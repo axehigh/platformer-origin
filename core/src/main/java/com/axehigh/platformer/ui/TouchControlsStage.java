@@ -61,13 +61,13 @@ public class TouchControlsStage extends Stage {
         yButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                inputSystem.requestTouchAttack();
+                inputSystem.requestTouchShoot();
             }
         });
         bButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                inputSystem.requestTouchAttack();
+                inputSystem.requestTouchMelee();
             }
         });
         aButton.addListener(new ClickListener() {

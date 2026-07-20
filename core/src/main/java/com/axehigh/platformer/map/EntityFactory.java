@@ -1,6 +1,9 @@
 package com.axehigh.platformer.map;
 
+import com.axehigh.platformer.ecs.components.ChestComponent;
+import com.axehigh.platformer.ecs.components.CoinPickupComponent;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
+import com.axehigh.platformer.ecs.components.DaggerPickupComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TextureComponent;
@@ -70,16 +73,19 @@ public class EntityFactory {
 
             switch (type) {
                 case "coin":
-                    engine.addEntity(createDecoration(centerX, centerY, "gfx/coin.png"));
+                    engine.addEntity(createCoinPickup(centerX, centerY));
                     break;
                 case "chest":
-                    engine.addEntity(createDecoration(centerX, centerY, "gfx/chest.png"));
+                    engine.addEntity(createChest(centerX, centerY));
                     break;
                 case "torch":
                     engine.addEntity(createDecoration(centerX, centerY, "gfx/torch.png"));
                     break;
                 case "exitGate":
                     engine.addEntity(createDecoration(centerX, centerY, "gfx/exit_gate.png"));
+                    break;
+                case "dagger":
+                    engine.addEntity(createDaggerPickup(centerX, centerY));
                     break;
                 default:
                     // "playerStart" and any unrecognized type: nothing to spawn here.
@@ -101,6 +107,76 @@ public class EntityFactory {
         TextureComponent textureComponent = new TextureComponent();
         textureComponent.region = new TextureRegion(texture);
         entity.add(textureComponent);
+
+        return entity;
+    }
+
+    private Entity createChest(float x, float y) {
+        Texture texture = getTexture("gfx/chest.png");
+
+        Entity entity = new Entity();
+
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(x, y);
+        transform.z = DECOR_Z;
+        entity.add(transform);
+
+        TextureComponent textureComponent = new TextureComponent();
+        textureComponent.region = new TextureRegion(texture);
+        entity.add(textureComponent);
+
+        CollisionComponent collisionComponent = new CollisionComponent();
+        collisionComponent.bounds.setSize(texture.getWidth(), texture.getHeight());
+        entity.add(collisionComponent);
+
+        entity.add(new ChestComponent());
+
+        return entity;
+    }
+
+    /** Builds a standalone coin pickup entity (used both for map object markers and chest drops). */
+    public Entity createCoinPickup(float x, float y) {
+        Texture texture = getTexture("gfx/coin.png");
+
+        Entity entity = new Entity();
+
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(x, y);
+        transform.z = DECOR_Z;
+        entity.add(transform);
+
+        TextureComponent textureComponent = new TextureComponent();
+        textureComponent.region = new TextureRegion(texture);
+        entity.add(textureComponent);
+
+        CollisionComponent collisionComponent = new CollisionComponent();
+        collisionComponent.bounds.setSize(texture.getWidth(), texture.getHeight());
+        entity.add(collisionComponent);
+
+        entity.add(new CoinPickupComponent());
+
+        return entity;
+    }
+
+    private Entity createDaggerPickup(float x, float y) {
+        Texture texture = getTexture("gfx/dagger.png");
+
+        Entity entity = new Entity();
+
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(x, y);
+        transform.z = DECOR_Z;
+        entity.add(transform);
+
+        TextureComponent textureComponent = new TextureComponent();
+        textureComponent.region = new TextureRegion(texture);
+        entity.add(textureComponent);
+
+        CollisionComponent collisionComponent = new CollisionComponent();
+        collisionComponent.bounds.setSize(texture.getWidth(), texture.getHeight());
+        entity.add(collisionComponent);
+
+        entity.add(new DaggerPickupComponent());
 
         return entity;
     }

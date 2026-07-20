@@ -6,6 +6,7 @@ import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Rectangle;
@@ -21,6 +22,8 @@ public class MapLoader implements Disposable {
     private static final String COLLISION_LAYER = "collision";
     private static final String OBJECTS_LAYER = "objects";
     private static final String TYPE_PLAYER_START = "playerStart";
+    /** Tile property distinguishing solid wall tiles from non-blocking ones (e.g. natural passageways). */
+    private static final String PROPERTY_SOLID = "solid";
 
     private final TiledMap map;
     private final Array<Rectangle> collisionRects = new Array<>();
@@ -42,11 +45,24 @@ public class MapLoader implements Disposable {
         for (int y = 0; y < layer.getHeight(); y++) {
             for (int x = 0; x < layer.getWidth(); x++) {
                 TiledMapTileLayer.Cell cell = layer.getCell(x, y);
-                if (cell != null) {
+                if (cell != null && isSolid(cell)) {
                     collisionRects.add(new Rectangle(x * tileWidth, y * tileHeight, tileWidth, tileHeight));
                 }
             }
         }
+    }
+
+    /**
+     * Whether a collision-layer cell actually blocks movement. Tiles are solid by default; a tile
+     * can opt out via a {@code solid=false} property (e.g. the "passage_tile" tileset), which marks
+     * a natural passageway between rooms without requiring a door/gap that's invisible on the map.
+     */
+    private boolean isSolid(TiledMapTileLayer.Cell cell) {
+        TiledMapTile tile = cell.getTile();
+        if (tile == null) {
+            return true;
+        }
+        return tile.getProperties().get(PROPERTY_SOLID, true, Boolean.class);
     }
 
     public TiledMap getMap() {

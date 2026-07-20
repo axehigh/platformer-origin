@@ -20,4 +20,11 @@ public class PlayerComponent implements Component {
     public boolean isWallClimbing = false;
     /** Prevents bullet spamming. */
     public float shootCooldownTimer = 0f;
+
+    /** Prevents melee-strike spamming. */
+    public float meleeCooldownTimer = 0f;
+    /** Counts down while the melee strike hitbox is active; &gt; 0 means the strike is in progress. */
+    public float meleeAttackTimer = 0f;
+    /** Ensures a single swing damages at most one enemy hit. */
+    public boolean meleeHasHit = false;
 }

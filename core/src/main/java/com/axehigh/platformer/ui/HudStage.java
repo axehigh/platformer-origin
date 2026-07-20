@@ -52,7 +52,7 @@ public class HudStage extends Stage {
         centerGroup.add(coinLabel);
 
         Table rightGroup = new Table();
-        Image itemIcon = new Image(new TextureRegion(assetManager.get("gfx/sword.png", Texture.class)));
+        Image itemIcon = new Image(new TextureRegion(assetManager.get("gfx/dagger.png", Texture.class)));
         rightGroup.add(itemIcon).size(16f, 16f).padRight(4f);
         itemLabel = new Label("", skin);
         rightGroup.add(itemLabel).padRight(8f);

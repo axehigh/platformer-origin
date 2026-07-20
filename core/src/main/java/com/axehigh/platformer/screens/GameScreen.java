@@ -5,8 +5,11 @@ import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.systems.AnimationSystem;
 import com.axehigh.platformer.ecs.systems.CameraSystem;
+import com.axehigh.platformer.ecs.systems.ChestSystem;
 import com.axehigh.platformer.ecs.systems.CollisionSystem;
+import com.axehigh.platformer.ecs.systems.MeleeAttackSystem;
 import com.axehigh.platformer.ecs.systems.MovementSystem;
+import com.axehigh.platformer.ecs.systems.PickupSystem;
 import com.axehigh.platformer.ecs.systems.PlayerInputSystem;
 import com.axehigh.platformer.ecs.systems.RenderSystem;
 import com.axehigh.platformer.ecs.systems.TiledMapRenderSystem;
@@ -39,6 +42,9 @@ public class GameScreen implements Screen {
     private static final int PRIORITY_INPUT = 0;
     private static final int PRIORITY_MOVEMENT = 5;
     private static final int PRIORITY_COLLISION = 6;
+    private static final int PRIORITY_MELEE = 7;
+    private static final int PRIORITY_PICKUP = 7;
+    private static final int PRIORITY_CHEST = 7;
     private static final int PRIORITY_CAMERA = 8;
     private static final int PRIORITY_ANIMATION = 10;
     private static final int PRIORITY_MAP_RENDER = 20;
@@ -64,8 +70,10 @@ public class GameScreen implements Screen {
         assetManager.load("gfx/torch.png", Texture.class);
         assetManager.load("gfx/exit_gate.png", Texture.class);
         assetManager.load("gfx/heart.png", Texture.class);
-        assetManager.load("gfx/sword.png", Texture.class);
         assetManager.load("gfx/bullet.png", Texture.class);
+        assetManager.load("gfx/dagger.png", Texture.class);
+        assetManager.load("gfx/chest_open.png", Texture.class);
+        assetManager.load("gfx/player_attack.png", Texture.class);
         assetManager.finishLoading();
 
         mapLoader = new MapLoader("maps/demo_room.tmx");
@@ -78,6 +86,9 @@ public class GameScreen implements Screen {
         engine.addSystem(playerInputSystem);
         engine.addSystem(new MovementSystem(mapLoader.getCollisionRects(), PRIORITY_MOVEMENT));
         engine.addSystem(new CollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION));
+        engine.addSystem(new MeleeAttackSystem(assetManager, PRIORITY_MELEE));
+        engine.addSystem(new PickupSystem(PRIORITY_PICKUP));
+        engine.addSystem(new ChestSystem(entityFactory, PRIORITY_CHEST));
         engine.addSystem(new CameraSystem(camera, PRIORITY_CAMERA));
         engine.addSystem(new AnimationSystem(PRIORITY_ANIMATION));
         engine.addSystem(tiledMapRenderSystem);
@@ -85,7 +96,7 @@ public class GameScreen implements Screen {
 
         Vector2 playerStart = mapLoader.findPlayerStart();
         Entity player = entityFactory.createPlayer(playerStart.x, playerStart.y);
-        attachIdleAnimation(player);
+        attachPlayerAnimations(player);
         engine.addEntity(player);
 
         entityFactory.spawnObjects(engine, mapLoader.getObjectLayer());
@@ -103,11 +114,12 @@ public class GameScreen implements Screen {
         Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
-    private void attachIdleAnimation(Entity player) {
-        Texture texture = assetManager.get("gfx/player.png", Texture.class);
-        TextureRegion region = new TextureRegion(texture);
+    private void attachPlayerAnimations(Entity player) {
+        TextureRegion idleRegion = new TextureRegion(assetManager.get("gfx/player.png", Texture.class));
+        TextureRegion attackRegion = new TextureRegion(assetManager.get("gfx/player_attack.png", Texture.class));
         AnimationComponent animationComponent = new AnimationComponent();
-        animationComponent.animations.put(AnimationComponent.State.IDLE, new Animation<>(1f, region));
+        animationComponent.animations.put(AnimationComponent.State.IDLE, new Animation<>(1f, idleRegion));
+        animationComponent.animations.put(AnimationComponent.State.ATTACKING, new Animation<>(1f, attackRegion));
         player.add(animationComponent);
     }
 

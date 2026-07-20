@@ -1,6 +1,7 @@
 # Agent Instructions: 2D Pixel-Art Platformer (libGDX)
 
-You are an expert libGDX game developer. Your task is to build a retro 2D side-scrolling platformer based on the reference images provided, utilizing the Ashley ECS framework and Tiled maps.
+You are an expert libGDX game developer. 
+Your task is to build a retro 2D side-scrolling platformer based on the reference images provided, utilizing the Ashley ECS framework and Tiled maps.
 
 ---
 
@@ -57,6 +58,7 @@ You are an expert libGDX game developer. Your task is to build a retro 2D side-s
 *   **Asset Management:** Use `AssetManager` to load all `TextureAtlas`, `TiledMap`, and audio assets asynchronously.
 *   **Memory Management:** Always explicitly `dispose()` of Textures, SpriteBatches, and TiledMaps when changing screens or shutting down to prevent memory leaks. Pool frequent ECS components if garbage collection spikes occur.
 *   **Frame-Rate Independence:** Always use `Gdx.graphics.getDeltaTime()` inside your Ashley systems' `update` methods.
+*   **Gameplay Documentation Sync:** Any change to gameplay mechanics (movement, combat, traversal abilities, enemy behavior, etc.) MUST be reflected with a corresponding update to `resources/docs-ai/gameplay.md`, keeping it as the single source of truth for gameplay design.
 
 ### E. Flip-Screen (Room-Based) Camera System
 *   **Virtual Screen Dimensions:** Define explicit constants for `VIRTUAL_WIDTH` and `VIRTUAL_HEIGHT` (e.g., 480x270).

@@ -4,6 +4,7 @@ import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TextureComponent;
+import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -14,6 +15,7 @@ import static com.axehigh.platformer.ecs.components.Mappers.ANIMATION;
 import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
 import static com.axehigh.platformer.ecs.components.Mappers.TEXTURE;
+import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 
 /** Advances the current animation state timer and updates the visible TextureRegion. */
 public class AnimationSystem extends IteratingSystem {
@@ -32,7 +34,13 @@ public class AnimationSystem extends IteratingSystem {
         TextureComponent textureComponent = TEXTURE.get(entity);
 
         if (PLAYER.has(entity) && MOVEMENT.has(entity)) {
-            animationComponent.currentState = resolvePlayerState(PLAYER.get(entity), MOVEMENT.get(entity));
+            PlayerComponent player = PLAYER.get(entity);
+            animationComponent.currentState = resolvePlayerState(player, MOVEMENT.get(entity));
+
+            TransformComponent transform = TRANSFORM.get(entity);
+            if (transform != null) {
+                transform.scale.x = Math.abs(transform.scale.x) * player.facingDirection;
+            }
         }
 
         if (animationComponent.currentState != animationComponent.previousState) {
@@ -49,6 +57,9 @@ public class AnimationSystem extends IteratingSystem {
     }
 
     private AnimationComponent.State resolvePlayerState(PlayerComponent player, MovementComponent movement) {
+        if (player.meleeAttackTimer > 0f) {
+            return AnimationComponent.State.ATTACKING;
+        }
         if (player.isWallClimbing) {
             return AnimationComponent.State.WALL_CLIMBING;
         }

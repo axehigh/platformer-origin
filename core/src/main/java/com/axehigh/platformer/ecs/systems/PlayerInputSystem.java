@@ -38,13 +38,17 @@ public class PlayerInputSystem extends IteratingSystem {
     private static final float BULLET_SIZE = 4f;
     private static final float BULLET_Z = 8f;
 
+    private static final float MELEE_COOLDOWN = 0.4f;
+    private static final float MELEE_ATTACK_DURATION = 0.2f;
+
     private final AssetManager assetManager;
 
     private PooledEngine engine;
     private boolean touchLeft = false;
     private boolean touchRight = false;
     private boolean touchJumpRequested = false;
-    private boolean touchAttackRequested = false;
+    private boolean touchMeleeRequested = false;
+    private boolean touchShootRequested = false;
 
     public PlayerInputSystem(AssetManager assetManager) {
         this(assetManager, 0);
@@ -70,9 +74,14 @@ public class PlayerInputSystem extends IteratingSystem {
         touchJumpRequested = true;
     }
 
-    /** Called by the B/Y buttons (attack/special). */
-    public void requestTouchAttack() {
-        touchAttackRequested = true;
+    /** Called by the B button (close-combat strike). */
+    public void requestTouchMelee() {
+        touchMeleeRequested = true;
+    }
+
+    /** Called by the Y button (ranged dagger shoot). */
+    public void requestTouchShoot() {
+        touchShootRequested = true;
     }
 
     @Override
@@ -85,7 +94,8 @@ public class PlayerInputSystem extends IteratingSystem {
     public void update(float deltaTime) {
         super.update(deltaTime);
         touchJumpRequested = false;
-        touchAttackRequested = false;
+        touchMeleeRequested = false;
+        touchShootRequested = false;
     }
 
     @Override
@@ -123,13 +133,25 @@ public class PlayerInputSystem extends IteratingSystem {
         if (player.shootCooldownTimer > 0f) {
             player.shootCooldownTimer -= deltaTime;
         }
+        if (player.meleeCooldownTimer > 0f) {
+            player.meleeCooldownTimer -= deltaTime;
+        }
 
-        boolean attackPressed = Gdx.input.isKeyJustPressed(Input.Keys.J)
-            || Gdx.input.isKeyJustPressed(Input.Keys.K)
-            || touchAttackRequested;
+        boolean meleePressed = Gdx.input.isKeyJustPressed(Input.Keys.J)
+            || Gdx.input.isKeyJustPressed(Input.Keys.B)
+            || touchMeleeRequested;
+        if (meleePressed && player.meleeCooldownTimer <= 0f) {
+            player.meleeAttackTimer = MELEE_ATTACK_DURATION;
+            player.meleeHasHit = false;
+            player.meleeCooldownTimer = MELEE_COOLDOWN;
+        }
 
-        if (attackPressed && player.shootCooldownTimer <= 0f) {
+        boolean shootPressed = Gdx.input.isKeyJustPressed(Input.Keys.K)
+            || Gdx.input.isKeyJustPressed(Input.Keys.Y)
+            || touchShootRequested;
+        if (shootPressed && player.shootCooldownTimer <= 0f && player.items > 0) {
             spawnBullet(transform, collision, player);
+            player.items--;
             player.shootCooldownTimer = SHOOT_COOLDOWN;
         }
     }
