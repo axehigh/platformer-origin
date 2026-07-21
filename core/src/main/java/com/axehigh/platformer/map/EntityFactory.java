@@ -4,6 +4,7 @@ import com.axehigh.platformer.ecs.components.ChestComponent;
 import com.axehigh.platformer.ecs.components.CoinPickupComponent;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.DaggerPickupComponent;
+import com.axehigh.platformer.ecs.components.EnemyComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TextureComponent;
@@ -87,6 +88,9 @@ public class EntityFactory {
                 case "dagger":
                     engine.addEntity(createDaggerPickup(centerX, centerY));
                     break;
+                case "enemy":
+                    engine.addEntity(createEnemy(centerX, centerY));
+                    break;
                 default:
                     // "playerStart" and any unrecognized type: nothing to spawn here.
                     break;
@@ -154,6 +158,34 @@ public class EntityFactory {
         entity.add(collisionComponent);
 
         entity.add(new CoinPickupComponent());
+
+        return entity;
+    }
+
+    private Entity createEnemy(float x, float y) {
+        Texture texture = getTexture("gfx/enemy.png");
+
+        Entity entity = new Entity();
+
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(x, y);
+        transform.z = DECOR_Z;
+        entity.add(transform);
+
+        TextureComponent textureComponent = new TextureComponent();
+        textureComponent.region = new TextureRegion(texture);
+        entity.add(textureComponent);
+
+        MovementComponent movementComponent = new MovementComponent();
+        entity.add(movementComponent);
+
+        CollisionComponent collisionComponent = new CollisionComponent();
+        collisionComponent.bounds.setSize(texture.getWidth(), texture.getHeight());
+        entity.add(collisionComponent);
+
+        EnemyComponent enemyComponent = new EnemyComponent();
+        enemyComponent.originX = x;
+        entity.add(enemyComponent);
 
         return entity;
     }

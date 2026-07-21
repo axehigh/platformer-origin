@@ -7,6 +7,7 @@ import com.axehigh.platformer.ecs.systems.AnimationSystem;
 import com.axehigh.platformer.ecs.systems.CameraSystem;
 import com.axehigh.platformer.ecs.systems.ChestSystem;
 import com.axehigh.platformer.ecs.systems.CollisionSystem;
+import com.axehigh.platformer.ecs.systems.EnemySystem;
 import com.axehigh.platformer.ecs.systems.MeleeAttackSystem;
 import com.axehigh.platformer.ecs.systems.MovementSystem;
 import com.axehigh.platformer.ecs.systems.PickupSystem;
@@ -40,6 +41,7 @@ import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
 /** Owns the Ashley Engine, the fixed-resolution viewport/camera, and drives the game loop. */
 public class GameScreen implements Screen {
     private static final int PRIORITY_INPUT = 0;
+    private static final int PRIORITY_ENEMY = 4;
     private static final int PRIORITY_MOVEMENT = 5;
     private static final int PRIORITY_COLLISION = 6;
     private static final int PRIORITY_MELEE = 7;
@@ -74,6 +76,7 @@ public class GameScreen implements Screen {
         assetManager.load("gfx/dagger.png", Texture.class);
         assetManager.load("gfx/chest_open.png", Texture.class);
         assetManager.load("gfx/player_attack.png", Texture.class);
+        assetManager.load("gfx/enemy.png", Texture.class);
         assetManager.finishLoading();
 
         mapLoader = new MapLoader("maps/demo_room.tmx");
@@ -84,6 +87,7 @@ public class GameScreen implements Screen {
         PlayerInputSystem playerInputSystem = new PlayerInputSystem(assetManager, PRIORITY_INPUT);
         tiledMapRenderSystem = new TiledMapRenderSystem(mapLoader.getMap(), camera, PRIORITY_MAP_RENDER);
         engine.addSystem(playerInputSystem);
+        engine.addSystem(new EnemySystem(PRIORITY_ENEMY));
         engine.addSystem(new MovementSystem(mapLoader.getCollisionRects(), PRIORITY_MOVEMENT));
         engine.addSystem(new CollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION));
         engine.addSystem(new MeleeAttackSystem(assetManager, PRIORITY_MELEE));

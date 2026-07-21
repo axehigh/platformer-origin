@@ -1,6 +1,6 @@
 # Agent Instructions: Gameplay Mechanics Implementation
 
-This document outlines the architectural and technical requirements for implementing player traversal (double jump, wall climb) and combat (close-combat strike, ammo-gated shooting, dagger pickups, coin pickups, chest interaction) using Ashley ECS in libGDX.
+This document outlines the architectural and technical requirements for implementing player traversal (double jump, wall climb), combat (close-combat strike, ammo-gated shooting, dagger pickups, coin pickups, chest interaction), and enemy patrol movement using Ashley ECS in libGDX.
 
 ---
 
@@ -35,6 +35,15 @@ Marker component applied to coin pickup entities:
 Tracks a chest entity's open/disappear state after being melee-struck:
 *   `boolean opened = false`
 *   `float disappearTimer = 0f` (Counts down after opening; on reaching 0 the chest is removed and drops coins).
+
+### F. Extended EnemyComponent
+Adds simple back-and-forth patrol state on top of the existing `float health = 1`:
+*   `float speed = 20` (Horizontal patrol speed, world units/second).
+*   `int direction = 1` (Current patrol direction: `1` right, `-1` left).
+*   `float patrolRange = 32` (Max distance walked away from `originX` in either direction before turning around).
+*   `float originX` (World-space X the enemy was spawned at, set once by `EntityFactory`; the center of its patrol path).
+
+See `resources/docs-ai/enemies.md` for the full enemy catalog (current type(s), stats, sprite, and how to add new enemy types) — this section only covers the shared `EnemyComponent` fields/mechanic, not per-type tuning.
 
 ---
 
@@ -81,6 +90,14 @@ Tracks a chest entity's open/disappear state after being melee-struck:
 ### F. Chest Open/Disappear Logic (`MeleeAttackSystem` & `ChestSystem`)
 1.  **Open Trigger:** When a melee strike rectangle overlaps an unopened chest (`ChestComponent.opened == false`), mark it `opened = true`, swap its texture to an "open" variant, and start `disappearTimer` (~0.3s). A chest that's already `opened` has no further reaction to being struck (no repeated coin drops).
 2.  **Disappear & Coin Drop (`ChestSystem`):** For each opened chest, count `disappearTimer` down every frame; once it reaches 0, remove the chest entity and spawn a random number (`MathUtils.random(2, 6)`) of coin pickup entities at small random offsets around the chest's last position.
+
+### G. Enemy Patrol Movement Logic (`EnemySystem`)
+1.  **Spawn:** Enemies are placed on the map via `"enemy"` object-layer markers, instantiated by `EntityFactory.createEnemy`, which gives them a `TransformComponent`, `MovementComponent`, `CollisionComponent`, and an `EnemyComponent` whose `originX` is set to the spawn X.
+2.  **Velocity Drive:** Every frame, before `MovementSystem` integrates positions, `EnemySystem` sets `movement.velocity.x = enemy.speed * enemy.direction`.
+3.  **Turn-Around Conditions:** `enemy.direction` flips to `-1`/`1` once `transform.position.x` reaches `originX ± patrolRange`, or immediately if the enemy is `grounded` and its `velocity.x` was zeroed (meaning `MovementSystem` stopped it against a wall the previous frame) — whichever happens first.
+4.  **Physics for free:** Enemies are **not** excluded from `MovementSystem`'s family (only bullets are), so gravity, ground snapping, and AABB wall collision against `collisionRects` apply to them automatically; `EnemySystem` only ever touches horizontal velocity.
+5.  **Damage:** Unchanged — enemies remain damageable via `CollisionSystem` (bullet hits) and `MeleeAttackSystem` (melee strikes), which act directly on `EnemyComponent.health` regardless of patrol state.
+6.  **Enemy catalog:** This section describes the one shared patrol mechanic; for the concrete enemy type(s) built on top of it (sprite, stats, and guidance for adding more types), see `resources/docs-ai/enemies.md`.
 
 ---
 

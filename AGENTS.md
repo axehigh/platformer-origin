@@ -1,7 +1,8 @@
 # Agent Instructions: 2D Pixel-Art Platformer (libGDX)
 
 You are an expert libGDX game developer. 
-Your task is to build a retro 2D side-scrolling platformer based on the reference images provided, utilizing the Ashley ECS framework and Tiled maps.
+Your task is to build a retro 2D side-scrolling platformer 
+utilizing the Ashley ECS framework and Tiled maps.
 
 ---
 
@@ -14,20 +15,7 @@ Your task is to build a retro 2D side-scrolling platformer based on the referenc
 ---
 
 ## 2. Ashley ECS Component & System Breakdown
-
-### Core Components
-*   `TransformComponent`: Position (x, y, z for layering), scale, and rotation.
-*   `TextureComponent`: Holds the `TextureRegion` to render.
-*   `AnimationComponent`: Holds animation states (Idle, Running, Jumping, Attacking).
-*   `MovementComponent`: Velocity, acceleration, and maximum speed limits.
-*   `CollisionComponent`: Bounding box dimensions for AABB environment checks.
-*   `PlayerComponent`: Flag component storing player-specific data (health, coins, states).
-
-### Core Systems
-*   `PlayerInputSystem`: Processes keyboard or mobile UI inputs and translates them into velocity changes on the `MovementComponent`.
-*   `MovementSystem`: Updates positions based on velocity and handles tilemap collisions.
-*   `AnimationSystem`: Updates texture regions based on current state timers.
-*   `RenderSystem`: Sorted by Z-index to draw entities via `SpriteBatch`.
+See @resources/docs-ai/ashley-ecs.md for the full, AI-usable overview of every ECS `Component` and `System`, their fields/family/priority, and how they're wired together in `GameScreen`.
 
 ---
 
@@ -37,7 +25,7 @@ Your task is to build a retro 2D side-scrolling platformer based on the referenc
 *   **Layer Structures:**
     *   *Background Layers:* Dark blue brick walls, pillars, windows, and decorative chains/shields.
     *   *Collision Layer:* Object layer or dedicated tile layer containing solid brick walls, floors, and platforms. Read this layer at startup to build static collision boundaries.
-    *   *Object Layers:* Spawners for chests, coins, lights/torches, start gates, and exit doors. Parse these to instantiate Ashley Entities dynamically.
+    *   *Object Layers:* Spawners for chests, coins, lights/torches, start gates, exit doors, and enemies. Parse these to instantiate Ashley Entities dynamically. See @resources/docs-ai/enemies.md for the enemy catalog (current types, stats, spawning, and how to add new ones).
 
 ---
 
@@ -58,9 +46,11 @@ Your task is to build a retro 2D side-scrolling platformer based on the referenc
 *   **Asset Management:** Use `AssetManager` to load all `TextureAtlas`, `TiledMap`, and audio assets asynchronously.
 *   **Memory Management:** Always explicitly `dispose()` of Textures, SpriteBatches, and TiledMaps when changing screens or shutting down to prevent memory leaks. Pool frequent ECS components if garbage collection spikes occur.
 *   **Frame-Rate Independence:** Always use `Gdx.graphics.getDeltaTime()` inside your Ashley systems' `update` methods.
-*   **Gameplay Documentation Sync:** Any change to gameplay mechanics (movement, combat, traversal abilities, enemy behavior, etc.) MUST be reflected with a corresponding update to `resources/docs-ai/gameplay.md`, keeping it as the single source of truth for gameplay design.
+*   **Gameplay Documentation Sync:** Any change to gameplay mechanics (movement, combat, traversal abilities, enemy behavior, etc.) MUST be flected with a corresponding update to `resources/docs-ai/gameplay.md`, keeping it as the single source of truth for gameplay design.
+*   **ECS Documentation Sync:** Any time an Ashley ECS `Component` or `System` is added, removed, renamed, or has its fields/family/priority/behavior changed, MUST be reflected with a corresponding update to `resources/docs-ai/ashley-ecs.md`, keeping it as the single source of truth for the ECS component/system breakdown.
+*   **Enemy Documentation Sync:** Any time an enemy type is added, removed, renamed, or has its stats/sprite/behavior changed, MUST be reflected with a corresponding update to `resources/docs-ai/enemies.md`, keeping it as the single source of truth for the enemy catalog.
 
-### E. Flip-Screen (Room-Based) Camera System
+## 6. Flip-Screen (Room-Based) Camera System
 *   **Virtual Screen Dimensions:** Define explicit constants for `VIRTUAL_WIDTH` and `VIRTUAL_HEIGHT` (e.g., 480x270).
 *   **Camera Tracking:** Do NOT track the player smoothly. Instead, implement a `CameraSystem` that calculates the current room index based on the player's position:
     *   `int roomX = (int)(player.x / VIRTUAL_WIDTH);`
@@ -68,3 +58,7 @@ Your task is to build a retro 2D side-scrolling platformer based on the referenc
 *   **Camera Position:** Set the camera's center position precisely to:
     *   `camera.position.set((roomX * VIRTUAL_WIDTH) + (VIRTUAL_WIDTH / 2f), (roomY * VIRTUAL_HEIGHT) + (VIRTUAL_HEIGHT / 2f), 0);`
 *   **Transitions (Optional):** When `roomX` or `roomY` changes, freeze player input/physics for a split second and linearly interpolate (`lerp`) the camera to the new room center to create a smooth sliding screen transition.
+
+## Debugging
+Turn on and off debugging with SHIFT+D.
+Use Shapedrawer for debugging. 
