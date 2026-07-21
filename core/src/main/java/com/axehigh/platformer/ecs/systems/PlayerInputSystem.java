@@ -33,7 +33,7 @@ public class PlayerInputSystem extends IteratingSystem {
 
     private static final float SHOOT_COOLDOWN = 0.35f;
     private static final float BULLET_SPEED = 220f;
-    private static final float BULLET_DAMAGE = 1f;
+    private static final float BULLET_DAMAGE = 10f;
     private static final float BULLET_LIFETIME = 1.5f;
     private static final float BULLET_SIZE = 4f;
     private static final float BULLET_Z = 8f;
@@ -130,29 +130,25 @@ public class PlayerInputSystem extends IteratingSystem {
             player.jumpCount++;
         }
 
-        if (player.shootCooldownTimer > 0f) {
-            player.shootCooldownTimer -= deltaTime;
-        }
-        if (player.meleeCooldownTimer > 0f) {
-            player.meleeCooldownTimer -= deltaTime;
-        }
+        player.shootCooldown.update(deltaTime);
+        player.meleeCooldown.update(deltaTime);
 
         boolean meleePressed = Gdx.input.isKeyJustPressed(Input.Keys.J)
             || Gdx.input.isKeyJustPressed(Input.Keys.B)
             || touchMeleeRequested;
-        if (meleePressed && player.meleeCooldownTimer <= 0f) {
-            player.meleeAttackTimer = MELEE_ATTACK_DURATION;
+        if (meleePressed && player.meleeCooldown.isDone()) {
+            player.meleeAttack.start(MELEE_ATTACK_DURATION);
             player.meleeHasHit = false;
-            player.meleeCooldownTimer = MELEE_COOLDOWN;
+            player.meleeCooldown.start(MELEE_COOLDOWN);
         }
 
         boolean shootPressed = Gdx.input.isKeyJustPressed(Input.Keys.K)
             || Gdx.input.isKeyJustPressed(Input.Keys.Y)
             || touchShootRequested;
-        if (shootPressed && player.shootCooldownTimer <= 0f && player.items > 0) {
+        if (shootPressed && player.shootCooldown.isDone() && player.items > 0) {
             spawnBullet(transform, collision, player);
             player.items--;
-            player.shootCooldownTimer = SHOOT_COOLDOWN;
+            player.shootCooldown.start(SHOOT_COOLDOWN);
         }
     }
 

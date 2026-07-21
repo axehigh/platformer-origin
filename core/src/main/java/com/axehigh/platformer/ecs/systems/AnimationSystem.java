@@ -57,7 +57,7 @@ public class AnimationSystem extends IteratingSystem {
     }
 
     private AnimationComponent.State resolvePlayerState(PlayerComponent player, MovementComponent movement) {
-        if (player.meleeAttackTimer > 0f) {
+        if (player.meleeAttack.isActive()) {
             return AnimationComponent.State.ATTACKING;
         }
         if (player.isWallClimbing) {

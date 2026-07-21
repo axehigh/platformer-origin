@@ -38,8 +38,8 @@ public class ChestSystem extends IteratingSystem {
             return;
         }
 
-        chest.disappearTimer -= deltaTime;
-        if (chest.disappearTimer > 0f) {
+        chest.disappearTimer.update(deltaTime);
+        if (chest.disappearTimer.isActive()) {
             return;
         }
 

@@ -3,6 +3,7 @@ package com.axehigh.platformer.ecs.systems;
 import com.axehigh.platformer.ecs.components.ChestComponent;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.EnemyComponent;
+import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TextureComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
@@ -19,18 +20,20 @@ import com.badlogic.gdx.math.Rectangle;
 import static com.axehigh.platformer.ecs.components.Mappers.CHEST;
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
+import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
 import static com.axehigh.platformer.ecs.components.Mappers.TEXTURE;
 import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 
 /**
- * Resolves the close-combat strike attack: while the player's {@code meleeAttackTimer} is active
+ * Resolves the close-combat strike attack: while the player's {@code meleeAttack} timer is active
  * and hasn't hit yet, checks a short-lived hitbox rectangle offset from the player's collision
  * bounds (in the direction the player is facing) against enemies and chests, applying melee
- * damage/opening a chest at most once per swing.
+ * damage (and a hit-stun/knockback via {@code EnemyDamageResolver}) or opening a chest, at most
+ * once per swing.
  */
 public class MeleeAttackSystem extends IteratingSystem {
-    private static final float MELEE_DAMAGE = 1f;
+    private static final float MELEE_DAMAGE = 5f;
     private static final float STRIKE_WIDTH = 10f;
     private static final float CHEST_DISAPPEAR_DELAY = 0.3f;
 
@@ -60,7 +63,7 @@ public class MeleeAttackSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         PlayerComponent player = PLAYER.get(entity);
-        if (player.meleeAttackTimer <= 0f) {
+        if (player.meleeAttack.isDone()) {
             return;
         }
 
@@ -76,8 +79,9 @@ public class MeleeAttackSystem extends IteratingSystem {
             Entity hitEnemy = findHit(strikeBounds, enemies);
             if (hitEnemy != null) {
                 EnemyComponent enemy = ENEMY.get(hitEnemy);
-                enemy.health -= MELEE_DAMAGE;
-                if (enemy.health <= 0f) {
+                MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
+                boolean died = EnemyDamageResolver.applyHit(enemy, enemyMovement, MELEE_DAMAGE, player.facingDirection);
+                if (died) {
                     getEngine().removeEntity(hitEnemy);
                 }
                 player.meleeHasHit = true;
@@ -87,7 +91,7 @@ public class MeleeAttackSystem extends IteratingSystem {
                     ChestComponent chest = CHEST.get(hitChest);
                     if (!chest.opened) {
                         chest.opened = true;
-                        chest.disappearTimer = CHEST_DISAPPEAR_DELAY;
+                        chest.disappearTimer.start(CHEST_DISAPPEAR_DELAY);
                         TextureComponent texture = TEXTURE.get(hitChest);
                         texture.region = new TextureRegion(assetManager.get("gfx/chest_open.png", Texture.class));
                     }
@@ -96,7 +100,7 @@ public class MeleeAttackSystem extends IteratingSystem {
             }
         }
 
-        player.meleeAttackTimer -= deltaTime;
+        player.meleeAttack.update(deltaTime);
     }
 
     private Entity findHit(Rectangle bounds, ImmutableArray<Entity> targets) {

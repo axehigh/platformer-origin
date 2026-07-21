@@ -21,7 +21,8 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 
 /**
  * Owns bullet movement integration and collision resolution: removes bullets on wall impact,
- * applies damage and removes bullets on enemy impact, and despawns bullets whose lifetime expires.
+ * applies damage (and a hit-stun/knockback via {@code EnemyDamageResolver}) and removes bullets
+ * on enemy impact, and despawns bullets whose lifetime expires.
  */
 public class CollisionSystem extends IteratingSystem {
     private final Array<Rectangle> collisionRects;
@@ -68,8 +69,10 @@ public class CollisionSystem extends IteratingSystem {
         Entity hitEnemy = findEnemyHit(bulletBounds);
         if (hitEnemy != null) {
             EnemyComponent enemy = ENEMY.get(hitEnemy);
-            enemy.health -= bullet.damage;
-            if (enemy.health <= 0f) {
+            MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
+            int knockbackDirection = movement.velocity.x >= 0f ? 1 : -1;
+            boolean died = EnemyDamageResolver.applyHit(enemy, enemyMovement, bullet.damage, knockbackDirection);
+            if (died) {
                 getEngine().removeEntity(hitEnemy);
             }
             getEngine().removeEntity(bulletEntity);

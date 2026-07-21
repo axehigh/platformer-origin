@@ -1,5 +1,6 @@
 package com.axehigh.platformer.ecs.components;
 
+import com.axehigh.platformer.util.Timer;
 import com.badlogic.ashley.core.Component;
 
 /** Flag component storing player-specific data. */
@@ -19,12 +20,14 @@ public class PlayerComponent implements Component {
     /** Flag for wall attachment. */
     public boolean isWallClimbing = false;
     /** Prevents bullet spamming. */
-    public float shootCooldownTimer = 0f;
+    public Timer shootCooldown = new Timer();
 
     /** Prevents melee-strike spamming. */
-    public float meleeCooldownTimer = 0f;
-    /** Counts down while the melee strike hitbox is active; &gt; 0 means the strike is in progress. */
-    public float meleeAttackTimer = 0f;
+    public Timer meleeCooldown = new Timer();
+    /** Counts down while the melee strike hitbox is active; active means the strike is in progress. */
+    public Timer meleeAttack = new Timer();
     /** Ensures a single swing damages at most one enemy hit. */
     public boolean meleeHasHit = false;
+    /** Grace period after being hit by an enemy, during which further enemy contact is ignored. */
+    public Timer hitInvulnerability = new Timer();
 }
