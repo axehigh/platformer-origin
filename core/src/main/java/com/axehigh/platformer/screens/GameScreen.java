@@ -20,6 +20,7 @@ import com.axehigh.platformer.ecs.systems.PlayerInputSystem;
 import com.axehigh.platformer.ecs.systems.RenderSystem;
 import com.axehigh.platformer.ecs.systems.TiledMapRenderSystem;
 import com.axehigh.platformer.map.EntityFactory;
+import com.axehigh.platformer.map.LevelCatalog;
 import com.axehigh.platformer.map.LevelManager;
 import com.axehigh.platformer.map.MapLoader;
 import com.axehigh.platformer.map.RoomState;
@@ -28,7 +29,10 @@ import com.axehigh.platformer.ui.SkinFactory;
 import com.axehigh.platformer.ui.TouchControlsStage;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
@@ -68,6 +72,9 @@ public class GameScreen implements Screen {
     private final OrthographicCamera camera = new OrthographicCamera();
     private final Viewport viewport = new FitViewport(GameConstants.VIRTUAL_WIDTH, GameConstants.VIRTUAL_HEIGHT, camera);
 
+    private final Game game;
+    private final String levelPath;
+
     private TiledMapRenderSystem tiledMapRenderSystem;
     private DebugRenderSystem debugRenderSystem;
     private LevelManager levelManager;
@@ -75,6 +82,16 @@ public class GameScreen implements Screen {
     private Skin uiSkin;
     private HudStage hudStage;
     private TouchControlsStage touchControlsStage;
+
+    /** Defaults to the catalog's first level. */
+    public GameScreen(Game game) {
+        this(game, LevelCatalog.levels().first().tmxPath);
+    }
+
+    public GameScreen(Game game, String levelPath) {
+        this.game = game;
+        this.levelPath = levelPath;
+    }
 
     @Override
     public void show() {
@@ -93,7 +110,7 @@ public class GameScreen implements Screen {
         assetManager.load("gfx/enemy_shooter.png", Texture.class);
         assetManager.finishLoading();
 
-        MapLoader mapLoader = new MapLoader("maps/demo_room_start.tmx");
+        MapLoader mapLoader = new MapLoader(levelPath);
         EntityFactory entityFactory = new EntityFactory(assetManager);
         RoomState roomState = new RoomState();
         roomState.rooms.addAll(mapLoader.getRooms());
@@ -140,6 +157,16 @@ public class GameScreen implements Screen {
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
         inputMultiplexer.addProcessor(touchControlsStage);
         inputMultiplexer.addProcessor(hudStage);
+        inputMultiplexer.addProcessor(new InputAdapter() {
+            @Override
+            public boolean keyDown(int keycode) {
+                if (keycode == Input.Keys.ESCAPE) {
+                    game.setScreen(new MainMenuScreen(game));
+                    return true;
+                }
+                return false;
+            }
+        });
         Gdx.input.setInputProcessor(inputMultiplexer);
     }
 

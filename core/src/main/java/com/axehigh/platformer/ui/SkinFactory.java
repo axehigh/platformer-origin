@@ -4,8 +4,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
 /** Builds a minimal, programmer-art Skin (font + flat-color button drawables) shared by both UI stages. */
@@ -35,6 +37,21 @@ public final class SkinFactory {
         buttonStyle.font = font;
         buttonStyle.fontColor = Color.WHITE;
         skin.add("default", buttonStyle);
+
+        CheckBox.CheckBoxStyle checkBoxStyle = new CheckBox.CheckBoxStyle();
+        checkBoxStyle.checkboxOff = skin.newDrawable("white", new Color(0.2f, 0.2f, 0.25f, 0.75f));
+        checkBoxStyle.checkboxOn = skin.newDrawable("white", new Color(0.55f, 0.55f, 0.6f, 0.9f));
+        checkBoxStyle.font = font;
+        checkBoxStyle.fontColor = Color.WHITE;
+        skin.add("default", checkBoxStyle);
+
+        Slider.SliderStyle sliderStyle = new Slider.SliderStyle();
+        sliderStyle.background = skin.newDrawable("white", new Color(0.2f, 0.2f, 0.25f, 0.75f));
+        sliderStyle.background.setMinHeight(6f);
+        sliderStyle.knob = skin.newDrawable("white", new Color(0.9f, 0.9f, 0.9f, 1f));
+        sliderStyle.knob.setMinWidth(12f);
+        sliderStyle.knob.setMinHeight(12f);
+        skin.add("default-horizontal", sliderStyle);
 
         return skin;
     }

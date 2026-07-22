@@ -1,6 +1,8 @@
 {
-    "activeFile": "",
+    "activeFile": "sample_room.tmx",
     "expandedProjectPaths": [
+        "/Users/lona/dev/libgdx/origin/assets",
+        "."
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -29,6 +31,9 @@
             "scaleInDock": 1
         },
         "demo_room_final.tmx": {
+            "expandedObjectLayers": [
+                3
+            ],
             "scale": 1.484375,
             "selectedLayer": 2,
             "viewCenter": {
@@ -46,6 +51,10 @@
             "scaleInDock": 1
         },
         "demo_room_start.tmx": {
+            "expandedObjectLayers": [
+                4,
+                3
+            ],
             "scale": 0.7792,
             "selectedLayer": 2,
             "viewCenter": {
@@ -69,8 +78,8 @@
             "scale": 1.1611,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 267.8494531048144,
-                "y": 200.67177676341402
+                "x": 353.97467918353277,
+                "y": 227.37059684781667
             }
         },
         "sample_room.tmx#brick_bg": {
@@ -84,11 +93,16 @@
         }
     },
     "openFiles": [
+        "demo_room_final.tmx",
+        "demo_room_start.tmx",
+        "demo_room.tmx",
+        "sample_room.tmx"
     ],
     "project": "Level_01.tiled-project",
     "recentFiles": [
-        "sample_room.tmx",
+        "demo_room_final.tmx",
+        "demo_room_start.tmx",
         "demo_room.tmx",
-        "demo_room_start.tmx"
+        "sample_room.tmx"
     ]
 }
