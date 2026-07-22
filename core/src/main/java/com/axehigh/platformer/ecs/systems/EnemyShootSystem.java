@@ -1,21 +1,19 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.components.BulletComponent;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.EnemyBulletComponent;
 import com.axehigh.platformer.ecs.components.EnemyComponent;
 import com.axehigh.platformer.ecs.components.EnemyShooterComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TextureComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.map.RoomState;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
-import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -30,10 +28,10 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
  * enemy's position traveling horizontally in its current patrol {@code direction} (no
  * player-aiming/aggro). Firing is skipped entirely while the enemy is stunned (mirrors
  * {@code EnemySystem}'s own stun-pause), so a knockback pop isn't interrupted by a shot, and also
- * skipped while the player is in a different flip-screen room (see {@code CameraSystem}/
- * {@code GameConstants}), so a shooter never fires a bullet the player wouldn't be able to see
- * coming from an adjacent, currently off-screen room. {@code shootCooldown} keeps ticking/idling
- * at done regardless, so the shooter fires as soon as the player re-enters its room.
+ * skipped while the shooter's {@code roomIndex} isn't the currently active Room (see {@code
+ * RoomState}/{@code CameraSystem}), so a shooter never fires a bullet the player wouldn't be able
+ * to see coming from a different, currently inactive room. {@code shootCooldown} keeps
+ * ticking/idling at done regardless, so the shooter fires as soon as the player re-enters its room.
  */
 public class EnemyShootSystem extends IteratingSystem {
     private static final float BULLET_SPEED = 150f;
@@ -42,23 +40,23 @@ public class EnemyShootSystem extends IteratingSystem {
     private static final float BULLET_Z = 8f;
 
     private final AssetManager assetManager;
+    private final RoomState roomState;
     private PooledEngine engine;
-    private ImmutableArray<Entity> players;
 
-    public EnemyShootSystem(AssetManager assetManager) {
-        this(assetManager, 0);
+    public EnemyShootSystem(AssetManager assetManager, RoomState roomState) {
+        this(assetManager, roomState, 0);
     }
 
-    public EnemyShootSystem(AssetManager assetManager, int priority) {
+    public EnemyShootSystem(AssetManager assetManager, RoomState roomState, int priority) {
         super(Family.all(EnemyComponent.class, EnemyShooterComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
         this.assetManager = assetManager;
+        this.roomState = roomState;
     }
 
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
         this.engine = (PooledEngine) engine;
-        this.players = engine.getEntitiesFor(Family.all(PlayerComponent.class, TransformComponent.class).get());
     }
 
     @Override
@@ -73,25 +71,11 @@ public class EnemyShootSystem extends IteratingSystem {
             return;
         }
 
-        if (shooter.shootCooldown.isDone() && isPlayerInSameRoom(transform)) {
+        boolean roomActive = enemy.roomIndex < 0 || enemy.roomIndex == roomState.activeRoomIndex;
+        if (shooter.shootCooldown.isDone() && roomActive) {
             spawnBullet(transform, collision, enemy.direction);
             shooter.shootCooldown.start(shooter.shootInterval);
         }
-    }
-
-    /** True if the single player entity's current flip-screen room matches the shooter's room. */
-    private boolean isPlayerInSameRoom(TransformComponent shooterTransform) {
-        if (players.size() == 0) {
-            return false;
-        }
-        TransformComponent playerTransform = TRANSFORM.get(players.first());
-
-        int shooterRoomX = (int) (shooterTransform.position.x / GameConstants.VIRTUAL_WIDTH);
-        int shooterRoomY = (int) (shooterTransform.position.y / GameConstants.VIRTUAL_HEIGHT);
-        int playerRoomX = (int) (playerTransform.position.x / GameConstants.VIRTUAL_WIDTH);
-        int playerRoomY = (int) (playerTransform.position.y / GameConstants.VIRTUAL_HEIGHT);
-
-        return shooterRoomX == playerRoomX && shooterRoomY == playerRoomY;
     }
 
     private void spawnBullet(TransformComponent enemyTransform, CollisionComponent enemyCollision, int direction) {

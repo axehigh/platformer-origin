@@ -22,6 +22,7 @@ import com.axehigh.platformer.ecs.systems.TiledMapRenderSystem;
 import com.axehigh.platformer.map.EntityFactory;
 import com.axehigh.platformer.map.LevelManager;
 import com.axehigh.platformer.map.MapLoader;
+import com.axehigh.platformer.map.RoomState;
 import com.axehigh.platformer.ui.HudStage;
 import com.axehigh.platformer.ui.SkinFactory;
 import com.axehigh.platformer.ui.TouchControlsStage;
@@ -94,14 +95,16 @@ public class GameScreen implements Screen {
 
         MapLoader mapLoader = new MapLoader("maps/demo_room_start.tmx");
         EntityFactory entityFactory = new EntityFactory(assetManager);
+        RoomState roomState = new RoomState();
+        roomState.rooms.addAll(mapLoader.getRooms());
 
         camera.position.set(GameConstants.VIRTUAL_WIDTH / 2f, GameConstants.VIRTUAL_HEIGHT / 2f, 0f);
 
         PlayerInputSystem playerInputSystem = new PlayerInputSystem(assetManager, PRIORITY_INPUT);
         tiledMapRenderSystem = new TiledMapRenderSystem(mapLoader.getMap(), camera, PRIORITY_MAP_RENDER);
         engine.addSystem(playerInputSystem);
-        engine.addSystem(new EnemySystem(mapLoader.getCollisionRects(), PRIORITY_ENEMY));
-        engine.addSystem(new EnemyShootSystem(assetManager, PRIORITY_ENEMY));
+        engine.addSystem(new EnemySystem(mapLoader.getCollisionRects(), roomState, PRIORITY_ENEMY));
+        engine.addSystem(new EnemyShootSystem(assetManager, roomState, PRIORITY_ENEMY));
         engine.addSystem(new MovementSystem(mapLoader.getCollisionRects(), PRIORITY_MOVEMENT));
         engine.addSystem(new CollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION));
         engine.addSystem(new EnemyBulletCollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION));
@@ -109,14 +112,14 @@ public class GameScreen implements Screen {
         engine.addSystem(new PickupSystem(PRIORITY_PICKUP));
         engine.addSystem(new ChestSystem(entityFactory, PRIORITY_CHEST));
         engine.addSystem(new EnemyContactSystem(PRIORITY_ENEMY_CONTACT));
-        engine.addSystem(new CameraSystem(camera, PRIORITY_CAMERA));
+        engine.addSystem(new CameraSystem(camera, roomState, PRIORITY_CAMERA));
         engine.addSystem(new AnimationSystem(PRIORITY_ANIMATION));
         engine.addSystem(tiledMapRenderSystem);
         engine.addSystem(new RenderSystem(batch, camera, PRIORITY_ENTITY_RENDER));
-        debugRenderSystem = new DebugRenderSystem(camera, mapLoader.getCollisionRects(), PRIORITY_DEBUG_RENDER);
+        debugRenderSystem = new DebugRenderSystem(camera, mapLoader.getCollisionRects(), roomState, PRIORITY_DEBUG_RENDER);
         engine.addSystem(debugRenderSystem);
 
-        levelManager = new LevelManager(engine, entityFactory, camera, tiledMapRenderSystem, mapLoader.getCollisionRects(), mapLoader);
+        levelManager = new LevelManager(engine, entityFactory, camera, tiledMapRenderSystem, mapLoader.getCollisionRects(), roomState, mapLoader);
         engine.addSystem(new LevelExitSystem(levelManager, PRIORITY_LEVEL_EXIT));
 
         Vector2 playerStart = mapLoader.findPlayerStart();
@@ -124,7 +127,8 @@ public class GameScreen implements Screen {
         attachPlayerAnimations(player);
         engine.addEntity(player);
 
-        entityFactory.spawnObjects(engine, mapLoader.getObjectLayer());
+        entityFactory.spawnObjects(engine, mapLoader.getObjectLayer(), roomState);
+        CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y);
 
         uiSkin = SkinFactory.createBasicSkin();
         playerComponent = PLAYER.get(player);

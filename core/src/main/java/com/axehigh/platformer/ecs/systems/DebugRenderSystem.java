@@ -2,6 +2,7 @@ package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.map.RoomState;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
@@ -22,27 +23,30 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 
 /**
  * Draws every active {@code CollisionComponent} AABB (both entity bounds and the static map
- * {@code collisionRects}) as outlined rectangles via a {@code ShapeRenderer}, toggled on/off with
- * SHIFT+D (see AGENTS.md "Debugging"). Disabled by default; drawing is skipped entirely while
- * off, so there's no per-frame cost in normal play. Must run after {@code RenderSystem} so its
- * {@code ShapeRenderer} block never overlaps the {@code SpriteBatch} block (the two can never be
- * open at the same time).
+ * {@code collisionRects}), plus the current level's Room rectangles ({@code RoomState.rooms}, in
+ * cyan, with the currently active one highlighted in orange), as outlined rectangles via a
+ * {@code ShapeRenderer}, toggled on/off with SHIFT+D (see AGENTS.md "Debugging"). Disabled by
+ * default; drawing is skipped entirely while off, so there's no per-frame cost in normal play.
+ * Must run after {@code RenderSystem} so its {@code ShapeRenderer} block never overlaps the
+ * {@code SpriteBatch} block (the two can never be open at the same time).
  */
 public class DebugRenderSystem extends EntitySystem implements Disposable {
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
     private final OrthographicCamera camera;
     private final Array<Rectangle> staticCollisionRects;
+    private final RoomState roomState;
     private ImmutableArray<Entity> collidables;
     private boolean debugEnabled = false;
 
-    public DebugRenderSystem(OrthographicCamera camera, Array<Rectangle> staticCollisionRects) {
-        this(camera, staticCollisionRects, 0);
+    public DebugRenderSystem(OrthographicCamera camera, Array<Rectangle> staticCollisionRects, RoomState roomState) {
+        this(camera, staticCollisionRects, roomState, 0);
     }
 
-    public DebugRenderSystem(OrthographicCamera camera, Array<Rectangle> staticCollisionRects, int priority) {
+    public DebugRenderSystem(OrthographicCamera camera, Array<Rectangle> staticCollisionRects, RoomState roomState, int priority) {
         super(priority);
         this.camera = camera;
         this.staticCollisionRects = staticCollisionRects;
+        this.roomState = roomState;
     }
 
     @Override
@@ -73,6 +77,12 @@ public class DebugRenderSystem extends EntitySystem implements Disposable {
             TransformComponent transform = TRANSFORM.get(entity);
             CollisionComponent collision = COLLISION.get(entity);
             shapeRenderer.rect(transform.position.x, transform.position.y, collision.bounds.width, collision.bounds.height);
+        }
+
+        for (int i = 0; i < roomState.rooms.size; i++) {
+            Rectangle room = roomState.rooms.get(i);
+            shapeRenderer.setColor(i == roomState.activeRoomIndex ? Color.ORANGE : Color.CYAN);
+            shapeRenderer.rect(room.x, room.y, room.width, room.height);
         }
 
         shapeRenderer.end();

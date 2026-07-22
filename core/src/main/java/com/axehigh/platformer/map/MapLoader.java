@@ -21,6 +21,7 @@ import com.badlogic.gdx.utils.Disposable;
 public class MapLoader implements Disposable {
     private static final String COLLISION_LAYER = "collision";
     private static final String OBJECTS_LAYER = "objects";
+    private static final String ROOMS_LAYER = "Rooms";
     private static final String TYPE_PLAYER_START = "playerStart";
     /** Tile property distinguishing solid wall tiles from non-blocking ones (e.g. natural passageways). */
     private static final String PROPERTY_SOLID = "solid";
@@ -76,6 +77,26 @@ public class MapLoader implements Disposable {
     public MapObjects getObjectLayer() {
         MapLayer layer = map.getLayers().get(OBJECTS_LAYER);
         return layer != null ? layer.getObjects() : new MapObjects();
+    }
+
+    /**
+     * Extracts every rectangle from the "Rooms" object layer, each defining a distinct room zone
+     * used by {@code CameraSystem} to clamp the camera and by {@code EnemySystem}/{@code
+     * EnemyShootSystem} to tell whether an enemy's owning room is the currently active one.
+     * Returns an empty array if the map has no such layer.
+     */
+    public Array<Rectangle> getRooms() {
+        Array<Rectangle> rooms = new Array<>();
+        MapLayer layer = map.getLayers().get(ROOMS_LAYER);
+        if (layer == null) {
+            return rooms;
+        }
+        for (MapObject object : layer.getObjects()) {
+            if (object instanceof RectangleMapObject) {
+                rooms.add(((RectangleMapObject) object).getRectangle());
+            }
+        }
+        return rooms;
     }
 
     /** Returns the center of the "playerStart" object, or the middle of the virtual screen if missing. */

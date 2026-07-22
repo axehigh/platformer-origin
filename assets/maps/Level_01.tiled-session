@@ -8,11 +8,15 @@
             "scaleInDock": 1
         },
         "demo_room.tmx": {
-            "scale": 0.4938020833333333,
-            "selectedLayer": 0,
+            "expandedObjectLayers": [
+                4,
+                3
+            ],
+            "scale": 1.1441,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 480.96192384769546,
-                "y": 271.36378019196286
+                "x": 208.02377414561664,
+                "y": 548.0290184424439
             }
         },
         "demo_room.tmx#brick_bg": {
@@ -42,11 +46,11 @@
             "scaleInDock": 1
         },
         "demo_room_start.tmx": {
-            "scale": 1.48,
-            "selectedLayer": 0,
+            "scale": 0.7792,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 239.52702702702703,
-                "y": 135.8108108108108
+                "x": 373.45995893223824,
+                "y": 173.25462012320332
             }
         },
         "demo_room_start.tmx#brick_bg": {
@@ -57,12 +61,31 @@
         },
         "demo_room_start.tmx#passage_tile": {
             "scaleInDock": 1
+        },
+        "sample_room.tmx": {
+            "scale": 0.890625,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 357.05263157894734,
+                "y": 131.36842105263156
+            }
+        },
+        "sample_room.tmx#brick_bg": {
+            "scaleInDock": 1
+        },
+        "sample_room.tmx#collision_tile": {
+            "scaleInDock": 1
+        },
+        "sample_room.tmx#passage_tile": {
+            "scaleInDock": 1
         }
     },
     "openFiles": [
     ],
     "project": "Level_01.tiled-project",
     "recentFiles": [
+        "sample_room.tmx",
+        "demo_room.tmx",
         "demo_room_start.tmx"
     ]
 }

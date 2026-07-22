@@ -1,9 +1,9 @@
 package com.axehigh.platformer.map;
 
-import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.systems.CameraSystem;
 import com.axehigh.platformer.ecs.systems.TiledMapRenderSystem;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
@@ -22,9 +22,9 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
  * .tmx, without ever destroying the Ashley engine or the player entity, so every persistent
  * {@code PlayerComponent} stat field (health, coins, items, ...) survives a level swap untouched
  * since it's literally the same component instance. The same {@code TiledMapRenderSystem} and
- * shared {@code collisionRects} array (read by {@code MovementSystem}, {@code EnemySystem},
- * {@code CollisionSystem}, {@code DebugRenderSystem}, ...) are fed the new level's data in place,
- * so no other system ever needs to be rebuilt or re-wired.
+ * shared {@code collisionRects}/{@code RoomState.rooms} (read by {@code MovementSystem}, {@code
+ * EnemySystem}, {@code CollisionSystem}, {@code DebugRenderSystem}, {@code CameraSystem}, ...)
+ * are fed the new level's data in place, so no other system ever needs to be rebuilt or re-wired.
  */
 public class LevelManager implements Disposable {
     private final PooledEngine engine;
@@ -32,17 +32,19 @@ public class LevelManager implements Disposable {
     private final OrthographicCamera camera;
     private final TiledMapRenderSystem tiledMapRenderSystem;
     private final Array<Rectangle> collisionRects;
+    private final RoomState roomState;
 
     private MapLoader mapLoader;
 
     public LevelManager(PooledEngine engine, EntityFactory entityFactory, OrthographicCamera camera,
                          TiledMapRenderSystem tiledMapRenderSystem, Array<Rectangle> collisionRects,
-                         MapLoader initialMapLoader) {
+                         RoomState roomState, MapLoader initialMapLoader) {
         this.engine = engine;
         this.entityFactory = entityFactory;
         this.camera = camera;
         this.tiledMapRenderSystem = tiledMapRenderSystem;
         this.collisionRects = collisionRects;
+        this.roomState = roomState;
         this.mapLoader = initialMapLoader;
     }
 
@@ -54,6 +56,10 @@ public class LevelManager implements Disposable {
 
         collisionRects.clear();
         collisionRects.addAll(newMapLoader.getCollisionRects());
+
+        roomState.rooms.clear();
+        roomState.rooms.addAll(newMapLoader.getRooms());
+        roomState.activeRoomIndex = -1;
 
         Array<Entity> entitiesToRemove = new Array<>();
         for (Entity entity : engine.getEntities()) {
@@ -69,7 +75,7 @@ public class LevelManager implements Disposable {
         mapLoader = newMapLoader;
         oldMapLoader.dispose();
 
-        entityFactory.spawnObjects(engine, mapLoader.getObjectLayer());
+        entityFactory.spawnObjects(engine, mapLoader.getObjectLayer(), roomState);
 
         Vector2 playerStart = mapLoader.findPlayerStart();
         TransformComponent transform = TRANSFORM.get(player);
@@ -89,13 +95,7 @@ public class LevelManager implements Disposable {
             playerComponent.nearExit = false;
         }
 
-        int roomX = (int) (playerStart.x / GameConstants.VIRTUAL_WIDTH);
-        int roomY = (int) (playerStart.y / GameConstants.VIRTUAL_HEIGHT);
-        camera.position.set(
-            (roomX * GameConstants.VIRTUAL_WIDTH) + (GameConstants.VIRTUAL_WIDTH / 2f),
-            (roomY * GameConstants.VIRTUAL_HEIGHT) + (GameConstants.VIRTUAL_HEIGHT / 2f),
-            0f);
-        camera.update();
+        CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y);
     }
 
     /** Disposes whichever MapLoader is currently active. */

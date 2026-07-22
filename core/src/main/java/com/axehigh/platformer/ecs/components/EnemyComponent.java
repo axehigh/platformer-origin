@@ -23,4 +23,11 @@ public class EnemyComponent implements Component {
      * knockback pop plays out uninterrupted (patrol AI is paused while this is active).
      */
     public Timer hitStun = new Timer();
+    /**
+     * Index into {@code RoomState.rooms} of the Room rectangle this enemy was spawned inside of,
+     * or {@code -1} if it wasn't inside any known room. {@code EnemySystem}/{@code
+     * EnemyShootSystem} freeze this enemy's AI/firing while its room isn't the currently active
+     * one (see {@code RoomState.activeRoomIndex}); {@code -1} means it's always active.
+     */
+    public int roomIndex = -1;
 }

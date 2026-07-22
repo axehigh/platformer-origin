@@ -5,6 +5,7 @@ import com.axehigh.platformer.ecs.components.EnemyComponent;
 import com.axehigh.platformer.ecs.components.FlyingEnemyComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.map.RoomState;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -30,6 +31,9 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
  * A {@code FlyingEnemyComponent} enemy additionally gets a time-based vertical bob wave driven
  * into {@code movement.velocity.y} (see {@code FlyingEnemyComponent}), so it visibly flaps up and
  * down around its spawn height instead of flying in a perfectly flat line.
+ * An enemy whose {@code roomIndex} doesn't match {@code RoomState.activeRoomIndex} is frozen
+ * entirely (velocity zeroed, no patrol/bob) until the player re-enters its owning room, per the
+ * Room-Based Entity management requirement.
  * Runs before {@code MovementSystem} so the velocity it sets is integrated the same frame.
  * Gravity and wall collision for enemies are handled for free by {@code MovementSystem}, since
  * any entity with Transform+Movement+Collision (and no BulletComponent) already matches its family.
@@ -41,15 +45,17 @@ public class EnemySystem extends IteratingSystem {
     private static final float LEDGE_PROBE_DEPTH = 4f;
 
     private final Array<Rectangle> collisionRects;
+    private final RoomState roomState;
     private final Rectangle ledgeProbe = new Rectangle();
 
-    public EnemySystem(Array<Rectangle> collisionRects) {
-        this(collisionRects, 0);
+    public EnemySystem(Array<Rectangle> collisionRects, RoomState roomState) {
+        this(collisionRects, roomState, 0);
     }
 
-    public EnemySystem(Array<Rectangle> collisionRects, int priority) {
+    public EnemySystem(Array<Rectangle> collisionRects, RoomState roomState, int priority) {
         super(Family.all(EnemyComponent.class, MovementComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
         this.collisionRects = collisionRects;
+        this.roomState = roomState;
     }
 
     @Override
@@ -58,8 +64,19 @@ public class EnemySystem extends IteratingSystem {
         MovementComponent movement = MOVEMENT.get(entity);
         TransformComponent transform = TRANSFORM.get(entity);
         CollisionComponent collision = COLLISION.get(entity);
+        FlyingEnemyComponent flying = FLYING.get(entity);
 
         enemy.hitStun.update(deltaTime);
+
+        boolean roomActive = enemy.roomIndex < 0 || enemy.roomIndex == roomState.activeRoomIndex;
+        if (!roomActive) {
+            movement.velocity.x = 0f;
+            if (flying != null) {
+                movement.velocity.y = 0f;
+            }
+            return;
+        }
+
         if (enemy.hitStun.isActive()) {
             return;
         }
@@ -76,7 +93,6 @@ public class EnemySystem extends IteratingSystem {
 
         movement.velocity.x = enemy.speed * enemy.direction;
 
-        FlyingEnemyComponent flying = FLYING.get(entity);
         if (flying != null) {
             flying.bobTime += deltaTime;
             movement.velocity.y = flying.bobAmplitude * flying.bobFrequency * MathUtils.cos(flying.bobTime * flying.bobFrequency);

@@ -17,13 +17,11 @@
 
 ### Enemies
 
+### Skills to generate
+## Room generator
+Based on this request and scripts used, create a skill named tmx-map-generator that generates a tmx map for this game,
+with a defined number of rooms, default 3 rooms, unless otherwise specified, add some enemies and items.
 
-### Level Map Ideas:
-Please implement a Room-Based Camera and Entity management system using our Tiled map setup.
+grill me for this skill.
 
-1. The system should look for an Object Layer named "Rooms" containing custom rectangle shapes. Each rectangle defines a distinct room zone of variable size.
-2. The player controller or game manager must track which Room rectangle the player is currently inside.
-3. The camera must dynamically clamp its viewport boundaries to match the edges of the active Room rectangle. If a room matches the screen resolution, the camera remains static. If a room is larger than the viewport, it allows continuous scrolling but remains clamped within the room's edges.
-4. Let the system manage enemy entities based on these rooms, ensuring enemies only activate/spawn when their corresponding room becomes the active zone.
-
-Grill-Me on the feature. 
+create this so that is running as a sub-agent? If there any advantages to that.

@@ -61,8 +61,12 @@ public class EntityFactory {
         return player;
     }
 
-    /** Spawns decorative entities (coin, chest, torch, exit gate) found in the object layer. */
-    public void spawnObjects(Engine engine, MapObjects objects) {
+    /**
+     * Spawns decorative entities (coin, chest, torch, exit gate, enemy) found in the object layer.
+     * {@code roomState} is used to assign each spawned enemy to whichever Room rectangle contains
+     * its spawn point (see {@code EnemyComponent.roomIndex}).
+     */
+    public void spawnObjects(Engine engine, MapObjects objects, RoomState roomState) {
         for (MapObject object : objects) {
             if (!(object instanceof RectangleMapObject)) {
                 continue;
@@ -95,7 +99,8 @@ public class EntityFactory {
                     break;
                 case "enemy":
                     String enemyType = object.getProperties().get("enemyType", "walker", String.class);
-                    engine.addEntity(createEnemy(centerX, centerY, enemyType));
+                    int roomIndex = roomState.findRoomIndexContaining(centerX, centerY);
+                    engine.addEntity(createEnemy(centerX, centerY, enemyType, roomIndex));
                     break;
                 default:
                     // "playerStart" and any unrecognized type: nothing to spawn here.
@@ -219,7 +224,7 @@ public class EntityFactory {
         return entity;
     }
 
-    private Entity createEnemy(float x, float y, String enemyType) {
+    private Entity createEnemy(float x, float y, String enemyType, int roomIndex) {
         String texturePath;
         switch (enemyType) {
             case "flyer":
@@ -254,6 +259,7 @@ public class EntityFactory {
 
         EnemyComponent enemyComponent = new EnemyComponent();
         enemyComponent.originX = x;
+        enemyComponent.roomIndex = roomIndex;
         if ("flyer".equals(enemyType)) {
             enemyComponent.health = 5f;
             entity.add(new FlyingEnemyComponent());
