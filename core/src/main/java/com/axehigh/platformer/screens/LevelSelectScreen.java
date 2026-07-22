@@ -4,6 +4,7 @@ import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.map.LevelCatalog;
 import com.axehigh.platformer.map.LevelDefinition;
 import com.axehigh.platformer.ui.SkinFactory;
+import com.axehigh.platformer.util.SaveManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -40,8 +42,13 @@ public class LevelSelectScreen implements Screen {
         Label title = new Label("Select Level", skin);
         table.add(title).padBottom(20f).row();
 
+        Array<String> completedLevelIds = SaveManager.hasSave() ? SaveManager.load().completedLevelIds : new Array<String>();
+
         for (LevelDefinition level : LevelCatalog.levels()) {
-            TextButton levelButton = new TextButton(level.displayName, skin);
+            String buttonText = completedLevelIds.contains(level.id, false)
+                ? level.displayName + " (Completed)"
+                : level.displayName;
+            TextButton levelButton = new TextButton(buttonText, skin);
             levelButton.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {

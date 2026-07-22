@@ -17,7 +17,7 @@
             "scale": 1.1441,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 223.7566646272179,
+                "x": 223.3196398916179,
                 "y": 166.06939952801326
             }
         },
@@ -37,7 +37,7 @@
             "scale": 1.484375,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 155.28421052631577,
+                "x": 155.2842105263158,
                 "y": 136.0842105263158
             }
         },
@@ -58,7 +58,7 @@
             "scale": 0.7792,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 225.87268993839834,
+                "x": 225.23100616016427,
                 "y": 173.25462012320332
             }
         },
@@ -70,6 +70,32 @@
         },
         "demo_room_start.tmx#passage_tile": {
             "scaleInDock": 1
+        },
+        "level2/sample_room_01.tmx": {
+            "expandedObjectLayers": [
+                4
+            ],
+            "scale": 1.16,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 207.32758620689657,
+                "y": 179.31034482758622
+            }
+        },
+        "level2/sample_room_01.tmx#brick_bg": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "level2/sample_room_01.tmx#collision_tile": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "level2/sample_room_01.tmx#passage_tile": {
+            "scaleInDock": 1
+        },
+        "origin_tiles_forest.tsx": {
+            "dynamicWrapping": true
         },
         "sample_room.tmx": {
             "expandedObjectLayers": [
@@ -92,6 +118,8 @@
             "scaleInDock": 1
         }
     },
+    "last.imagePath": "/Users/lona/dev/assets/craftpix/pixel-art-forest-platformer-tileset/Tiles",
+    "map.lastUsedFormat": "tmx",
     "openFiles": [
         "demo_room_final.tmx",
         "demo_room_start.tmx",
@@ -103,6 +131,9 @@
         "demo_room_final.tmx",
         "demo_room_start.tmx",
         "demo_room.tmx",
+        "level2/sample_room_01.tmx",
         "sample_room.tmx"
-    ]
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.type": 1
 }

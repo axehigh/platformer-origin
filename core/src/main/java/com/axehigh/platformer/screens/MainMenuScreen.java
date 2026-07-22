@@ -2,7 +2,9 @@ package com.axehigh.platformer.screens;
 
 import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.map.LevelCatalog;
+import com.axehigh.platformer.map.SaveData;
 import com.axehigh.platformer.ui.SkinFactory;
+import com.axehigh.platformer.util.SaveManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -45,14 +47,34 @@ public class MainMenuScreen implements Screen {
         newGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                game.setScreen(new GameScreen(game, LevelCatalog.levels().first().tmxPath));
+                SaveData freshSaveData = new SaveData();
+                freshSaveData.levelPath = LevelCatalog.levels().first().tmxPath;
+                freshSaveData.health = 3;
+                freshSaveData.maxHealth = 3;
+                freshSaveData.coins = 0;
+                freshSaveData.items = 0;
+                freshSaveData.swordDamage = 5;
+                freshSaveData.sharpEdgePurchased = false;
+                freshSaveData.daggerBandolierPurchased = false;
+                freshSaveData.ironHeartCount = 0;
+                freshSaveData.triesRemaining = 3;
+                game.setScreen(new GameScreen(game, freshSaveData));
             }
         });
         table.add(newGameButton).width(160f).padBottom(8f).row();
 
         TextButton continueButton = new TextButton("Continue", skin);
-        continueButton.setTouchable(Touchable.disabled);
-        continueButton.setColor(Color.GRAY);
+        if (SaveManager.hasSave()) {
+            continueButton.addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                    game.setScreen(new GameScreen(game, SaveManager.load()));
+                }
+            });
+        } else {
+            continueButton.setTouchable(Touchable.disabled);
+            continueButton.setColor(Color.GRAY);
+        }
         table.add(continueButton).width(160f).padBottom(8f).row();
 
         TextButton selectLevelButton = new TextButton("Select Level", skin);

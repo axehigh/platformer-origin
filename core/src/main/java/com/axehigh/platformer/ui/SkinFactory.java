@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 
 /** Builds a minimal, programmer-art Skin (font + flat-color button drawables) shared by both UI stages. */
 public final class SkinFactory {
@@ -52,6 +53,12 @@ public final class SkinFactory {
         sliderStyle.knob.setMinWidth(12f);
         sliderStyle.knob.setMinHeight(12f);
         skin.add("default-horizontal", sliderStyle);
+
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.background = skin.newDrawable("white", new Color(0.15f, 0.15f, 0.2f, 0.95f));
+        windowStyle.titleFont = font;
+        windowStyle.titleFontColor = Color.WHITE;
+        skin.add("default", windowStyle);
 
         return skin;
     }

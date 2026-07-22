@@ -16,6 +16,7 @@ import com.axehigh.platformer.ecs.systems.LevelExitSystem;
 import com.axehigh.platformer.ecs.systems.MeleeAttackSystem;
 import com.axehigh.platformer.ecs.systems.MovementSystem;
 import com.axehigh.platformer.ecs.systems.PickupSystem;
+import com.axehigh.platformer.ecs.systems.PlayerDeathSystem;
 import com.axehigh.platformer.ecs.systems.PlayerInputSystem;
 import com.axehigh.platformer.ecs.systems.RenderSystem;
 import com.axehigh.platformer.ecs.systems.TiledMapRenderSystem;
@@ -24,6 +25,8 @@ import com.axehigh.platformer.map.LevelCatalog;
 import com.axehigh.platformer.map.LevelManager;
 import com.axehigh.platformer.map.MapLoader;
 import com.axehigh.platformer.map.RoomState;
+import com.axehigh.platformer.map.SaveData;
+import com.axehigh.platformer.util.SaveManager;
 import com.axehigh.platformer.ui.HudStage;
 import com.axehigh.platformer.ui.SkinFactory;
 import com.axehigh.platformer.ui.TouchControlsStage;
@@ -42,7 +45,11 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -60,6 +67,7 @@ public class GameScreen implements Screen {
     private static final int PRIORITY_CHEST = 7;
     private static final int PRIORITY_ENEMY_CONTACT = 7;
     private static final int PRIORITY_LEVEL_EXIT = 7;
+    private static final int PRIORITY_PLAYER_DEATH = 7;
     private static final int PRIORITY_CAMERA = 8;
     private static final int PRIORITY_ANIMATION = 10;
     private static final int PRIORITY_MAP_RENDER = 20;
@@ -74,14 +82,17 @@ public class GameScreen implements Screen {
 
     private final Game game;
     private final String levelPath;
+    private final SaveData saveData;
 
     private TiledMapRenderSystem tiledMapRenderSystem;
     private DebugRenderSystem debugRenderSystem;
     private LevelManager levelManager;
     private PlayerComponent playerComponent;
+    private Entity playerEntity;
     private Skin uiSkin;
     private HudStage hudStage;
     private TouchControlsStage touchControlsStage;
+    private boolean gameOverActive = false;
 
     /** Defaults to the catalog's first level. */
     public GameScreen(Game game) {
@@ -91,6 +102,14 @@ public class GameScreen implements Screen {
     public GameScreen(Game game, String levelPath) {
         this.game = game;
         this.levelPath = levelPath;
+        this.saveData = null;
+    }
+
+    /** Resumes from a save: loads {@code saveData.levelPath} and applies its stats onto the new player. */
+    public GameScreen(Game game, SaveData saveData) {
+        this.game = game;
+        this.levelPath = saveData.levelPath;
+        this.saveData = saveData;
     }
 
     @Override
@@ -138,11 +157,17 @@ public class GameScreen implements Screen {
 
         levelManager = new LevelManager(engine, entityFactory, camera, tiledMapRenderSystem, mapLoader.getCollisionRects(), roomState, mapLoader);
         engine.addSystem(new LevelExitSystem(levelManager, PRIORITY_LEVEL_EXIT));
+        engine.addSystem(new PlayerDeathSystem(this::onPlayerDeath, PRIORITY_PLAYER_DEATH));
 
         Vector2 playerStart = mapLoader.findPlayerStart();
         Entity player = entityFactory.createPlayer(playerStart.x, playerStart.y);
+        playerEntity = player;
         attachPlayerAnimations(player);
         engine.addEntity(player);
+
+        if (saveData != null) {
+            applySaveData(player, saveData);
+        }
 
         entityFactory.spawnObjects(engine, mapLoader.getObjectLayer(), roomState);
         CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y);
@@ -170,6 +195,61 @@ public class GameScreen implements Screen {
         Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
+    private void onPlayerDeath() {
+        gameOverActive = true;
+        showGameOverDialog();
+    }
+
+    private void showGameOverDialog() {
+        SaveData currentSave = SaveManager.hasSave() ? SaveManager.load() : new SaveData();
+
+        Dialog dialog = new Dialog("Game Over", uiSkin) {
+            @Override
+            protected void result(Object object) {
+            }
+        };
+        dialog.text(new Label("You died!", uiSkin));
+
+        if (currentSave.triesRemaining > 0) {
+            TextButton continueButton = new TextButton("Continue (uses 1 try)", uiSkin);
+            continueButton.addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                    currentSave.triesRemaining--;
+                    SaveManager.save(currentSave);
+                    levelManager.loadLevel(levelManager.getCurrentLevelPath(), playerEntity);
+                    playerComponent.health = playerComponent.maxHealth;
+                    dialog.hide();
+                    gameOverActive = false;
+                }
+            });
+            dialog.button(continueButton);
+        }
+
+        TextButton exitButton = new TextButton("Exit to Main Menu", uiSkin);
+        exitButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                game.setScreen(new MainMenuScreen(game));
+            }
+        });
+        dialog.button(exitButton);
+
+        dialog.show(hudStage);
+    }
+
+    private void applySaveData(Entity player, SaveData saveData) {
+        PlayerComponent playerComponent = PLAYER.get(player);
+        playerComponent.health = saveData.health;
+        playerComponent.maxHealth = saveData.maxHealth;
+        playerComponent.coins = saveData.coins;
+        playerComponent.items = saveData.items;
+        playerComponent.swordDamage = saveData.swordDamage;
+        playerComponent.sharpEdgePurchased = saveData.sharpEdgePurchased;
+        playerComponent.daggerBandolierPurchased = saveData.daggerBandolierPurchased;
+        playerComponent.ironHeartCount = saveData.ironHeartCount;
+    }
+
     private void attachPlayerAnimations(Entity player) {
         TextureRegion idleRegion = new TextureRegion(assetManager.get("gfx/player.png", Texture.class));
         TextureRegion attackRegion = new TextureRegion(assetManager.get("gfx/player_attack.png", Texture.class));
@@ -183,7 +263,9 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         ScreenUtils.clear(0.1f, 0.1f, 0.15f, 1f);
         viewport.apply();
-        engine.update(Gdx.graphics.getDeltaTime());
+        if (!gameOverActive) {
+            engine.update(Gdx.graphics.getDeltaTime());
+        }
 
         touchControlsStage.setInteractVisible(playerComponent.nearExit);
 

@@ -98,6 +98,11 @@ public class LevelManager implements Disposable {
         CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y);
     }
 
+    /** Returns the .tmx path of the currently active level. */
+    public String getCurrentLevelPath() {
+        return mapLoader.getTmxPath();
+    }
+
     /** Disposes whichever MapLoader is currently active. */
     @Override
     public void dispose() {

@@ -4,13 +4,18 @@ import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.LevelExitComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.map.LevelCatalog;
+import com.axehigh.platformer.map.LevelDefinition;
 import com.axehigh.platformer.map.LevelManager;
+import com.axehigh.platformer.map.SaveData;
+import com.axehigh.platformer.util.SaveManager;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.LEVEL_EXIT;
@@ -86,7 +91,43 @@ public class LevelExitSystem extends IteratingSystem {
         if (player.interactPressed) {
             player.interactPressed = false;
             LevelExitComponent levelExit = LEVEL_EXIT.get(gateEntity);
+            SaveManager.save(buildSaveData(player, levelExit.nextLevelPath));
             levelManager.loadLevel(levelExit.nextLevelPath, playerEntity);
         }
+    }
+
+    private SaveData buildSaveData(PlayerComponent player, String nextLevelPath) {
+        SaveData saveData = new SaveData();
+        saveData.levelPath = nextLevelPath;
+        saveData.health = player.health;
+        saveData.maxHealth = player.maxHealth;
+        saveData.coins = player.coins;
+        saveData.items = player.items;
+        saveData.swordDamage = player.swordDamage;
+        saveData.sharpEdgePurchased = player.sharpEdgePurchased;
+        saveData.daggerBandolierPurchased = player.daggerBandolierPurchased;
+        saveData.ironHeartCount = player.ironHeartCount;
+        saveData.completedLevelIds = buildCompletedLevelIds();
+        return saveData;
+    }
+
+    private Array<String> buildCompletedLevelIds() {
+        Array<String> completedLevelIds = new Array<>();
+        if (SaveManager.hasSave()) {
+            SaveData previousSave = SaveManager.load();
+            if (previousSave.completedLevelIds != null) {
+                completedLevelIds.addAll(previousSave.completedLevelIds);
+            }
+        }
+        String currentLevelPath = levelManager.getCurrentLevelPath();
+        for (LevelDefinition level : LevelCatalog.levels()) {
+            if (level.tmxPath.equals(currentLevelPath)) {
+                if (!completedLevelIds.contains(level.id, false)) {
+                    completedLevelIds.add(level.id);
+                }
+                break;
+            }
+        }
+        return completedLevelIds;
     }
 }

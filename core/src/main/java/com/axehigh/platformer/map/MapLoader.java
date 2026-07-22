@@ -28,8 +28,10 @@ public class MapLoader implements Disposable {
 
     private final TiledMap map;
     private final Array<Rectangle> collisionRects = new Array<>();
+    private final String tmxPath;
 
     public MapLoader(String tmxPath) {
+        this.tmxPath = tmxPath;
         map = new TmxMapLoader().load(tmxPath);
         buildCollisionRects();
     }
@@ -68,6 +70,11 @@ public class MapLoader implements Disposable {
 
     public TiledMap getMap() {
         return map;
+    }
+
+    /** Returns the .tmx path this MapLoader was constructed with. */
+    public String getTmxPath() {
+        return tmxPath;
     }
 
     public Array<Rectangle> getCollisionRects() {
