@@ -10,6 +10,14 @@ public class PlayerComponent implements Component {
     public int coins = 0;
     public int items = 0;
     public int maxItems = 30;
+    /** Current melee/sword damage per hit; base 5, raised to 8 by the "Sharp Edge" shop upgrade. */
+    public int swordDamage = 5;
+    /** One-time flag: true once the "Sharp Edge" upgrade (swordDamage -> 8) has been purchased. */
+    public boolean sharpEdgePurchased = false;
+    /** One-time flag: true once the "Dagger Bandolier" upgrade (maxItems -> 60) has been purchased. */
+    public boolean daggerBandolierPurchased = false;
+    /** Number of times the repeatable "Iron Heart" upgrade (+1 maxHealth/health) has been purchased. */
+    public int ironHeartCount = 0;
     /** -1 for left, 1 for right. */
     public int facingDirection = 1;
 

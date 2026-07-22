@@ -34,7 +34,6 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
  * once per swing.
  */
 public class MeleeAttackSystem extends IteratingSystem {
-    private static final float MELEE_DAMAGE = 5f;
     private static final float STRIKE_WIDTH = 10f;
     private static final float CHEST_DISAPPEAR_DELAY = 0.3f;
 
@@ -82,7 +81,7 @@ public class MeleeAttackSystem extends IteratingSystem {
                 EnemyComponent enemy = ENEMY.get(hitEnemy);
                 MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
                 boolean isFlying = FLYING.get(hitEnemy) != null;
-                boolean died = EnemyDamageResolver.applyHit(enemy, enemyMovement, MELEE_DAMAGE, player.facingDirection, isFlying);
+                boolean died = EnemyDamageResolver.applyHit(enemy, enemyMovement, player.swordDamage, player.facingDirection, isFlying);
                 if (died) {
                     getEngine().removeEntity(hitEnemy);
                 }

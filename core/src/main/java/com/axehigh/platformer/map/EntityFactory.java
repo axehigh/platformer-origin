@@ -265,6 +265,8 @@ public class EntityFactory {
             entity.add(new FlyingEnemyComponent());
         } else if ("shooter".equals(enemyType)) {
             entity.add(new EnemyShooterComponent());
+        } else if ("knight".equals(enemyType)) {
+            enemyComponent.health = 15f;
         }
         entity.add(enemyComponent);
 
