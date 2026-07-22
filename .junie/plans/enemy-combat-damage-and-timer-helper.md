@@ -5,182 +5,210 @@ sessionId: session-260721-044237-17dw
 # Requirements
 
 ### Overview & Goals
-Add real hit-point-based combat resolution between the player and enemies, and introduce a reusable `Timer` helper class to encapsulate the countdown-timer pattern that already exists in several places (`PlayerComponent`, `ChestComponent`) and is now needed again for the player's post-hit grace period.
+Add two new enemy archetypes on top of the existing patrol-walker enemy: a **flying enemy** (5 HP, same horizontal patrol bounds as the walker but immune to gravity) and a **shooting enemy** (10 HP, patrols like the walker but also fires a bullet every 5 seconds that costs the player one life on hit, just like touching an enemy does).
 
 ### Scope
-**In scope:**
-* Enemies start with `10` hit points (currently `1`).
-* Melee (close-combat) strikes deal `5` damage to an enemy.
-* Ranged shots (dagger bullets) deal `10` damage to an enemy.
-* When an enemy touches the player, the player loses **1 life** (`PlayerComponent.health`).
-* After being hit, the player enters a **1.0 second grace period** during which further enemy contact does not reduce health again.
-* A new `com.axehigh.platformer.util.Timer` helper class encapsulates "count down from X, know when it's done" logic.
-* Existing raw-float timer fields (`shootCooldownTimer`, `meleeCooldownTimer`, `meleeAttackTimer` on `PlayerComponent`; `disappearTimer` on `ChestComponent`) are migrated to use `Timer` for a single consistent pattern, per your decision to migrate all existing timers.
-* Documentation (`ashley-ecs.md`, `gameplay.md`, `enemies.md`, `AGENTS.md`) updated to reflect all of the above, per the project's existing documentation-sync rules.
+**In scope (this session):**
+* A new **flying enemy** type: `5` HP, patrols back-and-forth with the same `patrolRange`/`originX` mechanism as the walker, but is completely unaffected by gravity (hovers at spawn height instead of falling/resting on the ground).
+* A new **shooting enemy** type: `10` HP (same as the walker), patrols like the walker (per your decision), and additionally fires a bullet every `5` seconds in whatever direction it's currently facing (no player-aiming/aggro, per your decision).
+* Enemy-fired bullets deal damage the same way an enemy's own touch does: on hitting the player, decrement `player.health` by `1` life (gated by the existing `player.hitInvulnerability` grace-period `Timer`, shared with contact damage) — **not** the HP-style `bullet.damage` mechanic used for player bullets hitting enemies.
+* Both new types are spawned from Tiled the same way as the existing walker (`type="enemy"` object markers), disambiguated by a new `enemyType` custom string property (`"flyer"` / `"shooter"`; omitted/`"walker"` = today's behavior, so existing map markers are unaffected).
+* A fix so a flying enemy's post-hit knockback doesn't launch it permanently upward (since it has no gravity to pull it back down).
+* Documentation (`ashley-ecs.md`, `gameplay.md`, `enemies.md`) updated to reflect both new types, per the project's existing documentation-sync rules.
 
 **Out of scope:**
-* No game-over/respawn/death handling when `player.health` reaches `0` (health is simply clamped at `0`; this mirrors the current state where no such handling exists at all).
-* No visual feedback (flicker/tint) during the invulnerability grace period — only the damage-prevention mechanic itself.
-* No per-enemy-type stat overrides (still only one enemy type exists, per `enemies.md`).
+* No player-aiming/aggro/detection logic for the shooter (fires in its current facing/patrol direction only, per your decision).
+* No stationary-turret variant (the shooter patrols like the walker, per your decision).
+* No new visual assets beyond simple placeholder sprites for the two new enemy types; enemy bullets reuse the existing `gfx/bullet.png` texture (no new bullet art).
+* No per-object stat overrides beyond the `enemyType` switch (e.g. no per-marker custom health/speed/shoot-interval overrides yet).
+* No changes to the already-implemented walker enemy, `Timer` helper, or the combat/grace-period mechanics from the previous session — this plan only adds the two new enemy archetypes on top of that foundation.
 
 ### User Stories
-* As a player, when I strike an enemy with my melee weapon, it takes meaningful damage (5 HP) and dies in 2 hits from full health.
-* As a player, when I shoot an enemy with a dagger, it takes heavier damage (10 HP) and dies in a single hit from full health.
-* As a player, if an enemy touches me, I lose one heart, but I get a brief moment where I can't be hit again immediately, so a single sustained overlap (or several enemies at once) doesn't shred my health instantly.
-
-### Functional Requirements
-* `EnemyComponent.health` default changes from `1f` to `10f`.
-* `MeleeAttackSystem`'s melee damage constant changes from `1f` to `5f`.
-* `PlayerInputSystem`'s bullet damage constant changes from `1f` to `10f`.
-* A new system detects AABB overlap between any enemy and the player and, if the player's invulnerability `Timer` is not active, decrements `player.health` by `1` (never below `0`) and starts the invulnerability `Timer` for `1.0` second.
-* Multiple enemies overlapping the player in the same frame only cost **one** life, not one per overlapping enemy.
-* The `Timer` class exposes: start a countdown, tick it down by delta time, and query whether it's still active/done — used identically everywhere a countdown is needed.
+* As a player, I encounter a flying enemy that hovers and patrols a fixed area in the air, taking only 2 melee hits (5+5>5, i.e. dies on the 1st bullet or 1st-2nd melee swing) to defeat since it only has 5 HP.
+* As a player, I encounter a shooting enemy that patrols like a regular enemy but also periodically fires a bullet at me, costing me a life if it connects — just like walking into it would.
+* As a player, if a shooter's bullet hits me right after I was already hit (by contact or another bullet), I don't lose a second life immediately, since the same grace period protects me from all enemy damage sources.
 
 # Technical Design
 
 ### Current Implementation
-* `EnemyComponent` (`core/.../ecs/components/EnemyComponent.java`): `float health = 1f` plus patrol fields (`speed`, `direction`, `patrolRange`, `originX`).
-* `PlayerComponent` (`core/.../ecs/components/PlayerComponent.java`): `int health/maxHealth = 3`, plus four raw-`float` countdown fields: `shootCooldownTimer`, `meleeCooldownTimer`, `meleeAttackTimer`.
-* `ChestComponent`: raw-`float` `disappearTimer`.
-* Damage is currently only ever applied **to enemies**: `CollisionSystem` (bullet hits, `bullet.damage`, currently `1f` from `PlayerInputSystem.BULLET_DAMAGE`) and `MeleeAttackSystem` (`MELEE_DAMAGE = 1f`). There is **no** system today that damages the player from enemy contact.
-* Countdown fields today are all hand-rolled: `PlayerInputSystem.processEntity` does `if (timer > 0f) timer -= deltaTime;` for cooldowns; `MeleeAttackSystem`/`AnimationSystem` read `meleeAttackTimer` directly; `ChestSystem.processEntity` does the same pattern for `disappearTimer`.
-* Player-vs-entity overlap already has an established pattern in `PickupSystem`: cache the single player entity in `addedToEngine`, then in `processEntity` (iterating the *other* family) build two `Rectangle`s from `TransformComponent.position` + `CollisionComponent.bounds` and call `overlaps()`.
-* `GameScreen.show()` wires systems with explicit priority constants (`PRIORITY_INPUT=0`, `PRIORITY_ENEMY=4`, `PRIORITY_MOVEMENT=5`, `PRIORITY_COLLISION=6`, `PRIORITY_MELEE/PICKUP/CHEST=7`, `PRIORITY_CAMERA=8`, ...).
+* `EnemyComponent` (`core/.../ecs/components/EnemyComponent.java`): `float health = 10f`, patrol fields (`speed`, `direction`, `patrolRange`, `originX`), `Timer hitStun`.
+* `EnemySystem` (`core/.../ecs/systems/EnemySystem.java`): drives horizontal patrol velocity, flips direction at `patrolRange`/on wall-block/on ledge, pauses entirely while `hitStun` is active. Runs over `Family.all(EnemyComponent, MovementComponent, TransformComponent, CollisionComponent)` at priority `4`.
+* `MovementSystem` (priority `5`): applies gravity to every entity in its family (`Transform+Movement+Collision`, excluding bullets) unconditionally — there is currently no way for an entity to opt out of gravity.
+* `EnemyDamageResolver` (`core/.../ecs/systems/EnemyDamageResolver.java`): shared static helper used by `CollisionSystem` (bullet hits) and `MeleeAttackSystem` (melee hits) — `applyHit(enemy, movement, damage, knockbackDirection)` applies damage and, on a surviving hit, a `90` u/s horizontal + `140` u/s vertical knockback pop plus a `0.3s` `hitStun`.
+* `EnemyContactSystem`/bullet-vs-enemy `CollisionSystem` are the only two damage pipelines today; both are one-directional (player/bullet → enemy, or enemy → player-via-touch). Nothing currently lets an enemy fire a projectile.
+* `EntityFactory.createEnemy(x, y)` (private) builds a single hardcoded enemy shape (`gfx/enemy.png`, `EnemyComponent` with `originX = x`); `spawnObjects` calls it unconditionally for every `type="enemy"` Tiled object marker — there's no per-marker type discriminator yet.
+* `resources/docs-ai/enemies.md` §3 already documents the intended pattern for this exact situation: "prefer a new marker component (e.g. `ShooterEnemyComponent`, `FlyingEnemyComponent`) layered on top of the base `EnemyComponent`, plus... a dedicated new `IteratingSystem`" — this plan follows that documented convention (confirmed with you for both new types).
+* `GameScreen.show()` wires systems with explicit priority constants (`PRIORITY_INPUT=0`, `PRIORITY_ENEMY=4`, `PRIORITY_MOVEMENT=5`, `PRIORITY_COLLISION=6`, `PRIORITY_MELEE/PICKUP/CHEST/ENEMY_CONTACT=7`, `PRIORITY_CAMERA=8`, ...).
 
 ### Key Decisions
-* **Timer as a plain embedded object, not a Component:** `Timer` lives in a new `com.axehigh.platformer.util` package as a plain class (not `Poolable`/not an Ashley `Component`), instantiated as a field inside existing components (`new Timer()`), matching how `PlayerComponent`/`ChestComponent`/`EnemyComponent` are already non-poolable, non-trivial data holders. This avoids inventing a new Ashley concept for something that's purely a value-holder.
-* **Migrate all existing timer fields (per your decision):** `PlayerComponent.shootCooldownTimer/meleeCooldownTimer/meleeAttackTimer` and `ChestComponent.disappearTimer` become `Timer` instances, so every countdown in the codebase (cooldowns, attack windows, disappear delay, and the new grace period) follows the exact same `start()/update()/isActive()/isDone()` API.
-* **New dedicated system for enemy-contact damage** (`EnemyContactSystem`), not folded into `EnemySystem` or `CollisionSystem`: it has a distinct responsibility (player-damage, not enemy-AI or bullet-resolution) and mirrors the existing separation of concerns (`MeleeAttackSystem` vs `CollisionSystem` vs `PickupSystem` are already split by *what* interacts with *what*).
-* **Grace-period timer ticked once per frame, not once per enemy:** Since `EnemyContactSystem` iterates the *enemy* family (there can be several enemies, one player), decrementing a shared `player.hitInvulnerability` timer inside `processEntity` would tick it multiple times per frame. Instead, `update(float deltaTime)` is overridden (mirroring `PlayerInputSystem`'s own `update()` override for its touch-request flags) to tick the player's timer exactly once before/after the per-enemy iteration.
+* **Flying enemy = marker component + `MovementSystem` gravity opt-out (per your decision):** a new `FlyingEnemyComponent` (empty marker, no fields) is checked by `MovementSystem` via a new `FLYING` mapper; if present, the gravity/wall-slide velocity-Y update is skipped entirely for that frame, so the entity holds its spawn height forever. `EnemySystem`'s existing patrol logic (`patrolRange`/`originX`) needs **no changes** — since a flying enemy is never `grounded`, its wall-block/ledge checks (both gated on `movement.grounded`) simply never fire, so it turns around purely via `patrolRange`, matching "similar patrol bounds as the walking one." *Trade-off:* unlike the walker, a flying enemy has no wall-block fallback, so its `patrolRange` must be placed clear of walls by the level designer — acceptable since flying enemies are meant to hover in open space.
+* **Shooter enemy patrols like the walker and fires in its facing direction (per your decisions):** shooter entities keep the base `EnemyComponent` (so `EnemySystem` already drives their patrol movement for free, since they still match its family) and additionally get a new `EnemyShooterComponent` (`Timer shootCooldown`, `float shootInterval = 5f`) processed by a new `EnemyShootSystem`. No player-position lookup is needed — the bullet direction is simply `enemy.direction`, keeping the "non-reactive, pure AABB" design philosophy already documented in `enemies.md`.
+* **Dedicated enemy-bullet pipeline, symmetric to the player's (per your decision):** a new `EnemyBulletComponent` marker (Poolable, like `BulletComponent`) is attached alongside `BulletComponent` on enemy-fired bullets. The existing `CollisionSystem`'s family gains `.exclude(EnemyBulletComponent.class)`, and a new `EnemyBulletCollisionSystem` mirrors its structure (movement/lifetime/wall-hit) but resolves the "hit" case against the cached player entity instead of the enemy family — keeping each system's `Family` unambiguous (no entity ever matches both) and following the project's existing "split systems by what interacts with what" convention.
+* **Enemy bullets damage the player exactly like contact does, not like HP damage:** on hitting the player, `EnemyBulletCollisionSystem` reuses `player.hitInvulnerability` (the *same* `Timer` `EnemyContactSystem` uses) — decrementing `player.health` by `1` only if it `isDone()`, then restarting it for `1.0s`. This means a bullet and a touch share one grace period, per your instruction that the shot should work "similar to being hit by an enemy." `BulletComponent.damage` is left unused/`0` for enemy bullets (the HP-damage field only makes sense for bullets that hit enemies).
+* **Flying-enemy knockback needs a small fix:** `EnemyDamageResolver.applyHit` currently always applies a `140` u/s vertical hop on a surviving hit; for a flying enemy (gravity disabled), that velocity would never decay and the enemy would drift upward forever. `applyHit` gains an `isFlying` boolean parameter — when `true`, it skips the vertical hop but keeps the horizontal knockback + `hitStun`. `CollisionSystem`/`MeleeAttackSystem` check the hit enemy's `FLYING` mapper and pass the result through.
+* **Enemy type selection via a Tiled custom property, not a new object `type`:** `EntityFactory.spawnObjects` reads an optional `enemyType` string property (`"flyer"` / `"shooter"`, default `"walker"`) off existing `type="enemy"` markers — existing map markers (`enemy1`, `enemy2`) are untouched and keep behaving exactly as today.
 
 ### Proposed Changes
-1. **New `Timer` helper** (`core/.../util/Timer.java`): `start(float duration)`, `update(float deltaTime)` (clamped at 0, no-op if already done), `isActive()`, `isDone()`, `getRemaining()`, `reset()`.
-2. **Combat tuning:**
-   * `EnemyComponent.health` default `1f` → `10f`.
-   * `MeleeAttackSystem.MELEE_DAMAGE` `1f` → `5f`.
-   * `PlayerInputSystem.BULLET_DAMAGE` `1f` → `10f`.
-3. **Timer migration:**
-   * `PlayerComponent`: `float shootCooldownTimer` → `Timer shootCooldown = new Timer()`; `float meleeCooldownTimer` → `Timer meleeCooldown = new Timer()`; `float meleeAttackTimer` → `Timer meleeAttack = new Timer()`; new `Timer hitInvulnerability = new Timer()`.
-   * `ChestComponent`: `float disappearTimer` → `Timer disappearTimer = new Timer()`.
-   * `PlayerInputSystem`: replace manual `-= deltaTime` / `> 0f` / `<= 0f` checks with `timer.update(deltaTime)` / `timer.isActive()` / `timer.isDone()`; replace direct assignment (`= SHOOT_COOLDOWN`) with `timer.start(SHOOT_COOLDOWN)`.
-   * `MeleeAttackSystem` / `AnimationSystem`: same swap for `meleeAttackTimer` → `meleeAttack`.
-   * `ChestSystem` (countdown) and `MeleeAttackSystem` (the `disappearTimer.start(...)` on chest-open): same swap.
-4. **New `EnemyContactSystem`** (`core/.../ecs/systems/EnemyContactSystem.java`, `IteratingSystem` over `Family.all(EnemyComponent, TransformComponent, CollisionComponent)`):
-   * Caches the single player entity in `addedToEngine` (same pattern as `PickupSystem`).
-   * Overrides `update(float deltaTime)`: ticks `player.hitInvulnerability.update(deltaTime)` once, then calls `super.update(deltaTime)` to run `processEntity` per enemy.
-   * `processEntity`: builds player/enemy `Rectangle`s from `Transform+Collision`, checks `overlaps()`; if overlapping **and** `player.hitInvulnerability.isDone()`: `player.health = Math.max(0, player.health - 1)` and `player.hitInvulnerability.start(1.0f)`.
-5. **Wiring:** `GameScreen.show()` adds `PRIORITY_ENEMY_CONTACT = 7` and registers `new EnemyContactSystem(PRIORITY_ENEMY_CONTACT)` alongside `MeleeAttackSystem`/`PickupSystem`/`ChestSystem` (same tier — order among priority-7 systems isn't meaningful, matching existing doc language).
+1. **`FlyingEnemyComponent`** (new, `core/.../ecs/components/FlyingEnemyComponent.java`): empty marker `Component`, not `Poolable` (created once per entity, like `EnemyComponent`).
+2. **`MovementSystem`**: look up `FLYING.get(entity)`; if non-null, skip the `movement.velocity.y += gravity * deltaTime` block entirely (velocity.y stays whatever it already was — `0` at rest).
+3. **`EnemyShooterComponent`** (new): `Timer shootCooldown = new Timer()`, `float shootInterval = 5f`.
+4. **`EnemyShootSystem`** (new, `IteratingSystem` over `Family.all(EnemyComponent, EnemyShooterComponent, TransformComponent, CollisionComponent)`, priority `4`, same tier as `EnemySystem`): caches a `PooledEngine` in `addedToEngine` (like `PlayerInputSystem`); each frame ticks `shootCooldown`; if `enemy.hitStun.isActive()`, skips firing (mirrors patrol's own stun-pause); otherwise once `shootCooldown.isDone()`, spawns a bullet at the enemy's position traveling horizontally in `enemy.direction` (reusing `gfx/bullet.png`, no gravity — same pattern as `PlayerInputSystem.spawnBullet`), tags it with `EnemyBulletComponent`, and restarts `shootCooldown` via `start(shootInterval)`.
+5. **`EnemyBulletComponent`** (new): empty marker `Component, Poolable` (bullets are pooled), no-op `reset()`.
+6. **`CollisionSystem`**: family becomes `Family.all(BulletComponent, TransformComponent, MovementComponent, CollisionComponent).exclude(EnemyBulletComponent.class)`, so it never touches enemy-owned bullets.
+7. **`EnemyBulletCollisionSystem`** (new, `IteratingSystem` over `Family.all(BulletComponent, EnemyBulletComponent, TransformComponent, MovementComponent, CollisionComponent)`, priority `6`, same tier as `CollisionSystem`): caches the single player entity in `addedToEngine` (mirrors `PickupSystem`); per bullet, ticks `lifetime` (removes on expiry), integrates position, removes on wall overlap (`collisionRects`), and on player overlap **always removes the bullet**, additionally decrementing `player.health` by `1` (clamped at `0`) and restarting `player.hitInvulnerability` for `1.0s` — but only if `hitInvulnerability.isDone()`.
+8. **`EnemyDamageResolver.applyHit`**: new `boolean isFlying` parameter; skips the vertical knockback assignment when `true`.
+9. **`CollisionSystem`/`MeleeAttackSystem`**: at the enemy-hit call site, compute `boolean isFlying = FLYING.get(hitEnemy) != null;` and pass it into `applyHit(...)`.
+10. **`EntityFactory`**: `createEnemy(x, y)` becomes `createEnemy(x, y, String enemyType)`; branches sprite (`gfx/enemy.png` / `gfx/enemy_flyer.png` / `gfx/enemy_shooter.png`) and attaches `FlyingEnemyComponent` (+ `health = 5f`) or `EnemyShooterComponent` accordingly; `spawnObjects`'s `"enemy"` case reads `object.getProperties().get("enemyType", "walker", String.class)` and passes it through.
+11. **`Mappers`**: add `FLYING`, `ENEMY_SHOOTER`, `ENEMY_BULLET` `ComponentMapper`s.
+12. **`demo_room.tmx`**: add one `enemyType="flyer"` marker in open air (patrol range clear of walls) and one `enemyType="shooter"` marker on solid ground (mirrors an existing walker's placement).
+13. **`GameScreen`**: load `gfx/enemy_flyer.png`/`gfx/enemy_shooter.png`, register `EnemyShootSystem` (priority `4`) and `EnemyBulletCollisionSystem` (priority `6`).
 
 ### Data Models / Contracts
 ```java
-// core/.../util/Timer.java
-public class Timer {
-    private float remaining = 0f;
-    public void start(float duration) { remaining = duration; }
-    public void update(float deltaTime) {
-        if (remaining > 0f) {
-            remaining = Math.max(0f, remaining - deltaTime);
-        }
+// FlyingEnemyComponent.java — empty marker, no fields
+public class FlyingEnemyComponent implements Component {}
+
+// EnemyShooterComponent.java
+public class EnemyShooterComponent implements Component {
+    public Timer shootCooldown = new Timer();
+    public float shootInterval = 5f;
+}
+
+// EnemyBulletComponent.java — empty marker, pooled like BulletComponent
+public class EnemyBulletComponent implements Component, Poolable {
+    @Override public void reset() {}
+}
+
+// EnemyDamageResolver.java (signature change)
+static boolean applyHit(EnemyComponent enemy, MovementComponent movement,
+                         float damage, int knockbackDirection, boolean isFlying) {
+    if (enemy.hitStun.isActive()) return false;
+    enemy.health -= damage;
+    if (enemy.health <= 0f) return true;
+    movement.velocity.x = KNOCKBACK_SPEED_X * knockbackDirection;
+    if (!isFlying) {
+        movement.velocity.y = KNOCKBACK_SPEED_Y;
     }
-    public boolean isActive() { return remaining > 0f; }
-    public boolean isDone() { return remaining <= 0f; }
-    public float getRemaining() { return remaining; }
-    public void reset() { remaining = 0f; }
+    enemy.hitStun.start(HIT_STUN_DURATION);
+    return false;
 }
 ```
 
 ### Components — key changes
-* `PlayerComponent`: 3 fields become `Timer`s, +1 new `Timer hitInvulnerability`.
-* `ChestComponent`: 1 field becomes a `Timer`.
-* `EnemyComponent`: `health` default `1f` → `10f` (no field shape change).
+* `FlyingEnemyComponent` (new): empty marker; `MovementSystem` skips gravity when present.
+* `EnemyShooterComponent` (new): `Timer shootCooldown`, `float shootInterval = 5f`; drives `EnemyShootSystem`.
+* `EnemyBulletComponent` (new): empty marker distinguishing enemy-fired bullets from player-fired ones.
+* `EnemyComponent`: no field shape change (flyer overrides `health` to `5f` at spawn time in `EntityFactory`, not via a new default).
 
 ### File Structure
 ```
 core/src/main/java/com/axehigh/platformer/
-  util/
-    Timer.java                          (new)
   ecs/components/
-    PlayerComponent.java                (modified: Timer fields)
-    ChestComponent.java                 (modified: Timer field)
-    EnemyComponent.java                 (modified: health default)
+    FlyingEnemyComponent.java           (new)
+    EnemyShooterComponent.java          (new)
+    EnemyBulletComponent.java           (new)
+    Mappers.java                        (modified: FLYING, ENEMY_SHOOTER, ENEMY_BULLET)
   ecs/systems/
-    EnemyContactSystem.java             (new)
-    PlayerInputSystem.java              (modified: Timer usage, BULLET_DAMAGE)
-    MeleeAttackSystem.java              (modified: Timer usage, MELEE_DAMAGE)
-    ChestSystem.java                    (modified: Timer usage)
-    AnimationSystem.java                (modified: Timer usage)
+    EnemyShootSystem.java               (new)
+    EnemyBulletCollisionSystem.java     (new)
+    MovementSystem.java                 (modified: skip gravity for flyers)
+    CollisionSystem.java                (modified: exclude EnemyBulletComponent, isFlying param)
+    MeleeAttackSystem.java              (modified: isFlying param)
+    EnemyDamageResolver.java            (modified: isFlying param)
+  map/
+    EntityFactory.java                  (modified: enemyType branching)
   screens/
-    GameScreen.java                     (modified: register EnemyContactSystem)
+    GameScreen.java                     (modified: load textures, register 2 new systems)
+assets/
+  maps/demo_room.tmx                    (modified: 2 new enemy markers)
+  gfx/enemy_flyer.png                   (new placeholder)
+  gfx/enemy_shooter.png                 (new placeholder)
 resources/docs-ai/
   ashley-ecs.md                         (modified)
   gameplay.md                           (modified)
   enemies.md                            (modified)
-AGENTS.md                               (modified)
 ```
 
 ### Architecture Diagram
 ```mermaid
 graph TD
-    A[EnemyContactSystem] -->|overlap check per enemy| B(Player Entity: TransformComponent + CollisionComponent)
-    A -->|reads/writes| C[PlayerComponent.health]
-    A -->|start/isDone| D[PlayerComponent.hitInvulnerability: Timer]
-    E[MeleeAttackSystem] -->|-5 dmg| F[EnemyComponent.health]
-    G[CollisionSystem: bullet hit] -->|-10 dmg| F
-    F -->|health <= 0| H[Engine.removeEntity]
+    A[EnemySystem] -->|patrol velocity.x| B[Walker / Flyer / Shooter entity]
+    C[MovementSystem] -->|skips gravity if FlyingEnemyComponent| B
+    D[EnemyShootSystem] -->|every shootInterval, dir=enemy.direction| E[Bullet + BulletComponent + EnemyBulletComponent]
+    E --> F[EnemyBulletCollisionSystem]
+    F -->|overlap + hitInvulnerability.isDone| G[PlayerComponent.health -1]
+    F -->|start| H[PlayerComponent.hitInvulnerability: Timer]
+    I[EnemyContactSystem] -->|touch + hitInvulnerability.isDone| G
+    I -->|start| H
+    J[CollisionSystem: player bullet] -->|excludes EnemyBulletComponent| K[EnemyDamageResolver.applyHit]
+    L[MeleeAttackSystem] --> K
+    K -->|isFlying=true: skip vertical hop| B
 ```
 
 ### Risks
-* **Shared-timer double-tick:** ticking `hitInvulnerability` inside `processEntity` (once per enemy) instead of once per frame in `update()` would silently break the grace period when 2+ enemies exist near the player — mitigated by the `update()` override design above.
-* **`Timer` migration blast radius:** touches 4 systems (`PlayerInputSystem`, `MeleeAttackSystem`, `AnimationSystem`, `ChestSystem`) plus 2 components; each call site will be updated mechanically (same semantics, different API) to keep behavior identical to today except for the new grace-period feature.
+* **Family overlap between the two bullet-collision systems:** if `CollisionSystem` isn't updated to `.exclude(EnemyBulletComponent.class)`, an enemy bullet would match both systems' families and get moved/lifetime-decremented twice per frame — mitigated by making the exclusion part of the same change as introducing `EnemyBulletComponent`.
+* **Flying enemy stuck at a wall:** since a flyer's wall-block detection relies on `movement.grounded` (always `false` for it), a flyer whose `patrolRange` includes a wall would have its horizontal velocity zeroed by `MovementSystem` without `EnemySystem` ever flipping its direction, leaving it pressed against the wall — mitigated by placing the new flyer's patrol range in open air on the map (a level-design constraint, not a code gap, per the accepted trade-off above).
+* **Forgetting the vertical-knockback fix:** without the `isFlying` parameter on `applyHit`, any hit on a flying enemy would launch it upward forever (no gravity to bring it back down) — called out explicitly as its own delivery stage so it isn't missed.
 
 # Testing
 
 ### Validation Approach
-No JUnit harness exists in the repo and prior sessions confirmed `:lwjgl3:run` has no usable display in this sandbox, so validation relies on `./gradlew :core:compileJava` succeeding plus structural/logical review of the new code paths (mirroring how enemy placement and passage connectivity were validated in earlier sessions).
+No JUnit harness exists in the repo and prior sessions confirmed `:lwjgl3:run` has no usable display in this sandbox, so validation relies on `./gradlew :core:compileJava` succeeding plus structural/logical review of the new code paths (mirroring how enemy placement, passage connectivity, and hit-reaction/ledge logic were validated in earlier sessions).
 
 ### Key Scenarios
-* Enemy hit-point math: full-health enemy (10 HP) dies in exactly 2 melee hits (5+5) or 1 bullet hit (10).
-* Enemy-touches-player: overlapping enemy and player with `hitInvulnerability.isDone()` reduces `player.health` by exactly 1 and starts a 1.0s timer.
-* Grace period holds: a second overlap check within the same 1.0s window does not reduce health again (`isDone()` returns false until the timer elapses).
-* Multiple simultaneous enemies: two enemies overlapping the player in the same frame only cost 1 life total (guarded by the single `update()`-level timer tick plus the `isDone()` check before each hit).
-* Health floor: `player.health` never goes below `0` even under repeated hits after grace periods expire.
+* Flying enemy: spawns at its marker's Y position and never falls (velocity.y stays `0` across frames since `MovementSystem` skips gravity for it); patrols within `patrolRange` of `originX`.
+* Flying enemy health: dies in exactly 1 bullet hit (10 dmg > 5 HP) or 1 melee hit (5 dmg == 5 HP).
+* Shooter enemy: patrols exactly like a walker (uses the same `EnemySystem` family/logic) and additionally fires a bullet every `5.0s` in its current `direction`.
+* Enemy bullet hits player: `player.health` decrements by exactly `1` and `hitInvulnerability` restarts, only when `hitInvulnerability.isDone()` beforehand; the bullet is removed either way.
+* Shared grace period: an enemy-bullet hit immediately after a contact hit (or vice versa) within the same 1.0s window does not stack — both damage sources gate on the same `player.hitInvulnerability` timer.
+* Flying-enemy knockback: after a surviving hit, a flyer's `velocity.y` is left untouched (no `140` u/s hop) while its `velocity.x` still gets the horizontal knockback pop.
 
 ### Edge Cases
-* Player at `health == 0`: further hits are absorbed by `Math.max(0, ...)` without going negative (no crash, no game-over handling — explicitly out of scope).
-* Timer migration regression check: shoot/melee cooldowns and the chest disappear delay must behave identically to before (same durations, same gating), just via the new API — verified by re-reading each call site after the mechanical swap.
-* Enemy removed same frame it damages the player (e.g., killed by a bullet the same frame it touches the player): Ashley's deferred entity removal means this is a harmless one-frame overlap, consistent with how `CollisionSystem`/`MeleeAttackSystem` already handle simultaneous kill/interaction ordering.
+* Enemy bullet expiring mid-flight (`lifetime` elapses with no hit): removed cleanly by `EnemyBulletCollisionSystem`, same as player bullets in `CollisionSystem`.
+* Enemy bullet hitting a wall: removed without touching player health, mirroring `CollisionSystem`'s wall-hit behavior for player bullets.
+* A shooter enemy stunned (`hitStun` active) right as its `shootCooldown` completes: firing is skipped that frame (per the stun-pause decision), so a stunned shooter doesn't spawn a bullet mid-knockback; the cooldown simply isn't restarted until it's no longer stunned and fires on a later frame.
+* Flying enemy with no walls inside its `patrolRange`: turns around purely on the `originX ± patrolRange` bounds check, exactly like a walker's fallback case — verified the new map marker's placement keeps its patrol range clear.
 
 # Delivery Steps
 
-### ✓ Step 1: Add Timer utility class and migrate existing timer fields
-A reusable `Timer` countdown helper exists and every current raw-float timer field in the codebase uses it instead of hand-rolled decrement logic.
+### ✓ Step 1: Add the flying enemy type
+A new flying enemy hovers at its spawn height and patrols horizontally like the walker, with 5 HP.
 
-- Create `core/.../util/Timer.java` with `start(duration)`, `update(deltaTime)`, `isActive()`, `isDone()`, `getRemaining()`, `reset()`.
-- Change `PlayerComponent.shootCooldownTimer`/`meleeCooldownTimer`/`meleeAttackTimer` from `float` to `Timer` fields.
-- Change `ChestComponent.disappearTimer` from `float` to a `Timer` field.
-- Update `PlayerInputSystem` (cooldown gating/starting), `MeleeAttackSystem` (melee attack window + chest disappear start), `AnimationSystem` (melee-attack state check), and `ChestSystem` (disappear countdown) to use the new `Timer` API with identical timing behavior to before.
+- Add `FlyingEnemyComponent` (empty marker `Component`) in `ecs/components`.
+- Add a `FLYING` `ComponentMapper` to `Mappers`.
+- In `MovementSystem`, look up `FLYING.get(entity)` and skip the gravity/wall-slide velocity-Y update entirely when present.
+- In `EntityFactory`, change `createEnemy(x, y)` to `createEnemy(x, y, String enemyType)`; for `"flyer"`, use a new `gfx/enemy_flyer.png` sprite, set `EnemyComponent.health = 5f`, and attach `FlyingEnemyComponent`.
+- In `EntityFactory.spawnObjects`, read the `enemyType` custom property (default `"walker"`) off `"enemy"` markers and pass it through.
+- Add a new `enemyType="flyer"` object marker to `demo_room.tmx`, placed in open air with a `patrolRange` clear of walls.
+- Load `gfx/enemy_flyer.png` in `GameScreen.show()`.
 
-### ✓ Step 2: Tune enemy and weapon damage values
-Enemies start with 10 hit points, melee strikes deal 5 damage, and bullets deal 10 damage.
+### ✓ Step 2: Add the shooting enemy type and its firing behavior
+A new shooting enemy patrols like the walker (10 HP) and fires a bullet every 5 seconds in its current facing direction.
 
-- Change `EnemyComponent.health` default from `1f` to `10f`.
-- Change `MeleeAttackSystem.MELEE_DAMAGE` from `1f` to `5f`.
-- Change `PlayerInputSystem.BULLET_DAMAGE` from `1f` to `10f`.
-- Confirm existing damage-application code in `CollisionSystem`/`MeleeAttackSystem` needs no other changes since it already reads these constants/fields dynamically.
+- Add `EnemyShooterComponent` (`Timer shootCooldown`, `float shootInterval = 5f`) in `ecs/components`, plus an `ENEMY_SHOOTER` mapper in `Mappers`.
+- Create `EnemyShootSystem` (`IteratingSystem` over `Family.all(EnemyComponent, EnemyShooterComponent, TransformComponent, CollisionComponent)`): caches a `PooledEngine` in `addedToEngine`; each frame ticks `shootCooldown`, skips firing while `enemy.hitStun.isActive()`, and once `isDone()` spawns a bullet traveling in `enemy.direction` (reusing `gfx/bullet.png`) before restarting the cooldown via `shootInterval`.
+- In `EntityFactory`, add the `"shooter"` branch to `createEnemy`: `gfx/enemy_shooter.png` sprite, default `10f` health, attach `EnemyShooterComponent`.
+- Add a new `enemyType="shooter"` object marker to `demo_room.tmx` on solid ground, mirroring an existing walker's placement.
+- Register `EnemyShootSystem` in `GameScreen.show()` at priority `4` (same tier as `EnemySystem`) and load `gfx/enemy_shooter.png`.
 
-### ✓ Step 3: Implement enemy-contact damage to the player with a hit-invulnerability grace period
-Touching an enemy costs the player one life, then grants a 1-second window where further enemy contact is ignored.
+### ✓ Step 3: Make enemy bullets damage the player through a dedicated collision pipeline
+A bullet fired by the shooting enemy costs the player one life on hit, sharing the same grace period as enemy-contact damage.
 
-- Add `Timer hitInvulnerability = new Timer()` to `PlayerComponent`.
-- Create `EnemyContactSystem` (`IteratingSystem` over the enemy family), caching the single player entity in `addedToEngine` like `PickupSystem` does.
-- Override `update(float deltaTime)` to tick `player.hitInvulnerability` exactly once per frame before iterating enemies, avoiding a multi-tick bug when several enemies exist.
-- In `processEntity`, check AABB overlap between the enemy and the cached player; on overlap while `hitInvulnerability.isDone()`, decrement `player.health` (clamped at 0) and `start()` a 1.0s grace period.
-- Register `EnemyContactSystem` in `GameScreen.show()` at priority `7`, alongside `MeleeAttackSystem`/`PickupSystem`/`ChestSystem`.
+- Add `EnemyBulletComponent` (empty marker `Component, Poolable`) in `ecs/components`, plus an `ENEMY_BULLET` mapper in `Mappers`.
+- Tag every bullet spawned by `EnemyShootSystem` with `EnemyBulletComponent` in addition to `BulletComponent`.
+- Update `CollisionSystem`'s family to `.exclude(EnemyBulletComponent.class)` so it never processes enemy-owned bullets.
+- Create `EnemyBulletCollisionSystem` (`IteratingSystem` over `Family.all(BulletComponent, EnemyBulletComponent, TransformComponent, MovementComponent, CollisionComponent)`): caches the single player entity in `addedToEngine` (mirrors `PickupSystem`); ticks `lifetime`, integrates position, removes the bullet on wall overlap, and on player overlap always removes the bullet, additionally decrementing `player.health` by 1 (clamped at 0) and restarting `player.hitInvulnerability` for 1.0s — only if `hitInvulnerability.isDone()`.
+- Register `EnemyBulletCollisionSystem` in `GameScreen.show()` at priority `6` (same tier as `CollisionSystem`).
 
-### ✓ Step 4: Sync AI-facing documentation with the new combat and timer mechanics
-The ECS, gameplay, and enemy-catalog docs accurately describe the new damage values, invulnerability mechanic, and Timer convention.
+### ✓ Step 4: Fix flying-enemy knockback to avoid a permanent upward drift
+Hitting a flying enemy no longer launches it upward forever, since it has no gravity to pull it back down.
 
-- Update `resources/docs-ai/ashley-ecs.md`: `PlayerComponent`/`ChestComponent`/`EnemyComponent` table rows (new `Timer` fields, new health default), add an `EnemyContactSystem` row, update the priority-order list.
-- Update `resources/docs-ai/gameplay.md`: reflect `Timer`-based fields in §1.A/§1.E, add a new mechanics subsection describing enemy-contact damage + grace period, and note the tuned damage values.
-- Update `resources/docs-ai/enemies.md`: bump the catalog table's Health column to 10, add melee/bullet damage-taken figures, and resolve the previously open design question about enemies dealing contact damage to the player (now implemented).
-- Add a short coding-convention bullet to `AGENTS.md` recommending `com.axehigh.platformer.util.Timer` for any new cooldown/countdown/grace-period effect.
+- Add a `boolean isFlying` parameter to `EnemyDamageResolver.applyHit`; when `true`, skip the vertical knockback velocity assignment but keep the horizontal pop and `hitStun`.
+- In `CollisionSystem` and `MeleeAttackSystem`, compute `boolean isFlying = FLYING.get(hitEnemy) != null` at the enemy-hit call site and pass it into `applyHit(...)`.
+
+### ✓ Step 5: Sync AI-facing documentation with the two new enemy types
+The ECS, gameplay, and enemy-catalog docs accurately describe the flying and shooting enemy types.
+
+- Update `resources/docs-ai/ashley-ecs.md`: add `FlyingEnemyComponent`/`EnemyShooterComponent`/`EnemyBulletComponent` rows, add `EnemyShootSystem`/`EnemyBulletCollisionSystem` rows, update `CollisionSystem`'s family/row, and update the priority-order list.
+- Update `resources/docs-ai/gameplay.md`: add new mechanics subsections for flying-enemy movement and enemy shooting/enemy-bullet damage, cross-referencing `enemies.md`.
+- Update `resources/docs-ai/enemies.md`: add Flying Enemy (5 HP) and Shooting Enemy (10 HP) catalog rows, describe the `enemyType` Tiled property and marker-component pattern used, and update the open design questions section (aggro remains unused; per-type contact/shot damage still uniform).

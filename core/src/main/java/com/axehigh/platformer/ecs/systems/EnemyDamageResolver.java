@@ -21,9 +21,12 @@ final class EnemyDamageResolver {
      * Applies {@code damage} to {@code enemy}, unless it's still within its hit-stun grace period
      * (in which case the hit is fully ignored). On a surviving hit, kicks off a horizontal +
      * vertical knockback pop (away from the attacker, given by {@code knockbackDirection}) and
-     * starts the hit-stun timer. Returns {@code true} if the enemy's health reached 0.
+     * starts the hit-stun timer. If {@code isFlying} is {@code true}, the vertical hop is skipped
+     * (a flying enemy has no gravity to pull it back down, so it would otherwise drift upward
+     * forever) while the horizontal knockback and hit-stun still apply. Returns {@code true} if
+     * the enemy's health reached 0.
      */
-    static boolean applyHit(EnemyComponent enemy, MovementComponent movement, float damage, int knockbackDirection) {
+    static boolean applyHit(EnemyComponent enemy, MovementComponent movement, float damage, int knockbackDirection, boolean isFlying) {
         if (enemy.hitStun.isActive()) {
             return false;
         }
@@ -34,7 +37,9 @@ final class EnemyDamageResolver {
         }
 
         movement.velocity.x = KNOCKBACK_SPEED_X * knockbackDirection;
-        movement.velocity.y = KNOCKBACK_SPEED_Y;
+        if (!isFlying) {
+            movement.velocity.y = KNOCKBACK_SPEED_Y;
+        }
         enemy.hitStun.start(HIT_STUN_DURATION);
         return false;
     }

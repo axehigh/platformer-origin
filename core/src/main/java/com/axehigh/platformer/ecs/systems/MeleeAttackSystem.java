@@ -20,6 +20,7 @@ import com.badlogic.gdx.math.Rectangle;
 import static com.axehigh.platformer.ecs.components.Mappers.CHEST;
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
+import static com.axehigh.platformer.ecs.components.Mappers.FLYING;
 import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
 import static com.axehigh.platformer.ecs.components.Mappers.TEXTURE;
@@ -80,7 +81,8 @@ public class MeleeAttackSystem extends IteratingSystem {
             if (hitEnemy != null) {
                 EnemyComponent enemy = ENEMY.get(hitEnemy);
                 MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
-                boolean died = EnemyDamageResolver.applyHit(enemy, enemyMovement, MELEE_DAMAGE, player.facingDirection);
+                boolean isFlying = FLYING.get(hitEnemy) != null;
+                boolean died = EnemyDamageResolver.applyHit(enemy, enemyMovement, MELEE_DAMAGE, player.facingDirection, isFlying);
                 if (died) {
                     getEngine().removeEntity(hitEnemy);
                 }

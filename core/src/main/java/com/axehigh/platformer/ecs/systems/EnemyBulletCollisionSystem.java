@@ -3,8 +3,8 @@ package com.axehigh.platformer.ecs.systems;
 import com.axehigh.platformer.ecs.components.BulletComponent;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.EnemyBulletComponent;
-import com.axehigh.platformer.ecs.components.EnemyComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
+import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -16,36 +16,40 @@ import com.badlogic.gdx.utils.Array;
 
 import static com.axehigh.platformer.ecs.components.Mappers.BULLET;
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
-import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
-import static com.axehigh.platformer.ecs.components.Mappers.FLYING;
 import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
+import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
 import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 
 /**
- * Owns bullet movement integration and collision resolution: removes bullets on wall impact,
- * applies damage (and a hit-stun/knockback via {@code EnemyDamageResolver}) and removes bullets
- * on enemy impact, and despawns bullets whose lifetime expires.
+ * Owns enemy-fired bullet movement integration and collision resolution: mirrors
+ * {@code CollisionSystem}'s structure (lifetime countdown, position integration, wall-hit
+ * removal), but resolves the "hit" case against the cached player entity instead of the enemy
+ * family. On hitting the player, the bullet is always removed and, while the shared
+ * {@code player.hitInvulnerability} grace-period timer (also used by {@code EnemyContactSystem})
+ * is done, decrements {@code player.health} by one and restarts that timer — the exact same
+ * damage rule as touching an enemy.
  */
-public class CollisionSystem extends IteratingSystem {
+public class EnemyBulletCollisionSystem extends IteratingSystem {
+    private static final float HIT_INVULNERABILITY_DURATION = 1.0f;
+
     private final Array<Rectangle> collisionRects;
     private final Rectangle bulletBounds = new Rectangle();
-    private final Rectangle enemyBounds = new Rectangle();
-    private ImmutableArray<Entity> enemies;
+    private final Rectangle playerBounds = new Rectangle();
+    private ImmutableArray<Entity> players;
 
-    public CollisionSystem(Array<Rectangle> collisionRects) {
+    public EnemyBulletCollisionSystem(Array<Rectangle> collisionRects) {
         this(collisionRects, 0);
     }
 
-    public CollisionSystem(Array<Rectangle> collisionRects, int priority) {
-        super(Family.all(BulletComponent.class, TransformComponent.class, MovementComponent.class, CollisionComponent.class)
-            .exclude(EnemyBulletComponent.class).get(), priority);
+    public EnemyBulletCollisionSystem(Array<Rectangle> collisionRects, int priority) {
+        super(Family.all(BulletComponent.class, EnemyBulletComponent.class, TransformComponent.class, MovementComponent.class, CollisionComponent.class).get(), priority);
         this.collisionRects = collisionRects;
     }
 
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
-        enemies = engine.getEntitiesFor(Family.all(EnemyComponent.class, TransformComponent.class, CollisionComponent.class).get());
+        players = engine.getEntitiesFor(Family.all(PlayerComponent.class, TransformComponent.class, CollisionComponent.class).get());
     }
 
     @Override
@@ -69,16 +73,7 @@ public class CollisionSystem extends IteratingSystem {
             return;
         }
 
-        Entity hitEnemy = findEnemyHit(bulletBounds);
-        if (hitEnemy != null) {
-            EnemyComponent enemy = ENEMY.get(hitEnemy);
-            MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
-            int knockbackDirection = movement.velocity.x >= 0f ? 1 : -1;
-            boolean isFlying = FLYING.get(hitEnemy) != null;
-            boolean died = EnemyDamageResolver.applyHit(enemy, enemyMovement, bullet.damage, knockbackDirection, isFlying);
-            if (died) {
-                getEngine().removeEntity(hitEnemy);
-            }
+        if (hitsPlayer(bulletBounds)) {
             getEngine().removeEntity(bulletEntity);
         }
     }
@@ -92,16 +87,25 @@ public class CollisionSystem extends IteratingSystem {
         return false;
     }
 
-    private Entity findEnemyHit(Rectangle bounds) {
-        for (Entity enemyEntity : enemies) {
-            CollisionComponent enemyCollision = COLLISION.get(enemyEntity);
-            TransformComponent enemyTransform = TRANSFORM.get(enemyEntity);
-            enemyBounds.set(enemyTransform.position.x, enemyTransform.position.y,
-                enemyCollision.bounds.width, enemyCollision.bounds.height);
-            if (bounds.overlaps(enemyBounds)) {
-                return enemyEntity;
-            }
+    private boolean hitsPlayer(Rectangle bounds) {
+        if (players.size() == 0) {
+            return false;
         }
-        return null;
+        Entity playerEntity = players.first();
+        TransformComponent playerTransform = TRANSFORM.get(playerEntity);
+        CollisionComponent playerCollision = COLLISION.get(playerEntity);
+        playerBounds.set(playerTransform.position.x, playerTransform.position.y,
+            playerCollision.bounds.width, playerCollision.bounds.height);
+
+        if (!bounds.overlaps(playerBounds)) {
+            return false;
+        }
+
+        PlayerComponent player = PLAYER.get(playerEntity);
+        if (player.hitInvulnerability.isDone()) {
+            player.health = Math.max(0, player.health - 1);
+            player.hitInvulnerability.start(HIT_INVULNERABILITY_DURATION);
+        }
+        return true;
     }
 }

@@ -39,6 +39,9 @@ Tracks a chest entity's open/disappear state after being melee-struck:
 *   `boolean opened = false`
 *   `Timer disappearTimer` (Counts down after opening; on becoming done the chest is removed and drops coins).
 
+### E.1. PoppedItemComponent (New)
+Empty marker component applied to a pickup entity that was launched with an initial `MovementComponent.velocity` (currently only chest-dropped coins, see §2.F). Checked by `MovementSystem`: the instant the entity's `grounded` flag first becomes `true`, its horizontal velocity is also zeroed so it comes to a dead stop exactly where it lands, instead of sliding indefinitely (there is no ground friction elsewhere in the system).
+
 ### F. Extended EnemyComponent
 Adds simple back-and-forth patrol state on top of the existing `float health = 10`:
 *   `float speed = 20` (Horizontal patrol speed, world units/second).
@@ -48,6 +51,22 @@ Adds simple back-and-forth patrol state on top of the existing `float health = 1
 *   `Timer hitStun` (Grace period after taking damage; while active, patrol AI pauses and further hits are ignored so a knockback pop can play out — see §2.G.5).
 
 See `resources/docs-ai/enemies.md` for the full enemy catalog (current type(s), stats, sprite, and how to add new enemy types) — this section only covers the shared `EnemyComponent` fields/mechanic, not per-type tuning.
+
+### G. FlyingEnemyComponent (New)
+Marker component layered on top of `EnemyComponent`, tagging an enemy as immune to gravity; checked by `MovementSystem`, which skips its gravity/wall-slide velocity-Y update entirely when present, so the entity never falls under gravity on its own. Also carries the vertical bob-wave tuning `EnemySystem` uses to give it a flapping motion (see §2.K):
+*   `float bobAmplitude = 8` (World units the bob swings above/below the height it was at when patrol last resumed.)
+*   `float bobFrequency = π` (Angular frequency of the bob wave, radians/second; default is roughly a 2 second period.)
+*   `float bobTime = 0` (Elapsed-time accumulator driving the wave's phase; frozen while patrol AI is paused.)
+
+### H. EnemyShooterComponent (New)
+Marker component layered on top of `EnemyComponent`:
+*   `Timer shootCooldown` (Counts down between shots; once done, `EnemyShootSystem` fires and restarts it.)
+*   `float shootInterval = 5` (Seconds between shots.)
+
+See §2.L.
+
+### I. EnemyBulletComponent (New)
+Empty marker component (`Poolable`), no fields. Tags a bullet entity as enemy-fired (as opposed to the player's own bullets), attached alongside `BulletComponent` by `EnemyShootSystem`. See §2.L.
 
 ---
 
@@ -93,7 +112,8 @@ See `resources/docs-ai/enemies.md` for the full enemy catalog (current type(s), 
 
 ### F. Chest Open/Disappear Logic (`MeleeAttackSystem` & `ChestSystem`)
 1.  **Open Trigger:** When a melee strike rectangle overlaps an unopened chest (`ChestComponent.opened == false`), mark it `opened = true`, swap its texture to an "open" variant, and `start()` `disappearTimer` (~0.3s). A chest that's already `opened` has no further reaction to being struck (no repeated coin drops).
-2.  **Disappear & Coin Drop (`ChestSystem`):** For each opened chest, `update()` `disappearTimer` every frame; once `isDone()`, remove the chest entity and spawn a random number (`MathUtils.random(2, 6)`) of coin pickup entities at small random offsets around the chest's last position.
+2.  **Disappear & Coin Pop (`ChestSystem`):** For each opened chest, `update()` `disappearTimer` every frame; once `isDone()`, remove the chest entity and spawn a random number (`MathUtils.random(2, 6)`) of coin pickup entities at the chest's last position via `EntityFactory.createPoppedCoinPickup`, each given a random initial velocity: `80`-`140` u/s upward and `±40` u/s horizontal. Because these coins carry a `MovementComponent` (and a `PoppedItemComponent` marker), `MovementSystem` picks them up automatically the next frame: gravity arcs them up and back down, AABB collision keeps them from passing through floors/walls, and — since they have `PoppedItemComponent` — their horizontal velocity is zeroed the instant they first touch ground (see §1.E.1), so each coin visibly pops up and scatters outward before coming to rest in place rather than either sitting still or sliding forever.
+3.  **Scope:** This pop-then-fall treatment is chest-drop-only; coin/dagger pickups placed directly on the map via object-layer markers are still built with the plain `EntityFactory.createCoinPickup`/`createDaggerPickup` (no `MovementComponent`), so they remain static.
 
 ### G. Enemy Patrol Movement Logic (`EnemySystem`)
 1.  **Spawn:** Enemies are placed on the map via `"enemy"` object-layer markers, instantiated by `EntityFactory.createEnemy`, which gives them a `TransformComponent`, `MovementComponent`, `CollisionComponent`, and an `EnemyComponent` whose `originX` is set to the spawn X.
@@ -106,9 +126,9 @@ See `resources/docs-ai/enemies.md` for the full enemy catalog (current type(s), 
 8.  **Enemy catalog:** This section describes the shared patrol/hit-reaction mechanics; for the concrete enemy type(s) built on top of them (sprite, stats, and guidance for adding more types), see `resources/docs-ai/enemies.md`.
 
 ### I. Enemy Hit Reaction: Stun + Knockback (`EnemyDamageResolver`)
-1.  **Shared resolver:** Both `CollisionSystem` (bullet hits) and `MeleeAttackSystem` (melee hits) route enemy damage through a shared `EnemyDamageResolver.applyHit(enemy, movement, damage, knockbackDirection)` helper, so both damage sources react identically.
+1.  **Shared resolver:** Both `CollisionSystem` (bullet hits) and `MeleeAttackSystem` (melee hits) route enemy damage through a shared `EnemyDamageResolver.applyHit(enemy, movement, damage, knockbackDirection, isFlying)` helper, so both damage sources react identically. `isFlying` is computed at each call site from whether the hit enemy has a `FlyingEnemyComponent`.
 2.  **Immunity while stunned:** If `enemy.hitStun.isActive()`, the hit is ignored completely — no damage, no knockback — preventing a single swing/bullet from re-triggering the pop on an enemy still mid-knockback.
-3.  **Damage & knockback:** Otherwise, `damage` is subtracted from `enemy.health` (removing the entity at `<= 0`, no knockback needed). If the enemy survives, its `MovementComponent.velocity` is set to a knockback pop: `90` u/s horizontally away from the attacker (melee: opposite the player's `facingDirection`; bullet: the bullet's own travel direction, via `knockbackDirection`) plus a `140` u/s upward hop.
+3.  **Damage & knockback:** Otherwise, `damage` is subtracted from `enemy.health` (removing the entity at `<= 0`, no knockback needed). If the enemy survives, its `MovementComponent.velocity.x` is set to a knockback pop: `90` u/s horizontally away from the attacker (melee: opposite the player's `facingDirection`; bullet: the bullet's own travel direction, via `knockbackDirection`). Unless the enemy has a `FlyingEnemyComponent` (see §2.K), a `140` u/s upward hop is also applied to `velocity.y`; for a flying enemy this vertical hop is skipped entirely (it has no gravity to pull it back down, so it would otherwise drift upward forever) while the horizontal pop still applies.
 4.  **Grace period:** A surviving hit also `start()`s `enemy.hitStun` for `0.3` seconds; while active, `EnemySystem` pauses patrol AI (§2.G.2) so the knockback isn't immediately overwritten, and the enemy can't take further damage until it elapses.
 
 ### J. Enemy-Contact Damage & Hit-Invulnerability Grace Period (`EnemyContactSystem`)
@@ -116,6 +136,23 @@ See `resources/docs-ai/enemies.md` for the full enemy catalog (current type(s), 
 2.  **Damage & Grace Period:** On overlap, if `player.hitInvulnerability.isDone()`, decrement `player.health` by `1` (clamped at `0` via `Math.max`, never negative — there is no game-over/respawn handling yet) and `start()` `hitInvulnerability` for `1.0` second.
 3.  **Single-Tick Timer:** The grace-period countdown is ticked exactly **once per frame** in `EnemyContactSystem.update()` (before iterating enemies), not once per enemy in `processEntity` — this ensures multiple enemies overlapping the player in the same frame only cost **one** life, not one per enemy.
 4.  **No Visual Feedback (yet):** The grace period only prevents repeated damage; it does not currently flicker/tint the player sprite.
+
+### K. Flying Enemy Movement (`MovementSystem`, `EnemySystem`, `FlyingEnemyComponent`)
+1.  **Gravity Opt-Out:** Every frame, `MovementSystem` checks whether the entity has a `FlyingEnemyComponent`; if so, the gravity/wall-slide velocity-Y update is skipped entirely, so the enemy never falls under gravity on its own.
+2.  **Vertical Bob Wave:** Every frame patrol AI isn't paused (i.e. `enemy.hitStun` is not active), `EnemySystem` also accumulates `flying.bobTime += deltaTime` and sets `movement.velocity.y = flying.bobAmplitude * flying.bobFrequency * cos(flying.bobTime * flying.bobFrequency)`. Since gravity never touches `velocity.y` for a flyer, `MovementSystem`'s normal integration turns this into a smooth sine oscillation of height, swinging ±`bobAmplitude` (default `8` units) around the height the enemy was at when patrol last resumed, at `bobFrequency` (default `π` rad/s, ≈ 2 second period) — giving the enemy a visible flap/hover instead of flying in a perfectly flat line.
+3.  **Horizontal Patrol Unchanged:** `EnemySystem`'s existing horizontal patrol logic (§2.G) needs no changes for a flyer: since it's never `grounded`, its wall-block and ledge-probe turn-around checks (both gated on `movement.grounded`) simply never fire, so it turns around purely on the `originX ± patrolRange` bounds check.
+4.  **Level-Design Constraint:** A flying enemy has no wall-block fallback, so its `patrolRange` must be placed clear of walls by the level designer (there's no automatic edge/wall avoidance for flyers, unlike grounded patrol enemies); it should also be placed with enough vertical clearance for the bob wave.
+5.  **Knockback & Bob Pause:** See §2.I.5 — a flyer's vertical knockback hop is skipped so it doesn't drift upward forever; since patrol AI (and therefore the bob) is paused for the same `hitStun` duration, `bobTime` simply freezes and resumes smoothly once the stun ends.
+6.  **Catalog:** See `resources/docs-ai/enemies.md` for the Flying Enemy's stats (5 HP).
+
+### L. Enemy Shooting & Enemy Bullet Damage (`EnemyShootSystem`, `EnemyBulletCollisionSystem`)
+1.  **Firing Cadence:** A shooter enemy (`EnemyShooterComponent`) still patrols exactly like a base enemy (driven by `EnemySystem`, since it matches its family too). Every frame, `EnemyShootSystem` ticks `shooter.shootCooldown`; while `enemy.hitStun.isActive()` (§2.I), firing is skipped entirely, mirroring `EnemySystem`'s own stun-pause.
+2.  **Same-Room Gating:** `EnemyShootSystem` resolves the single player entity once in `addedToEngine` (mirroring `EnemyContactSystem`). Once `shootCooldown.isDone()`, it additionally computes both the shooter's and the player's current flip-screen room (`(int)(x / GameConstants.VIRTUAL_WIDTH)`, `(int)(y / GameConstants.VIRTUAL_HEIGHT)` — the exact same formula `CameraSystem` uses) and only proceeds to fire if they match. If the player is in a different room, the shooter simply doesn't fire that frame and leaves `shootCooldown` at `isDone()` (never restarted), so it fires immediately once the player re-enters its room instead of firing blind into an off-screen room the player has no way to react to.
+3.  **Spawn:** When both the cooldown and the room check pass, a bullet is spawned at the enemy's leading edge, traveling horizontally in `enemy.direction` — there is **no** player-aiming/aggro, the shot always fires in whatever direction the enemy is currently facing/patrolling. The cooldown then restarts via `shootInterval` (`5` seconds by default).
+4.  **Enemy Bullet Tagging:** The spawned bullet gets both `BulletComponent` (`damage = 0`, unused for enemy bullets) and `EnemyBulletComponent`, a marker that makes `CollisionSystem` ignore it (excluded from its family) so it's instead processed by `EnemyBulletCollisionSystem`.
+5.  **Hit Resolution (`EnemyBulletCollisionSystem`):** Mirrors `CollisionSystem`'s bullet-vs-wall/lifetime handling, but resolves the hit case against the cached player entity instead of an enemy. On overlap, the bullet is always removed; additionally, if `player.hitInvulnerability.isDone()`, `player.health` is decremented by `1` (clamped at `0`) and `hitInvulnerability` is restarted for `1.0` second. Bullets already in flight are unaffected by the room check — only new shots are gated.
+6.  **Shared Grace Period:** This is the **same** `player.hitInvulnerability` timer `EnemyContactSystem` (§2.J) uses, so a shot landing right after a contact hit (or vice versa) within the same window doesn't stack — a shot costs a life "similar to being hit by an enemy," per design.
+7.  **Catalog:** See `resources/docs-ai/enemies.md` for the Shooting Enemy's stats (10 HP, 5s shot interval).
 
 ---
 
@@ -134,3 +171,6 @@ The single multi-room `.tmx` map (see the flip-screen `CameraSystem` design) lay
 *   **Solid tile property:** Every tile in the collision layer's tilesets declares a boolean `solid` property (`true` for the regular wall tile, `false` for the dedicated `passage_tile`). `MapLoader.buildCollisionRects()` only emits a boundary `Rectangle` for cells whose tile is `solid` (defaulting to `true` if the property is absent), so `passage_tile` cells render as part of the wall/corridor art but never block movement.
 *   **Authoring an opening:** To connect two adjacent rooms, replace the wall tiles on **both** sides of the shared border (each room contributes its own 1-tile-thick border) with `passage_tile` cells, spanning enough width/height for the player to walk through comfortably (e.g. 3-4 tiles).
 *   **No new components/systems required:** Since passability is derived purely from the tile's `solid` property, traversal, `MovementSystem`'s AABB collision, and `CollisionSystem`'s bullet-vs-wall checks all treat a passage exactly like open floor — no special-casing needed outside `MapLoader`.
+
+### D. Debug Collision Overlay (`DebugRenderSystem`)
+A dedicated `DebugRenderSystem` (see `resources/docs-ai/ashley-ecs.md`) draws every live `CollisionComponent` AABB (lime) plus the static map `collisionRects` (yellow) via a `ShapeRenderer`, toggled on/off with **SHIFT+D** (see `AGENTS.md` "Debugging"). It is a pure visualization aid — disabled by default, no gameplay effect, and skips all drawing while off.

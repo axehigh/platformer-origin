@@ -7,7 +7,10 @@ import com.axehigh.platformer.ecs.systems.AnimationSystem;
 import com.axehigh.platformer.ecs.systems.CameraSystem;
 import com.axehigh.platformer.ecs.systems.ChestSystem;
 import com.axehigh.platformer.ecs.systems.CollisionSystem;
+import com.axehigh.platformer.ecs.systems.DebugRenderSystem;
+import com.axehigh.platformer.ecs.systems.EnemyBulletCollisionSystem;
 import com.axehigh.platformer.ecs.systems.EnemyContactSystem;
+import com.axehigh.platformer.ecs.systems.EnemyShootSystem;
 import com.axehigh.platformer.ecs.systems.EnemySystem;
 import com.axehigh.platformer.ecs.systems.MeleeAttackSystem;
 import com.axehigh.platformer.ecs.systems.MovementSystem;
@@ -53,6 +56,7 @@ public class GameScreen implements Screen {
     private static final int PRIORITY_ANIMATION = 10;
     private static final int PRIORITY_MAP_RENDER = 20;
     private static final int PRIORITY_ENTITY_RENDER = 30;
+    private static final int PRIORITY_DEBUG_RENDER = 40;
 
     private final AssetManager assetManager = new AssetManager();
     private final PooledEngine engine = new PooledEngine();
@@ -62,6 +66,7 @@ public class GameScreen implements Screen {
 
     private MapLoader mapLoader;
     private TiledMapRenderSystem tiledMapRenderSystem;
+    private DebugRenderSystem debugRenderSystem;
     private Skin uiSkin;
     private HudStage hudStage;
     private TouchControlsStage touchControlsStage;
@@ -79,6 +84,8 @@ public class GameScreen implements Screen {
         assetManager.load("gfx/chest_open.png", Texture.class);
         assetManager.load("gfx/player_attack.png", Texture.class);
         assetManager.load("gfx/enemy.png", Texture.class);
+        assetManager.load("gfx/enemy_flyer.png", Texture.class);
+        assetManager.load("gfx/enemy_shooter.png", Texture.class);
         assetManager.finishLoading();
 
         mapLoader = new MapLoader("maps/demo_room.tmx");
@@ -90,8 +97,10 @@ public class GameScreen implements Screen {
         tiledMapRenderSystem = new TiledMapRenderSystem(mapLoader.getMap(), camera, PRIORITY_MAP_RENDER);
         engine.addSystem(playerInputSystem);
         engine.addSystem(new EnemySystem(mapLoader.getCollisionRects(), PRIORITY_ENEMY));
+        engine.addSystem(new EnemyShootSystem(assetManager, PRIORITY_ENEMY));
         engine.addSystem(new MovementSystem(mapLoader.getCollisionRects(), PRIORITY_MOVEMENT));
         engine.addSystem(new CollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION));
+        engine.addSystem(new EnemyBulletCollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION));
         engine.addSystem(new MeleeAttackSystem(assetManager, PRIORITY_MELEE));
         engine.addSystem(new PickupSystem(PRIORITY_PICKUP));
         engine.addSystem(new ChestSystem(entityFactory, PRIORITY_CHEST));
@@ -100,6 +109,8 @@ public class GameScreen implements Screen {
         engine.addSystem(new AnimationSystem(PRIORITY_ANIMATION));
         engine.addSystem(tiledMapRenderSystem);
         engine.addSystem(new RenderSystem(batch, camera, PRIORITY_ENTITY_RENDER));
+        debugRenderSystem = new DebugRenderSystem(camera, mapLoader.getCollisionRects(), PRIORITY_DEBUG_RENDER);
+        engine.addSystem(debugRenderSystem);
 
         Vector2 playerStart = mapLoader.findPlayerStart();
         Entity player = entityFactory.createPlayer(playerStart.x, playerStart.y);
@@ -170,6 +181,9 @@ public class GameScreen implements Screen {
         assetManager.dispose();
         if (tiledMapRenderSystem != null) {
             tiledMapRenderSystem.dispose();
+        }
+        if (debugRenderSystem != null) {
+            debugRenderSystem.dispose();
         }
         if (mapLoader != null) {
             mapLoader.dispose();

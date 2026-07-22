@@ -13,12 +13,16 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 
 /**
  * Owns the opened-chest disappear-timer countdown: once an opened chest's timer reaches 0, it is
- * removed from the engine and a random number of coin pickups are scattered near its position.
+ * removed from the engine and a random number of coin pickups pop out of its position, each with
+ * a random upward + horizontal launch velocity, before gravity/collision (via MovementSystem) pulls
+ * them back down to rest nearby.
  */
 public class ChestSystem extends IteratingSystem {
     private static final int MIN_COIN_DROPS = 2;
     private static final int MAX_COIN_DROPS = 6;
-    private static final float SCATTER_RANGE = 12f;
+    private static final float MIN_POP_VELOCITY_Y = 80f;
+    private static final float MAX_POP_VELOCITY_Y = 140f;
+    private static final float MAX_POP_VELOCITY_X = 40f;
 
     private final EntityFactory entityFactory;
 
@@ -46,9 +50,9 @@ public class ChestSystem extends IteratingSystem {
         TransformComponent transform = TRANSFORM.get(entity);
         int coinCount = MathUtils.random(MIN_COIN_DROPS, MAX_COIN_DROPS);
         for (int i = 0; i < coinCount; i++) {
-            float offsetX = MathUtils.random(-SCATTER_RANGE, SCATTER_RANGE);
-            float offsetY = MathUtils.random(-SCATTER_RANGE, SCATTER_RANGE);
-            getEngine().addEntity(entityFactory.createCoinPickup(transform.position.x + offsetX, transform.position.y + offsetY));
+            float velocityX = MathUtils.random(-MAX_POP_VELOCITY_X, MAX_POP_VELOCITY_X);
+            float velocityY = MathUtils.random(MIN_POP_VELOCITY_Y, MAX_POP_VELOCITY_Y);
+            getEngine().addEntity(entityFactory.createPoppedCoinPickup(transform.position.x, transform.position.y, velocityX, velocityY));
         }
 
         getEngine().removeEntity(entity);

@@ -13,8 +13,10 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
+import static com.axehigh.platformer.ecs.components.Mappers.FLYING;
 import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
+import static com.axehigh.platformer.ecs.components.Mappers.POPPED_ITEM;
 import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 
 /**
@@ -48,10 +50,13 @@ public class MovementSystem extends IteratingSystem {
         PlayerComponent player = PLAYER.get(entity);
 
         boolean wallClimbing = player != null && player.isWallClimbing;
+        boolean flying = FLYING.get(entity) != null;
 
-        movement.velocity.y += (wallClimbing ? WALL_SLIDE_GRAVITY : GRAVITY) * deltaTime;
-        if (wallClimbing) {
-            movement.velocity.y = Math.max(movement.velocity.y, WALL_SLIDE_MAX_FALL_SPEED);
+        if (!flying) {
+            movement.velocity.y += (wallClimbing ? WALL_SLIDE_GRAVITY : GRAVITY) * deltaTime;
+            if (wallClimbing) {
+                movement.velocity.y = Math.max(movement.velocity.y, WALL_SLIDE_MAX_FALL_SPEED);
+            }
         }
         movement.velocity.x = MathUtils.clamp(movement.velocity.x, -movement.maxSpeedX, movement.maxSpeedX);
         movement.velocity.y = MathUtils.clamp(movement.velocity.y, -movement.maxSpeedY, movement.maxSpeedY);
@@ -59,6 +64,12 @@ public class MovementSystem extends IteratingSystem {
         float attemptedDeltaX = movement.velocity.x;
         boolean hitWallX = moveX(transform, movement, collision, deltaTime);
         moveY(transform, movement, collision, deltaTime);
+
+        // Popped pickups (e.g. chest-dropped coins) have no ground friction of their own; freeze
+        // them dead in place the moment they first touch down instead of sliding indefinitely.
+        if (movement.grounded && POPPED_ITEM.get(entity) != null) {
+            movement.velocity.x = 0f;
+        }
 
         if (player != null) {
             if (movement.grounded) {

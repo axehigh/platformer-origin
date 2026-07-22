@@ -47,8 +47,17 @@ public class RenderSystem extends SortedIteratingSystem {
 
         float width = region.getRegionWidth() * transform.scale.x;
         float height = region.getRegionHeight() * transform.scale.y;
+        // batch.draw(TextureRegion, x, y, originX, originY, width, height, ...) spans [x, x + width]
+        // (and mirrors the region's UVs) whenever width/height is negative, i.e. it spans
+        // [x + width, x] instead of [x, x + width]. A flipped sprite (negative scale.x/scale.y, see
+        // AnimationSystem) would otherwise render shifted a full sprite-size away from its
+        // TransformComponent/CollisionComponent position. Compensating the draw x/y by the negative
+        // part keeps the drawn rect anchored at [position, position + |width|] either way, so only
+        // the texture itself mirrors in place instead of the sprite's screen position jumping.
+        float drawX = transform.position.x - Math.min(0f, width);
+        float drawY = transform.position.y - Math.min(0f, height);
         batch.draw(region,
-            transform.position.x, transform.position.y,
+            drawX, drawY,
             width / 2f, height / 2f,
             width, height,
             1f, 1f,

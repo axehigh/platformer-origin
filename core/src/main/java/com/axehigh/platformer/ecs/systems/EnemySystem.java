@@ -2,16 +2,19 @@ package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.EnemyComponent;
+import com.axehigh.platformer.ecs.components.FlyingEnemyComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
+import static com.axehigh.platformer.ecs.components.Mappers.FLYING;
 import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
 import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 
@@ -24,6 +27,9 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
  * its leading foot, checked against the same static {@code collisionRects} used by
  * {@code MovementSystem}). While an enemy's {@code hitStun} timer is active, patrol AI is skipped
  * entirely so a hit's knockback pop can play out uninterrupted via {@code MovementSystem}.
+ * A {@code FlyingEnemyComponent} enemy additionally gets a time-based vertical bob wave driven
+ * into {@code movement.velocity.y} (see {@code FlyingEnemyComponent}), so it visibly flaps up and
+ * down around its spawn height instead of flying in a perfectly flat line.
  * Runs before {@code MovementSystem} so the velocity it sets is integrated the same frame.
  * Gravity and wall collision for enemies are handled for free by {@code MovementSystem}, since
  * any entity with Transform+Movement+Collision (and no BulletComponent) already matches its family.
@@ -69,6 +75,12 @@ public class EnemySystem extends IteratingSystem {
         }
 
         movement.velocity.x = enemy.speed * enemy.direction;
+
+        FlyingEnemyComponent flying = FLYING.get(entity);
+        if (flying != null) {
+            flying.bobTime += deltaTime;
+            movement.velocity.y = flying.bobAmplitude * flying.bobFrequency * MathUtils.cos(flying.bobTime * flying.bobFrequency);
+        }
     }
 
     /** Probes a small area just past the enemy's leading foot, at foot level, for solid ground. */
