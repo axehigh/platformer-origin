@@ -13,10 +13,10 @@
                 3
             ],
             "scale": 1.1441,
-            "selectedLayer": 1,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 208.02377414561664,
-                "y": 548.0290184424439
+                "x": 223.7566646272179,
+                "y": 166.06939952801326
             }
         },
         "demo_room.tmx#brick_bg": {
@@ -47,9 +47,9 @@
         },
         "demo_room_start.tmx": {
             "scale": 0.7792,
-            "selectedLayer": 1,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 373.45995893223824,
+                "x": 225.87268993839834,
                 "y": 173.25462012320332
             }
         },
@@ -63,11 +63,14 @@
             "scaleInDock": 1
         },
         "sample_room.tmx": {
-            "scale": 0.890625,
+            "expandedObjectLayers": [
+                4
+            ],
+            "scale": 1.1611,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 357.05263157894734,
-                "y": 131.36842105263156
+                "x": 267.8494531048144,
+                "y": 200.67177676341402
             }
         },
         "sample_room.tmx#brick_bg": {

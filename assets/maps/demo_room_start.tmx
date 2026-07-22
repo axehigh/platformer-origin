@@ -82,11 +82,11 @@
   <object id="25" name="coin1" type="coin" x="272" y="208" width="8" height="8"/>
   <object id="26" name="exitGate" type="exitGate" x="448" y="240" width="16" height="16">
    <properties>
-    <property name="nextLevel" value="maps/demo_room.tmx"/>
+    <property name="nextLevel" value="maps/sample_room.tmx"/>
    </properties>
   </object>
  </objectgroup>
- <objectgroup id="4" name="Rooms">
+ <objectgroup id="4" name="Rooms" locked="1">
   <object id="27" name="startRoom" x="0" y="0" width="480" height="272"/>
  </objectgroup>
 </map>
