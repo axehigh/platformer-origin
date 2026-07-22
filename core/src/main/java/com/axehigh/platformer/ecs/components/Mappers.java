@@ -19,6 +19,7 @@ public final class Mappers {
     public static final ComponentMapper<CoinPickupComponent> COIN_PICKUP = ComponentMapper.getFor(CoinPickupComponent.class);
     public static final ComponentMapper<ChestComponent> CHEST = ComponentMapper.getFor(ChestComponent.class);
     public static final ComponentMapper<PoppedItemComponent> POPPED_ITEM = ComponentMapper.getFor(PoppedItemComponent.class);
+    public static final ComponentMapper<LevelExitComponent> LEVEL_EXIT = ComponentMapper.getFor(LevelExitComponent.class);
 
     private Mappers() {
     }

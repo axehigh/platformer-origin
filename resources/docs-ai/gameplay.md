@@ -18,6 +18,8 @@ Track the advanced state variables required for these mechanics directly inside 
 *   `Timer meleeAttack` (Counts down while the melee strike hitbox is active; active means a strike is in progress).
 *   `boolean meleeHasHit` (Ensures a single swing damages at most one enemy).
 *   `Timer hitInvulnerability` (Grace period after being hit by an enemy; while active, further enemy contact does not reduce health again — see §2.J).
+*   `boolean interactPressed` (One-shot: true only during the frame the interact key/touch button was pressed; see §2.M).
+*   `boolean nearExit` (True while inside any exit gate's proximity sensor; drives the touch UI prompt — see §2.M).
 
 All of the countdown fields above (`shootCooldown`, `meleeCooldown`, `meleeAttack`, `hitInvulnerability`) are instances of the reusable `com.axehigh.platformer.util.Timer` helper (`start()`/`update()`/`isActive()`/`isDone()`), not raw `float`s; use it for any new cooldown/countdown/grace-period field instead of hand-rolling a decrement.
 
@@ -41,6 +43,12 @@ Tracks a chest entity's open/disappear state after being melee-struck:
 
 ### E.1. PoppedItemComponent (New)
 Empty marker component applied to a pickup entity that was launched with an initial `MovementComponent.velocity` (currently only chest-dropped coins, see §2.F). Checked by `MovementSystem`: the instant the entity's `grounded` flag first becomes `true`, its horizontal velocity is also zeroed so it comes to a dead stop exactly where it lands, instead of sliding indefinitely (there is no ground friction elsewhere in the system).
+
+### E.2. LevelExitComponent (New)
+Marks an exit-gate entity as an actual level-transition trigger (as opposed to a purely decorative gate):
+*   `String nextLevelPath = ""` (Target `.tmx` asset path, e.g. `maps/demo_room.tmx`; read from the gate object's `nextLevel` custom Tiled property by `EntityFactory.createExitGate(...)`. An exit-gate object with no `nextLevel` property gets no `LevelExitComponent` and is purely decorative.)
+
+See §2.M for the full multi-level progression mechanic built on top of this component.
 
 ### F. Extended EnemyComponent
 Adds simple back-and-forth patrol state on top of the existing `float health = 10`:
@@ -174,3 +182,14 @@ The single multi-room `.tmx` map (see the flip-screen `CameraSystem` design) lay
 
 ### D. Debug Collision Overlay (`DebugRenderSystem`)
 A dedicated `DebugRenderSystem` (see `resources/docs-ai/ashley-ecs.md`) draws every live `CollisionComponent` AABB (lime) plus the static map `collisionRects` (yellow) via a `ShapeRenderer`, toggled on/off with **SHIFT+D** (see `AGENTS.md` "Debugging"). It is a pure visualization aid — disabled by default, no gameplay effect, and skips all drawing while off.
+
+### M. Multi-Level Progression & Exit Gates (`LevelExitSystem`, `LevelManager`, `PlayerInputSystem`)
+1.  **Level chain:** The game ships 3 levels in a strict, hardcoded-by-content (not hardcoded-in-code) sequence: `demo_room_start.tmx` (level 1, where `GameScreen` now boots into) → `demo_room.tmx` (level 2) → `demo_room_final.tmx` (level 3, a dead end with no exit gate — reaching it ends traversal with no win/game-over screen, matching the rest of the codebase today). Each map's exit gate points at the next one via its own `nextLevel` Tiled property (§1.E.2) rather than any level-order list, so the chain is purely data-driven and could become non-linear later without code changes.
+2.  **Proximity sensor, not walk-through:** Unlike coin/dagger pickups, an exit gate never auto-triggers on overlap. `LevelExitSystem` builds a sensor `Rectangle` from the gate's own `CollisionComponent.bounds` inflated by `SENSOR_PADDING = 6` world units on every side (so it feels like walking up to a door, not requiring pixel-perfect contact) and checks it against the player's AABB every frame.
+3.  **Interact input:** Pressing **E** (keyboard) or the new contextual up-arrow touch button sets `player.interactPressed` for exactly one frame (`PlayerInputSystem`, mirroring the existing `requestTouchJump`/`touchJumpRequested` one-shot pattern via `requestTouchInteract()`/`touchInteractRequested`). A level transition only fires when the player is inside a gate's sensor **and** `interactPressed` is `true` that same frame; being near the gate alone only sets `player.nearExit = true` (driving the UI prompt) without firing anything.
+4.  **Contextual UI prompt:** `TouchControlsStage` exposes `setInteractVisible(boolean)`, called every frame from `GameScreen.render()` with `playerComponent.nearExit`, showing/hiding a small up-arrow touch button (per the "Contextual Action Button" UI guideline) only while the player is near a gate.
+5.  **In-place level swap (`LevelManager`):** Firing a gate calls `LevelManager.loadLevel(nextLevelPath, playerEntity)`, which loads the new `.tmx`, swaps `TiledMapRenderSystem`'s wrapped map, clears+refills the shared `collisionRects` array in place (every map-dependent system already holds that same array reference, so no re-wiring is needed), removes every engine entity **except** the player, disposes the old map, respawns the new level's objects (`EntityFactory.spawnObjects`), repositions the player at the new map's `playerStart`, and snaps the camera to the new starting room. The `PooledEngine` and the player `Entity` are never destroyed — it's the exact same `PlayerComponent` instance before and after the swap.
+6.  **Stat persistence guarantee:** Because the player entity survives the swap, `health`, `maxHealth`, `coins`, `items`, `maxItems`, and every active cooldown `Timer` (shoot/melee/hit-invulnerability) carry over into the new level completely untouched — there is nothing to serialize or restore. Only *transient* state is explicitly reset by `LevelManager`: `MovementComponent.velocity`/`grounded`, and `PlayerComponent.jumpCount`/`isWallClimbing`/`interactPressed`/`nearExit`, so the player doesn't, say, arrive already mid-jump or wall-climbing in the new room.
+7.  **Fresh object population:** Every non-player entity from the old level (enemies, pickups, chests, the old exit gate, etc.) is gone after a transition; the new level's enemies/pickups/gate are spawned fresh from its own object layer, exactly as if the level had just been loaded from scratch.
+8.  **No cross-level persistence beyond the session:** Progress is in-memory only for the lifetime of one play session — there is no save/load across app restarts.
+9.  **Debug overlay survives transitions:** `DebugRenderSystem`'s SHIFT+D toggle state is untouched by a level swap, since the system itself is never removed/recreated — only its `collisionRects` reference is refilled in place by `LevelManager`.

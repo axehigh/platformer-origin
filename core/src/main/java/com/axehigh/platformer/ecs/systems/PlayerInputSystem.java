@@ -49,6 +49,7 @@ public class PlayerInputSystem extends IteratingSystem {
     private boolean touchJumpRequested = false;
     private boolean touchMeleeRequested = false;
     private boolean touchShootRequested = false;
+    private boolean touchInteractRequested = false;
 
     public PlayerInputSystem(AssetManager assetManager) {
         this(assetManager, 0);
@@ -84,6 +85,11 @@ public class PlayerInputSystem extends IteratingSystem {
         touchShootRequested = true;
     }
 
+    /** Called by the contextual up-arrow button (interact with a nearby exit gate). */
+    public void requestTouchInteract() {
+        touchInteractRequested = true;
+    }
+
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
@@ -96,6 +102,7 @@ public class PlayerInputSystem extends IteratingSystem {
         touchJumpRequested = false;
         touchMeleeRequested = false;
         touchShootRequested = false;
+        touchInteractRequested = false;
     }
 
     @Override
@@ -150,6 +157,8 @@ public class PlayerInputSystem extends IteratingSystem {
             player.items--;
             player.shootCooldown.start(SHOOT_COOLDOWN);
         }
+
+        player.interactPressed = Gdx.input.isKeyJustPressed(Input.Keys.E) || touchInteractRequested;
     }
 
     private void spawnBullet(TransformComponent playerTransform, CollisionComponent playerCollision, PlayerComponent player) {

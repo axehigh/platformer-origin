@@ -111,7 +111,11 @@
   <object id="14" name="coinNorth" type="coin" x="120" y="520" width="8" height="8"/>
   <object id="15" name="torchNorthEast" type="torch" x="496" y="372" width="16" height="16"/>
   <object id="16" name="coinNorthEast" type="coin" x="600" y="520" width="8" height="8"/>
-  <object id="17" name="exitGate" type="exitGate" x="912" y="512" width="16" height="16"/>
+  <object id="17" name="exitGate" type="exitGate" x="912" y="512" width="16" height="16">
+   <properties>
+    <property name="nextLevel" value="maps/demo_room_final.tmx"/>
+   </properties>
+  </object>
   <object id="18" name="enemy1" type="enemy" x="160" y="240" width="16" height="16"/>
   <object id="19" name="enemy2" type="enemy" x="650" y="240" width="16" height="16"/>
   <object id="20" name="flyer1" type="enemy" x="304" y="224" width="16" height="16">

@@ -30,4 +30,9 @@ public class PlayerComponent implements Component {
     public boolean meleeHasHit = false;
     /** Grace period after being hit by an enemy, during which further enemy contact is ignored. */
     public Timer hitInvulnerability = new Timer();
+
+    /** One-shot: true only during the frame the interact key/touch button was pressed. */
+    public boolean interactPressed = false;
+    /** True while the player is inside any exit gate's proximity sensor; drives the interact UI prompt. */
+    public boolean nearExit = false;
 }

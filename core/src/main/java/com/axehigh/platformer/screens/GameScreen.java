@@ -12,6 +12,7 @@ import com.axehigh.platformer.ecs.systems.EnemyBulletCollisionSystem;
 import com.axehigh.platformer.ecs.systems.EnemyContactSystem;
 import com.axehigh.platformer.ecs.systems.EnemyShootSystem;
 import com.axehigh.platformer.ecs.systems.EnemySystem;
+import com.axehigh.platformer.ecs.systems.LevelExitSystem;
 import com.axehigh.platformer.ecs.systems.MeleeAttackSystem;
 import com.axehigh.platformer.ecs.systems.MovementSystem;
 import com.axehigh.platformer.ecs.systems.PickupSystem;
@@ -19,6 +20,7 @@ import com.axehigh.platformer.ecs.systems.PlayerInputSystem;
 import com.axehigh.platformer.ecs.systems.RenderSystem;
 import com.axehigh.platformer.ecs.systems.TiledMapRenderSystem;
 import com.axehigh.platformer.map.EntityFactory;
+import com.axehigh.platformer.map.LevelManager;
 import com.axehigh.platformer.map.MapLoader;
 import com.axehigh.platformer.ui.HudStage;
 import com.axehigh.platformer.ui.SkinFactory;
@@ -52,6 +54,7 @@ public class GameScreen implements Screen {
     private static final int PRIORITY_PICKUP = 7;
     private static final int PRIORITY_CHEST = 7;
     private static final int PRIORITY_ENEMY_CONTACT = 7;
+    private static final int PRIORITY_LEVEL_EXIT = 7;
     private static final int PRIORITY_CAMERA = 8;
     private static final int PRIORITY_ANIMATION = 10;
     private static final int PRIORITY_MAP_RENDER = 20;
@@ -64,9 +67,10 @@ public class GameScreen implements Screen {
     private final OrthographicCamera camera = new OrthographicCamera();
     private final Viewport viewport = new FitViewport(GameConstants.VIRTUAL_WIDTH, GameConstants.VIRTUAL_HEIGHT, camera);
 
-    private MapLoader mapLoader;
     private TiledMapRenderSystem tiledMapRenderSystem;
     private DebugRenderSystem debugRenderSystem;
+    private LevelManager levelManager;
+    private PlayerComponent playerComponent;
     private Skin uiSkin;
     private HudStage hudStage;
     private TouchControlsStage touchControlsStage;
@@ -88,7 +92,7 @@ public class GameScreen implements Screen {
         assetManager.load("gfx/enemy_shooter.png", Texture.class);
         assetManager.finishLoading();
 
-        mapLoader = new MapLoader("maps/demo_room.tmx");
+        MapLoader mapLoader = new MapLoader("maps/demo_room_start.tmx");
         EntityFactory entityFactory = new EntityFactory(assetManager);
 
         camera.position.set(GameConstants.VIRTUAL_WIDTH / 2f, GameConstants.VIRTUAL_HEIGHT / 2f, 0f);
@@ -112,6 +116,9 @@ public class GameScreen implements Screen {
         debugRenderSystem = new DebugRenderSystem(camera, mapLoader.getCollisionRects(), PRIORITY_DEBUG_RENDER);
         engine.addSystem(debugRenderSystem);
 
+        levelManager = new LevelManager(engine, entityFactory, camera, tiledMapRenderSystem, mapLoader.getCollisionRects(), mapLoader);
+        engine.addSystem(new LevelExitSystem(levelManager, PRIORITY_LEVEL_EXIT));
+
         Vector2 playerStart = mapLoader.findPlayerStart();
         Entity player = entityFactory.createPlayer(playerStart.x, playerStart.y);
         attachPlayerAnimations(player);
@@ -120,7 +127,7 @@ public class GameScreen implements Screen {
         entityFactory.spawnObjects(engine, mapLoader.getObjectLayer());
 
         uiSkin = SkinFactory.createBasicSkin();
-        PlayerComponent playerComponent = PLAYER.get(player);
+        playerComponent = PLAYER.get(player);
         Viewport hudViewport = new FitViewport(GameConstants.VIRTUAL_WIDTH, GameConstants.VIRTUAL_HEIGHT);
         Viewport touchViewport = new FitViewport(GameConstants.VIRTUAL_WIDTH, GameConstants.VIRTUAL_HEIGHT);
         hudStage = new HudStage(hudViewport, uiSkin, assetManager, playerComponent);
@@ -146,6 +153,8 @@ public class GameScreen implements Screen {
         ScreenUtils.clear(0.1f, 0.1f, 0.15f, 1f);
         viewport.apply();
         engine.update(Gdx.graphics.getDeltaTime());
+
+        touchControlsStage.setInteractVisible(playerComponent.nearExit);
 
         hudStage.act(delta);
         hudStage.draw();
@@ -185,8 +194,8 @@ public class GameScreen implements Screen {
         if (debugRenderSystem != null) {
             debugRenderSystem.dispose();
         }
-        if (mapLoader != null) {
-            mapLoader.dispose();
+        if (levelManager != null) {
+            levelManager.dispose();
         }
         if (hudStage != null) {
             hudStage.dispose();

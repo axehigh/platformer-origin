@@ -7,6 +7,7 @@ import com.axehigh.platformer.ecs.components.DaggerPickupComponent;
 import com.axehigh.platformer.ecs.components.EnemyComponent;
 import com.axehigh.platformer.ecs.components.EnemyShooterComponent;
 import com.axehigh.platformer.ecs.components.FlyingEnemyComponent;
+import com.axehigh.platformer.ecs.components.LevelExitComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.PoppedItemComponent;
@@ -86,7 +87,8 @@ public class EntityFactory {
                     engine.addEntity(createDecoration(centerX, centerY, "gfx/torch.png"));
                     break;
                 case "exitGate":
-                    engine.addEntity(createDecoration(centerX, centerY, "gfx/exit_gate.png"));
+                    String nextLevelPath = object.getProperties().get("nextLevel", String.class);
+                    engine.addEntity(createExitGate(centerX, centerY, nextLevelPath));
                     break;
                 case "dagger":
                     engine.addEntity(createDaggerPickup(centerX, centerY));
@@ -115,6 +117,40 @@ public class EntityFactory {
         TextureComponent textureComponent = new TextureComponent();
         textureComponent.region = new TextureRegion(texture);
         entity.add(textureComponent);
+
+        return entity;
+    }
+
+    /**
+     * Builds an exit-gate entity: the decorative sprite plus a {@code CollisionComponent} (sized
+     * like other pickups) so {@code LevelExitSystem} has bounds to build its proximity sensor
+     * from. Only gets a {@code LevelExitComponent} (and is thus an actual level-transition
+     * trigger) when {@code nextLevelPath} is non-null; otherwise it's purely decorative, e.g. the
+     * dead-end final level.
+     */
+    private Entity createExitGate(float x, float y, String nextLevelPath) {
+        Texture texture = getTexture("gfx/exit_gate.png");
+
+        Entity entity = new Entity();
+
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(x, y);
+        transform.z = DECOR_Z;
+        entity.add(transform);
+
+        TextureComponent textureComponent = new TextureComponent();
+        textureComponent.region = new TextureRegion(texture);
+        entity.add(textureComponent);
+
+        CollisionComponent collisionComponent = new CollisionComponent();
+        collisionComponent.bounds.setSize(texture.getWidth(), texture.getHeight());
+        entity.add(collisionComponent);
+
+        if (nextLevelPath != null) {
+            LevelExitComponent levelExitComponent = new LevelExitComponent();
+            levelExitComponent.nextLevelPath = nextLevelPath;
+            entity.add(levelExitComponent);
+        }
 
         return entity;
     }

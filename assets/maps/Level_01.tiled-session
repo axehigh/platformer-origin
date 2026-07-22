@@ -1,0 +1,68 @@
+{
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+        "": {
+            "scaleInDock": 1
+        },
+        "demo_room.tmx": {
+            "scale": 0.4938020833333333,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 480.96192384769546,
+                "y": 271.36378019196286
+            }
+        },
+        "demo_room.tmx#brick_bg": {
+            "scaleInDock": 1
+        },
+        "demo_room.tmx#collision_tile": {
+            "scaleInDock": 1
+        },
+        "demo_room.tmx#passage_tile": {
+            "scaleInDock": 1
+        },
+        "demo_room_final.tmx": {
+            "scale": 1.484375,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 155.28421052631577,
+                "y": 136.0842105263158
+            }
+        },
+        "demo_room_final.tmx#brick_bg": {
+            "scaleInDock": 1
+        },
+        "demo_room_final.tmx#collision_tile": {
+            "scaleInDock": 1
+        },
+        "demo_room_final.tmx#passage_tile": {
+            "scaleInDock": 1
+        },
+        "demo_room_start.tmx": {
+            "scale": 1.48,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 239.52702702702703,
+                "y": 135.8108108108108
+            }
+        },
+        "demo_room_start.tmx#brick_bg": {
+            "scaleInDock": 1
+        },
+        "demo_room_start.tmx#collision_tile": {
+            "scaleInDock": 1
+        },
+        "demo_room_start.tmx#passage_tile": {
+            "scaleInDock": 1
+        }
+    },
+    "openFiles": [
+    ],
+    "project": "Level_01.tiled-project",
+    "recentFiles": [
+        "demo_room_start.tmx"
+    ]
+}
