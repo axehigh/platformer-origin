@@ -30,6 +30,7 @@ public class MovementSystem extends IteratingSystem {
 
     private final Array<Rectangle> collisionRects;
     private final Rectangle entityBounds = new Rectangle();
+    private float unitScale = 1f;
 
     public MovementSystem(Array<Rectangle> collisionRects) {
         this(collisionRects, 0);
@@ -40,6 +41,10 @@ public class MovementSystem extends IteratingSystem {
         super(Family.all(TransformComponent.class, MovementComponent.class, CollisionComponent.class)
             .exclude(BulletComponent.class).get(), priority);
         this.collisionRects = collisionRects;
+    }
+
+    public void setUnitScale(float unitScale) {
+        this.unitScale = unitScale;
     }
 
     @Override
@@ -53,9 +58,9 @@ public class MovementSystem extends IteratingSystem {
         boolean flying = FLYING.get(entity) != null;
 
         if (!flying) {
-            movement.velocity.y += (wallClimbing ? WALL_SLIDE_GRAVITY : GRAVITY) * deltaTime;
+            movement.velocity.y += (wallClimbing ? WALL_SLIDE_GRAVITY * unitScale : GRAVITY * unitScale) * deltaTime;
             if (wallClimbing) {
-                movement.velocity.y = Math.max(movement.velocity.y, WALL_SLIDE_MAX_FALL_SPEED);
+                movement.velocity.y = Math.max(movement.velocity.y, WALL_SLIDE_MAX_FALL_SPEED * unitScale);
             }
         }
         movement.velocity.x = MathUtils.clamp(movement.velocity.x, -movement.maxSpeedX, movement.maxSpeedX);

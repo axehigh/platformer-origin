@@ -29,10 +29,17 @@ public class MapLoader implements Disposable {
     private final TiledMap map;
     private final Array<Rectangle> collisionRects = new Array<>();
     private final String tmxPath;
+    private final float tileWidth;
+    private final float tileHeight;
 
     public MapLoader(String tmxPath) {
         this.tmxPath = tmxPath;
         map = new TmxMapLoader().load(tmxPath);
+        
+        // Get tile size from properties or from first tile layer
+        tileWidth = map.getProperties().get("tilewidth", 16, Integer.class);
+        tileHeight = map.getProperties().get("tileheight", 16, Integer.class);
+
         buildCollisionRects();
     }
 
@@ -79,6 +86,14 @@ public class MapLoader implements Disposable {
 
     public Array<Rectangle> getCollisionRects() {
         return collisionRects;
+    }
+
+    public float getTileWidth() {
+        return tileWidth;
+    }
+
+    public float getTileHeight() {
+        return tileHeight;
     }
 
     public MapObjects getObjectLayer() {

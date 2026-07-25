@@ -30,9 +30,14 @@ public class EntityFactory {
     private static final float PLAYER_Z = 10f;
 
     private final AssetManager assetManager;
+    private float unitScale = 1f;
 
     public EntityFactory(AssetManager assetManager) {
         this.assetManager = assetManager;
+    }
+
+    public void setUnitScale(float unitScale) {
+        this.unitScale = unitScale;
     }
 
     public Entity createPlayer(float x, float y) {
@@ -42,6 +47,7 @@ public class EntityFactory {
 
         TransformComponent transform = new TransformComponent();
         transform.position.set(x, y);
+        transform.scale.set(unitScale, unitScale);
         transform.z = PLAYER_Z;
         player.add(transform);
 
@@ -50,10 +56,12 @@ public class EntityFactory {
         player.add(textureComponent);
 
         MovementComponent movementComponent = new MovementComponent();
+        movementComponent.maxSpeedX *= unitScale;
+        movementComponent.maxSpeedY *= unitScale;
         player.add(movementComponent);
 
         CollisionComponent collisionComponent = new CollisionComponent();
-        collisionComponent.bounds.setSize(texture.getWidth(), texture.getHeight());
+        collisionComponent.bounds.setSize(texture.getWidth() * unitScale, texture.getHeight() * unitScale);
         player.add(collisionComponent);
 
         player.add(new PlayerComponent());
@@ -116,6 +124,7 @@ public class EntityFactory {
 
         TransformComponent transform = new TransformComponent();
         transform.position.set(x, y);
+        transform.scale.set(unitScale, unitScale);
         transform.z = DECOR_Z;
         entity.add(transform);
 
@@ -140,6 +149,7 @@ public class EntityFactory {
 
         TransformComponent transform = new TransformComponent();
         transform.position.set(x, y);
+        transform.scale.set(unitScale, unitScale);
         transform.z = DECOR_Z;
         entity.add(transform);
 
@@ -148,7 +158,7 @@ public class EntityFactory {
         entity.add(textureComponent);
 
         CollisionComponent collisionComponent = new CollisionComponent();
-        collisionComponent.bounds.setSize(texture.getWidth(), texture.getHeight());
+        collisionComponent.bounds.setSize(texture.getWidth() * unitScale, texture.getHeight() * unitScale);
         entity.add(collisionComponent);
 
         if (nextLevelPath != null) {
@@ -167,6 +177,7 @@ public class EntityFactory {
 
         TransformComponent transform = new TransformComponent();
         transform.position.set(x, y);
+        transform.scale.set(unitScale, unitScale);
         transform.z = DECOR_Z;
         entity.add(transform);
 
@@ -175,7 +186,7 @@ public class EntityFactory {
         entity.add(textureComponent);
 
         CollisionComponent collisionComponent = new CollisionComponent();
-        collisionComponent.bounds.setSize(texture.getWidth(), texture.getHeight());
+        collisionComponent.bounds.setSize(texture.getWidth() * unitScale, texture.getHeight() * unitScale);
         entity.add(collisionComponent);
 
         entity.add(new ChestComponent());
@@ -191,6 +202,7 @@ public class EntityFactory {
 
         TransformComponent transform = new TransformComponent();
         transform.position.set(x, y);
+        transform.scale.set(unitScale, unitScale);
         transform.z = DECOR_Z;
         entity.add(transform);
 
@@ -199,7 +211,7 @@ public class EntityFactory {
         entity.add(textureComponent);
 
         CollisionComponent collisionComponent = new CollisionComponent();
-        collisionComponent.bounds.setSize(texture.getWidth(), texture.getHeight());
+        collisionComponent.bounds.setSize(texture.getWidth() * unitScale, texture.getHeight() * unitScale);
         entity.add(collisionComponent);
 
         entity.add(new CoinPickupComponent());
@@ -243,6 +255,7 @@ public class EntityFactory {
 
         TransformComponent transform = new TransformComponent();
         transform.position.set(x, y);
+        transform.scale.set(unitScale, unitScale);
         transform.z = DECOR_Z;
         entity.add(transform);
 
@@ -251,18 +264,25 @@ public class EntityFactory {
         entity.add(textureComponent);
 
         MovementComponent movementComponent = new MovementComponent();
+        movementComponent.maxSpeedX *= unitScale;
+        movementComponent.maxSpeedY *= unitScale;
         entity.add(movementComponent);
 
         CollisionComponent collisionComponent = new CollisionComponent();
-        collisionComponent.bounds.setSize(texture.getWidth(), texture.getHeight());
+        collisionComponent.bounds.setSize(texture.getWidth() * unitScale, texture.getHeight() * unitScale);
         entity.add(collisionComponent);
 
         EnemyComponent enemyComponent = new EnemyComponent();
         enemyComponent.originX = x;
         enemyComponent.roomIndex = roomIndex;
+        enemyComponent.speed *= unitScale;
+        enemyComponent.patrolRange *= unitScale;
+
         if ("flyer".equals(enemyType)) {
             enemyComponent.health = 5f;
-            entity.add(new FlyingEnemyComponent());
+            FlyingEnemyComponent flying = new FlyingEnemyComponent();
+            flying.bobAmplitude *= unitScale;
+            entity.add(flying);
         } else if ("shooter".equals(enemyType)) {
             entity.add(new EnemyShooterComponent());
         } else if ("knight".equals(enemyType)) {
@@ -280,6 +300,7 @@ public class EntityFactory {
 
         TransformComponent transform = new TransformComponent();
         transform.position.set(x, y);
+        transform.scale.set(unitScale, unitScale);
         transform.z = DECOR_Z;
         entity.add(transform);
 
@@ -288,7 +309,7 @@ public class EntityFactory {
         entity.add(textureComponent);
 
         CollisionComponent collisionComponent = new CollisionComponent();
-        collisionComponent.bounds.setSize(texture.getWidth(), texture.getHeight());
+        collisionComponent.bounds.setSize(texture.getWidth() * unitScale, texture.getHeight() * unitScale);
         entity.add(collisionComponent);
 
         entity.add(new DaggerPickupComponent());

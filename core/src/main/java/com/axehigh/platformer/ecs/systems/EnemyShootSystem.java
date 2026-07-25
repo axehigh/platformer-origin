@@ -42,6 +42,7 @@ public class EnemyShootSystem extends IteratingSystem {
     private final AssetManager assetManager;
     private final RoomState roomState;
     private PooledEngine engine;
+    private float unitScale = 1f;
 
     public EnemyShootSystem(AssetManager assetManager, RoomState roomState) {
         this(assetManager, roomState, 0);
@@ -51,6 +52,10 @@ public class EnemyShootSystem extends IteratingSystem {
         super(Family.all(EnemyComponent.class, EnemyShooterComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
         this.assetManager = assetManager;
         this.roomState = roomState;
+    }
+
+    public void setUnitScale(float unitScale) {
+        this.unitScale = unitScale;
     }
 
     @Override
@@ -81,13 +86,15 @@ public class EnemyShootSystem extends IteratingSystem {
     private void spawnBullet(TransformComponent enemyTransform, CollisionComponent enemyCollision, int direction) {
         Entity bullet = engine.createEntity();
 
-        float centerY = enemyTransform.position.y + (enemyCollision.bounds.height - BULLET_SIZE) / 2f;
+        float bulletSize = BULLET_SIZE * unitScale;
+        float centerY = enemyTransform.position.y + (enemyCollision.bounds.height - bulletSize) / 2f;
         float spawnX = direction > 0
             ? enemyTransform.position.x + enemyCollision.bounds.width
-            : enemyTransform.position.x - BULLET_SIZE;
+            : enemyTransform.position.x - bulletSize;
 
         TransformComponent transform = engine.createComponent(TransformComponent.class);
         transform.position.set(spawnX, centerY);
+        transform.scale.set(unitScale, unitScale);
         transform.z = BULLET_Z;
         bullet.add(transform);
 
@@ -96,13 +103,14 @@ public class EnemyShootSystem extends IteratingSystem {
         bullet.add(textureComponent);
 
         MovementComponent movement = engine.createComponent(MovementComponent.class);
-        movement.velocity.set(BULLET_SPEED * direction, 0f);
-        movement.maxSpeedX = BULLET_SPEED;
+        float speed = BULLET_SPEED * unitScale;
+        movement.velocity.set(speed * direction, 0f);
+        movement.maxSpeedX = speed;
         movement.maxSpeedY = 0f;
         bullet.add(movement);
 
         CollisionComponent collision = engine.createComponent(CollisionComponent.class);
-        collision.bounds.setSize(BULLET_SIZE, BULLET_SIZE);
+        collision.bounds.setSize(bulletSize, bulletSize);
         bullet.add(collision);
 
         BulletComponent bulletComponent = engine.createComponent(BulletComponent.class);

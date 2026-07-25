@@ -38,6 +38,7 @@ public class MeleeAttackSystem extends IteratingSystem {
     private static final float CHEST_DISAPPEAR_DELAY = 0.3f;
 
     private final AssetManager assetManager;
+    private float unitScale = 1f;
 
     private final Rectangle strikeBounds = new Rectangle();
     private final Rectangle targetBounds = new Rectangle();
@@ -51,6 +52,10 @@ public class MeleeAttackSystem extends IteratingSystem {
     public MeleeAttackSystem(AssetManager assetManager, int priority) {
         super(Family.all(PlayerComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
         this.assetManager = assetManager;
+    }
+
+    public void setUnitScale(float unitScale) {
+        this.unitScale = unitScale;
     }
 
     @Override
@@ -71,10 +76,11 @@ public class MeleeAttackSystem extends IteratingSystem {
             TransformComponent transform = TRANSFORM.get(entity);
             CollisionComponent collision = COLLISION.get(entity);
 
+            float strikeWidth = STRIKE_WIDTH * unitScale;
             float strikeX = player.facingDirection > 0
                 ? transform.position.x + collision.bounds.width
-                : transform.position.x - STRIKE_WIDTH;
-            strikeBounds.set(strikeX, transform.position.y, STRIKE_WIDTH, collision.bounds.height);
+                : transform.position.x - strikeWidth;
+            strikeBounds.set(strikeX, transform.position.y, strikeWidth, collision.bounds.height);
 
             Entity hitEnemy = findHit(strikeBounds, enemies);
             if (hitEnemy != null) {

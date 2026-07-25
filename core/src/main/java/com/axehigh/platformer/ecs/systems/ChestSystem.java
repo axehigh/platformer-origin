@@ -25,6 +25,7 @@ public class ChestSystem extends IteratingSystem {
     private static final float MAX_POP_VELOCITY_X = 40f;
 
     private final EntityFactory entityFactory;
+    private float unitScale = 1f;
 
     public ChestSystem(EntityFactory entityFactory) {
         this(entityFactory, 0);
@@ -33,6 +34,10 @@ public class ChestSystem extends IteratingSystem {
     public ChestSystem(EntityFactory entityFactory, int priority) {
         super(Family.all(ChestComponent.class, TransformComponent.class).get(), priority);
         this.entityFactory = entityFactory;
+    }
+
+    public void setUnitScale(float unitScale) {
+        this.unitScale = unitScale;
     }
 
     @Override
@@ -50,8 +55,8 @@ public class ChestSystem extends IteratingSystem {
         TransformComponent transform = TRANSFORM.get(entity);
         int coinCount = MathUtils.random(MIN_COIN_DROPS, MAX_COIN_DROPS);
         for (int i = 0; i < coinCount; i++) {
-            float velocityX = MathUtils.random(-MAX_POP_VELOCITY_X, MAX_POP_VELOCITY_X);
-            float velocityY = MathUtils.random(MIN_POP_VELOCITY_Y, MAX_POP_VELOCITY_Y);
+            float velocityX = MathUtils.random(-MAX_POP_VELOCITY_X, MAX_POP_VELOCITY_X) * unitScale;
+            float velocityY = MathUtils.random(MIN_POP_VELOCITY_Y, MAX_POP_VELOCITY_Y) * unitScale;
             getEngine().addEntity(entityFactory.createPoppedCoinPickup(transform.position.x, transform.position.y, velocityX, velocityY));
         }
 

@@ -37,6 +37,7 @@ public class LevelExitSystem extends IteratingSystem {
     private final LevelManager levelManager;
     private final Rectangle sensorBounds = new Rectangle();
     private final Rectangle playerBounds = new Rectangle();
+    private float unitScale = 1f;
     private ImmutableArray<Entity> players;
 
     public LevelExitSystem(LevelManager levelManager) {
@@ -46,6 +47,10 @@ public class LevelExitSystem extends IteratingSystem {
     public LevelExitSystem(LevelManager levelManager, int priority) {
         super(Family.all(LevelExitComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
         this.levelManager = levelManager;
+    }
+
+    public void setUnitScale(float unitScale) {
+        this.unitScale = unitScale;
     }
 
     @Override
@@ -76,11 +81,12 @@ public class LevelExitSystem extends IteratingSystem {
 
         TransformComponent gateTransform = TRANSFORM.get(gateEntity);
         CollisionComponent gateCollision = COLLISION.get(gateEntity);
+        float padding = SENSOR_PADDING * unitScale;
         sensorBounds.set(
-            gateTransform.position.x - SENSOR_PADDING,
-            gateTransform.position.y - SENSOR_PADDING,
-            gateCollision.bounds.width + SENSOR_PADDING * 2f,
-            gateCollision.bounds.height + SENSOR_PADDING * 2f);
+            gateTransform.position.x - padding,
+            gateTransform.position.y - padding,
+            gateCollision.bounds.width + padding * 2f,
+            gateCollision.bounds.height + padding * 2f);
 
         if (!playerBounds.overlaps(sensorBounds)) {
             return;

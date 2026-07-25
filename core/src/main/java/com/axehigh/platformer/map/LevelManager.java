@@ -1,9 +1,17 @@
 package com.axehigh.platformer.map;
 
+import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
+import com.axehigh.platformer.ecs.components.TextureComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.ecs.systems.CameraSystem;
+import com.axehigh.platformer.ecs.systems.ChestSystem;
+import com.axehigh.platformer.ecs.systems.EnemyShootSystem;
+import com.axehigh.platformer.ecs.systems.EnemySystem;
+import com.axehigh.platformer.ecs.systems.LevelExitSystem;
+import com.axehigh.platformer.ecs.systems.MeleeAttackSystem;
+import com.axehigh.platformer.ecs.systems.MovementSystem;
 import com.axehigh.platformer.ecs.systems.TiledMapRenderSystem;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
@@ -13,8 +21,10 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 
+import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
+import static com.axehigh.platformer.ecs.components.Mappers.TEXTURE;
 import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 
 /**
@@ -51,6 +61,33 @@ public class LevelManager implements Disposable {
     /** Swaps the active map: repositions the (persisted) player, keeps its stats, respawns objects. */
     public void loadLevel(String tmxPath, Entity player) {
         MapLoader newMapLoader = new MapLoader(tmxPath);
+        float newScale = newMapLoader.getTileWidth() / 16f;
+        entityFactory.setUnitScale(newScale);
+
+        MovementSystem movementSystem = engine.getSystem(MovementSystem.class);
+        if (movementSystem != null) {
+            movementSystem.setUnitScale(newScale);
+        }
+        EnemySystem enemySystem = engine.getSystem(EnemySystem.class);
+        if (enemySystem != null) {
+            enemySystem.setUnitScale(newScale);
+        }
+        EnemyShootSystem shootSystem = engine.getSystem(EnemyShootSystem.class);
+        if (shootSystem != null) {
+            shootSystem.setUnitScale(newScale);
+        }
+        MeleeAttackSystem meleeSystem = engine.getSystem(MeleeAttackSystem.class);
+        if (meleeSystem != null) {
+            meleeSystem.setUnitScale(newScale);
+        }
+        ChestSystem chestSystem = engine.getSystem(ChestSystem.class);
+        if (chestSystem != null) {
+            chestSystem.setUnitScale(newScale);
+        }
+        LevelExitSystem exitSystem = engine.getSystem(LevelExitSystem.class);
+        if (exitSystem != null) {
+            exitSystem.setUnitScale(newScale);
+        }
 
         tiledMapRenderSystem.setMap(newMapLoader.getMap());
 
@@ -80,6 +117,15 @@ public class LevelManager implements Disposable {
         Vector2 playerStart = mapLoader.findPlayerStart();
         TransformComponent transform = TRANSFORM.get(player);
         transform.position.set(playerStart.x, playerStart.y);
+        transform.scale.set(newScale, newScale);
+
+        CollisionComponent playerCollision = COLLISION.get(player);
+        if (playerCollision != null) {
+            TextureComponent tex = TEXTURE.get(player);
+            if (tex != null && tex.region != null) {
+                playerCollision.bounds.setSize(tex.region.getRegionWidth() * newScale, tex.region.getRegionHeight() * newScale);
+            }
+        }
 
         MovementComponent movement = MOVEMENT.get(player);
         if (movement != null) {

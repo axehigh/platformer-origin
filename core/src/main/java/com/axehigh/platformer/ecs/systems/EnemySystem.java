@@ -47,6 +47,7 @@ public class EnemySystem extends IteratingSystem {
     private final Array<Rectangle> collisionRects;
     private final RoomState roomState;
     private final Rectangle ledgeProbe = new Rectangle();
+    private float unitScale = 1f;
 
     public EnemySystem(Array<Rectangle> collisionRects, RoomState roomState) {
         this(collisionRects, roomState, 0);
@@ -56,6 +57,10 @@ public class EnemySystem extends IteratingSystem {
         super(Family.all(EnemyComponent.class, MovementComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
         this.collisionRects = collisionRects;
         this.roomState = roomState;
+    }
+
+    public void setUnitScale(float unitScale) {
+        this.unitScale = unitScale;
     }
 
     @Override
@@ -103,9 +108,9 @@ public class EnemySystem extends IteratingSystem {
     private boolean hasGroundAhead(TransformComponent transform, CollisionComponent collision, int direction) {
         float probeX = direction > 0
             ? transform.position.x + collision.bounds.width
-            : transform.position.x - LEDGE_PROBE_AHEAD;
-        float probeY = transform.position.y - LEDGE_PROBE_DEPTH;
-        ledgeProbe.set(probeX, probeY, LEDGE_PROBE_AHEAD, LEDGE_PROBE_DEPTH);
+            : transform.position.x - LEDGE_PROBE_AHEAD * unitScale;
+        float probeY = transform.position.y - LEDGE_PROBE_DEPTH * unitScale;
+        ledgeProbe.set(probeX, probeY, LEDGE_PROBE_AHEAD * unitScale, LEDGE_PROBE_DEPTH * unitScale);
 
         for (Rectangle rect : collisionRects) {
             if (ledgeProbe.overlaps(rect)) {

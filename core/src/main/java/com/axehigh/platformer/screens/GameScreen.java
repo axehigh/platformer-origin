@@ -130,7 +130,10 @@ public class GameScreen implements Screen {
         assetManager.finishLoading();
 
         MapLoader mapLoader = new MapLoader(levelPath);
+        float scale = mapLoader.getTileWidth() / 16f;
         EntityFactory entityFactory = new EntityFactory(assetManager);
+        entityFactory.setUnitScale(scale);
+
         RoomState roomState = new RoomState();
         roomState.rooms.addAll(mapLoader.getRooms());
 
@@ -139,14 +142,32 @@ public class GameScreen implements Screen {
         PlayerInputSystem playerInputSystem = new PlayerInputSystem(assetManager, PRIORITY_INPUT);
         tiledMapRenderSystem = new TiledMapRenderSystem(mapLoader.getMap(), camera, PRIORITY_MAP_RENDER);
         engine.addSystem(playerInputSystem);
-        engine.addSystem(new EnemySystem(mapLoader.getCollisionRects(), roomState, PRIORITY_ENEMY));
-        engine.addSystem(new EnemyShootSystem(assetManager, roomState, PRIORITY_ENEMY));
-        engine.addSystem(new MovementSystem(mapLoader.getCollisionRects(), PRIORITY_MOVEMENT));
+        
+        EnemySystem enemySystem = new EnemySystem(mapLoader.getCollisionRects(), roomState, PRIORITY_ENEMY);
+        enemySystem.setUnitScale(scale);
+        engine.addSystem(enemySystem);
+
+        EnemyShootSystem shootSystem = new EnemyShootSystem(assetManager, roomState, PRIORITY_ENEMY);
+        shootSystem.setUnitScale(scale);
+        engine.addSystem(shootSystem);
+
+        MovementSystem movementSystem = new MovementSystem(mapLoader.getCollisionRects(), PRIORITY_MOVEMENT);
+        movementSystem.setUnitScale(scale);
+        engine.addSystem(movementSystem);
+
         engine.addSystem(new CollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION));
         engine.addSystem(new EnemyBulletCollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION));
-        engine.addSystem(new MeleeAttackSystem(assetManager, PRIORITY_MELEE));
+
+        MeleeAttackSystem meleeSystem = new MeleeAttackSystem(assetManager, PRIORITY_MELEE);
+        meleeSystem.setUnitScale(scale);
+        engine.addSystem(meleeSystem);
+
         engine.addSystem(new PickupSystem(PRIORITY_PICKUP));
-        engine.addSystem(new ChestSystem(entityFactory, PRIORITY_CHEST));
+        
+        ChestSystem chestSystem = new ChestSystem(entityFactory, PRIORITY_CHEST);
+        chestSystem.setUnitScale(scale);
+        engine.addSystem(chestSystem);
+
         engine.addSystem(new EnemyContactSystem(PRIORITY_ENEMY_CONTACT));
         engine.addSystem(new CameraSystem(camera, roomState, PRIORITY_CAMERA));
         engine.addSystem(new AnimationSystem(PRIORITY_ANIMATION));
@@ -156,7 +177,11 @@ public class GameScreen implements Screen {
         engine.addSystem(debugRenderSystem);
 
         levelManager = new LevelManager(engine, entityFactory, camera, tiledMapRenderSystem, mapLoader.getCollisionRects(), roomState, mapLoader);
-        engine.addSystem(new LevelExitSystem(levelManager, PRIORITY_LEVEL_EXIT));
+        
+        LevelExitSystem exitSystem = new LevelExitSystem(levelManager, PRIORITY_LEVEL_EXIT);
+        exitSystem.setUnitScale(scale);
+        engine.addSystem(exitSystem);
+
         engine.addSystem(new PlayerDeathSystem(this::onPlayerDeath, PRIORITY_PLAYER_DEATH));
 
         Vector2 playerStart = mapLoader.findPlayerStart();
