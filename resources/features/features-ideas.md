@@ -1,5 +1,12 @@
 # Agent Instructions: Features ideas
 
+# TODO
+- Need to remove calls to version over 8 in java, instead use libgdx lists, arrays etc.
+- Collision layer, since we wont have strict square collision, ex half tiles etc. How do we do this best?
+- Should components have public values? Should the final values be in component or in a game constant?
+- When jumping, walls should not reset jump count. Walls should not be climbable, but only ladders and vines.
+- 
+
 ### Game Loop
 - Dead, has 3 tries each have 3 base lives. One dead, will reset to start of level.
 

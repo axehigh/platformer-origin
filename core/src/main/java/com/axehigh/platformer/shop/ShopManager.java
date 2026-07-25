@@ -5,6 +5,9 @@ import com.axehigh.platformer.ecs.components.PlayerComponent;
 import java.util.Collections;
 import java.util.List;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
+
 /**
  * Holds the fixed catalog of purchasable upgrades and applies purchases directly against a {@link
  * PlayerComponent}. Plain Java class (no Ashley wiring) — there's no vendor entity/UI yet; a
@@ -22,7 +25,7 @@ public class ShopManager {
     private final List<ShopItem> catalog;
 
     public ShopManager() {
-        catalog = Collections.unmodifiableList(java.util.Arrays.asList(
+        catalog = unmodifiableList(asList(
             new ShopItem(SHARP_EDGE, 100,
                 player -> player.swordDamage = 8,
                 false,

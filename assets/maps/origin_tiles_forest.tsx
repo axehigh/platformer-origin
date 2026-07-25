@@ -12,6 +12,9 @@
  </tile>
  <tile id="3">
   <image source="../../../../assets/craftpix/pixel-art-forest-platformer-tileset/Tiles/Ground_grass_0003_tile.png" width="64" height="64"/>
+  <objectgroup draworder="index" id="3">
+   <object id="3" x="11.3896" y="0" width="53.192" height="64.9451"/>
+  </objectgroup>
  </tile>
  <tile id="4">
   <image source="../../../../assets/craftpix/pixel-art-forest-platformer-tileset/Tiles/Ground_grass_0004_tile.png" width="64" height="64"/>

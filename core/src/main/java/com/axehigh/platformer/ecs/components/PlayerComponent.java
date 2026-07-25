@@ -1,17 +1,18 @@
 package com.axehigh.platformer.ecs.components;
 
+import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.util.Timer;
 import com.badlogic.ashley.core.Component;
 
 /** Flag component storing player-specific data. */
 public class PlayerComponent implements Component {
-    public int health = 3;
-    public int maxHealth = 3;
+    public int health = GameConstants.MaxHealth;
+    public int maxHealth = GameConstants.MaxHealth;
     public int coins = 0;
     public int items = 0;
-    public int maxItems = 30;
+    public int maxItems = GameConstants.MaxItems;
     /** Current melee/sword damage per hit; base 5, raised to 8 by the "Sharp Edge" shop upgrade. */
-    public int swordDamage = 5;
+    public int swordDamage = GameConstants.SwordDamage;
     /** One-time flag: true once the "Sharp Edge" upgrade (swordDamage -> 8) has been purchased. */
     public boolean sharpEdgePurchased = false;
     /** One-time flag: true once the "Dagger Bandolier" upgrade (maxItems -> 60) has been purchased. */

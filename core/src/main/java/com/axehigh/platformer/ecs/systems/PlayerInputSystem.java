@@ -21,6 +21,7 @@ import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
 import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
+import static com.badlogic.gdx.Input.Keys.*;
 
 /**
  * Reads keyboard and on-screen touch input and translates it into velocity/facing-direction
@@ -38,7 +39,7 @@ public class PlayerInputSystem extends IteratingSystem {
     private static final float BULLET_SIZE = 4f;
     private static final float BULLET_Z = 8f;
 
-    private static final float MELEE_COOLDOWN = 0.4f;
+    private static final float MELEE_COOLDOWN = 0.2f;
     private static final float MELEE_ATTACK_DURATION = 0.2f;
 
     private final AssetManager assetManager;
@@ -125,9 +126,9 @@ public class PlayerInputSystem extends IteratingSystem {
             movement.velocity.x = 0f;
         }
 
-        boolean jumpPressed = Gdx.input.isKeyJustPressed(Input.Keys.SPACE)
-            || Gdx.input.isKeyJustPressed(Input.Keys.W)
-            || Gdx.input.isKeyJustPressed(Input.Keys.UP)
+        boolean jumpPressed = Gdx.input.isKeyJustPressed(SPACE)
+            || Gdx.input.isKeyJustPressed(W)
+            || Gdx.input.isKeyJustPressed(UP)
             || touchJumpRequested;
 
         if (jumpPressed && player.jumpCount < player.maxJumps) {

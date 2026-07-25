@@ -1,5 +1,5 @@
 {
-    "activeFile": "sample_room.tmx",
+    "activeFile": "",
     "expandedProjectPaths": [
         "/Users/lona/dev/libgdx/origin/assets",
         "."
@@ -8,6 +8,10 @@
     "fileStates": {
         "": {
             "scaleInDock": 1
+        },
+        "/Users/lona/dev/assets/tiledmaps/origin/Cave01.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 0.25
         },
         "demo_room.tmx": {
             "expandedObjectLayers": [
@@ -55,11 +59,11 @@
                 4,
                 3
             ],
-            "scale": 0.7792,
+            "scale": 1.5734,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 225.23100616016427,
-                "y": 173.25462012320332
+                "x": 247.23528664039657,
+                "y": 155.07817465361637
             }
         },
         "demo_room_start.tmx#brick_bg": {
@@ -73,13 +77,15 @@
         },
         "level2/sample_room_01.tmx": {
             "expandedObjectLayers": [
-                4
+                3,
+                4,
+                5
             ],
-            "scale": 1.16,
-            "selectedLayer": 1,
+            "scale": 0.24,
+            "selectedLayer": 3,
             "viewCenter": {
-                "x": 207.32758620689657,
-                "y": 179.31034482758622
+                "x": 1168.7500000000002,
+                "y": 856.2500000000001
             }
         },
         "level2/sample_room_01.tmx#brick_bg": {
@@ -92,10 +98,13 @@
             "scaleInEditor": 1
         },
         "level2/sample_room_01.tmx#passage_tile": {
+            "dynamicWrapping": false,
             "scaleInDock": 1
         },
         "origin_tiles_forest.tsx": {
-            "dynamicWrapping": true
+            "dynamicWrapping": true,
+            "scaleInDock": 0.7635,
+            "scaleInEditor": 1
         },
         "sample_room.tmx": {
             "expandedObjectLayers": [
@@ -118,22 +127,21 @@
             "scaleInDock": 1
         }
     },
-    "last.imagePath": "/Users/lona/dev/assets/craftpix/pixel-art-forest-platformer-tileset/Tiles",
+    "last.externalTilesetPath": "/Users/lona/dev/assets/tiledmaps/origin",
+    "last.imagePath": "/Users/lona/dev/assets/craftpix/cave-platformer-2d-game-tileset/png",
     "map.lastUsedFormat": "tmx",
     "openFiles": [
-        "demo_room_final.tmx",
-        "demo_room_start.tmx",
-        "demo_room.tmx",
-        "sample_room.tmx"
     ],
     "project": "Level_01.tiled-project",
     "recentFiles": [
-        "demo_room_final.tmx",
-        "demo_room_start.tmx",
-        "demo_room.tmx",
         "level2/sample_room_01.tmx",
+        "demo_room_start.tmx",
+        "origin_tiles_forest.tsx",
+        "demo_room_final.tmx",
+        "demo_room.tmx",
         "sample_room.tmx"
     ],
+    "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)",
     "tileset.lastUsedFormat": "tsx",
-    "tileset.type": 1
+    "tileset.type": 0
 }

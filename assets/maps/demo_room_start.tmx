@@ -71,7 +71,11 @@
   <object id="8" name="torchRight" type="torch" x="448" y="100" width="16" height="16"/>
   <object id="9" name="dagger1" type="dagger" x="112" y="112" width="16" height="16"/>
   <object id="10" name="dagger2" type="dagger" x="352" y="48" width="16" height="16"/>
-  <object id="18" name="enemy1" type="enemy" x="160" y="240" width="16" height="16"/>
+  <object id="18" name="enemy3" type="enemy" x="160" y="240" width="16" height="16">
+   <properties>
+    <property name="enemyType" value="knight"/>
+   </properties>
+  </object>
   <object id="20" name="flyer1" type="enemy" x="64" y="208" width="16" height="16">
    <properties>
     <property name="enemyType" value="flyer"/>
