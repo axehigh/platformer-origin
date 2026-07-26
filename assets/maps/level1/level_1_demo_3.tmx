@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="32" height="17" tilewidth="128" tileheight="128" infinite="0" nextlayerid="6" nextobjectid="16">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="32" height="17" tilewidth="128" tileheight="128" infinite="0" nextlayerid="8" nextobjectid="45">
  <tileset firstgid="1" source="cave_tileset.tsx"/>
+ <tileset firstgid="49" source="items.tsx"/>
+ <tileset firstgid="68" source="enemy.tsx"/>
  <layer id="1" name="background" width="32" height="17">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -68,13 +70,28 @@
   <object id="3" name="playerStart" type="playerStart" x="128" y="1152" width="128" height="128"/>
   <object id="4" name="torchLeft" type="torch" x="0" y="640" width="128" height="128"/>
   <object id="6" name="torchLeft" type="torch" x="1920" y="640" width="128" height="128"/>
-  <object id="7" name="chest" type="chest" x="2176" y="1920" width="128" height="144"/>
-  <object id="8" name="coin1" type="coin" x="1408" y="512" width="108" height="80"/>
-  <object id="10" name="enemy1" type="enemy" x="1536" y="896" width="68" height="88"/>
-  <object id="11" name="coin1" type="coin" x="1664" y="512" width="108" height="80"/>
-  <object id="12" name="chest" type="chest" x="384" y="384" width="128" height="144"/>
-  <object id="13" name="chest" type="chest" x="3840" y="896" width="128" height="144"/>
-  <object id="14" name="coin1" type="coin" x="2688" y="896" width="128" height="128"/>
-  <object id="15" name="coin1" type="coin" x="2176" y="896" width="128" height="128"/>
+  <object id="19" gid="61" x="1152" y="1024" width="128" height="128"/>
+  <object id="20" gid="52" x="896" y="1536" width="128" height="128"/>
+  <object id="21" gid="61" x="1408" y="640" width="128" height="128"/>
+  <object id="22" gid="61" x="1664" y="640" width="128" height="128"/>
+  <object id="23" gid="61" x="512" y="512" width="128" height="128"/>
+  <object id="24" gid="61" x="128" y="2048" width="128" height="128"/>
+  <object id="25" gid="61" x="512" y="2048" width="128" height="128"/>
+  <object id="26" gid="61" x="640" y="2048" width="128" height="128"/>
+  <object id="27" gid="61" x="1792" y="1792" width="128" height="128"/>
+  <object id="29" gid="61" x="2304" y="1024" width="128" height="128"/>
+  <object id="30" gid="61" x="3840" y="1408" width="128" height="128"/>
+  <object id="31" gid="61" x="3712" y="1408" width="128" height="128"/>
+  <object id="32" gid="61" x="2560" y="2048" width="128" height="128"/>
+  <object id="33" gid="61" x="2432" y="2048" width="128" height="128"/>
+  <object id="34" gid="52" x="128" y="512" width="128" height="128"/>
+  <object id="35" gid="52" x="2176" y="2048" width="128" height="128"/>
+  <object id="36" gid="52" x="2176" y="1024" width="128" height="128"/>
+  <object id="37" gid="52" x="3840" y="1024" width="128" height="128"/>
+ </objectgroup>
+ <objectgroup id="7" name="enemies">
+  <object id="41" gid="70" x="1408" y="1024" width="128" height="128"/>
+  <object id="42" gid="70" x="2560" y="1408" width="128" height="128"/>
+  <object id="44" gid="72" x="896" y="2048" width="128" height="128"/>
  </objectgroup>
 </map>

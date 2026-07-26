@@ -119,6 +119,7 @@ public class LevelManager implements Disposable {
         oldMapLoader.dispose();
 
         entityFactory.spawnObjects(engine, mapLoader.getObjectLayer(), roomState);
+        entityFactory.spawnObjects(engine, mapLoader.getEnemiesLayer(), roomState);
 
         Vector2 playerStart = mapLoader.findPlayerStart();
         TransformComponent transform = TRANSFORM.get(player);

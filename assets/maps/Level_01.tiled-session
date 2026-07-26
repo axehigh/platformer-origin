@@ -76,7 +76,14 @@
             "scaleInDock": 1
         },
         "level1/cave_tileset.tsx": {
+            "dynamicWrapping": false,
             "scaleInEditor": 1
+        },
+        "level1/enemy.tsx": {
+            "dynamicWrapping": true
+        },
+        "level1/items.tsx": {
+            "dynamicWrapping": true
         },
         "level1/level_1_demo_2.tmx": {
             "expandedObjectLayers": [
@@ -88,6 +95,18 @@
             "viewCenter": {
                 "x": 777.2727272727273,
                 "y": 1234.848484848485
+            }
+        },
+        "level1/level_1_demo_3.tmx": {
+            "expandedObjectLayers": [
+                7,
+                3
+            ],
+            "scale": 0.25,
+            "selectedLayer": 4,
+            "viewCenter": {
+                "x": 1210,
+                "y": 1502
             }
         },
         "level2/level_02_demo.tmx": {
@@ -104,15 +123,15 @@
         },
         "level2/sample_room_01.tmx": {
             "expandedObjectLayers": [
-                3,
                 4,
-                5
+                5,
+                3
             ],
             "scale": 0.24,
             "selectedLayer": 3,
             "viewCenter": {
-                "x": 1168.7500000000002,
-                "y": 856.2500000000001
+                "x": 2385.416666666667,
+                "y": 956.2500000000001
             }
         },
         "level2/sample_room_01.tmx#brick_bg": {
@@ -127,6 +146,10 @@
         "level2/sample_room_01.tmx#passage_tile": {
             "dynamicWrapping": false,
             "scaleInDock": 1
+        },
+        "level3/temple_tileset.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 0.75
         },
         "origin_tiles_forest.tsx": {
             "dynamicWrapping": true,
@@ -155,7 +178,7 @@
         }
     },
     "last.externalTilesetPath": "/Users/lona/dev/assets/tiledmaps/origin",
-    "last.imagePath": "/Users/lona/dev/libgdx/origin/assets/maps/level1",
+    "last.imagePath": "/Users/lona/dev/libgdx/origin/assets/maps/gfx/enemies",
     "map.height": 8,
     "map.lastUsedFormat": "tmx",
     "map.tileHeight": 128,
@@ -165,9 +188,10 @@
     ],
     "project": "Level_01.tiled-project",
     "recentFiles": [
-        "level1/cave_tileset.tsx",
-        "demo_room.tmx",
         "level2/sample_room_01.tmx",
+        "level1/cave_tileset.tsx",
+        "level3/temple_tileset.tsx",
+        "demo_room.tmx",
         "demo_room_start.tmx",
         "origin_tiles_forest.tsx",
         "demo_room_final.tmx",
@@ -175,9 +199,11 @@
     ],
     "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)",
     "tileset.lastUsedFormat": "tsx",
+    "tileset.margin": 128,
+    "tileset.spacing": 128,
     "tileset.tileSize": {
         "height": 128,
         "width": 128
     },
-    "tileset.type": 0
+    "tileset.type": 1
 }

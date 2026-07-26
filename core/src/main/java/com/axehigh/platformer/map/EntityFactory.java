@@ -1,5 +1,6 @@
 package com.axehigh.platformer.map;
 
+import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.ChestComponent;
 import com.axehigh.platformer.ecs.components.CoinPickupComponent;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
@@ -18,10 +19,15 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
+import com.badlogic.gdx.maps.tiled.TiledMapTile;
+import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
+import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
+import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.Rectangle;
 
 /** Builds Ashley entities for the player and for object-layer markers (coin, chest, torch, exit gate). */
@@ -75,46 +81,86 @@ public class EntityFactory {
      * its spawn point (see {@code EnemyComponent.roomIndex}).
      */
     public void spawnObjects(Engine engine, MapObjects objects, RoomState roomState) {
+        com.badlogic.gdx.utils.Array<MapObject> toRemove = new com.badlogic.gdx.utils.Array<>();
         for (MapObject object : objects) {
-            if (!(object instanceof RectangleMapObject)) {
+            float centerX, centerY;
+            TiledMapTile tile = null;
+            boolean spawned = false;
+
+            if (object instanceof RectangleMapObject) {
+                Rectangle rect = ((RectangleMapObject) object).getRectangle();
+                centerX = rect.x + rect.width / 2f;
+                centerY = rect.y + rect.height / 2f;
+            } else if (object instanceof TiledMapTileMapObject) {
+                TiledMapTileMapObject tileObj = (TiledMapTileMapObject) object;
+                tile = tileObj.getTile();
+                float width = object.getProperties().get("width", 0f, Float.class);
+                float height = object.getProperties().get("height", 0f, Float.class);
+                // If properties missing, fall back to tile dimensions
+                if ((width == 0f || height == 0f) && tile != null) {
+                    width = tile.getTextureRegion().getRegionWidth();
+                    height = tile.getTextureRegion().getRegionHeight();
+                }
+                float x = object.getProperties().get("x", 0f, Float.class);
+                float y = object.getProperties().get("y", 0f, Float.class);
+                centerX = x + width / 2f;
+                centerY = y + height / 2f;
+            } else {
                 continue;
             }
-            String type = object.getProperties().get("type", String.class);
+
+            String type = getProperty(object, tile, "type", null);
             if (type == null) {
                 continue;
             }
 
-            Rectangle rect = ((RectangleMapObject) object).getRectangle();
-            float centerX = rect.x + rect.width / 2f;
-            float centerY = rect.y + rect.height / 2f;
-
             switch (type) {
                 case "coin":
-                    engine.addEntity(createCoinPickup(centerX, centerY));
+                    engine.addEntity(tile != null ? createCoinPickup(centerX, centerY, tile) : createCoinPickup(centerX, centerY));
+                    spawned = true;
                     break;
                 case "chest":
                     engine.addEntity(createChest(centerX, centerY));
+                    spawned = true;
                     break;
                 case "torch":
                     engine.addEntity(createDecoration(centerX, centerY, "gfx/torch.png"));
+                    spawned = true;
                     break;
                 case "exitGate":
-                    String nextLevelPath = object.getProperties().get("nextLevel", String.class);
+                    String nextLevelPath = getProperty(object, tile, "nextLevel", null);
                     engine.addEntity(createExitGate(centerX, centerY, nextLevelPath));
+                    spawned = true;
                     break;
                 case "dagger":
                     engine.addEntity(createDaggerPickup(centerX, centerY));
+                    spawned = true;
                     break;
                 case "enemy":
-                    String enemyType = object.getProperties().get("enemyType", "walker", String.class);
+                    String enemyType = getProperty(object, tile, "enemyType", "walker");
                     int roomIndex = roomState.findRoomIndexContaining(centerX, centerY);
                     engine.addEntity(createEnemy(centerX, centerY, enemyType, roomIndex));
+                    spawned = true;
                     break;
                 default:
                     // "playerStart" and any unrecognized type: nothing to spawn here.
                     break;
             }
+            if (spawned) {
+                toRemove.add(object);
+            }
         }
+        for (MapObject obj : toRemove) {
+            objects.remove(obj);
+        }
+    }
+
+    private String getProperty(MapObject object, TiledMapTile tile, String key, String defaultValue) {
+        String value = object.getProperties().get(key, String.class);
+        if (value == null && tile != null) {
+            value = tile.getProperties().get(key, String.class);
+        }
+        return value != null ? value : defaultValue;
     }
 
     private Entity createDecoration(float x, float y, String texturePath) {
@@ -215,6 +261,47 @@ public class EntityFactory {
         entity.add(collisionComponent);
 
         entity.add(new CoinPickupComponent());
+
+        return entity;
+    }
+
+    /** Builds a coin pickup from a Tiled map tile, supporting animation if defined in the tileset. */
+    public Entity createCoinPickup(float x, float y, TiledMapTile tile) {
+        Entity entity = new Entity();
+
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(x, y);
+        transform.scale.set(1f, 1f);
+        transform.z = DECOR_Z;
+        entity.add(transform);
+
+        TextureComponent textureComponent = new TextureComponent();
+        textureComponent.region = tile.getTextureRegion();
+        entity.add(textureComponent);
+
+        CollisionComponent collisionComponent = new CollisionComponent();
+        collisionComponent.bounds.setSize(tile.getTextureRegion().getRegionWidth(),
+            tile.getTextureRegion().getRegionHeight());
+        entity.add(collisionComponent);
+
+        entity.add(new CoinPickupComponent());
+
+        if (tile instanceof AnimatedTiledMapTile) {
+            AnimatedTiledMapTile animatedTile = (AnimatedTiledMapTile) tile;
+            StaticTiledMapTile[] frames = animatedTile.getFrameTiles();
+            TextureRegion[] regions = new TextureRegion[frames.length];
+            for (int i = 0; i < frames.length; i++) {
+                regions[i] = frames[i].getTextureRegion();
+            }
+            int[] intervals = animatedTile.getAnimationIntervals();
+            float frameDuration = intervals.length > 0 ? intervals[0] / 1000f : 0.1f;
+
+            Animation<TextureRegion> animation = new Animation<>(frameDuration, regions);
+            AnimationComponent animComp = new AnimationComponent();
+            animComp.animations.put(AnimationComponent.State.IDLE, animation);
+            animComp.currentState = AnimationComponent.State.IDLE;
+            entity.add(animComp);
+        }
 
         return entity;
     }

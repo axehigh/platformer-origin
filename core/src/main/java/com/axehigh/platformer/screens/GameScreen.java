@@ -199,6 +199,7 @@ public class GameScreen implements Screen {
         }
 
         entityFactory.spawnObjects(engine, mapLoader.getObjectLayer(), roomState);
+        entityFactory.spawnObjects(engine, mapLoader.getEnemiesLayer(), roomState);
         CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y);
 
         uiSkin = SkinFactory.createBasicSkin();

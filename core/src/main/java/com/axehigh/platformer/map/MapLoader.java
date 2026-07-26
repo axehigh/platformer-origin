@@ -9,6 +9,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -16,11 +17,13 @@ import com.badlogic.gdx.utils.Disposable;
 
 /**
  * Loads a .tmx map and extracts the static collision boundary set (from the "collision" tile
- * layer) plus the player-start position (from the "objects" layer), used at level-start.
+ * layer), the player-start position (from the "objects" layer), and other objects (from the
+ * "objects" and "enemies" layers), used at level-start.
  */
 public class MapLoader implements Disposable {
     private static final String COLLISION_LAYER = "collision";
     private static final String OBJECTS_LAYER = "objects";
+    private static final String ENEMIES_LAYER = "enemies";
     private static final String ROOMS_LAYER = "Rooms";
     private static final String TYPE_PLAYER_START = "playerStart";
     /** Tile property distinguishing solid wall tiles from non-blocking ones (e.g. natural passageways). */
@@ -101,6 +104,11 @@ public class MapLoader implements Disposable {
         return layer != null ? layer.getObjects() : new MapObjects();
     }
 
+    public MapObjects getEnemiesLayer() {
+        MapLayer layer = map.getLayers().get(ENEMIES_LAYER);
+        return layer != null ? layer.getObjects() : new MapObjects();
+    }
+
     /**
      * Extracts every rectangle from the "Rooms" object layer, each defining a distinct room zone
      * used by {@code CameraSystem} to clamp the camera and by {@code EnemySystem}/{@code
@@ -121,16 +129,38 @@ public class MapLoader implements Disposable {
         return rooms;
     }
 
-    /** Returns the center of the "playerStart" object, or the middle of the virtual screen if missing. */
     public Vector2 findPlayerStart() {
         for (MapObject object : getObjectLayer()) {
-            if (!(object instanceof RectangleMapObject)) {
+            float x, y, width, height;
+            TiledMapTile tile = null;
+            if (object instanceof RectangleMapObject) {
+                Rectangle rect = ((RectangleMapObject) object).getRectangle();
+                x = rect.x;
+                y = rect.y;
+                width = rect.width;
+                height = rect.height;
+            } else if (object instanceof TiledMapTileMapObject) {
+                TiledMapTileMapObject tileObj = (TiledMapTileMapObject) object;
+                tile = tileObj.getTile();
+                width = object.getProperties().get("width", 0f, Float.class);
+                height = object.getProperties().get("height", 0f, Float.class);
+                if ((width == 0f || height == 0f) && tile != null) {
+                    width = tile.getTextureRegion().getRegionWidth();
+                    height = tile.getTextureRegion().getRegionHeight();
+                }
+                x = object.getProperties().get("x", 0f, Float.class);
+                y = object.getProperties().get("y", 0f, Float.class);
+            } else {
                 continue;
             }
+
             String type = object.getProperties().get("type", String.class);
+            if (type == null && tile != null) {
+                type = tile.getProperties().get("type", String.class);
+            }
+
             if (TYPE_PLAYER_START.equals(type)) {
-                Rectangle rect = ((RectangleMapObject) object).getRectangle();
-                return new Vector2(rect.x + rect.width / 2f, rect.y + rect.height / 2f);
+                return new Vector2(x + width / 2f, y + height / 2f);
             }
         }
         float scale = tileWidth / 16f;
