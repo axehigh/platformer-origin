@@ -27,6 +27,7 @@ public final class GameConstants {
     public static float PlayerCollisionHeight = 60f;
     public static float PlayerOffsetRight = -16f;
     public static float PlayerOffsetLeft = -16f;
+    public static float PlayerOffsetY = -12f;
 
     private GameConstants() {
     }

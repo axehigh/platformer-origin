@@ -87,8 +87,9 @@ public class EntityFactory {
             collisionComponent.baseOffsetY = (region.getRegionHeight() - collisionHeight) / 2f * finalScale;
         }
         collisionComponent.currentOffsetX = GameConstants.PlayerOffsetRight * finalScale;
+        collisionComponent.currentOffsetY = GameConstants.PlayerOffsetY * finalScale;
         collisionComponent.bounds.setX(collisionComponent.baseOffsetX + collisionComponent.currentOffsetX);
-        collisionComponent.bounds.setY(collisionComponent.baseOffsetY);
+        collisionComponent.bounds.setY(collisionComponent.baseOffsetY + collisionComponent.currentOffsetY);
         player.add(collisionComponent);
 
         player.add(new PlayerComponent());

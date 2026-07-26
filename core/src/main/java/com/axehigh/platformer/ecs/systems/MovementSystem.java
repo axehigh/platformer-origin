@@ -67,6 +67,7 @@ public class MovementSystem extends IteratingSystem {
             collision.currentOffsetX = MathUtils.lerp(collision.currentOffsetX, targetOffset, Math.min(lerpFactor, 1f));
 
             collision.bounds.setX(collision.baseOffsetX + collision.currentOffsetX);
+            collision.bounds.setY(collision.baseOffsetY + collision.currentOffsetY);
         }
 
         if (!flying) {
