@@ -59,22 +59,25 @@ public class TouchControlsStage extends Stage {
         TextButton yButton = new TextButton("Y", skin);
         TextButton bButton = new TextButton("B", skin);
         TextButton aButton = new TextButton("A", skin);
-        yButton.addListener(new ClickListener() {
+        yButton.addListener(new InputListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 inputSystem.requestTouchShoot();
+                return true;
             }
         });
-        bButton.addListener(new ClickListener() {
+        bButton.addListener(new InputListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 inputSystem.requestTouchMelee();
+                return true;
             }
         });
-        aButton.addListener(new ClickListener() {
+        aButton.addListener(new InputListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 inputSystem.requestTouchJump();
+                return true;
             }
         });
         actions.add(yButton).size(20f, 20f).pad(2f);
@@ -83,10 +86,11 @@ public class TouchControlsStage extends Stage {
         actions.add(aButton).size(20f, 20f).pad(2f);
 
         interactButton = new TextButton("^", skin);
-        interactButton.addListener(new ClickListener() {
+        interactButton.addListener(new InputListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 inputSystem.requestTouchInteract();
+                return true;
             }
         });
         interactButton.setVisible(false);

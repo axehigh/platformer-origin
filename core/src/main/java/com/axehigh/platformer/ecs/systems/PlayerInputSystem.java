@@ -31,6 +31,7 @@ import static com.badlogic.gdx.Input.Keys.*;
 public class PlayerInputSystem extends IteratingSystem {
     private static final float MOVE_SPEED = 90f;
     private static final float JUMP_VELOCITY = 220f;
+    private static final float DOUBLE_JUMP_FACTOR = 0.7f;
 
     private static final float SHOOT_COOLDOWN = 0.35f;
     private static final float BULLET_SPEED = 220f;
@@ -137,7 +138,11 @@ public class PlayerInputSystem extends IteratingSystem {
             || touchJumpRequested;
 
         if (jumpPressed && player.jumpCount < player.maxJumps) {
-            movement.velocity.y = JUMP_VELOCITY * unitScale;
+            float jumpVelocity = JUMP_VELOCITY * unitScale;
+            if (player.jumpCount > 0) {
+                jumpVelocity *= DOUBLE_JUMP_FACTOR;
+            }
+            movement.velocity.y = jumpVelocity;
             movement.grounded = false;
             player.isWallClimbing = false;
             player.jumpCount++;
