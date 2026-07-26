@@ -56,8 +56,12 @@ public class ChestSystem extends IteratingSystem {
 
         TransformComponent transform = TRANSFORM.get(entity);
         CollisionComponent collision = COLLISION.get(entity);
-        float centerX = transform.position.x + (collision != null ? collision.bounds.width / 2f : 0f);
-        float centerY = transform.position.y + (collision != null ? collision.bounds.height / 2f : 0f);
+        float centerX = transform.position.x;
+        float centerY = transform.position.y;
+        if (collision != null) {
+            centerX = collision.worldBounds.x + collision.worldBounds.width / 2f;
+            centerY = collision.worldBounds.y + collision.worldBounds.height / 2f;
+        }
 
         int coinCount = MathUtils.random(MIN_COIN_DROPS, MAX_COIN_DROPS);
         for (int i = 0; i < coinCount; i++) {

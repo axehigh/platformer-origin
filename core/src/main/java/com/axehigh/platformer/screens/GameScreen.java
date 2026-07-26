@@ -7,6 +7,7 @@ import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.systems.AnimationSystem;
 import com.axehigh.platformer.ecs.systems.CameraSystem;
 import com.axehigh.platformer.ecs.systems.ChestSystem;
+import com.axehigh.platformer.ecs.systems.CollisionBoundsSystem;
 import com.axehigh.platformer.ecs.systems.CollisionSystem;
 import com.axehigh.platformer.ecs.systems.DebugRenderSystem;
 import com.axehigh.platformer.ecs.systems.EnemyBulletCollisionSystem;
@@ -63,14 +64,15 @@ public class GameScreen implements Screen {
     private static final int PRIORITY_INPUT = 0;
     private static final int PRIORITY_ENEMY = 4;
     private static final int PRIORITY_MOVEMENT = 5;
-    private static final int PRIORITY_COLLISION = 6;
-    private static final int PRIORITY_MELEE = 7;
-    private static final int PRIORITY_PICKUP = 7;
-    private static final int PRIORITY_CHEST = 7;
-    private static final int PRIORITY_ENEMY_CONTACT = 7;
-    private static final int PRIORITY_LEVEL_EXIT = 7;
-    private static final int PRIORITY_PLAYER_DEATH = 7;
-    private static final int PRIORITY_CAMERA = 8;
+    private static final int PRIORITY_BOUNDS = 6;
+    private static final int PRIORITY_COLLISION = 7;
+    private static final int PRIORITY_MELEE = 8;
+    private static final int PRIORITY_PICKUP = 8;
+    private static final int PRIORITY_CHEST = 8;
+    private static final int PRIORITY_ENEMY_CONTACT = 8;
+    private static final int PRIORITY_LEVEL_EXIT = 8;
+    private static final int PRIORITY_PLAYER_DEATH = 8;
+    private static final int PRIORITY_CAMERA = 9;
     private static final int PRIORITY_ANIMATION = 10;
     private static final int PRIORITY_MAP_RENDER = 20;
     private static final int PRIORITY_ENTITY_RENDER = 30;
@@ -154,6 +156,7 @@ public class GameScreen implements Screen {
         engine.addSystem(collisionSystem);
 
         engine.addSystem(new EnemyBulletCollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION));
+        engine.addSystem(new CollisionBoundsSystem(PRIORITY_BOUNDS));
 
         MeleeAttackSystem meleeSystem = new MeleeAttackSystem(assetManager, PRIORITY_MELEE);
         meleeSystem.setUnitScale(scale);

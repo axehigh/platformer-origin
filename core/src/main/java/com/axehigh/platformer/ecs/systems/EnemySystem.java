@@ -107,9 +107,9 @@ public class EnemySystem extends IteratingSystem {
     /** Probes a small area just past the enemy's leading foot, at foot level, for solid ground. */
     private boolean hasGroundAhead(TransformComponent transform, CollisionComponent collision, int direction) {
         float probeX = direction > 0
-            ? transform.position.x + collision.bounds.width
-            : transform.position.x - LEDGE_PROBE_AHEAD * unitScale;
-        float probeY = transform.position.y - LEDGE_PROBE_DEPTH * unitScale;
+            ? collision.worldBounds.x + collision.worldBounds.width
+            : collision.worldBounds.x - LEDGE_PROBE_AHEAD * unitScale;
+        float probeY = collision.worldBounds.y - LEDGE_PROBE_DEPTH * unitScale;
         ledgeProbe.set(probeX, probeY, LEDGE_PROBE_AHEAD * unitScale, LEDGE_PROBE_DEPTH * unitScale);
 
         for (Rectangle rect : collisionRects) {

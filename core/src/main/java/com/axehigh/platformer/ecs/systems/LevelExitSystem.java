@@ -74,21 +74,17 @@ public class LevelExitSystem extends IteratingSystem {
         }
         Entity playerEntity = players.first();
         PlayerComponent player = PLAYER.get(playerEntity);
-        TransformComponent playerTransform = TRANSFORM.get(playerEntity);
         CollisionComponent playerCollision = COLLISION.get(playerEntity);
-        playerBounds.set(playerTransform.position.x, playerTransform.position.y,
-            playerCollision.bounds.width, playerCollision.bounds.height);
 
-        TransformComponent gateTransform = TRANSFORM.get(gateEntity);
         CollisionComponent gateCollision = COLLISION.get(gateEntity);
         float padding = SENSOR_PADDING * unitScale;
         sensorBounds.set(
-            gateTransform.position.x - padding,
-            gateTransform.position.y - padding,
-            gateCollision.bounds.width + padding * 2f,
-            gateCollision.bounds.height + padding * 2f);
+            gateCollision.worldBounds.x - padding,
+            gateCollision.worldBounds.y - padding,
+            gateCollision.worldBounds.width + padding * 2f,
+            gateCollision.worldBounds.height + padding * 2f);
 
-        if (!playerBounds.overlaps(sensorBounds)) {
+        if (!playerCollision.worldBounds.overlaps(sensorBounds)) {
             return;
         }
 

@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
+import static com.axehigh.platformer.GameConstants.*;
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.FLYING;
 import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
@@ -58,7 +59,14 @@ public class MovementSystem extends IteratingSystem {
         boolean flying = FLYING.get(entity) != null;
 
         if (player != null) {
-            collision.bounds.setX(collision.baseOffsetX);
+            float targetOffset = (player.facingDirection > 0) ? PlayerOffsetRight : PlayerOffsetLeft;
+            targetOffset *= Math.abs(transform.scale.x);
+
+            // Smoothly interpolate the offset to avoid "jumping" when turning against walls
+            float lerpFactor = 15f * deltaTime;
+            collision.currentOffsetX = MathUtils.lerp(collision.currentOffsetX, targetOffset, Math.min(lerpFactor, 1f));
+
+            collision.bounds.setX(collision.baseOffsetX + collision.currentOffsetX);
         }
 
         if (!flying) {
@@ -93,7 +101,9 @@ public class MovementSystem extends IteratingSystem {
         }
     }
 
-    /** Moves the entity along the X axis, resolving collisions. Returns true if a wall was hit. */
+    /**
+     * Moves the entity along the X axis, resolving collisions. Returns true if a wall was hit.
+     */
     private boolean moveX(TransformComponent transform, MovementComponent movement, CollisionComponent collision, float deltaTime) {
         float deltaX = movement.velocity.x * deltaTime;
         if (deltaX == 0f) {

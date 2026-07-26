@@ -25,8 +25,8 @@ public final class GameConstants {
     public static int MaxHealth = 3;
     public static float PlayerCollisionWidth = 30f;
     public static float PlayerCollisionHeight = 60f;
-    public static float PlayerOffsetRight = 10f;
-    public static float PlayerOffsetLeft = 40f;
+    public static float PlayerOffsetRight = -16f;
+    public static float PlayerOffsetLeft = -16f;
 
     private GameConstants() {
     }

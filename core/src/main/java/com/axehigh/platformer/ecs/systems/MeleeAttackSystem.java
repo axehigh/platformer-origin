@@ -41,7 +41,6 @@ public class MeleeAttackSystem extends IteratingSystem {
     private float unitScale = 1f;
 
     private final Rectangle strikeBounds = new Rectangle();
-    private final Rectangle targetBounds = new Rectangle();
     private ImmutableArray<Entity> enemies;
     private ImmutableArray<Entity> chests;
 
@@ -78,9 +77,9 @@ public class MeleeAttackSystem extends IteratingSystem {
 
             float strikeWidth = STRIKE_WIDTH * unitScale;
             float strikeX = player.facingDirection > 0
-                ? transform.position.x + collision.bounds.width
-                : transform.position.x - strikeWidth;
-            strikeBounds.set(strikeX, transform.position.y, strikeWidth, collision.bounds.height);
+                ? collision.worldBounds.x + collision.worldBounds.width
+                : collision.worldBounds.x - strikeWidth;
+            strikeBounds.set(strikeX, collision.worldBounds.y, strikeWidth, collision.worldBounds.height);
 
             Entity hitEnemy = findHit(strikeBounds, enemies);
             if (hitEnemy != null) {
@@ -113,10 +112,7 @@ public class MeleeAttackSystem extends IteratingSystem {
     private Entity findHit(Rectangle bounds, ImmutableArray<Entity> targets) {
         for (Entity target : targets) {
             CollisionComponent targetCollision = COLLISION.get(target);
-            TransformComponent targetTransform = TRANSFORM.get(target);
-            targetBounds.set(targetTransform.position.x, targetTransform.position.y,
-                targetCollision.bounds.width, targetCollision.bounds.height);
-            if (bounds.overlaps(targetBounds)) {
+            if (bounds.overlaps(targetCollision.worldBounds)) {
                 return target;
             }
         }

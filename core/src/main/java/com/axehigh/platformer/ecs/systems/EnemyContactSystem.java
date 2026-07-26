@@ -24,8 +24,6 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 public class EnemyContactSystem extends IteratingSystem {
     private static final float HIT_INVULNERABILITY_DURATION = 1.0f;
 
-    private final Rectangle playerBounds = new Rectangle();
-    private final Rectangle enemyBounds = new Rectangle();
     private ImmutableArray<Entity> players;
 
     public EnemyContactSystem() {
@@ -60,15 +58,9 @@ public class EnemyContactSystem extends IteratingSystem {
         PlayerComponent player = PLAYER.get(playerEntity);
         TransformComponent playerTransform = TRANSFORM.get(playerEntity);
         CollisionComponent playerCollision = COLLISION.get(playerEntity);
-        playerBounds.set(playerTransform.position.x, playerTransform.position.y,
-            playerCollision.bounds.width, playerCollision.bounds.height);
-
-        TransformComponent enemyTransform = TRANSFORM.get(enemyEntity);
         CollisionComponent enemyCollision = COLLISION.get(enemyEntity);
-        enemyBounds.set(enemyTransform.position.x, enemyTransform.position.y,
-            enemyCollision.bounds.width, enemyCollision.bounds.height);
 
-        if (!playerBounds.overlaps(enemyBounds)) {
+        if (!playerCollision.worldBounds.overlaps(enemyCollision.worldBounds)) {
             return;
         }
 

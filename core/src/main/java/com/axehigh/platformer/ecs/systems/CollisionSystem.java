@@ -28,8 +28,6 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
  */
 public class CollisionSystem extends IteratingSystem {
     private final Array<Rectangle> collisionRects;
-    private final Rectangle bulletBounds = new Rectangle();
-    private final Rectangle enemyBounds = new Rectangle();
     private ImmutableArray<Entity> enemies;
     private float unitScale = 1f;
 
@@ -67,14 +65,14 @@ public class CollisionSystem extends IteratingSystem {
         }
 
         transform.position.mulAdd(movement.velocity, deltaTime);
-        bulletBounds.set(transform.position.x, transform.position.y, collision.bounds.width, collision.bounds.height);
+        collision.updateWorldBounds(transform.position);
 
-        if (hitsWall(bulletBounds)) {
+        if (hitsWall(collision.worldBounds)) {
             getEngine().removeEntity(bulletEntity);
             return;
         }
 
-        Entity hitEnemy = findEnemyHit(bulletBounds);
+        Entity hitEnemy = findEnemyHit(collision.worldBounds);
         if (hitEnemy != null) {
             EnemyComponent enemy = ENEMY.get(hitEnemy);
             MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
@@ -100,10 +98,7 @@ public class CollisionSystem extends IteratingSystem {
     private Entity findEnemyHit(Rectangle bounds) {
         for (Entity enemyEntity : enemies) {
             CollisionComponent enemyCollision = COLLISION.get(enemyEntity);
-            TransformComponent enemyTransform = TRANSFORM.get(enemyEntity);
-            enemyBounds.set(enemyTransform.position.x, enemyTransform.position.y,
-                enemyCollision.bounds.width, enemyCollision.bounds.height);
-            if (bounds.overlaps(enemyBounds)) {
+            if (bounds.overlaps(enemyCollision.worldBounds)) {
                 return enemyEntity;
             }
         }

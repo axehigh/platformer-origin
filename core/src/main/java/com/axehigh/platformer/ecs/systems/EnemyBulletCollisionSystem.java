@@ -33,8 +33,6 @@ public class EnemyBulletCollisionSystem extends IteratingSystem {
     private static final float HIT_INVULNERABILITY_DURATION = 1.0f;
 
     private final Array<Rectangle> collisionRects;
-    private final Rectangle bulletBounds = new Rectangle();
-    private final Rectangle playerBounds = new Rectangle();
     private ImmutableArray<Entity> players;
 
     public EnemyBulletCollisionSystem(Array<Rectangle> collisionRects) {
@@ -66,14 +64,14 @@ public class EnemyBulletCollisionSystem extends IteratingSystem {
         }
 
         transform.position.mulAdd(movement.velocity, deltaTime);
-        bulletBounds.set(transform.position.x, transform.position.y, collision.bounds.width, collision.bounds.height);
+        collision.updateWorldBounds(transform.position);
 
-        if (hitsWall(bulletBounds)) {
+        if (hitsWall(collision.worldBounds)) {
             getEngine().removeEntity(bulletEntity);
             return;
         }
 
-        if (hitsPlayer(bulletBounds)) {
+        if (hitsPlayer(collision.worldBounds)) {
             getEngine().removeEntity(bulletEntity);
         }
     }
@@ -92,12 +90,9 @@ public class EnemyBulletCollisionSystem extends IteratingSystem {
             return false;
         }
         Entity playerEntity = players.first();
-        TransformComponent playerTransform = TRANSFORM.get(playerEntity);
         CollisionComponent playerCollision = COLLISION.get(playerEntity);
-        playerBounds.set(playerTransform.position.x, playerTransform.position.y,
-            playerCollision.bounds.width, playerCollision.bounds.height);
 
-        if (!bounds.overlaps(playerBounds)) {
+        if (!bounds.overlaps(playerCollision.worldBounds)) {
             return false;
         }
 

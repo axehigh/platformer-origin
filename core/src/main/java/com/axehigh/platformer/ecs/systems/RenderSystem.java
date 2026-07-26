@@ -51,24 +51,47 @@ public class RenderSystem extends SortedIteratingSystem {
         float width = region.getRegionWidth() * transform.scale.x;
         float height = region.getRegionHeight() * transform.scale.y;
 
-        float offsetX = 0f;
-        float offsetY = 0f;
-        if (region instanceof AtlasRegion) {
-            AtlasRegion atlasRegion = (AtlasRegion) region;
-            offsetX = atlasRegion.offsetX * transform.scale.x;
-            offsetY = atlasRegion.offsetY * transform.scale.y;
-        }
+        float drawX = transform.position.x;
+        float drawY = transform.position.y;
 
         CollisionComponent collision = COLLISION.get(entity);
-        float directionalOffsetX = 0f;
-        float directionalOffsetY = 0f;
-        if (collision != null) {
-            directionalOffsetX = (collision.bounds.x - collision.baseOffsetX);
-            directionalOffsetY = (collision.bounds.y - collision.baseOffsetY);
+        if (collision != null && region instanceof AtlasRegion) {
+            AtlasRegion atlasRegion = (AtlasRegion) region;
+            float absScaleX = Math.abs(transform.scale.x);
+            float absScaleY = Math.abs(transform.scale.y);
+
+            // Anchor the sprite based on the collision box's actual center.
+            // This ensures that the character remains centered on the collision box even if
+            // it's off-center in the atlas frame and the box shifts directionally.
+            float colCenterX = transform.position.x + collision.bounds.x + collision.bounds.width / 2f;
+            float colCenterY = transform.position.y + collision.bounds.y + collision.bounds.height / 2f;
+
+            // To keep the character centered on the collision box even when flipping off-center frames,
+            // we must adjust the frame's anchor based on the current directional offset.
+            float frameCenterX = (transform.scale.x >= 0) ? colCenterX - collision.currentOffsetX : colCenterX + collision.currentOffsetX;
+            float frameCenterY = (transform.scale.y >= 0) ? colCenterY - collision.currentOffsetY : colCenterY + collision.currentOffsetY;
+
+            float frameAnchorX = frameCenterX - (atlasRegion.originalWidth / 2f) * absScaleX;
+            float frameAnchorY = frameCenterY - (atlasRegion.originalHeight / 2f) * absScaleY;
+
+            if (transform.scale.x >= 0) {
+                drawX = frameAnchorX + atlasRegion.offsetX * absScaleX;
+            } else {
+                // When flipped, drawX is the right edge of the flipped packed region.
+                drawX = frameAnchorX + (atlasRegion.originalWidth - atlasRegion.offsetX) * absScaleX;
+            }
+
+            if (transform.scale.y >= 0) {
+                drawY = frameAnchorY + atlasRegion.offsetY * absScaleY;
+            } else {
+                drawY = frameAnchorY + (atlasRegion.originalHeight - atlasRegion.offsetY) * absScaleY;
+            }
+        } else {
+            // Fallback for non-atlas or non-collision entities
+            drawX -= Math.min(0f, width);
+            drawY -= Math.min(0f, height);
         }
 
-        float drawX = transform.position.x + offsetX + directionalOffsetX - Math.min(0f, width);
-        float drawY = transform.position.y + offsetY + directionalOffsetY - Math.min(0f, height);
         batch.draw(region,
             drawX, drawY,
             width / 2f, height / 2f,

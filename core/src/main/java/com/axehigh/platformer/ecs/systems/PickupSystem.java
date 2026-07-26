@@ -25,8 +25,6 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
  * pickup entity.
  */
 public class PickupSystem extends IteratingSystem {
-    private final Rectangle playerBounds = new Rectangle();
-    private final Rectangle pickupBounds = new Rectangle();
     private ImmutableArray<Entity> players;
 
     public PickupSystem() {
@@ -51,17 +49,10 @@ public class PickupSystem extends IteratingSystem {
         }
         Entity playerEntity = players.first();
         PlayerComponent player = PLAYER.get(playerEntity);
-        TransformComponent playerTransform = TRANSFORM.get(playerEntity);
         CollisionComponent playerCollision = COLLISION.get(playerEntity);
-        playerBounds.set(playerTransform.position.x, playerTransform.position.y,
-            playerCollision.bounds.width, playerCollision.bounds.height);
-
-        TransformComponent pickupTransform = TRANSFORM.get(pickupEntity);
         CollisionComponent pickupCollision = COLLISION.get(pickupEntity);
-        pickupBounds.set(pickupTransform.position.x, pickupTransform.position.y,
-            pickupCollision.bounds.width, pickupCollision.bounds.height);
 
-        if (!playerBounds.overlaps(pickupBounds)) {
+        if (!playerCollision.worldBounds.overlaps(pickupCollision.worldBounds)) {
             return;
         }
 
