@@ -75,16 +75,19 @@
         "demo_room_start.tmx#passage_tile": {
             "scaleInDock": 1
         },
+        "level1/cave_tileset.tsx": {
+            "scaleInEditor": 1
+        },
         "level1/level_1_demo_2.tmx": {
             "expandedObjectLayers": [
                 4,
                 3
             ],
-            "scale": 0.25,
-            "selectedLayer": 2,
+            "scale": 0.33,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 1570,
-                "y": 1206
+                "x": 777.2727272727273,
+                "y": 1234.848484848485
             }
         },
         "level2/level_02_demo.tmx": {
@@ -162,6 +165,7 @@
     ],
     "project": "Level_01.tiled-project",
     "recentFiles": [
+        "level1/cave_tileset.tsx",
         "demo_room.tmx",
         "level2/sample_room_01.tmx",
         "demo_room_start.tmx",
