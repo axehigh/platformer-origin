@@ -160,7 +160,7 @@ public class MapLoader implements Disposable {
             }
 
             if (TYPE_PLAYER_START.equals(type)) {
-                return new Vector2(x + width / 2f, y + height / 2f);
+                return new Vector2(x, y);
             }
         }
         float scale = tileWidth / 16f;

@@ -1,5 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
+import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.ChestComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.map.EntityFactory;
@@ -9,6 +10,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
 
 import static com.axehigh.platformer.ecs.components.Mappers.CHEST;
+import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 
 /**
@@ -53,11 +55,15 @@ public class ChestSystem extends IteratingSystem {
         }
 
         TransformComponent transform = TRANSFORM.get(entity);
+        CollisionComponent collision = COLLISION.get(entity);
+        float centerX = transform.position.x + (collision != null ? collision.bounds.width / 2f : 0f);
+        float centerY = transform.position.y + (collision != null ? collision.bounds.height / 2f : 0f);
+
         int coinCount = MathUtils.random(MIN_COIN_DROPS, MAX_COIN_DROPS);
         for (int i = 0; i < coinCount; i++) {
             float velocityX = MathUtils.random(-MAX_POP_VELOCITY_X, MAX_POP_VELOCITY_X) * unitScale;
             float velocityY = MathUtils.random(MIN_POP_VELOCITY_Y, MAX_POP_VELOCITY_Y) * unitScale;
-            getEngine().addEntity(entityFactory.createPoppedCoinPickup(transform.position.x, transform.position.y, velocityX, velocityY));
+            getEngine().addEntity(entityFactory.createPoppedCoinPickup(centerX, centerY, velocityX, velocityY));
         }
 
         getEngine().removeEntity(entity);

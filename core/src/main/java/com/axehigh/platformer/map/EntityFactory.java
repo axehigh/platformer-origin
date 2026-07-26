@@ -87,8 +87,11 @@ public class EntityFactory {
             TiledMapTile tile = null;
             boolean spawned = false;
 
+            float spawnX, spawnY;
             if (object instanceof RectangleMapObject) {
                 Rectangle rect = ((RectangleMapObject) object).getRectangle();
+                spawnX = rect.x;
+                spawnY = rect.y;
                 centerX = rect.x + rect.width / 2f;
                 centerY = rect.y + rect.height / 2f;
             } else if (object instanceof TiledMapTileMapObject) {
@@ -101,10 +104,10 @@ public class EntityFactory {
                     width = tile.getTextureRegion().getRegionWidth();
                     height = tile.getTextureRegion().getRegionHeight();
                 }
-                float x = object.getProperties().get("x", 0f, Float.class);
-                float y = object.getProperties().get("y", 0f, Float.class);
-                centerX = x + width / 2f;
-                centerY = y + height / 2f;
+                spawnX = object.getProperties().get("x", 0f, Float.class);
+                spawnY = object.getProperties().get("y", 0f, Float.class);
+                centerX = spawnX + width / 2f;
+                centerY = spawnY + height / 2f;
             } else {
                 continue;
             }
@@ -116,30 +119,30 @@ public class EntityFactory {
 
             switch (type) {
                 case "coin":
-                    engine.addEntity(tile != null ? createCoinPickup(centerX, centerY, tile) : createCoinPickup(centerX, centerY));
+                    engine.addEntity(tile != null ? createCoinPickup(spawnX, spawnY, tile) : createCoinPickup(spawnX, spawnY));
                     spawned = true;
                     break;
                 case "chest":
-                    engine.addEntity(createChest(centerX, centerY));
+                    engine.addEntity(tile != null ? createChest(spawnX, spawnY, tile) : createChest(spawnX, spawnY));
                     spawned = true;
                     break;
                 case "torch":
-                    engine.addEntity(createDecoration(centerX, centerY, "gfx/torch.png"));
+                    engine.addEntity(createDecoration(spawnX, spawnY, "gfx/torch.png"));
                     spawned = true;
                     break;
                 case "exitGate":
                     String nextLevelPath = getProperty(object, tile, "nextLevel", null);
-                    engine.addEntity(createExitGate(centerX, centerY, nextLevelPath));
+                    engine.addEntity(createExitGate(spawnX, spawnY, nextLevelPath));
                     spawned = true;
                     break;
                 case "dagger":
-                    engine.addEntity(createDaggerPickup(centerX, centerY));
+                    engine.addEntity(createDaggerPickup(spawnX, spawnY));
                     spawned = true;
                     break;
                 case "enemy":
                     String enemyType = getProperty(object, tile, "enemyType", "walker");
                     int roomIndex = roomState.findRoomIndexContaining(centerX, centerY);
-                    engine.addEntity(createEnemy(centerX, centerY, enemyType, roomIndex));
+                    engine.addEntity(createEnemy(spawnX, spawnY, enemyType, roomIndex));
                     spawned = true;
                     break;
                 default:
@@ -233,6 +236,30 @@ public class EntityFactory {
 
         CollisionComponent collisionComponent = new CollisionComponent();
         collisionComponent.bounds.setSize(texture.getWidth() * unitScale, texture.getHeight() * unitScale);
+        entity.add(collisionComponent);
+
+        entity.add(new ChestComponent());
+
+        return entity;
+    }
+
+    /** Builds a chest entity from a Tiled map tile. */
+    public Entity createChest(float x, float y, TiledMapTile tile) {
+        Entity entity = new Entity();
+
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(x, y);
+        transform.scale.set(1f, 1f);
+        transform.z = DECOR_Z;
+        entity.add(transform);
+
+        TextureComponent textureComponent = new TextureComponent();
+        textureComponent.region = tile.getTextureRegion();
+        entity.add(textureComponent);
+
+        CollisionComponent collisionComponent = new CollisionComponent();
+        collisionComponent.bounds.setSize(tile.getTextureRegion().getRegionWidth(),
+            tile.getTextureRegion().getRegionHeight());
         entity.add(collisionComponent);
 
         entity.add(new ChestComponent());
