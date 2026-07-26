@@ -45,6 +45,7 @@ public class PlayerInputSystem extends IteratingSystem {
     private final AssetManager assetManager;
 
     private PooledEngine engine;
+    private float unitScale = 1f;
     private boolean touchLeft = false;
     private boolean touchRight = false;
     private boolean touchJumpRequested = false;
@@ -91,6 +92,10 @@ public class PlayerInputSystem extends IteratingSystem {
         touchInteractRequested = true;
     }
 
+    public void setUnitScale(float unitScale) {
+        this.unitScale = unitScale;
+    }
+
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
@@ -117,10 +122,10 @@ public class PlayerInputSystem extends IteratingSystem {
         boolean right = Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT) || touchRight;
 
         if (left && !right) {
-            movement.velocity.x = -MOVE_SPEED;
+            movement.velocity.x = -MOVE_SPEED * unitScale;
             player.facingDirection = -1;
         } else if (right && !left) {
-            movement.velocity.x = MOVE_SPEED;
+            movement.velocity.x = MOVE_SPEED * unitScale;
             player.facingDirection = 1;
         } else {
             movement.velocity.x = 0f;
@@ -132,7 +137,7 @@ public class PlayerInputSystem extends IteratingSystem {
             || touchJumpRequested;
 
         if (jumpPressed && player.jumpCount < player.maxJumps) {
-            movement.velocity.y = JUMP_VELOCITY;
+            movement.velocity.y = JUMP_VELOCITY * unitScale;
             movement.grounded = false;
             player.isWallClimbing = false;
             player.jumpCount++;
@@ -165,13 +170,15 @@ public class PlayerInputSystem extends IteratingSystem {
     private void spawnBullet(TransformComponent playerTransform, CollisionComponent playerCollision, PlayerComponent player) {
         Entity bullet = engine.createEntity();
 
-        float centerY = playerTransform.position.y + (playerCollision.bounds.height - BULLET_SIZE) / 2f;
+        float bulletSize = BULLET_SIZE * unitScale;
+        float centerY = playerTransform.position.y + (playerCollision.bounds.height - bulletSize) / 2f;
         float spawnX = player.facingDirection > 0
             ? playerTransform.position.x + playerCollision.bounds.width
-            : playerTransform.position.x - BULLET_SIZE;
+            : playerTransform.position.x - bulletSize;
 
         TransformComponent transform = engine.createComponent(TransformComponent.class);
         transform.position.set(spawnX, centerY);
+        transform.scale.set(unitScale, unitScale);
         transform.z = BULLET_Z;
         bullet.add(transform);
 
@@ -180,13 +187,14 @@ public class PlayerInputSystem extends IteratingSystem {
         bullet.add(textureComponent);
 
         MovementComponent movement = engine.createComponent(MovementComponent.class);
-        movement.velocity.set(BULLET_SPEED * player.facingDirection, 0f);
-        movement.maxSpeedX = BULLET_SPEED;
+        float speed = BULLET_SPEED * unitScale;
+        movement.velocity.set(speed * player.facingDirection, 0f);
+        movement.maxSpeedX = speed;
         movement.maxSpeedY = 0f;
         bullet.add(movement);
 
         CollisionComponent collision = engine.createComponent(CollisionComponent.class);
-        collision.bounds.setSize(BULLET_SIZE, BULLET_SIZE);
+        collision.bounds.setSize(bulletSize, bulletSize);
         bullet.add(collision);
 
         BulletComponent bulletComponent = engine.createComponent(BulletComponent.class);

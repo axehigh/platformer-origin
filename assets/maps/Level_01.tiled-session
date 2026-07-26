@@ -21,8 +21,8 @@
             "scale": 1.1441,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 223.3196398916179,
-                "y": 166.06939952801326
+                "x": 342.1903679748274,
+                "y": 337.8201206188271
             }
         },
         "demo_room.tmx#brick_bg": {
@@ -74,6 +74,30 @@
         },
         "demo_room_start.tmx#passage_tile": {
             "scaleInDock": 1
+        },
+        "level1/level_1_demo_2.tmx": {
+            "expandedObjectLayers": [
+                4,
+                3
+            ],
+            "scale": 0.25,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 1570,
+                "y": 1206
+            }
+        },
+        "level2/level_02_demo.tmx": {
+            "expandedObjectLayers": [
+                4,
+                3
+            ],
+            "scale": 0.33,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 986.3636363636364,
+                "y": 683.3333333333334
+            }
         },
         "level2/sample_room_01.tmx": {
             "expandedObjectLayers": [
@@ -128,20 +152,28 @@
         }
     },
     "last.externalTilesetPath": "/Users/lona/dev/assets/tiledmaps/origin",
-    "last.imagePath": "/Users/lona/dev/assets/craftpix/cave-platformer-2d-game-tileset/png",
+    "last.imagePath": "/Users/lona/dev/libgdx/origin/assets/maps/level1",
+    "map.height": 8,
     "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 128,
+    "map.tileWidth": 128,
+    "map.width": 16,
     "openFiles": [
     ],
     "project": "Level_01.tiled-project",
     "recentFiles": [
+        "demo_room.tmx",
         "level2/sample_room_01.tmx",
         "demo_room_start.tmx",
         "origin_tiles_forest.tsx",
         "demo_room_final.tmx",
-        "demo_room.tmx",
         "sample_room.tmx"
     ],
     "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)",
     "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 128,
+        "width": 128
+    },
     "tileset.type": 0
 }

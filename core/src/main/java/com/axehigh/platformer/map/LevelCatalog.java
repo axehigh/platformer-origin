@@ -11,6 +11,8 @@ public final class LevelCatalog {
         LEVELS.add(new LevelDefinition("demo_room", "Demo Room", "maps/demo_room.tmx"));
         LEVELS.add(new LevelDefinition("demo_room_final", "Demo Room Final", "maps/demo_room_final.tmx"));
         LEVELS.add(new LevelDefinition("sample_room", "Sample Room", "maps/sample_room.tmx"));
+        LEVELS.add(new LevelDefinition("lvl1_demo1", "Level 1 demo 1", "maps/level1/level_1_demo.tmx"));
+        LEVELS.add(new LevelDefinition("lvl1_demo2", "Level 1 demo 2", "maps/level1/level_1_demo_2.tmx"));
     }
 
     private LevelCatalog() {

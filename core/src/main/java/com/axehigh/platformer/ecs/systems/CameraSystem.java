@@ -69,8 +69,8 @@ public class CameraSystem extends EntitySystem {
             ? roomState.rooms.get(roomState.activeRoomIndex)
             : null;
 
-        float camX = room != null ? clampAxis(x, room.x, room.width, GameConstants.VIRTUAL_WIDTH) : x;
-        float camY = room != null ? clampAxis(y, room.y, room.height, GameConstants.VIRTUAL_HEIGHT) : y;
+        float camX = room != null ? clampAxis(x, room.x, room.width, camera.viewportWidth) : x;
+        float camY = room != null ? clampAxis(y, room.y, room.height, camera.viewportHeight) : y;
         camera.position.set(camX, camY, 0f);
         camera.update();
     }

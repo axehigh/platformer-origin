@@ -133,7 +133,8 @@ public class MapLoader implements Disposable {
                 return new Vector2(rect.x + rect.width / 2f, rect.y + rect.height / 2f);
             }
         }
-        return new Vector2(GameConstants.VIRTUAL_WIDTH / 2f, GameConstants.VIRTUAL_HEIGHT / 2f);
+        float scale = tileWidth / 16f;
+        return new Vector2(GameConstants.VIRTUAL_WIDTH * scale / 2f, GameConstants.VIRTUAL_HEIGHT * scale / 2f);
     }
 
     @Override

@@ -131,15 +131,19 @@ public class GameScreen implements Screen {
 
         MapLoader mapLoader = new MapLoader(levelPath);
         float scale = mapLoader.getTileWidth() / 16f;
+        viewport.setWorldSize(GameConstants.VIRTUAL_WIDTH * scale, GameConstants.VIRTUAL_HEIGHT * scale);
+        viewport.apply();
+        
         EntityFactory entityFactory = new EntityFactory(assetManager);
         entityFactory.setUnitScale(scale);
 
         RoomState roomState = new RoomState();
         roomState.rooms.addAll(mapLoader.getRooms());
 
-        camera.position.set(GameConstants.VIRTUAL_WIDTH / 2f, GameConstants.VIRTUAL_HEIGHT / 2f, 0f);
+        camera.position.set(viewport.getWorldWidth() / 2f, viewport.getWorldHeight() / 2f, 0f);
 
         PlayerInputSystem playerInputSystem = new PlayerInputSystem(assetManager, PRIORITY_INPUT);
+        playerInputSystem.setUnitScale(scale);
         tiledMapRenderSystem = new TiledMapRenderSystem(mapLoader.getMap(), camera, PRIORITY_MAP_RENDER);
         engine.addSystem(playerInputSystem);
         
@@ -176,7 +180,7 @@ public class GameScreen implements Screen {
         debugRenderSystem = new DebugRenderSystem(camera, mapLoader.getCollisionRects(), roomState, PRIORITY_DEBUG_RENDER);
         engine.addSystem(debugRenderSystem);
 
-        levelManager = new LevelManager(engine, entityFactory, camera, tiledMapRenderSystem, mapLoader.getCollisionRects(), roomState, mapLoader);
+        levelManager = new LevelManager(engine, entityFactory, viewport, tiledMapRenderSystem, mapLoader.getCollisionRects(), roomState, mapLoader);
         
         LevelExitSystem exitSystem = new LevelExitSystem(levelManager, PRIORITY_LEVEL_EXIT);
         exitSystem.setUnitScale(scale);

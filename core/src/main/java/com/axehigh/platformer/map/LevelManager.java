@@ -20,6 +20,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
@@ -40,18 +41,20 @@ public class LevelManager implements Disposable {
     private final PooledEngine engine;
     private final EntityFactory entityFactory;
     private final OrthographicCamera camera;
+    private final Viewport viewport;
     private final TiledMapRenderSystem tiledMapRenderSystem;
     private final Array<Rectangle> collisionRects;
     private final RoomState roomState;
 
     private MapLoader mapLoader;
 
-    public LevelManager(PooledEngine engine, EntityFactory entityFactory, OrthographicCamera camera,
+    public LevelManager(PooledEngine engine, EntityFactory entityFactory, Viewport viewport,
                          TiledMapRenderSystem tiledMapRenderSystem, Array<Rectangle> collisionRects,
                          RoomState roomState, MapLoader initialMapLoader) {
         this.engine = engine;
         this.entityFactory = entityFactory;
-        this.camera = camera;
+        this.viewport = viewport;
+        this.camera = (OrthographicCamera) viewport.getCamera();
         this.tiledMapRenderSystem = tiledMapRenderSystem;
         this.collisionRects = collisionRects;
         this.roomState = roomState;
@@ -63,6 +66,9 @@ public class LevelManager implements Disposable {
         MapLoader newMapLoader = new MapLoader(tmxPath);
         float newScale = newMapLoader.getTileWidth() / 16f;
         entityFactory.setUnitScale(newScale);
+
+        viewport.setWorldSize(com.axehigh.platformer.GameConstants.VIRTUAL_WIDTH * newScale, com.axehigh.platformer.GameConstants.VIRTUAL_HEIGHT * newScale);
+        viewport.apply();
 
         MovementSystem movementSystem = engine.getSystem(MovementSystem.class);
         if (movementSystem != null) {
@@ -131,6 +137,8 @@ public class LevelManager implements Disposable {
         if (movement != null) {
             movement.velocity.setZero();
             movement.grounded = false;
+            movement.maxSpeedX = com.axehigh.platformer.GameConstants.MaxSpeedX * newScale;
+            movement.maxSpeedY = com.axehigh.platformer.GameConstants.MaxSpeedY * newScale;
         }
 
         PlayerComponent playerComponent = PLAYER.get(player);
