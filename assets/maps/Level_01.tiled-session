@@ -18,11 +18,11 @@
                 4,
                 3
             ],
-            "scale": 1.1441,
+            "scale": 0.75,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 342.1903679748274,
-                "y": 337.8201206188271
+                "x": 595.3333333333333,
+                "y": 467.33333333333337
             }
         },
         "demo_room.tmx#brick_bg": {
@@ -102,11 +102,11 @@
                 7,
                 3
             ],
-            "scale": 0.25,
-            "selectedLayer": 4,
+            "scale": 0.125,
+            "selectedLayer": 3,
             "viewCenter": {
-                "x": 1210,
-                "y": 1502
+                "x": 1020,
+                "y": 316
             }
         },
         "level2/level_02_demo.tmx": {
@@ -130,8 +130,8 @@
             "scale": 0.24,
             "selectedLayer": 3,
             "viewCenter": {
-                "x": 2385.416666666667,
-                "y": 956.2500000000001
+                "x": 1260.416666666667,
+                "y": 672.9166666666667
             }
         },
         "level2/sample_room_01.tmx#brick_bg": {

@@ -19,7 +19,7 @@
    </properties>
   </tile>
  </tileset>
- <layer id="1" name="background" width="60" height="60" visible="0">
+ <layer id="1" name="background" width="60" height="60">
   <data encoding="csv">
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -147,7 +147,7 @@
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
 </data>
  </layer>
- <objectgroup id="3" name="objects" visible="0">
+ <objectgroup id="3" name="objects">
   <object id="1" name="playerStart" type="playerStart" x="32" y="176" width="16" height="16"/>
   <object id="3" name="chest" type="chest" x="220" y="240" width="16" height="16"/>
   <object id="4" name="coin1" type="coin" x="120" y="248" width="8" height="8"/>

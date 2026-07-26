@@ -159,7 +159,10 @@ public class GameScreen implements Screen {
         movementSystem.setUnitScale(scale);
         engine.addSystem(movementSystem);
 
-        engine.addSystem(new CollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION));
+        CollisionSystem collisionSystem = new CollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION);
+        collisionSystem.setUnitScale(scale);
+        engine.addSystem(collisionSystem);
+
         engine.addSystem(new EnemyBulletCollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION));
 
         MeleeAttackSystem meleeSystem = new MeleeAttackSystem(assetManager, PRIORITY_MELEE);

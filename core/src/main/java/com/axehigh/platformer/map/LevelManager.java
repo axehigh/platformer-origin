@@ -7,6 +7,7 @@ import com.axehigh.platformer.ecs.components.TextureComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.ecs.systems.CameraSystem;
 import com.axehigh.platformer.ecs.systems.ChestSystem;
+import com.axehigh.platformer.ecs.systems.CollisionSystem;
 import com.axehigh.platformer.ecs.systems.EnemyShootSystem;
 import com.axehigh.platformer.ecs.systems.EnemySystem;
 import com.axehigh.platformer.ecs.systems.LevelExitSystem;
@@ -81,6 +82,10 @@ public class LevelManager implements Disposable {
         EnemyShootSystem shootSystem = engine.getSystem(EnemyShootSystem.class);
         if (shootSystem != null) {
             shootSystem.setUnitScale(newScale);
+        }
+        CollisionSystem collisionSystem = engine.getSystem(CollisionSystem.class);
+        if (collisionSystem != null) {
+            collisionSystem.setUnitScale(newScale);
         }
         MeleeAttackSystem meleeSystem = engine.getSystem(MeleeAttackSystem.class);
         if (meleeSystem != null) {

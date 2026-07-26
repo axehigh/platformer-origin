@@ -26,7 +26,7 @@ final class EnemyDamageResolver {
      * forever) while the horizontal knockback and hit-stun still apply. Returns {@code true} if
      * the enemy's health reached 0.
      */
-    static boolean applyHit(EnemyComponent enemy, MovementComponent movement, float damage, int knockbackDirection, boolean isFlying) {
+    static boolean applyHit(EnemyComponent enemy, MovementComponent movement, float damage, int knockbackDirection, boolean isFlying, float unitScale) {
         if (enemy.hitStun.isActive()) {
             return false;
         }
@@ -36,9 +36,9 @@ final class EnemyDamageResolver {
             return true;
         }
 
-        movement.velocity.x = KNOCKBACK_SPEED_X * knockbackDirection;
+        movement.velocity.x = KNOCKBACK_SPEED_X * knockbackDirection * unitScale;
         if (!isFlying) {
-            movement.velocity.y = KNOCKBACK_SPEED_Y;
+            movement.velocity.y = KNOCKBACK_SPEED_Y * unitScale;
         }
         enemy.hitStun.start(HIT_STUN_DURATION);
         return false;

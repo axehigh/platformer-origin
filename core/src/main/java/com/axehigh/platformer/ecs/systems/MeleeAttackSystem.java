@@ -87,7 +87,7 @@ public class MeleeAttackSystem extends IteratingSystem {
                 EnemyComponent enemy = ENEMY.get(hitEnemy);
                 MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
                 boolean isFlying = FLYING.get(hitEnemy) != null;
-                boolean died = EnemyDamageResolver.applyHit(enemy, enemyMovement, player.swordDamage, player.facingDirection, isFlying);
+                boolean died = EnemyDamageResolver.applyHit(enemy, enemyMovement, player.swordDamage, player.facingDirection, isFlying, unitScale);
                 if (died) {
                     getEngine().removeEntity(hitEnemy);
                 }

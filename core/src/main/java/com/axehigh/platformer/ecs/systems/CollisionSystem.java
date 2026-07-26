@@ -31,6 +31,7 @@ public class CollisionSystem extends IteratingSystem {
     private final Rectangle bulletBounds = new Rectangle();
     private final Rectangle enemyBounds = new Rectangle();
     private ImmutableArray<Entity> enemies;
+    private float unitScale = 1f;
 
     public CollisionSystem(Array<Rectangle> collisionRects) {
         this(collisionRects, 0);
@@ -40,6 +41,10 @@ public class CollisionSystem extends IteratingSystem {
         super(Family.all(BulletComponent.class, TransformComponent.class, MovementComponent.class, CollisionComponent.class)
             .exclude(EnemyBulletComponent.class).get(), priority);
         this.collisionRects = collisionRects;
+    }
+
+    public void setUnitScale(float unitScale) {
+        this.unitScale = unitScale;
     }
 
     @Override
@@ -75,7 +80,7 @@ public class CollisionSystem extends IteratingSystem {
             MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
             int knockbackDirection = movement.velocity.x >= 0f ? 1 : -1;
             boolean isFlying = FLYING.get(hitEnemy) != null;
-            boolean died = EnemyDamageResolver.applyHit(enemy, enemyMovement, bullet.damage, knockbackDirection, isFlying);
+            boolean died = EnemyDamageResolver.applyHit(enemy, enemyMovement, bullet.damage, knockbackDirection, isFlying, unitScale);
             if (died) {
                 getEngine().removeEntity(hitEnemy);
             }
