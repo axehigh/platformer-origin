@@ -76,7 +76,7 @@ public class DebugRenderSystem extends EntitySystem implements Disposable {
         for (Entity entity : collidables) {
             TransformComponent transform = TRANSFORM.get(entity);
             CollisionComponent collision = COLLISION.get(entity);
-            shapeRenderer.rect(transform.position.x, transform.position.y, collision.bounds.width, collision.bounds.height);
+            shapeRenderer.rect(transform.position.x + collision.bounds.x, transform.position.y + collision.bounds.y, collision.bounds.width, collision.bounds.height);
         }
 
         for (int i = 0; i < roomState.rooms.size; i++) {

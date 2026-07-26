@@ -11,10 +11,33 @@ import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 
-/** Builds a minimal, programmer-art Skin (font + flat-color button drawables) shared by both UI stages. */
+/**
+ * Builds a minimal, programmer-art Skin (font + flat-color button drawables) shared by both UI stages.
+ */
 public final class SkinFactory {
 
     private SkinFactory() {
+    }
+
+    public static Skin createSkin(com.badlogic.gdx.graphics.g2d.TextureAtlas atlas) {
+        Skin skin = new Skin(atlas);
+
+        BitmapFont font = new BitmapFont();
+        skin.add("default-font", font, BitmapFont.class);
+
+        Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
+        skin.add("default", labelStyle);
+
+        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
+        buttonStyle.up = skin.getDrawable("button");
+        buttonStyle.down = skin.getDrawable("button");
+        buttonStyle.font = font;
+        buttonStyle.fontColor = Color.WHITE;
+        skin.add("default", buttonStyle);
+
+        // Add other styles using atlas drawables if possible
+
+        return skin;
     }
 
     public static Skin createBasicSkin() {
@@ -63,3 +86,4 @@ public final class SkinFactory {
         return skin;
     }
 }
+

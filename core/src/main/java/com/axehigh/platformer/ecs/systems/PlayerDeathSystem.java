@@ -24,6 +24,7 @@ public class PlayerDeathSystem extends IteratingSystem {
         }
         PlayerComponent player = PLAYER.get(entity);
         if (player.health <= 0) {
+            player.isDead = true;
             triggered = true;
             onDeath.run();
         }

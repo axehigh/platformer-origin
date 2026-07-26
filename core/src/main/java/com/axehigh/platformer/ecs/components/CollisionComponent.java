@@ -7,9 +7,13 @@ import com.badlogic.gdx.utils.Pool.Poolable;
 /** Bounding box (in world units, relative to the entity's TransformComponent position) used for AABB checks. */
 public class CollisionComponent implements Component, Poolable {
     public final Rectangle bounds = new Rectangle();
+    public float baseOffsetX = 0f;
+    public float baseOffsetY = 0f;
 
     @Override
     public void reset() {
         bounds.set(0f, 0f, 0f, 0f);
+        baseOffsetX = 0f;
+        baseOffsetY = 0f;
     }
 }

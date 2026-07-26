@@ -43,6 +43,7 @@ See @resources/docs-ai/ashley-ecs.md for the full, AI-usable overview of every E
 ---
 
 ## 5. Coding Conventions & Best Practices
+*   **Import** Never Use qualified imports, unless you have to.
 *   **Asset Management:** Use `AssetManager` to load all `TextureAtlas`, `TiledMap`, and audio assets asynchronously.
 *   **Memory Management:** Always explicitly `dispose()` of Textures, SpriteBatches, and TiledMaps when changing screens or shutting down to prevent memory leaks. Pool frequent ECS components if garbage collection spikes occur.
 *   **Frame-Rate Independence:** Always use `Gdx.graphics.getDeltaTime()` inside your Ashley systems' `update` methods.
@@ -50,6 +51,7 @@ See @resources/docs-ai/ashley-ecs.md for the full, AI-usable overview of every E
 *   **ECS Documentation Sync:** Any time an Ashley ECS `Component` or `System` is added, removed, renamed, or has its fields/family/priority/behavior changed, MUST be reflected with a corresponding update to `resources/docs-ai/ashley-ecs.md`, keeping it as the single source of truth for the ECS component/system breakdown.
 *   **Enemy Documentation Sync:** Any time an enemy type is added, removed, renamed, or has its stats/sprite/behavior changed, MUST be reflected with a corresponding update to `resources/docs-ai/enemies.md`, keeping it as the single source of truth for the enemy catalog.
 *   **Timer Convention:** For any new cooldown, countdown, attack-window, or grace-period effect, use the reusable `com.axehigh.platformer.util.Timer` helper (`start()`/`update()`/`isActive()`/`isDone()`) instead of hand-rolling a raw-`float` decrement, matching the existing usage in `PlayerComponent`/`ChestComponent`.
+*   **Enum** Use enum if you can.
 *   **Grill Before Building:** For any new feature request (new mechanic, enemy type, system, visual behavior, etc.), before implementing, "grill" the requester with focused clarifying/challenging questions about the ambiguous design decisions (e.g. exact motion/behavior shape, tunable defaults, edge cases, how it interacts with existing systems) rather than silently guessing. Only proceed with implementation once those decisions are confirmed.
 
 ## 6. Flip-Screen (Room-Based) Camera System

@@ -57,6 +57,10 @@ public class MovementSystem extends IteratingSystem {
         boolean wallClimbing = player != null && player.isWallClimbing;
         boolean flying = FLYING.get(entity) != null;
 
+        if (player != null) {
+            collision.bounds.setX(collision.baseOffsetX);
+        }
+
         if (!flying) {
             movement.velocity.y += (wallClimbing ? WALL_SLIDE_GRAVITY * unitScale : GRAVITY * unitScale) * deltaTime;
             if (wallClimbing) {
@@ -97,7 +101,7 @@ public class MovementSystem extends IteratingSystem {
         }
 
         float newX = transform.position.x + deltaX;
-        entityBounds.set(newX, transform.position.y, collision.bounds.width, collision.bounds.height);
+        entityBounds.set(newX + collision.bounds.x, transform.position.y + collision.bounds.y, collision.bounds.width, collision.bounds.height);
 
         Rectangle hit = findCollision(entityBounds);
         if (hit == null) {
@@ -106,9 +110,9 @@ public class MovementSystem extends IteratingSystem {
         }
 
         if (deltaX > 0f) {
-            transform.position.x = hit.x - collision.bounds.width;
+            transform.position.x = hit.x - collision.bounds.width - collision.bounds.x;
         } else {
-            transform.position.x = hit.x + hit.width;
+            transform.position.x = hit.x + hit.width - collision.bounds.x;
         }
         movement.velocity.x = 0f;
         return true;
@@ -119,7 +123,7 @@ public class MovementSystem extends IteratingSystem {
         movement.grounded = false;
 
         float newY = transform.position.y + deltaY;
-        entityBounds.set(transform.position.x, newY, collision.bounds.width, collision.bounds.height);
+        entityBounds.set(transform.position.x + collision.bounds.x, newY + collision.bounds.y, collision.bounds.width, collision.bounds.height);
 
         Rectangle hit = findCollision(entityBounds);
         if (hit == null) {
@@ -128,10 +132,10 @@ public class MovementSystem extends IteratingSystem {
         }
 
         if (deltaY < 0f) {
-            transform.position.y = hit.y + hit.height;
+            transform.position.y = hit.y + hit.height - collision.bounds.y;
             movement.grounded = true;
         } else if (deltaY > 0f) {
-            transform.position.y = hit.y - collision.bounds.height;
+            transform.position.y = hit.y - collision.bounds.height - collision.bounds.y;
         }
         movement.velocity.y = 0f;
     }

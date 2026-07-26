@@ -224,3 +224,8 @@ A dedicated `DebugRenderSystem` (see `resources/docs-ai/ashley-ecs.md`) draws ev
 5.  **Tries exhausted:** Once `triesRemaining == 0` at the moment of death, the dialog is built with **no** Continue option at all (not merely disabled) — only "Exit to Main Menu" is shown.
 6.  **Exit to Main Menu:** Always available regardless of tries remaining; calls `game.setScreen(new MainMenuScreen(game))`, abandoning the current in-progress level (any stats from the last exit-gate autosave remain on disk, untouched).
 7.  **No death animation/sound:** This mechanic only covers detection + pause + dialog + retry/exit; there is no visual/audio feedback on the player entity itself when health reaches 0.
+
+### Q. Player Scaling (EntityFactory)
+1. Scaling Strategy: Automatic. Player scale is derived from tile size to maintain relative size.
+2. Atlas Usage: Uses `knight2.atlas` instead of `gfx/player.png`.
+3. Implementation: Player `TransformComponent.scale` is set to `unitScale * GameConstants.PlayerScale`. `CollisionComponent.bounds` is set to a tighter 40x80 pixel box (scaled by `finalScale`) for more responsive collision handling.

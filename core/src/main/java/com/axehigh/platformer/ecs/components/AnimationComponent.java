@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 /** Holds per-state animations (Idle, Running, Jumping, Attacking, ...) and playback timing. */
 public class AnimationComponent implements Component {
     public enum State {
-        IDLE, RUNNING, JUMPING, DOUBLE_JUMPING, WALL_CLIMBING, ATTACKING
+        IDLE, WALKING, RUNNING, JUMPING, DOUBLE_JUMPING, WALL_CLIMBING, ATTACKING,DEATH,HURT
     }
 
     public final ObjectMap<State, Animation<TextureRegion>> animations = new ObjectMap<>();

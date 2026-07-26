@@ -57,6 +57,12 @@ public class AnimationSystem extends IteratingSystem {
     }
 
     private AnimationComponent.State resolvePlayerState(PlayerComponent player, MovementComponent movement) {
+        if (player.isDead) {
+            return AnimationComponent.State.DEATH;
+        }
+        if (player.hitInvulnerability.isActive()) {
+            return AnimationComponent.State.HURT;
+        }
         if (player.meleeAttack.isActive()) {
             return AnimationComponent.State.ATTACKING;
         }
@@ -67,7 +73,7 @@ public class AnimationSystem extends IteratingSystem {
             return player.jumpCount >= 2 ? AnimationComponent.State.DOUBLE_JUMPING : AnimationComponent.State.JUMPING;
         }
         if (Math.abs(movement.velocity.x) > 0.01f) {
-            return AnimationComponent.State.RUNNING;
+            return Math.abs(movement.velocity.x) < 50f ? AnimationComponent.State.WALKING : AnimationComponent.State.RUNNING;
         }
         return AnimationComponent.State.IDLE;
     }

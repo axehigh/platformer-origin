@@ -4,7 +4,7 @@ import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.util.Timer;
 import com.badlogic.ashley.core.Component;
 
-/** Flag component storing player-specific data. */
+
 public class PlayerComponent implements Component {
     public int health = GameConstants.MaxHealth;
     public int maxHealth = GameConstants.MaxHealth;
@@ -39,6 +39,9 @@ public class PlayerComponent implements Component {
     public boolean meleeHasHit = false;
     /** Grace period after being hit by an enemy, during which further enemy contact is ignored. */
     public Timer hitInvulnerability = new Timer();
+    
+    /** Flag to track death status. */
+    public boolean isDead = false;
 
     /** One-shot: true only during the frame the interact key/touch button was pressed. */
     public boolean interactPressed = false;

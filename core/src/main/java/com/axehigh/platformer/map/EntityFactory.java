@@ -1,5 +1,6 @@
 package com.axehigh.platformer.map;
 
+import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.ChestComponent;
 import com.axehigh.platformer.ecs.components.CoinPickupComponent;
@@ -20,6 +21,8 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
@@ -47,18 +50,22 @@ public class EntityFactory {
     }
 
     public Entity createPlayer(float x, float y) {
-        Texture texture = getTexture("gfx/player.png");
+        TextureAtlas heroAtlas = assetManager.get("gfx/hero/knight2.atlas", TextureAtlas.class);
+        TextureRegion region = heroAtlas.findRegion("idle");
+
+        float scaleFactor = GameConstants.PlayerScale; // Scaling factor for the new larger graphics
+        float finalScale = unitScale * scaleFactor;
 
         Entity player = new Entity();
 
         TransformComponent transform = new TransformComponent();
         transform.position.set(x, y);
-        transform.scale.set(unitScale, unitScale);
+        transform.scale.set(finalScale, finalScale);
         transform.z = PLAYER_Z;
         player.add(transform);
 
         TextureComponent textureComponent = new TextureComponent();
-        textureComponent.region = new TextureRegion(texture);
+        textureComponent.region = region;
         player.add(textureComponent);
 
         MovementComponent movementComponent = new MovementComponent();
@@ -67,7 +74,20 @@ public class EntityFactory {
         player.add(movementComponent);
 
         CollisionComponent collisionComponent = new CollisionComponent();
-        collisionComponent.bounds.setSize(texture.getWidth() * unitScale, texture.getHeight() * unitScale);
+        float collisionWidth = GameConstants.PlayerCollisionWidth;
+        float collisionHeight = GameConstants.PlayerCollisionHeight;
+        collisionComponent.bounds.setSize(collisionWidth * finalScale, collisionHeight * finalScale);
+
+        if (region instanceof AtlasRegion) {
+            AtlasRegion atlasRegion = (AtlasRegion) region;
+            collisionComponent.baseOffsetX = (atlasRegion.offsetX + (atlasRegion.getRegionWidth() - collisionWidth) / 2f) * finalScale;
+            collisionComponent.baseOffsetY = (atlasRegion.offsetY + (atlasRegion.getRegionHeight() - collisionHeight) / 2f) * finalScale;
+        } else {
+            collisionComponent.baseOffsetX = (region.getRegionWidth() - collisionWidth) / 2f * finalScale;
+            collisionComponent.baseOffsetY = (region.getRegionHeight() - collisionHeight) / 2f * finalScale;
+        }
+        collisionComponent.bounds.setX(collisionComponent.baseOffsetX);
+        collisionComponent.bounds.setY(collisionComponent.baseOffsetY);
         player.add(collisionComponent);
 
         player.add(new PlayerComponent());

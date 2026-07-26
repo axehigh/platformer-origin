@@ -15,12 +15,18 @@ public final class GameConstants {
      */
     public static final float VIRTUAL_HEIGHT = 272f;
 
+    public static float PlayerScale = .5f; // Knight2.png
+
     //Movement MaxSpeedX/Y
     public static float MaxSpeedX = 100f;
     public static float MaxSpeedY = 400f;
     public static int MaxItems = 10;
-    public static int SwordDamage =5;
-    public static int MaxHealth =3;
+    public static int SwordDamage = 5;
+    public static int MaxHealth = 3;
+    public static float PlayerCollisionWidth = 30f;
+    public static float PlayerCollisionHeight = 60f;
+    public static float PlayerOffsetRight = 10f;
+    public static float PlayerOffsetLeft = 40f;
 
     private GameConstants() {
     }

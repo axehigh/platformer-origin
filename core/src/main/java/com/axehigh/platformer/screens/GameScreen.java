@@ -1,5 +1,6 @@
 package com.axehigh.platformer.screens;
 
+import com.axehigh.platformer.assets.GameAssetRegistry;
 import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
@@ -43,6 +44,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
@@ -114,26 +116,14 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-        assetManager.load("gfx/player.png", Texture.class);
-        assetManager.load("gfx/coin.png", Texture.class);
-        assetManager.load("gfx/chest.png", Texture.class);
-        assetManager.load("gfx/torch.png", Texture.class);
-        assetManager.load("gfx/exit_gate.png", Texture.class);
-        assetManager.load("gfx/heart.png", Texture.class);
-        assetManager.load("gfx/bullet.png", Texture.class);
-        assetManager.load("gfx/dagger.png", Texture.class);
-        assetManager.load("gfx/chest_open.png", Texture.class);
-        assetManager.load("gfx/player_attack.png", Texture.class);
-        assetManager.load("gfx/enemy.png", Texture.class);
-        assetManager.load("gfx/enemy_flyer.png", Texture.class);
-        assetManager.load("gfx/enemy_shooter.png", Texture.class);
+        GameAssetRegistry.loadAssets(assetManager);
         assetManager.finishLoading();
 
         MapLoader mapLoader = new MapLoader(levelPath);
         float scale = mapLoader.getTileWidth() / 16f;
         viewport.setWorldSize(GameConstants.VIRTUAL_WIDTH * scale, GameConstants.VIRTUAL_HEIGHT * scale);
         viewport.apply();
-        
+
         EntityFactory entityFactory = new EntityFactory(assetManager);
         entityFactory.setUnitScale(scale);
 
@@ -146,7 +136,7 @@ public class GameScreen implements Screen {
         playerInputSystem.setUnitScale(scale);
         tiledMapRenderSystem = new TiledMapRenderSystem(mapLoader.getMap(), camera, PRIORITY_MAP_RENDER);
         engine.addSystem(playerInputSystem);
-        
+
         EnemySystem enemySystem = new EnemySystem(mapLoader.getCollisionRects(), roomState, PRIORITY_ENEMY);
         enemySystem.setUnitScale(scale);
         engine.addSystem(enemySystem);
@@ -170,7 +160,7 @@ public class GameScreen implements Screen {
         engine.addSystem(meleeSystem);
 
         engine.addSystem(new PickupSystem(PRIORITY_PICKUP));
-        
+
         ChestSystem chestSystem = new ChestSystem(entityFactory, PRIORITY_CHEST);
         chestSystem.setUnitScale(scale);
         engine.addSystem(chestSystem);
@@ -184,7 +174,7 @@ public class GameScreen implements Screen {
         engine.addSystem(debugRenderSystem);
 
         levelManager = new LevelManager(engine, entityFactory, viewport, tiledMapRenderSystem, mapLoader.getCollisionRects(), roomState, mapLoader);
-        
+
         LevelExitSystem exitSystem = new LevelExitSystem(levelManager, PRIORITY_LEVEL_EXIT);
         exitSystem.setUnitScale(scale);
         engine.addSystem(exitSystem);
@@ -205,7 +195,7 @@ public class GameScreen implements Screen {
         entityFactory.spawnObjects(engine, mapLoader.getEnemiesLayer(), roomState);
         CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y);
 
-        uiSkin = SkinFactory.createBasicSkin();
+        uiSkin = SkinFactory.createSkin(assetManager.get("ui/uiskin.atlas", TextureAtlas.class));
         playerComponent = PLAYER.get(player);
         Viewport hudViewport = new FitViewport(GameConstants.VIRTUAL_WIDTH, GameConstants.VIRTUAL_HEIGHT);
         Viewport touchViewport = new FitViewport(GameConstants.VIRTUAL_WIDTH, GameConstants.VIRTUAL_HEIGHT);
@@ -284,11 +274,20 @@ public class GameScreen implements Screen {
     }
 
     private void attachPlayerAnimations(Entity player) {
-        TextureRegion idleRegion = new TextureRegion(assetManager.get("gfx/player.png", Texture.class));
-        TextureRegion attackRegion = new TextureRegion(assetManager.get("gfx/player_attack.png", Texture.class));
+        TextureAtlas heroAtlas = assetManager.get("gfx/hero/knight2.atlas", TextureAtlas.class);
+
         AnimationComponent animationComponent = new AnimationComponent();
-        animationComponent.animations.put(AnimationComponent.State.IDLE, new Animation<>(1f, idleRegion));
-        animationComponent.animations.put(AnimationComponent.State.ATTACKING, new Animation<>(1f, attackRegion));
+        animationComponent.animations.put(AnimationComponent.State.IDLE, new Animation<>(0.1f, heroAtlas.findRegions("idle"), Animation.PlayMode.LOOP));
+        animationComponent.animations.put(AnimationComponent.State.WALKING, new Animation<>(0.1f, heroAtlas.findRegions("walk"), Animation.PlayMode.LOOP));
+        animationComponent.animations.put(AnimationComponent.State.RUNNING, new Animation<>(0.1f, heroAtlas.findRegions("run"), Animation.PlayMode.LOOP));
+        animationComponent.animations.put(AnimationComponent.State.JUMPING, new Animation<>(0.1f, heroAtlas.findRegions("jump"), Animation.PlayMode.NORMAL));
+        animationComponent.animations.put(AnimationComponent.State.DOUBLE_JUMPING, new Animation<>(0.1f, heroAtlas.findRegions("high_jump"), Animation.PlayMode.NORMAL));
+        animationComponent.animations.put(AnimationComponent.State.WALL_CLIMBING, new Animation<>(0.1f, heroAtlas.findRegions("climb"), Animation.PlayMode.LOOP));
+        animationComponent.animations.put(AnimationComponent.State.ATTACKING, new Animation<>(0.1f, heroAtlas.findRegions("attack"), Animation.PlayMode.NORMAL));
+
+        animationComponent.animations.put(AnimationComponent.State.DEATH, new Animation<>(0.1f, heroAtlas.findRegions("death"), Animation.PlayMode.NORMAL));
+        animationComponent.animations.put(AnimationComponent.State.HURT, new Animation<>(0.1f, heroAtlas.findRegions("hurt"), Animation.PlayMode.NORMAL));
+
         player.add(animationComponent);
     }
 

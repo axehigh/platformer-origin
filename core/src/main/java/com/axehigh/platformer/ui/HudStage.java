@@ -5,6 +5,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -33,7 +34,8 @@ public class HudStage extends Stage {
         addActor(root);
 
         Table leftGroup = new Table();
-        Image avatar = new Image(new TextureRegion(assetManager.get("gfx/player.png", Texture.class)));
+        TextureAtlas heroAtlas = assetManager.get("gfx/hero/knight2.atlas", TextureAtlas.class);
+        Image avatar = new Image(heroAtlas.findRegion("idle"));
         leftGroup.add(avatar).size(16f, 16f).padRight(4f);
 
         Table heartsTable = new Table();
