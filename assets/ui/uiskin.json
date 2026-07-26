@@ -1,0 +1,36 @@
+{
+com.badlogic.gdx.graphics.g2d.BitmapFont: {
+	edgeofgalaxy: {
+		file: edgeofgalaxy.fnt
+		scaledSize: -1
+		markupEnabled: false
+		flip: false
+	}
+	sansserif: {
+		file: sansserif.fnt
+		scaledSize: -1
+		markupEnabled: false
+		flip: false
+	}
+}
+com.badlogic.gdx.graphics.Color: {
+	RGBA_0_0_0_255: {
+		r: 0
+		g: 0
+		b: 0
+		a: 1
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
+	default: {
+		up: button
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
+	default: {
+		background: scroll_large
+		titleFont: edgeofgalaxy
+		titleFontColor: RGBA_0_0_0_255
+	}
+}
+}

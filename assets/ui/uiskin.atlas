@@ -1,0 +1,48 @@
+
+uiskin.png
+size: 2048, 2048
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+edgeofgalaxy
+  rotate: false
+  xy: 1, 160
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+sansserif
+  rotate: false
+  xy: 1105, 1405
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+button
+  rotate: false
+  xy: 940, 1114
+  size: 81, 46
+  orig: 81, 46
+  offset: 0, 0
+  index: -1
+scroll_info
+  rotate: false
+  xy: 1619, 1586
+  size: 300, 331
+  orig: 300, 331
+  offset: 0, 0
+  index: -1
+scroll_large
+  rotate: false
+  xy: 1, 674
+  size: 937, 486
+  orig: 937, 486
+  offset: 0, 0
+  index: -1
+table
+  rotate: false
+  xy: 1, 1162
+  size: 1102, 755
+  orig: 1102, 755
+  offset: 0, 0
+  index: -1
