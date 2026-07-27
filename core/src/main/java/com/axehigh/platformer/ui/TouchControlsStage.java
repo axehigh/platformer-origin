@@ -1,5 +1,6 @@
 package com.axehigh.platformer.ui;
 
+import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.systems.PlayerInputSystem;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -7,8 +8,9 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.Viewport;
+
+import static com.axehigh.platformer.GameConstants.*;
 
 /**
  * Mobile touch overlay: bottom-left D-pad (left/right), bottom-right A/B/Y buttons.
@@ -23,6 +25,7 @@ public class TouchControlsStage extends Stage {
         Table root = new Table();
         root.setFillParent(true);
         root.bottom();
+        root.getColor().a = GameConstants.UI_BUTTON_ALPHA;
         addActor(root);
 
         Table dpad = new Table();
@@ -52,8 +55,8 @@ public class TouchControlsStage extends Stage {
                 inputSystem.setTouchRight(false);
             }
         });
-        dpad.add(leftButton).size(24f, 24f).padRight(6f);
-        dpad.add(rightButton).size(24f, 24f);
+        dpad.add(leftButton).size(UI_Button_Move_Size, UI_Button_Move_Size).padRight(UI_Button_Move_Size);
+        dpad.add(rightButton).size(UI_Button_Move_Size, UI_Button_Move_Size);
 
         Table actions = new Table();
         TextButton yButton = new TextButton("Y", skin);
@@ -80,10 +83,10 @@ public class TouchControlsStage extends Stage {
                 return true;
             }
         });
-        actions.add(yButton).size(20f, 20f).pad(2f);
+        actions.add(yButton).size(UI_Button_Action_Size, UI_Button_Action_Size).pad(UI_PADDING);
         actions.row();
-        actions.add(bButton).size(20f, 20f).pad(2f);
-        actions.add(aButton).size(20f, 20f).pad(2f);
+        actions.add(bButton).size(UI_Button_Action_Size, UI_Button_Action_Size).pad(UI_PADDING);
+        actions.add(aButton).size(UI_Button_Action_Size, UI_Button_Action_Size).pad(UI_PADDING);
 
         interactButton = new TextButton("^", skin);
         interactButton.addListener(new InputListener() {
@@ -95,13 +98,15 @@ public class TouchControlsStage extends Stage {
         });
         interactButton.setVisible(false);
 
-        root.add(interactButton).colspan(2).size(20f, 20f).padBottom(6f);
+        root.add(interactButton).colspan(2).size(UI_Button_Action_Size, UI_Button_Action_Size).padBottom(6f);
         root.row();
-        root.add(dpad).expandX().left().pad(10f);
-        root.add(actions).expandX().right().pad(10f);
+        root.add(dpad).expandX().left().pad(20f);
+        root.add(actions).expandX().right().pad(20f);
     }
 
-    /** Shows/hides the contextual interact button, e.g. while the player is near an exit gate. */
+    /**
+     * Shows/hides the contextual interact button, e.g. while the player is near an exit gate.
+     */
     public void setInteractVisible(boolean visible) {
         interactButton.setVisible(visible);
     }
