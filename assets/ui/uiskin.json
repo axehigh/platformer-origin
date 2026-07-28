@@ -14,9 +14,27 @@ com.badlogic.gdx.graphics.g2d.BitmapFont: {
 	}
 }
 com.badlogic.gdx.graphics.Color: {
-	RGBA_0_0_0_255: {
+	BLACK: {
 		r: 0
 		g: 0
+		b: 0
+		a: 1
+	}
+	GREEN: {
+		r: 0.09411765
+		g: 0.8627451
+		b: 0
+		a: 1
+	}
+	RED: {
+		r: 0.9719101
+		g: 0
+		b: 0
+		a: 1
+	}
+	YELLOW: {
+		r: 1
+		g: 1
 		b: 0
 		a: 1
 	}
@@ -26,11 +44,42 @@ com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
 		up: button
 	}
 }
+com.badlogic.gdx.scenes.scene2d.ui.CheckBox$CheckBoxStyle: {
+	default: {
+		checkboxOn: button
+		checkboxOff: button
+		font: edgeofgalaxy
+		fontColor: GREEN
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
+	default: {
+		font: edgeofgalaxy
+		fontColor: GREEN
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
+	default: {
+		font: edgeofgalaxy
+		fontColor: GREEN
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle: {
+	default: {
+		font: edgeofgalaxy
+		fontColor: BLACK
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.TextTooltip$TextTooltipStyle: {
+	default: {
+		label: default
+	}
+}
 com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
 	default: {
 		background: scroll_large
 		titleFont: edgeofgalaxy
-		titleFontColor: RGBA_0_0_0_255
+		titleFontColor: BLACK
 	}
 }
 }
