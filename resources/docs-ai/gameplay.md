@@ -225,12 +225,22 @@ A dedicated `DebugRenderSystem` (see `resources/docs-ai/ashley-ecs.md`) draws ev
 6.  **Exit to Main Menu:** Always available regardless of tries remaining; calls `game.setScreen(new MainMenuScreen(game))`, abandoning the current in-progress level (any stats from the last exit-gate autosave remain on disk, untouched).
 7.  **No death animation/sound:** This mechanic only covers detection + pause + dialog + retry/exit; there is no visual/audio feedback on the player entity itself when health reaches 0.
 
-### Q. Player Scaling (EntityFactory)
+### R. Pause Menu (`GameScreen`)
+1. **Trigger:** The pause menu is triggered by pressing **ESCAPE** or clicking the pause button (`||`) in the HUD.
+2. **State:** Setting `gamePaused = true` freezes the Ashley engine update (`engine.update(...)`) in `GameScreen.render()`, effectively pausing all physics, AI, and animations.
+3. **Dialog:** A Scene2D `Dialog` (titled "Paused") is shown on the `hudStage`.
+4. **Options:**
+    *   **Resume:** Closes the dialog and sets `gamePaused = false`.
+    *   **Music (ON/OFF):** A placeholder toggle for background music volume.
+    *   **Exit to Main Menu:** Returns the player to the `MainMenuScreen`.
+5. **Interaction:** The pause menu is disabled while the Game Over dialog is active.
+
+### S. Player Scaling (EntityFactory)
 1. Scaling Strategy: Automatic. Player scale is derived from tile size to maintain relative size.
 2. Atlas Usage: Uses `knight2.atlas` instead of `gfx/player.png`.
 3. Implementation: Player `TransformComponent.scale` is set to `unitScale * GameConstants.PlayerScale`. `CollisionComponent.bounds` is set to a tighter 40x80 pixel box (scaled by `finalScale`) for more responsive collision handling.
 
-### R. Dynamic Collision Offset & Sprite Alignment (`MovementSystem`, `RenderSystem`)
+### T. Dynamic Collision Offset & Sprite Alignment (`MovementSystem`, `RenderSystem`)
 1. **Alignment & Reach:** The player's collision box can be offset from its visual center using `PlayerOffsetRight`, `PlayerOffsetLeft`, and `PlayerOffsetY` in `GameConstants`. These are used to correct sprite misalignment in the atlas or to provide directional reach.
 2. **Locked Movement:** The collision box target offset is chosen based on `facingDirection` (`PlayerOffsetRight` when facing right, `PlayerOffsetLeft` when facing left). Vertical offset `PlayerOffsetY` is applied constantly.
 3. **Smoothing:** `MovementSystem` smoothly interpolates `CollisionComponent.currentOffsetX` towards the target offset using a lerp, preventing position snaps when turning against walls.

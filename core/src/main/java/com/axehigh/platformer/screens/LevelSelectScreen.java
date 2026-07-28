@@ -31,7 +31,7 @@ public class LevelSelectScreen implements Screen {
 
     @Override
     public void show() {
-        skin = SkinFactory.createBasicSkin();
+        skin = SkinFactory.getSkin();
         Viewport viewport = new FitViewport(GameConstants.VIRTUAL_WIDTH, GameConstants.VIRTUAL_HEIGHT);
         stage = new Stage(viewport);
 
@@ -45,17 +45,16 @@ public class LevelSelectScreen implements Screen {
         Array<String> completedLevelIds = SaveManager.hasSave() ? SaveManager.load().completedLevelIds : new Array<String>();
 
         for (LevelDefinition level : LevelCatalog.levels()) {
-            String buttonText = completedLevelIds.contains(level.id, false)
-                ? level.displayName + " (Completed)"
-                : level.displayName;
+            String buttonText = findButtonTextFor(level, completedLevelIds);
             TextButton levelButton = new TextButton(buttonText, skin);
+            levelButton.getLabel().setFontScale(0.5f);
             levelButton.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
                     game.setScreen(new GameScreen(game, level.tmxPath));
                 }
             });
-            table.add(levelButton).width(160f).padBottom(8f).row();
+            table.add(levelButton).width(120f).padBottom(6f).row();
         }
 
         TextButton backButton = new TextButton("Back", skin);
@@ -65,9 +64,15 @@ public class LevelSelectScreen implements Screen {
                 game.setScreen(new MainMenuScreen(game));
             }
         });
-        table.add(backButton).width(160f).padTop(12f).row();
+        table.add(backButton).width(120f).padTop(10f).row();
 
         Gdx.input.setInputProcessor(stage);
+    }
+
+    private static String findButtonTextFor(LevelDefinition level, Array<String> completedLevelIds) {
+        return completedLevelIds.contains(level.id, false)
+            ? level.displayName + " (Completed)"
+            : level.displayName;
     }
 
     @Override

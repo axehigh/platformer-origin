@@ -57,7 +57,11 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import static com.axehigh.platformer.GameConstants.FontScale;
+import static com.axehigh.platformer.ecs.components.AnimationComponent.State.*;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
+import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
+import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.NORMAL;
 
 /** Owns the Ashley Engine, the fixed-resolution viewport/camera, and drives the game loop. */
 public class GameScreen implements Screen {
@@ -97,6 +101,8 @@ public class GameScreen implements Screen {
     private HudStage hudStage;
     private TouchControlsStage touchControlsStage;
     private boolean gameOverActive = false;
+    private boolean gamePaused = false;
+    private boolean musicEnabled = true;
 
     /** Defaults to the catalog's first level. */
     public GameScreen(Game game) {
@@ -198,11 +204,17 @@ public class GameScreen implements Screen {
         entityFactory.spawnObjects(engine, mapLoader.getEnemiesLayer(), roomState);
         CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y);
 
-        uiSkin = SkinFactory.createSkin(assetManager.get("ui/uiskin.atlas", TextureAtlas.class));
+        uiSkin = SkinFactory.getSkin();
         playerComponent = PLAYER.get(player);
         Viewport hudViewport = new FitViewport(GameConstants.VIRTUAL_WIDTH, GameConstants.VIRTUAL_HEIGHT);
         Viewport touchViewport = new FitViewport(GameConstants.VIRTUAL_WIDTH, GameConstants.VIRTUAL_HEIGHT);
         hudStage = new HudStage(hudViewport, uiSkin, assetManager, playerComponent);
+        hudStage.getPauseButton().addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                togglePause();
+            }
+        });
         touchControlsStage = new TouchControlsStage(touchViewport, uiSkin, playerInputSystem);
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
@@ -212,7 +224,7 @@ public class GameScreen implements Screen {
             @Override
             public boolean keyDown(int keycode) {
                 if (keycode == Input.Keys.ESCAPE) {
-                    game.setScreen(new MainMenuScreen(game));
+                    togglePause();
                     return true;
                 }
                 return false;
@@ -224,6 +236,58 @@ public class GameScreen implements Screen {
     private void onPlayerDeath() {
         gameOverActive = true;
         showGameOverDialog();
+    }
+
+    private void togglePause() {
+        if (gameOverActive) return;
+        gamePaused = !gamePaused;
+        if (gamePaused) {
+            showPauseDialog();
+        }
+    }
+
+    private void showPauseDialog() {
+        Dialog dialog = new Dialog("Paused", uiSkin) {
+            @Override
+            protected void result(Object object) {
+                gamePaused = false;
+            }
+        };
+        dialog.getTitleLabel().setFontScale(FontScale);
+        dialog.getContentTable().defaults().pad(4f);
+        dialog.getButtonTable().defaults().pad(4f);
+
+        TextButton resumeButton = new TextButton("Resume", uiSkin);
+        resumeButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                dialog.hide();
+                gamePaused = false;
+            }
+        });
+        dialog.button(resumeButton);
+
+        final TextButton musicButton = new TextButton("Music: " + (musicEnabled ? "ON" : "OFF"), uiSkin);
+        musicButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                musicEnabled = !musicEnabled;
+                musicButton.setText("Music: " + (musicEnabled ? "ON" : "OFF"));
+                // Placeholder for actual music toggle logic
+            }
+        });
+        dialog.getContentTable().add(musicButton).width(100f).pad(5f).row();
+
+        TextButton exitButton = new TextButton("Exit", uiSkin);
+        exitButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                game.setScreen(new MainMenuScreen(game));
+            }
+        });
+        dialog.button(exitButton);
+
+        dialog.show(hudStage);
     }
 
     private void showGameOverDialog() {
@@ -280,16 +344,15 @@ public class GameScreen implements Screen {
         TextureAtlas heroAtlas = assetManager.get("gfx/hero/knight2.atlas", TextureAtlas.class);
 
         AnimationComponent animationComponent = new AnimationComponent();
-        animationComponent.animations.put(AnimationComponent.State.IDLE, new Animation<>(0.1f, heroAtlas.findRegions("idle"), Animation.PlayMode.LOOP));
-        animationComponent.animations.put(AnimationComponent.State.WALKING, new Animation<>(0.1f, heroAtlas.findRegions("walk"), Animation.PlayMode.LOOP));
-        animationComponent.animations.put(AnimationComponent.State.RUNNING, new Animation<>(0.1f, heroAtlas.findRegions("run"), Animation.PlayMode.LOOP));
-        animationComponent.animations.put(AnimationComponent.State.JUMPING, new Animation<>(0.1f, heroAtlas.findRegions("jump"), Animation.PlayMode.NORMAL));
-        animationComponent.animations.put(AnimationComponent.State.DOUBLE_JUMPING, new Animation<>(0.1f, heroAtlas.findRegions("high_jump"), Animation.PlayMode.NORMAL));
-        animationComponent.animations.put(AnimationComponent.State.WALL_CLIMBING, new Animation<>(0.1f, heroAtlas.findRegions("climb"), Animation.PlayMode.LOOP));
-        animationComponent.animations.put(AnimationComponent.State.ATTACKING, new Animation<>(0.1f, heroAtlas.findRegions("attack"), Animation.PlayMode.NORMAL));
-
-        animationComponent.animations.put(AnimationComponent.State.DEATH, new Animation<>(0.1f, heroAtlas.findRegions("death"), Animation.PlayMode.NORMAL));
-        animationComponent.animations.put(AnimationComponent.State.HURT, new Animation<>(0.1f, heroAtlas.findRegions("hurt"), Animation.PlayMode.NORMAL));
+        animationComponent.animations.put(IDLE, new Animation<>(0.15f, heroAtlas.findRegions("idle"), LOOP));
+        animationComponent.animations.put(WALKING, new Animation<>(0.1f, heroAtlas.findRegions("walk"), LOOP));
+        animationComponent.animations.put(RUNNING, new Animation<>(0.1f, heroAtlas.findRegions("run"), LOOP));
+        animationComponent.animations.put(JUMPING, new Animation<>(0.1f, heroAtlas.findRegions("jump"), NORMAL));
+        animationComponent.animations.put(DOUBLE_JUMPING, new Animation<>(0.1f, heroAtlas.findRegions("high_jump"), NORMAL));
+        animationComponent.animations.put(WALL_CLIMBING, new Animation<>(0.1f, heroAtlas.findRegions("climb"), LOOP));
+        animationComponent.animations.put(ATTACKING, new Animation<>(0.1f, heroAtlas.findRegions("attack"), NORMAL));
+        animationComponent.animations.put(DEATH, new Animation<>(0.1f, heroAtlas.findRegions("death"), NORMAL));
+        animationComponent.animations.put(HURT, new Animation<>(0.1f, heroAtlas.findRegions("hurt"), NORMAL));
 
         player.add(animationComponent);
     }
@@ -298,7 +361,7 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         ScreenUtils.clear(0.1f, 0.1f, 0.15f, 1f);
         viewport.apply();
-        if (!gameOverActive) {
+        if (!gameOverActive && !gamePaused) {
             engine.update(Gdx.graphics.getDeltaTime());
         }
 

@@ -23,6 +23,7 @@ public class HudStage extends Stage {
     private final Image[] heartImages;
     private final Label coinLabel;
     private final Label itemLabel;
+    private final TextButton pauseButton;
 
     public HudStage(Viewport viewport, Skin skin, AssetManager assetManager, PlayerComponent playerComponent) {
         super(viewport);
@@ -58,7 +59,7 @@ public class HudStage extends Stage {
         rightGroup.add(itemIcon).size(16f, 16f).padRight(4f);
         itemLabel = new Label("", skin);
         rightGroup.add(itemLabel).padRight(8f);
-        TextButton pauseButton = new TextButton("||", skin);
+        pauseButton = new TextButton("||", skin);
         rightGroup.add(pauseButton).size(20f, 16f);
 
         root.add(leftGroup).expandX().left().pad(6f);
@@ -80,5 +81,9 @@ public class HudStage extends Stage {
         }
         coinLabel.setText(String.format("x %04d", playerComponent.coins));
         itemLabel.setText(String.format("x %02d/%02d", playerComponent.items, playerComponent.maxItems));
+    }
+
+    public TextButton getPauseButton() {
+        return pauseButton;
     }
 }

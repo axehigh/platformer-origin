@@ -31,7 +31,7 @@ public class PreferencesScreen implements Screen {
 
     @Override
     public void show() {
-        skin = SkinFactory.createBasicSkin();
+        skin = SkinFactory.getSkin();
         Viewport viewport = new FitViewport(GameConstants.VIRTUAL_WIDTH, GameConstants.VIRTUAL_HEIGHT);
         stage = new Stage(viewport);
 
@@ -40,7 +40,8 @@ public class PreferencesScreen implements Screen {
         stage.addActor(table);
 
         Label title = new Label("Preferences", skin);
-        table.add(title).colspan(2).padBottom(20f).row();
+        title.setFontScale(0.8f);
+        table.add(title).colspan(2).padBottom(10f).row();
 
         Label musicLabel = new Label("Music Volume", skin);
         Slider musicSlider = new Slider(0f, 100f, 1f, false, skin);
@@ -52,7 +53,7 @@ public class PreferencesScreen implements Screen {
             }
         });
         table.add(musicLabel).padRight(12f);
-        table.add(musicSlider).width(160f).padBottom(8f).row();
+        table.add(musicSlider).width(120f).padBottom(6f).row();
 
         Label sfxLabel = new Label("SFX Volume", skin);
         Slider sfxSlider = new Slider(0f, 100f, 1f, false, skin);
@@ -64,7 +65,7 @@ public class PreferencesScreen implements Screen {
             }
         });
         table.add(sfxLabel).padRight(12f);
-        table.add(sfxSlider).width(160f).padBottom(8f).row();
+        table.add(sfxSlider).width(120f).padBottom(6f).row();
 
         CheckBox debugCheckBox = new CheckBox(" Debug Mode", skin);
         debugCheckBox.setChecked(preferences.isDebugMode());
@@ -74,7 +75,7 @@ public class PreferencesScreen implements Screen {
                 preferences.setDebugMode(debugCheckBox.isChecked());
             }
         });
-        table.add(debugCheckBox).colspan(2).padBottom(20f).row();
+        table.add(debugCheckBox).colspan(2).padBottom(10f).row();
 
         TextButton backButton = new TextButton("Back", skin);
         backButton.addListener(new ChangeListener() {
@@ -83,7 +84,7 @@ public class PreferencesScreen implements Screen {
                 game.setScreen(new MainMenuScreen(game));
             }
         });
-        table.add(backButton).colspan(2).width(160f).row();
+        table.add(backButton).colspan(2).width(120f).row();
 
         Gdx.input.setInputProcessor(stage);
     }
