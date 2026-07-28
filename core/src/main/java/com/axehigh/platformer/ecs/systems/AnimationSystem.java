@@ -1,6 +1,7 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.ecs.components.AnimationComponent;
+import com.axehigh.platformer.ecs.components.EnemyComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TextureComponent;
@@ -12,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import static com.axehigh.platformer.ecs.components.Mappers.ANIMATION;
+import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
 import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
 import static com.axehigh.platformer.ecs.components.Mappers.TEXTURE;
@@ -40,6 +42,14 @@ public class AnimationSystem extends IteratingSystem {
             TransformComponent transform = TRANSFORM.get(entity);
             if (transform != null) {
                 transform.scale.x = Math.abs(transform.scale.x) * player.facingDirection;
+            }
+        } else if (ENEMY.has(entity) && MOVEMENT.has(entity)) {
+            EnemyComponent enemy = ENEMY.get(entity);
+            animationComponent.currentState = resolveEnemyState(enemy, MOVEMENT.get(entity));
+
+            TransformComponent transform = TRANSFORM.get(entity);
+            if (transform != null) {
+                transform.scale.x = Math.abs(transform.scale.x) * enemy.direction;
             }
         }
 
@@ -74,6 +84,16 @@ public class AnimationSystem extends IteratingSystem {
         }
         if (Math.abs(movement.velocity.x) > 0.01f) {
             return Math.abs(movement.velocity.x) < 50f ? AnimationComponent.State.WALKING : AnimationComponent.State.RUNNING;
+        }
+        return AnimationComponent.State.IDLE;
+    }
+
+    private AnimationComponent.State resolveEnemyState(EnemyComponent enemy, MovementComponent movement) {
+        if (enemy.hitStun.isActive()) {
+            return AnimationComponent.State.HURT;
+        }
+        if (Math.abs(movement.velocity.x) > 0.01f) {
+            return AnimationComponent.State.WALKING;
         }
         return AnimationComponent.State.IDLE;
     }

@@ -32,6 +32,7 @@ import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 
 /** Builds Ashley entities for the player and for object-layer markers (coin, chest, torch, exit gate). */
 public class EntityFactory {
@@ -39,10 +40,12 @@ public class EntityFactory {
     private static final float PLAYER_Z = 10f;
 
     private final AssetManager assetManager;
+    private final TextureAtlas originAtlas;
     private float unitScale = 1f;
 
     public EntityFactory(AssetManager assetManager) {
         this.assetManager = assetManager;
+        this.originAtlas = assetManager.get("gfx/origin-game.atlas", TextureAtlas.class);
     }
 
     public void setUnitScale(float unitScale) {
@@ -373,30 +376,48 @@ public class EntityFactory {
     }
 
     private Entity createEnemy(float x, float y, String enemyType, int roomIndex) {
-        String texturePath;
+        String atlasPrefix;
+        String walkRegionName;
         switch (enemyType) {
             case "flyer":
-                texturePath = "gfx/enemy_flyer.png";
+                atlasPrefix = "mosquito";
+                walkRegionName = "flight";
                 break;
             case "shooter":
-                texturePath = "gfx/enemy_shooter.png";
+                atlasPrefix = "spider";
+                walkRegionName = "walk";
                 break;
             default:
-                texturePath = "gfx/enemy.png";
+                atlasPrefix = "goblin";
+                walkRegionName = "walk";
                 break;
         }
-        Texture texture = getTexture(texturePath);
 
         Entity entity = new Entity();
 
+        // Animations
+        AnimationComponent animComp = new AnimationComponent();
+        float frameDuration = 0.1f;
+        animComp.animations.put(AnimationComponent.State.IDLE, new Animation<>(frameDuration, originAtlas.findRegions(atlasPrefix + "_idle"), Animation.PlayMode.LOOP));
+        animComp.animations.put(AnimationComponent.State.WALKING, new Animation<>(frameDuration, originAtlas.findRegions(atlasPrefix + "_" + walkRegionName), Animation.PlayMode.LOOP));
+        animComp.animations.put(AnimationComponent.State.ATTACKING, new Animation<>(frameDuration, originAtlas.findRegions(atlasPrefix + "_attack"), Animation.PlayMode.NORMAL));
+        animComp.animations.put(AnimationComponent.State.HURT, new Animation<>(frameDuration, originAtlas.findRegions(atlasPrefix + "_hurt"), Animation.PlayMode.NORMAL));
+        animComp.animations.put(AnimationComponent.State.DEATH, new Animation<>(frameDuration, originAtlas.findRegions(atlasPrefix + "_death"), Animation.PlayMode.NORMAL));
+        animComp.currentState = AnimationComponent.State.IDLE;
+        entity.add(animComp);
+
+        TextureRegion initialRegion = animComp.animations.get(AnimationComponent.State.IDLE).getKeyFrame(0);
+
+        float enemyScale = unitScale * 0.5f; // Match player scale for new high-res assets
+
         TransformComponent transform = new TransformComponent();
         transform.position.set(x, y);
-        transform.scale.set(unitScale, unitScale);
+        transform.scale.set(enemyScale, enemyScale);
         transform.z = DECOR_Z;
         entity.add(transform);
 
         TextureComponent textureComponent = new TextureComponent();
-        textureComponent.region = new TextureRegion(texture);
+        textureComponent.region = initialRegion;
         entity.add(textureComponent);
 
         MovementComponent movementComponent = new MovementComponent();
@@ -405,7 +426,12 @@ public class EntityFactory {
         entity.add(movementComponent);
 
         CollisionComponent collisionComponent = new CollisionComponent();
-        collisionComponent.bounds.setSize(texture.getWidth() * unitScale, texture.getHeight() * unitScale);
+        // Use a reasonable collision size for these 128x128 sprites (scaled to 64x64)
+        collisionComponent.bounds.setSize(32f * unitScale, 48f * unitScale);
+        collisionComponent.baseOffsetX = (initialRegion.getRegionWidth() * enemyScale - collisionComponent.bounds.width) / 2f;
+        collisionComponent.baseOffsetY = 0f;
+        collisionComponent.bounds.setX(x + collisionComponent.baseOffsetX);
+        collisionComponent.bounds.setY(y + collisionComponent.baseOffsetY);
         entity.add(collisionComponent);
 
         EnemyComponent enemyComponent = new EnemyComponent();

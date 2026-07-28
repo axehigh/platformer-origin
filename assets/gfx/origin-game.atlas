@@ -1,141 +1,488 @@
 origin-game.png
-size:2048,1024
-repeat:none
-goblin_attack1
-bounds:392,686,128,128
-goblin_attack2
-bounds:782,426,128,128
-goblin_attack3
-bounds:392,426,128,128
-goblin_attack4
-bounds:132,686,128,128
-goblin_attack5
-bounds:262,36,128,128
-goblin_death2
-bounds:2,686,128,128
-goblin_hurt2
-bounds:2,686,128,128
-goblin_death3
-bounds:782,686,128,128
-goblin_death4
-bounds:522,816,128,128
-goblin_hurt3
-bounds:2,816,128,128
-goblin_death1
-bounds:2,816,128,128
-goblin_hurt1
-bounds:2,816,128,128
-goblin_idle1
-bounds:522,296,128,128
+size: 2048, 1024
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+goblin_attack
+  rotate: false
+  xy: 392, 686
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 1
+goblin_attack
+  rotate: false
+  xy: 782, 426
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 2
+goblin_attack
+  rotate: false
+  xy: 392, 426
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 3
+goblin_attack
+  rotate: false
+  xy: 132, 686
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 4
+goblin_attack
+  rotate: false
+  xy: 262, 36
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 5
+goblin_death
+  rotate: false
+  xy: 2, 686
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 2
+goblin_hurt
+  rotate: false
+  xy: 2, 686
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 2
+goblin_death
+  rotate: false
+  xy: 782, 686
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 3
+goblin_death
+  rotate: false
+  xy: 522, 816
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 4
+goblin_hurt
+  rotate: false
+  xy: 2, 816
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 3
+goblin_death
+  rotate: false
+  xy: 2, 816
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 1
+goblin_hurt
+  rotate: false
+  xy: 2, 816
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 1
+goblin_idle
+  rotate: false
+  xy: 522, 296
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 1
 goblin_0goblin
-bounds:522,296,128,128
-goblin_idle2
-bounds:522,686,128,128
-goblin_idle4
-bounds:522,686,128,128
-goblin_idle3
-bounds:912,426,128,128
-goblin_walk1
-bounds:2,166,128,128
-goblin_walk2
-bounds:1042,686,128,128
-goblin_walk3
-bounds:652,686,128,128
-goblin_walk4
-bounds:2,426,128,128
-goblin_walk5
-bounds:652,426,128,128
-goblin_walk6
-bounds:652,816,128,128
+  rotate: false
+  xy: 522, 296
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+goblin_idle
+  rotate: false
+  xy: 522, 686
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 2
+goblin_idle
+  rotate: false
+  xy: 522, 686
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 4
+goblin_idle
+  rotate: false
+  xy: 912, 426
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 3
+goblin_walk
+  rotate: false
+  xy: 2, 166
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 1
+goblin_walk
+  rotate: false
+  xy: 1042, 686
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 2
+goblin_walk
+  rotate: false
+  xy: 652, 686
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 3
+goblin_walk
+  rotate: false
+  xy: 2, 426
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 4
+goblin_walk
+  rotate: false
+  xy: 652, 426
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 5
+goblin_walk
+  rotate: false
+  xy: 652, 816
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 6
 mosquito_0mosquito
-bounds:522,166,128,128
-mosquito_attack1_getto1
-bounds:652,166,128,128
-mosquito_attack1_getto2
-bounds:522,426,128,128
-mosquito_attack2_cycle1
-bounds:392,166,128,128
-mosquito_attack2_cycle2
-bounds:392,556,128,128
-mosquito_attack2_cycle3
-bounds:782,296,128,128
+  rotate: false
+  xy: 522, 166
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+mosquito_attack1_getto
+  rotate: false
+  xy: 652, 166
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 1
+mosquito_attack1_getto
+  rotate: false
+  xy: 522, 426
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 2
+mosquito_attack2_cycle
+  rotate: false
+  xy: 392, 166
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 1
+mosquito_attack2_cycle
+  rotate: false
+  xy: 392, 556
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 2
+mosquito_attack2_cycle
+  rotate: false
+  xy: 782, 296
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 3
 mosquito_attack3_get_out
-bounds:652,296,128,128
-mosquito_death1
-bounds:132,36,128,128
-mosquito_hurt1
-bounds:132,36,128,128
-mosquito_death2
-bounds:392,816,128,128
-mosquito_hurt2
-bounds:392,816,128,128
-mosquito_death3
-bounds:1042,816,128,128
-mosquito_death4
-bounds:132,166,128,128
-mosquito_flight1
-bounds:132,556,128,128
-mosquito_flight2
-bounds:782,556,128,128
-mosquito_flight3
-bounds:2,36,128,128
-mosquito_hurt3
-bounds:132,426,128,128
-mosquito_idle1
-bounds:912,556,128,128
-mosquito_idle2
-bounds:522,556,128,128
-mosquito_idle3
-bounds:262,816,128,128
-spider_attack1
-bounds:262,166,128,128
-spider_attack2
-bounds:2,296,128,128
-spider_attack3
-bounds:392,36,128,128
-spider_death1
-bounds:132,816,128,128
-spider_hurt1
-bounds:132,816,128,128
-spider_death3
-bounds:132,296,128,128
-spider_death4
-bounds:1172,816,128,128
-spider_hurt2
-bounds:652,556,128,128
-spider_death2
-bounds:652,556,128,128
-spider_hurt3
-bounds:262,556,128,128
-spider_idle2
-bounds:782,816,128,128
-spider_idle3
-bounds:262,686,128,128
+  rotate: false
+  xy: 652, 296
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+mosquito_death
+  rotate: false
+  xy: 132, 36
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 1
+mosquito_hurt
+  rotate: false
+  xy: 132, 36
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 1
+mosquito_death
+  rotate: false
+  xy: 392, 816
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 2
+mosquito_hurt
+  rotate: false
+  xy: 392, 816
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 2
+mosquito_death
+  rotate: false
+  xy: 1042, 816
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 3
+mosquito_death
+  rotate: false
+  xy: 132, 166
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 4
+mosquito_flight
+  rotate: false
+  xy: 132, 556
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 1
+mosquito_flight
+  rotate: false
+  xy: 782, 556
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 2
+mosquito_flight
+  rotate: false
+  xy: 2, 36
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 3
+mosquito_hurt
+  rotate: false
+  xy: 132, 426
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 3
+mosquito_idle
+  rotate: false
+  xy: 912, 556
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 1
+mosquito_idle
+  rotate: false
+  xy: 522, 556
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 2
+mosquito_idle
+  rotate: false
+  xy: 262, 816
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 3
+spider_attack
+  rotate: false
+  xy: 262, 166
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 1
+spider_attack
+  rotate: false
+  xy: 2, 296
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 2
+spider_attack
+  rotate: false
+  xy: 392, 36
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 3
+spider_death
+  rotate: false
+  xy: 132, 816
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 1
+spider_hurt
+  rotate: false
+  xy: 132, 816
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 1
+spider_death
+  rotate: false
+  xy: 132, 296
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 3
+spider_death
+  rotate: false
+  xy: 1172, 816
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 4
+spider_hurt
+  rotate: false
+  xy: 652, 556
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 2
+spider_death
+  rotate: false
+  xy: 652, 556
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 2
+spider_hurt
+  rotate: false
+  xy: 262, 556
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 3
+spider_idle
+  rotate: false
+  xy: 782, 816
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 2
+spider_idle
+  rotate: false
+  xy: 262, 686
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 3
 spider_0spider
-bounds:262,686,128,128
-spider_idle1
-bounds:262,686,128,128
-spider_idle4
-bounds:912,686,128,128
-spider_walk1
-bounds:262,296,128,128
-spider_walk2
-bounds:2,556,128,128
-spider_walk3
-bounds:912,816,128,128
-spider_walk4
-bounds:262,426,128,128
-spider_walk5
-bounds:522,36,128,128
-spider_walk6
-bounds:392,296,128,128
-spider_web1
-bounds:1172,782,32,32
-spider_web2
-bounds:2,2,32,32
-spider_web3
-bounds:1302,912,32,32
-spider_web4
-bounds:1042,652,32,32
-spider_web5
-bounds:652,132,32,32
+  rotate: false
+  xy: 262, 686
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+spider_idle
+  rotate: false
+  xy: 262, 686
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 1
+spider_idle
+  rotate: false
+  xy: 912, 686
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 4
+spider_walk
+  rotate: false
+  xy: 262, 296
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 1
+spider_walk
+  rotate: false
+  xy: 2, 556
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 2
+spider_walk
+  rotate: false
+  xy: 912, 816
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 3
+spider_walk
+  rotate: false
+  xy: 262, 426
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 4
+spider_walk
+  rotate: false
+  xy: 522, 36
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 5
+spider_walk
+  rotate: false
+  xy: 392, 296
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 6
+spider_web
+  rotate: false
+  xy: 1172, 782
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 1
+spider_web
+  rotate: false
+  xy: 2, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 2
+spider_web
+  rotate: false
+  xy: 1302, 912
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 3
+spider_web
+  rotate: false
+  xy: 1042, 652
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 4
+spider_web
+  rotate: false
+  xy: 652, 132
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: 5

@@ -11,6 +11,7 @@ public final class GameAssetRegistry {
 
     public static void loadAssets(AssetManager assetManager) {
         assetManager.load("gfx/hero/knight2.atlas", TextureAtlas.class);
+        assetManager.load("gfx/origin-game.atlas", TextureAtlas.class);
         assetManager.load("ui/uiskin.atlas", TextureAtlas.class);
         assetManager.load("gfx/player.png", Texture.class);
         assetManager.load("gfx/coin.png", Texture.class);
@@ -21,8 +22,5 @@ public final class GameAssetRegistry {
         assetManager.load("gfx/bullet.png", Texture.class);
         assetManager.load("gfx/dagger.png", Texture.class);
         assetManager.load("gfx/chest_open.png", Texture.class);
-        assetManager.load("gfx/enemy.png", Texture.class);
-        assetManager.load("gfx/enemy_flyer.png", Texture.class);
-        assetManager.load("gfx/enemy_shooter.png", Texture.class);
     }
 }
