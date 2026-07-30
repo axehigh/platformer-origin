@@ -47,6 +47,7 @@ public class MainMenuScreen implements Screen {
         table.add(title).padBottom(8f).row();
 
         TextButton newGameButton = new TextButton("New Game", skin);
+        newGameButton.getLabel().setFontScale(FontScale);
         newGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -56,6 +57,7 @@ public class MainMenuScreen implements Screen {
         table.add(newGameButton).width(100f).padBottom(4f).row();
 
         TextButton continueButton = new TextButton("Continue", skin);
+        continueButton.getLabel().setFontScale(FontScale);
         if (SaveManager.hasSave()) {
             continueButton.addListener(new ChangeListener() {
                 @Override
@@ -70,6 +72,7 @@ public class MainMenuScreen implements Screen {
         table.add(continueButton).width(100f).padBottom(4f).row();
 
         TextButton selectLevelButton = new TextButton("Select Level", skin);
+        selectLevelButton.getLabel().setFontScale(FontScale);
         selectLevelButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -79,6 +82,7 @@ public class MainMenuScreen implements Screen {
         table.add(selectLevelButton).width(100f).padBottom(4f).row();
 
         TextButton preferencesButton = new TextButton("Preferences", skin);
+        preferencesButton.getLabel().setFontScale(FontScale);
         preferencesButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {

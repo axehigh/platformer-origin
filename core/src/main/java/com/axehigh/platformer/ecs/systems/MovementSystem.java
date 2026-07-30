@@ -1,5 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
+import com.axehigh.platformer.assets.SpriteConstants;
 import com.axehigh.platformer.ecs.components.BulletComponent;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
@@ -12,7 +13,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
-import static com.axehigh.platformer.GameConstants.*;
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.FLYING;
 import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
@@ -59,7 +59,7 @@ public class MovementSystem extends IteratingSystem {
         boolean flying = FLYING.get(entity) != null;
 
         if (player != null) {
-            float targetOffset = (player.facingDirection > 0) ? PlayerOffsetRight : PlayerOffsetLeft;
+            float targetOffset = (player.facingDirection > 0) ? SpriteConstants.PlayerOffsetRight : SpriteConstants.PlayerOffsetLeft;
             targetOffset *= Math.abs(transform.scale.x);
 
             // Smoothly interpolate the offset to avoid "jumping" when turning against walls

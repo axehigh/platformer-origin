@@ -238,10 +238,10 @@ A dedicated `DebugRenderSystem` (see `resources/docs-ai/ashley-ecs.md`) draws ev
 ### S. Player Scaling (EntityFactory)
 1. Scaling Strategy: Automatic. Player scale is derived from tile size to maintain relative size.
 2. Atlas Usage: Uses `knight2.atlas` instead of `gfx/player.png`.
-3. Implementation: Player `TransformComponent.scale` is set to `unitScale * GameConstants.PlayerScale`. `CollisionComponent.bounds` is set to a tighter 40x80 pixel box (scaled by `finalScale`) for more responsive collision handling.
+3. Implementation: Player `TransformComponent.scale` is set to `unitScale * SpriteCollision.PlayerScale`. `CollisionComponent.bounds` is set to a tighter 40x80 pixel box (scaled by `finalScale`) for more responsive collision handling.
 
 ### T. Dynamic Collision Offset & Sprite Alignment (`MovementSystem`, `RenderSystem`)
-1. **Alignment & Reach:** The player's collision box can be offset from its visual center using `PlayerOffsetRight`, `PlayerOffsetLeft`, and `PlayerOffsetY` in `GameConstants`. These are used to correct sprite misalignment in the atlas or to provide directional reach.
+1. **Alignment & Reach:** The player's collision box can be offset from its visual center using `PlayerOffsetRight`, `PlayerOffsetLeft`, and `PlayerOffsetY` in `SpriteConstants`. These are used to correct sprite misalignment in the atlas or to provide directional reach.
 2. **Locked Movement:** The collision box target offset is chosen based on `facingDirection` (`PlayerOffsetRight` when facing right, `PlayerOffsetLeft` when facing left). Vertical offset `PlayerOffsetY` is applied constantly.
 3. **Smoothing:** `MovementSystem` smoothly interpolates `CollisionComponent.currentOffsetX` towards the target offset using a lerp, preventing position snaps when turning against walls.
 4. **Visual Anchoring:** `RenderSystem` anchors the sprite such that the character's center remains locked to the collision box center (compensated for offsets). To prevent the character from "jumping" in world space when flipping off-center frames, the system dynamically compensates by flipping the sign of the directional offsets (`currentOffsetX/Y`) when calculating the sprite's `frameCenterX/Y`. This ensures that both the character and its collision box remain stable and aligned during turns, even if the character is not centered in the sprite frame.

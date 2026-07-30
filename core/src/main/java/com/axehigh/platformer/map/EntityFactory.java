@@ -1,6 +1,6 @@
 package com.axehigh.platformer.map;
 
-import com.axehigh.platformer.GameConstants;
+import com.axehigh.platformer.assets.SpriteConstants;
 import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.ChestComponent;
 import com.axehigh.platformer.ecs.components.CoinPickupComponent;
@@ -32,9 +32,10 @@ import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Array;
 
-/** Builds Ashley entities for the player and for object-layer markers (coin, chest, torch, exit gate). */
+/**
+ * Builds Ashley entities for the player and for object-layer markers (coin, chest, torch, exit gate).
+ */
 public class EntityFactory {
     private static final float DECOR_Z = 5f;
     private static final float PLAYER_Z = 10f;
@@ -56,7 +57,7 @@ public class EntityFactory {
         TextureAtlas heroAtlas = assetManager.get("gfx/hero/knight2.atlas", TextureAtlas.class);
         TextureRegion region = heroAtlas.findRegion("idle");
 
-        float scaleFactor = GameConstants.PlayerScale; // Scaling factor for the new larger graphics
+        float scaleFactor = SpriteConstants.PlayerScale; // Scaling factor for the new larger graphics
         float finalScale = unitScale * scaleFactor;
 
         Entity player = new Entity();
@@ -77,8 +78,8 @@ public class EntityFactory {
         player.add(movementComponent);
 
         CollisionComponent collisionComponent = new CollisionComponent();
-        float collisionWidth = GameConstants.PlayerCollisionWidth;
-        float collisionHeight = GameConstants.PlayerCollisionHeight;
+        float collisionWidth = SpriteConstants.PlayerCollisionWidth;
+        float collisionHeight = SpriteConstants.PlayerCollisionHeight;
         collisionComponent.bounds.setSize(collisionWidth * finalScale, collisionHeight * finalScale);
 
         if (region instanceof AtlasRegion) {
@@ -89,8 +90,8 @@ public class EntityFactory {
             collisionComponent.baseOffsetX = (region.getRegionWidth() - collisionWidth) / 2f * finalScale;
             collisionComponent.baseOffsetY = (region.getRegionHeight() - collisionHeight) / 2f * finalScale;
         }
-        collisionComponent.currentOffsetX = GameConstants.PlayerOffsetRight * finalScale;
-        collisionComponent.currentOffsetY = GameConstants.PlayerOffsetY * finalScale;
+        collisionComponent.currentOffsetX = SpriteConstants.PlayerOffsetRight * finalScale;
+        collisionComponent.currentOffsetY = SpriteConstants.PlayerOffsetY * finalScale;
         collisionComponent.bounds.setX(collisionComponent.baseOffsetX + collisionComponent.currentOffsetX);
         collisionComponent.bounds.setY(collisionComponent.baseOffsetY + collisionComponent.currentOffsetY);
         player.add(collisionComponent);
@@ -129,8 +130,8 @@ public class EntityFactory {
                     width = tile.getTextureRegion().getRegionWidth();
                     height = tile.getTextureRegion().getRegionHeight();
                 }
-                spawnX = object.getProperties().get("x", 0f, Float.class);
-                spawnY = object.getProperties().get("y", 0f, Float.class);
+                spawnX = tileObj.getX();
+                spawnY = tileObj.getY();
                 centerX = spawnX + width / 2f;
                 centerY = spawnY + height / 2f;
             } else {
@@ -268,7 +269,9 @@ public class EntityFactory {
         return entity;
     }
 
-    /** Builds a chest entity from a Tiled map tile. */
+    /**
+     * Builds a chest entity from a Tiled map tile.
+     */
     public Entity createChest(float x, float y, TiledMapTile tile) {
         Entity entity = new Entity();
 
@@ -292,7 +295,9 @@ public class EntityFactory {
         return entity;
     }
 
-    /** Builds a static, standalone coin pickup entity (used for map object markers). */
+    /**
+     * Builds a static, standalone coin pickup entity (used for map object markers).
+     */
     public Entity createCoinPickup(float x, float y) {
         Texture texture = getTexture("gfx/coin.png");
 
@@ -317,7 +322,9 @@ public class EntityFactory {
         return entity;
     }
 
-    /** Builds a coin pickup from a Tiled map tile, supporting animation if defined in the tileset. */
+    /**
+     * Builds a coin pickup from a Tiled map tile, supporting animation if defined in the tileset.
+     */
     public Entity createCoinPickup(float x, float y, TiledMapTile tile) {
         Entity entity = new Entity();
 
@@ -378,18 +385,39 @@ public class EntityFactory {
     private Entity createEnemy(float x, float y, String enemyType, int roomIndex) {
         String atlasPrefix;
         String walkRegionName;
+        float colWidth, colHeight, colOffsetY, enemyScale;
         switch (enemyType) {
             case "flyer":
                 atlasPrefix = "mosquito";
                 walkRegionName = "flight";
+                colWidth = SpriteConstants.EnemyFlyerCollisionWidth;
+                colHeight = SpriteConstants.EnemyFlyerCollisionHeight;
+                colOffsetY = SpriteConstants.EnemyFlyerOffsetY;
+                enemyScale = unitScale * SpriteConstants.EnemyFlyerScale;
                 break;
             case "shooter":
                 atlasPrefix = "spider";
                 walkRegionName = "walk";
+                colWidth = SpriteConstants.EnemyShooterCollisionWidth;
+                colHeight = SpriteConstants.EnemyShooterCollisionHeight;
+                colOffsetY = SpriteConstants.EnemyShooterOffsetY;
+                enemyScale = unitScale * SpriteConstants.EnemyShooterScale;
+                break;
+            case "knight":
+                atlasPrefix = "goblin";
+                walkRegionName = "walk";
+                colWidth = SpriteConstants.EnemyKnightCollisionWidth;
+                colHeight = SpriteConstants.EnemyKnightCollisionHeight;
+                colOffsetY = SpriteConstants.EnemyKnightOffsetY;
+                enemyScale = unitScale * SpriteConstants.EnemyKnightScale;
                 break;
             default:
                 atlasPrefix = "goblin";
                 walkRegionName = "walk";
+                colWidth = SpriteConstants.EnemyWalkerCollisionWidth;
+                colHeight = SpriteConstants.EnemyWalkerCollisionHeight;
+                colOffsetY = SpriteConstants.EnemyWalkerOffsetY;
+                enemyScale = unitScale * SpriteConstants.EnemyWalkerScale;
                 break;
         }
 
@@ -408,7 +436,6 @@ public class EntityFactory {
 
         TextureRegion initialRegion = animComp.animations.get(AnimationComponent.State.IDLE).getKeyFrame(0);
 
-        float enemyScale = unitScale * 0.5f; // Match player scale for new high-res assets
 
         TransformComponent transform = new TransformComponent();
         transform.position.set(x, y);
@@ -426,12 +453,13 @@ public class EntityFactory {
         entity.add(movementComponent);
 
         CollisionComponent collisionComponent = new CollisionComponent();
-        // Use a reasonable collision size for these 128x128 sprites (scaled to 64x64)
-        collisionComponent.bounds.setSize(32f * unitScale, 48f * unitScale);
-        collisionComponent.baseOffsetX = (initialRegion.getRegionWidth() * enemyScale - collisionComponent.bounds.width) / 2f;
-        collisionComponent.baseOffsetY = 0f;
-        collisionComponent.bounds.setX(x + collisionComponent.baseOffsetX);
-        collisionComponent.bounds.setY(y + collisionComponent.baseOffsetY);
+        collisionComponent.bounds.setSize(colWidth * enemyScale, colHeight * enemyScale);
+        collisionComponent.baseOffsetX = (128f * enemyScale - collisionComponent.bounds.width) / 2f;
+        collisionComponent.baseOffsetY = (128f * enemyScale - collisionComponent.bounds.height) / 2f;
+        collisionComponent.currentOffsetY = colOffsetY * enemyScale;
+
+        collisionComponent.bounds.setX(collisionComponent.baseOffsetX);
+        collisionComponent.bounds.setY(collisionComponent.baseOffsetY + collisionComponent.currentOffsetY);
         entity.add(collisionComponent);
 
         EnemyComponent enemyComponent = new EnemyComponent();

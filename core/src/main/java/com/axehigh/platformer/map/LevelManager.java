@@ -1,6 +1,7 @@
 package com.axehigh.platformer.map;
 
 import com.axehigh.platformer.GameConstants;
+import com.axehigh.platformer.assets.SpriteConstants;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
@@ -131,13 +132,13 @@ public class LevelManager implements Disposable {
         Vector2 playerStart = mapLoader.findPlayerStart();
         TransformComponent transform = TRANSFORM.get(player);
         transform.position.set(playerStart.x, playerStart.y);
-        float playerFinalScale = newScale * GameConstants.PlayerScale;
+        float playerFinalScale = newScale * SpriteConstants.PlayerScale;
         transform.scale.set(playerFinalScale, playerFinalScale);
 
         CollisionComponent playerCollision = COLLISION.get(player);
         if (playerCollision != null) {
-            float collisionWidth = GameConstants.PlayerCollisionWidth;
-            float collisionHeight = GameConstants.PlayerCollisionHeight;
+            float collisionWidth = SpriteConstants.PlayerCollisionWidth;
+            float collisionHeight = SpriteConstants.PlayerCollisionHeight;
             playerCollision.bounds.setSize(collisionWidth * playerFinalScale, collisionHeight * playerFinalScale);
 
             TextureComponent tex = TEXTURE.get(player);
@@ -145,8 +146,8 @@ public class LevelManager implements Disposable {
                 AtlasRegion atlasRegion = (AtlasRegion) tex.region;
                 playerCollision.baseOffsetX = (atlasRegion.offsetX + (atlasRegion.getRegionWidth() - collisionWidth) / 2f) * playerFinalScale;
                 playerCollision.baseOffsetY = (atlasRegion.offsetY + (atlasRegion.getRegionHeight() - collisionHeight) / 2f) * playerFinalScale;
-                playerCollision.currentOffsetX = GameConstants.PlayerOffsetRight * playerFinalScale;
-                playerCollision.currentOffsetY = GameConstants.PlayerOffsetY * playerFinalScale;
+                playerCollision.currentOffsetX = SpriteConstants.PlayerOffsetRight * playerFinalScale;
+                playerCollision.currentOffsetY = SpriteConstants.PlayerOffsetY * playerFinalScale;
                 playerCollision.bounds.setX(playerCollision.baseOffsetX + playerCollision.currentOffsetX);
                 playerCollision.bounds.setY(playerCollision.baseOffsetY + playerCollision.currentOffsetY);
             }

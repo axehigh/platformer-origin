@@ -148,8 +148,8 @@ public class MapLoader implements Disposable {
                     width = tile.getTextureRegion().getRegionWidth();
                     height = tile.getTextureRegion().getRegionHeight();
                 }
-                x = object.getProperties().get("x", 0f, Float.class);
-                y = object.getProperties().get("y", 0f, Float.class);
+                x = tileObj.getX();
+                y = tileObj.getY();
             } else {
                 continue;
             }

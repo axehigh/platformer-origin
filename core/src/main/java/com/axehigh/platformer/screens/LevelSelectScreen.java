@@ -40,6 +40,7 @@ public class LevelSelectScreen implements Screen {
         stage.addActor(table);
 
         Label title = new Label("Select Level", skin);
+        title.setFontScale(GameConstants.FontScale);
         table.add(title).padBottom(20f).row();
 
         Array<String> completedLevelIds = SaveManager.hasSave() ? SaveManager.load().completedLevelIds : new Array<String>();
@@ -47,7 +48,7 @@ public class LevelSelectScreen implements Screen {
         for (LevelDefinition level : LevelCatalog.levels()) {
             String buttonText = findButtonTextFor(level, completedLevelIds);
             TextButton levelButton = new TextButton(buttonText, skin);
-            levelButton.getLabel().setFontScale(0.5f);
+            levelButton.getLabel().setFontScale(GameConstants.FontScale);
             levelButton.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
@@ -58,6 +59,7 @@ public class LevelSelectScreen implements Screen {
         }
 
         TextButton backButton = new TextButton("Back", skin);
+        backButton.getLabel().setFontScale(GameConstants.FontScale);
         backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {

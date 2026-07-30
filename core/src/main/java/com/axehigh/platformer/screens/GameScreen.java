@@ -1,52 +1,23 @@
 package com.axehigh.platformer.screens;
 
-import com.axehigh.platformer.assets.GameAssetRegistry;
 import com.axehigh.platformer.GameConstants;
+import com.axehigh.platformer.assets.GameAssetRegistry;
 import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.systems.AnimationSystem;
-import com.axehigh.platformer.ecs.systems.CameraSystem;
-import com.axehigh.platformer.ecs.systems.ChestSystem;
-import com.axehigh.platformer.ecs.systems.CollisionBoundsSystem;
-import com.axehigh.platformer.ecs.systems.CollisionSystem;
-import com.axehigh.platformer.ecs.systems.DebugRenderSystem;
-import com.axehigh.platformer.ecs.systems.EnemyBulletCollisionSystem;
-import com.axehigh.platformer.ecs.systems.EnemyContactSystem;
-import com.axehigh.platformer.ecs.systems.EnemyShootSystem;
-import com.axehigh.platformer.ecs.systems.EnemySystem;
-import com.axehigh.platformer.ecs.systems.LevelExitSystem;
-import com.axehigh.platformer.ecs.systems.MeleeAttackSystem;
-import com.axehigh.platformer.ecs.systems.MovementSystem;
-import com.axehigh.platformer.ecs.systems.PickupSystem;
-import com.axehigh.platformer.ecs.systems.PlayerDeathSystem;
-import com.axehigh.platformer.ecs.systems.PlayerInputSystem;
-import com.axehigh.platformer.ecs.systems.RenderSystem;
-import com.axehigh.platformer.ecs.systems.TiledMapRenderSystem;
-import com.axehigh.platformer.map.EntityFactory;
-import com.axehigh.platformer.map.LevelCatalog;
-import com.axehigh.platformer.map.LevelManager;
-import com.axehigh.platformer.map.MapLoader;
-import com.axehigh.platformer.map.RoomState;
-import com.axehigh.platformer.map.SaveData;
-import com.axehigh.platformer.util.SaveManager;
+import com.axehigh.platformer.ecs.systems.*;
+import com.axehigh.platformer.map.*;
 import com.axehigh.platformer.ui.HudStage;
 import com.axehigh.platformer.ui.SkinFactory;
 import com.axehigh.platformer.ui.TouchControlsStage;
+import com.axehigh.platformer.util.SaveManager;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
-import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -227,6 +198,10 @@ public class GameScreen implements Screen {
                     togglePause();
                     return true;
                 }
+                if (keycode == Input.Keys.Q) {
+                    game.setScreen(new MainMenuScreen(game));
+                    return true;
+                }
                 return false;
             }
         });
@@ -254,10 +229,11 @@ public class GameScreen implements Screen {
             }
         };
         dialog.getTitleLabel().setFontScale(FontScale);
-        dialog.getContentTable().defaults().pad(4f);
-        dialog.getButtonTable().defaults().pad(4f);
+        dialog.getContentTable().defaults().pad(2f);
+        dialog.getButtonTable().defaults().pad(2f);
 
         TextButton resumeButton = new TextButton("Resume", uiSkin);
+        resumeButton.getLabel().setFontScale(FontScale);
         resumeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
@@ -268,6 +244,7 @@ public class GameScreen implements Screen {
         dialog.button(resumeButton);
 
         final TextButton musicButton = new TextButton("Music: " + (musicEnabled ? "ON" : "OFF"), uiSkin);
+        musicButton.getLabel().setFontScale(FontScale);
         musicButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
@@ -276,15 +253,17 @@ public class GameScreen implements Screen {
                 // Placeholder for actual music toggle logic
             }
         });
-        dialog.getContentTable().add(musicButton).width(100f).pad(5f).row();
+        dialog.getContentTable().add(musicButton).width(80f).pad(4f).row();
 
         TextButton exitButton = new TextButton("Exit", uiSkin);
+        exitButton.getLabel().setFontScale(FontScale);
         exitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
                 game.setScreen(new MainMenuScreen(game));
             }
         });
+
         dialog.button(exitButton);
 
         dialog.show(hudStage);
@@ -298,10 +277,14 @@ public class GameScreen implements Screen {
             protected void result(Object object) {
             }
         };
-        dialog.text(new Label("You died!", uiSkin));
+        dialog.getTitleLabel().setFontScale(FontScale);
+        Label deathLabel = new Label("You died!", uiSkin);
+        deathLabel.setFontScale(FontScale);
+        dialog.text(deathLabel);
 
         if (currentSave.triesRemaining > 0) {
             TextButton continueButton = new TextButton("Continue (uses 1 try)", uiSkin);
+            continueButton.getLabel().setFontScale(FontScale);
             continueButton.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
@@ -317,6 +300,7 @@ public class GameScreen implements Screen {
         }
 
         TextButton exitButton = new TextButton("Exit to Main Menu", uiSkin);
+        exitButton.getLabel().setFontScale(FontScale);
         exitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {

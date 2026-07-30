@@ -13,6 +13,7 @@ public final class GameAssetRegistry {
         assetManager.load("gfx/hero/knight2.atlas", TextureAtlas.class);
         assetManager.load("gfx/origin-game.atlas", TextureAtlas.class);
         assetManager.load("ui/uiskin.atlas", TextureAtlas.class);
+        //TODO This will be outdated after the atlas'es have been loaded.
         assetManager.load("gfx/player.png", Texture.class);
         assetManager.load("gfx/coin.png", Texture.class);
         assetManager.load("gfx/chest.png", Texture.class);

@@ -40,10 +40,11 @@ public class PreferencesScreen implements Screen {
         stage.addActor(table);
 
         Label title = new Label("Preferences", skin);
-        title.setFontScale(0.8f);
+        title.setFontScale(GameConstants.FontScale);
         table.add(title).colspan(2).padBottom(10f).row();
 
         Label musicLabel = new Label("Music Volume", skin);
+        musicLabel.setFontScale(GameConstants.FontScale);
         Slider musicSlider = new Slider(0f, 100f, 1f, false, skin);
         musicSlider.setValue(preferences.getMusicVolume());
         musicSlider.addListener(new ChangeListener() {
@@ -56,6 +57,7 @@ public class PreferencesScreen implements Screen {
         table.add(musicSlider).width(120f).padBottom(6f).row();
 
         Label sfxLabel = new Label("SFX Volume", skin);
+        sfxLabel.setFontScale(GameConstants.FontScale);
         Slider sfxSlider = new Slider(0f, 100f, 1f, false, skin);
         sfxSlider.setValue(preferences.getSfxVolume());
         sfxSlider.addListener(new ChangeListener() {
@@ -68,6 +70,7 @@ public class PreferencesScreen implements Screen {
         table.add(sfxSlider).width(120f).padBottom(6f).row();
 
         CheckBox debugCheckBox = new CheckBox(" Debug Mode", skin);
+        debugCheckBox.getLabel().setFontScale(GameConstants.FontScale);
         debugCheckBox.setChecked(preferences.isDebugMode());
         debugCheckBox.addListener(new ChangeListener() {
             @Override
@@ -78,6 +81,7 @@ public class PreferencesScreen implements Screen {
         table.add(debugCheckBox).colspan(2).padBottom(10f).row();
 
         TextButton backButton = new TextButton("Back", skin);
+        backButton.getLabel().setFontScale(GameConstants.FontScale);
         backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {

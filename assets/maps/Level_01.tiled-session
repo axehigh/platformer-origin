@@ -1,15 +1,19 @@
 {
-    "activeFile": "",
+    "activeFile": "level1/level_1_demo_3.tmx",
     "expandedProjectPaths": [
-        "/Users/lona/dev/libgdx/origin/assets",
-        "."
+        ".",
+        "C:/Users/lona/dev/libgdx/origin/assets",
+        "C:/skuld/dev_olona/libgdx/platformer-origin/assets",
+        "level1",
+        "C:/skuld/dev_olona/libgdx/platformer-origin/assets/ui",
+        "level3"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "": {
             "scaleInDock": 1
         },
-        "/Users/lona/dev/assets/tiledmaps/origin/Cave01.tsx": {
+        "C:/Users/lona/dev/assets/tiledmaps/origin/Cave01.tsx": {
             "dynamicWrapping": false,
             "scaleInDock": 0.25
         },
@@ -77,13 +81,16 @@
         },
         "level1/cave_tileset.tsx": {
             "dynamicWrapping": false,
+            "scaleInDock": 1,
             "scaleInEditor": 1
         },
         "level1/enemy.tsx": {
-            "dynamicWrapping": true
+            "dynamicWrapping": true,
+            "scaleInDock": 1
         },
         "level1/items.tsx": {
-            "dynamicWrapping": true
+            "dynamicWrapping": true,
+            "scaleInDock": 1
         },
         "level1/level_1_demo_2.tmx": {
             "expandedObjectLayers": [
@@ -99,14 +106,14 @@
         },
         "level1/level_1_demo_3.tmx": {
             "expandedObjectLayers": [
-                7,
-                3
+                3,
+                7
             ],
-            "scale": 0.125,
+            "scale": 0.33,
             "selectedLayer": 3,
             "viewCenter": {
-                "x": 1972,
-                "y": 524
+                "x": 2139.3939393939395,
+                "y": 1007.5757575757575
             }
         },
         "level2/level_02_demo.tmx": {
@@ -185,9 +192,11 @@
     "map.tileWidth": 128,
     "map.width": 16,
     "openFiles": [
+        "level1/level_1_demo_3.tmx"
     ],
     "project": "Level_01.tiled-project",
     "recentFiles": [
+        "level1/level_1_demo_3.tmx",
         "level2/sample_room_01.tmx",
         "level1/cave_tileset.tsx",
         "level3/temple_tileset.tsx",
