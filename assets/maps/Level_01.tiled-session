@@ -1,11 +1,11 @@
 {
     "activeFile": "level1/level_1_demo_3.tmx",
     "expandedProjectPaths": [
-        ".",
         "C:/Users/lona/dev/libgdx/origin/assets",
         "C:/skuld/dev_olona/libgdx/platformer-origin/assets",
-        "level1",
         "C:/skuld/dev_olona/libgdx/platformer-origin/assets/ui",
+        ".",
+        "level1",
         "level3"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
@@ -19,18 +19,19 @@
         },
         "demo_room.tmx": {
             "expandedObjectLayers": [
-                4,
-                3
+                3,
+                4
             ],
             "scale": 0.75,
             "selectedLayer": 2,
             "viewCenter": {
                 "x": 595.3333333333333,
-                "y": 467.33333333333337
+                "y": 628.6666666666665
             }
         },
         "demo_room.tmx#brick_bg": {
-            "scaleInDock": 1
+            "scaleInDock": 1,
+            "scaleInEditor": 1
         },
         "demo_room.tmx#collision_tile": {
             "scaleInDock": 1
@@ -42,11 +43,11 @@
             "expandedObjectLayers": [
                 3
             ],
-            "scale": 1.484375,
-            "selectedLayer": 2,
+            "scale": 0.25,
+            "selectedLayer": 3,
             "viewCenter": {
-                "x": 155.2842105263158,
-                "y": 136.0842105263158
+                "x": 1298,
+                "y": 650
             }
         },
         "demo_room_final.tmx#brick_bg": {
@@ -60,14 +61,14 @@
         },
         "demo_room_start.tmx": {
             "expandedObjectLayers": [
-                4,
-                3
+                3,
+                4
             ],
             "scale": 1.5734,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 247.23528664039657,
-                "y": 155.07817465361637
+                "x": 246.9175034956146,
+                "y": 154.76039150883437
             }
         },
         "demo_room_start.tmx#brick_bg": {
@@ -92,16 +93,27 @@
             "dynamicWrapping": true,
             "scaleInDock": 1
         },
-        "level1/level_1_demo_2.tmx": {
+        "level1/level_1_demo.tmx": {
             "expandedObjectLayers": [
-                4,
                 3
             ],
-            "scale": 0.33,
-            "selectedLayer": 1,
+            "scale": 0.38408203124999996,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 777.2727272727273,
-                "y": 1234.848484848485
+                "x": 798.006610729723,
+                "y": 766.7632850241548
+            }
+        },
+        "level1/level_1_demo_2.tmx": {
+            "expandedObjectLayers": [
+                3,
+                4
+            ],
+            "scale": 0.25,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 1214,
+                "y": 1186
             }
         },
         "level1/level_1_demo_3.tmx": {
@@ -112,27 +124,27 @@
             "scale": 0.33,
             "selectedLayer": 3,
             "viewCenter": {
-                "x": 2139.3939393939395,
+                "x": 2589.3939393939395,
                 "y": 1007.5757575757575
             }
         },
         "level2/level_02_demo.tmx": {
             "expandedObjectLayers": [
-                4,
-                3
+                3,
+                4
             ],
             "scale": 0.33,
             "selectedLayer": 2,
             "viewCenter": {
                 "x": 986.3636363636364,
-                "y": 683.3333333333334
+                "y": 253.03030303030312
             }
         },
         "level2/sample_room_01.tmx": {
             "expandedObjectLayers": [
+                3,
                 4,
-                5,
-                3
+                5
             ],
             "scale": 0.24,
             "selectedLayer": 3,
@@ -154,6 +166,10 @@
             "dynamicWrapping": false,
             "scaleInDock": 1
         },
+        "level3/temple_demo_1.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
         "level3/temple_tileset.tsx": {
             "scaleInDock": 1,
             "scaleInEditor": 0.75
@@ -170,8 +186,8 @@
             "scale": 1.1611,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 353.97467918353277,
-                "y": 227.37059684781667
+                "x": 353.5440530531393,
+                "y": 331.1514942726725
             }
         },
         "sample_room.tmx#brick_bg": {
@@ -181,6 +197,7 @@
             "scaleInDock": 1
         },
         "sample_room.tmx#passage_tile": {
+            "dynamicWrapping": false,
             "scaleInDock": 1
         }
     },
@@ -196,15 +213,18 @@
     ],
     "project": "Level_01.tiled-project",
     "recentFiles": [
-        "level1/level_1_demo_3.tmx",
+        "level1/level_1_demo_2.tmx",
+        "level1/level_1_demo.tmx",
+        "level2/level_02_demo.tmx",
         "level2/sample_room_01.tmx",
-        "level1/cave_tileset.tsx",
+        "level3/temple_demo_1.tsx",
         "level3/temple_tileset.tsx",
         "demo_room.tmx",
-        "demo_room_start.tmx",
-        "origin_tiles_forest.tsx",
         "demo_room_final.tmx",
-        "sample_room.tmx"
+        "sample_room.tmx",
+        "demo_room_start.tmx",
+        "level1/level_1_demo_3.tmx",
+        "origin_tiles_forest.tsx"
     ],
     "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)",
     "tileset.lastUsedFormat": "tsx",

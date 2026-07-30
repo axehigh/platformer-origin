@@ -1,488 +1,193 @@
 origin-game.png
-size: 2048, 1024
-format: RGBA8888
-filter: Nearest,Nearest
-repeat: none
-goblin_attack
-  rotate: false
-  xy: 392, 686
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 1
-goblin_attack
-  rotate: false
-  xy: 782, 426
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 2
-goblin_attack
-  rotate: false
-  xy: 392, 426
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 3
-goblin_attack
-  rotate: false
-  xy: 132, 686
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 4
-goblin_attack
-  rotate: false
-  xy: 262, 36
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 5
-goblin_death
-  rotate: false
-  xy: 2, 686
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 2
-goblin_hurt
-  rotate: false
-  xy: 2, 686
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 2
-goblin_death
-  rotate: false
-  xy: 782, 686
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 3
-goblin_death
-  rotate: false
-  xy: 522, 816
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 4
-goblin_hurt
-  rotate: false
-  xy: 2, 816
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 3
-goblin_death
-  rotate: false
-  xy: 2, 816
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 1
-goblin_hurt
-  rotate: false
-  xy: 2, 816
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 1
-goblin_idle
-  rotate: false
-  xy: 522, 296
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 1
+size:2048,2048
+repeat:none
+blade1
+bounds:2,1714,256,256
+blade2
+bounds:260,682,256,256
+blade3
+bounds:260,1198,256,256
+blade4
+bounds:260,424,256,256
+blade5
+bounds:776,1456,256,256
+blade6
+bounds:2,1198,256,256
+blade7
+bounds:1034,1456,256,256
+fire1
+bounds:2,940,256,256
+fire10
+bounds:1034,1198,256,256
+fire2
+bounds:2,166,256,256
+fire3
+bounds:260,940,256,256
+fire4
+bounds:2,1456,256,256
+fire5
+bounds:518,940,256,256
+fire6
+bounds:518,1456,256,256
+fire7
+bounds:518,682,256,256
+fire8
+bounds:1034,1714,256,256
+fire9
+bounds:260,1456,256,256
+goblin_attack1
+bounds:1422,1324,128,128
+goblin_attack2
+bounds:1684,1192,128,128
+goblin_attack3
+bounds:262,34,128,128
+goblin_attack4
+bounds:518,552,128,128
+goblin_attack5
+bounds:1682,1582,128,128
+goblin_death2
+bounds:1550,1842,128,128
+goblin_hurt2
+bounds:1550,1842,128,128
+goblin_death3
+bounds:1682,1712,128,128
+goblin_death4
+bounds:132,36,128,128
+goblin_hurt3
+bounds:1292,1584,128,128
+goblin_death1
+bounds:1292,1584,128,128
+goblin_hurt1
+bounds:1292,1584,128,128
+goblin_idle1
+bounds:1812,1712,128,128
 goblin_0goblin
-  rotate: false
-  xy: 522, 296
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-goblin_idle
-  rotate: false
-  xy: 522, 686
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 2
-goblin_idle
-  rotate: false
-  xy: 522, 686
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 4
-goblin_idle
-  rotate: false
-  xy: 912, 426
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 3
-goblin_walk
-  rotate: false
-  xy: 2, 166
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 1
-goblin_walk
-  rotate: false
-  xy: 1042, 686
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 2
-goblin_walk
-  rotate: false
-  xy: 652, 686
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 3
-goblin_walk
-  rotate: false
-  xy: 2, 426
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 4
-goblin_walk
-  rotate: false
-  xy: 652, 426
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 5
-goblin_walk
-  rotate: false
-  xy: 652, 816
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 6
+bounds:1812,1712,128,128
+goblin_idle2
+bounds:1294,1194,128,128
+goblin_idle4
+bounds:1294,1194,128,128
+goblin_idle3
+bounds:522,162,128,128
+goblin_walk1
+bounds:390,294,128,128
+goblin_walk2
+bounds:1684,1062,128,128
+goblin_walk3
+bounds:392,34,128,128
+goblin_walk4
+bounds:1034,1068,128,128
+goblin_walk5
+bounds:1812,1582,128,128
+goblin_walk6
+bounds:1424,1194,128,128
+lightning1
+bounds:518,1198,256,256
+lightning2
+bounds:260,1714,256,256
+lightning3
+bounds:776,1198,256,256
+lightning4
+bounds:776,1714,256,256
+lightning5
+bounds:776,940,256,256
+lightning6
+bounds:2,424,256,256
+lightning7
+bounds:518,1714,256,256
+lightning8
+bounds:1292,1714,256,256
+lightning9
+bounds:2,682,256,256
 mosquito_0mosquito
-  rotate: false
-  xy: 522, 166
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-mosquito_attack1_getto
-  rotate: false
-  xy: 652, 166
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 1
-mosquito_attack1_getto
-  rotate: false
-  xy: 522, 426
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 2
-mosquito_attack2_cycle
-  rotate: false
-  xy: 392, 166
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 1
-mosquito_attack2_cycle
-  rotate: false
-  xy: 392, 556
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 2
-mosquito_attack2_cycle
-  rotate: false
-  xy: 782, 296
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 3
+bounds:1554,1192,128,128
+mosquito_attack1_getto1
+bounds:1814,1062,128,128
+mosquito_attack1_getto2
+bounds:1552,1712,128,128
+mosquito_attack2_cycle1
+bounds:1682,1452,128,128
+mosquito_attack2_cycle2
+bounds:1164,1068,128,128
+mosquito_attack2_cycle3
+bounds:522,292,128,128
 mosquito_attack3_get_out
-  rotate: false
-  xy: 652, 296
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-mosquito_death
-  rotate: false
-  xy: 132, 36
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 1
-mosquito_hurt
-  rotate: false
-  xy: 132, 36
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 1
-mosquito_death
-  rotate: false
-  xy: 392, 816
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 2
-mosquito_hurt
-  rotate: false
-  xy: 392, 816
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 2
-mosquito_death
-  rotate: false
-  xy: 1042, 816
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 3
-mosquito_death
-  rotate: false
-  xy: 132, 166
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 4
-mosquito_flight
-  rotate: false
-  xy: 132, 556
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 1
-mosquito_flight
-  rotate: false
-  xy: 782, 556
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 2
-mosquito_flight
-  rotate: false
-  xy: 2, 36
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 3
-mosquito_hurt
-  rotate: false
-  xy: 132, 426
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 3
-mosquito_idle
-  rotate: false
-  xy: 912, 556
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 1
-mosquito_idle
-  rotate: false
-  xy: 522, 556
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 2
-mosquito_idle
-  rotate: false
-  xy: 262, 816
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 3
-spider_attack
-  rotate: false
-  xy: 262, 166
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 1
-spider_attack
-  rotate: false
-  xy: 2, 296
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 2
-spider_attack
-  rotate: false
-  xy: 392, 36
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 3
-spider_death
-  rotate: false
-  xy: 132, 816
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 1
-spider_hurt
-  rotate: false
-  xy: 132, 816
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 1
-spider_death
-  rotate: false
-  xy: 132, 296
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 3
-spider_death
-  rotate: false
-  xy: 1172, 816
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 4
-spider_hurt
-  rotate: false
-  xy: 652, 556
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 2
-spider_death
-  rotate: false
-  xy: 652, 556
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 2
-spider_hurt
-  rotate: false
-  xy: 262, 556
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 3
-spider_idle
-  rotate: false
-  xy: 782, 816
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 2
-spider_idle
-  rotate: false
-  xy: 262, 686
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 3
+bounds:1684,1322,128,128
+mosquito_death1
+bounds:778,550,128,128
+mosquito_hurt1
+bounds:778,550,128,128
+mosquito_death2
+bounds:1292,1324,128,128
+mosquito_hurt2
+bounds:1292,1324,128,128
+mosquito_death3
+bounds:1036,938,128,128
+mosquito_death4
+bounds:1424,1064,128,128
+mosquito_flight1
+bounds:1292,1454,128,128
+mosquito_flight2
+bounds:1812,1452,128,128
+mosquito_flight3
+bounds:1294,1064,128,128
+mosquito_hurt3
+bounds:1422,1584,128,128
+mosquito_idle1
+bounds:1554,1062,128,128
+mosquito_idle2
+bounds:392,164,128,128
+mosquito_idle3
+bounds:776,810,128,128
+spider_attack1
+bounds:908,680,128,128
+spider_attack2
+bounds:1810,1842,128,128
+spider_attack3
+bounds:1554,1322,128,128
+spider_death1
+bounds:2,36,128,128
+spider_hurt1
+bounds:2,36,128,128
+spider_death3
+bounds:648,552,128,128
+spider_death4
+bounds:1814,1322,128,128
+spider_hurt2
+bounds:1552,1582,128,128
+spider_death2
+bounds:1552,1582,128,128
+spider_hurt3
+bounds:1422,1454,128,128
+spider_idle2
+bounds:778,680,128,128
+spider_idle3
+bounds:1680,1842,128,128
 spider_0spider
-  rotate: false
-  xy: 262, 686
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-spider_idle
-  rotate: false
-  xy: 262, 686
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 1
-spider_idle
-  rotate: false
-  xy: 912, 686
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 4
-spider_walk
-  rotate: false
-  xy: 262, 296
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 1
-spider_walk
-  rotate: false
-  xy: 2, 556
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 2
-spider_walk
-  rotate: false
-  xy: 912, 816
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 3
-spider_walk
-  rotate: false
-  xy: 262, 426
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 4
-spider_walk
-  rotate: false
-  xy: 522, 36
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 5
-spider_walk
-  rotate: false
-  xy: 392, 296
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: 6
-spider_web
-  rotate: false
-  xy: 1172, 782
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 1
-spider_web
-  rotate: false
-  xy: 2, 2
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 2
-spider_web
-  rotate: false
-  xy: 1302, 912
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 3
-spider_web
-  rotate: false
-  xy: 1042, 652
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 4
-spider_web
-  rotate: false
-  xy: 652, 132
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 5
+bounds:1680,1842,128,128
+spider_idle1
+bounds:1680,1842,128,128
+spider_idle4
+bounds:520,422,128,128
+spider_walk1
+bounds:262,164,128,128
+spider_walk2
+bounds:260,294,128,128
+spider_walk3
+bounds:1552,1452,128,128
+spider_walk4
+bounds:906,810,128,128
+spider_walk5
+bounds:1814,1192,128,128
+spider_walk6
+bounds:908,550,128,128
+spider_web1
+bounds:1036,904,32,32
+spider_web2
+bounds:2,2,32,32
+spider_web3
+bounds:1166,1034,32,32
+spider_web4
+bounds:1940,1938,32,32
+spider_web5
+bounds:650,518,32,32
