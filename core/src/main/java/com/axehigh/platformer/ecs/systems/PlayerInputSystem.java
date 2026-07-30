@@ -1,5 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
+import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.BulletComponent;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
@@ -15,8 +16,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import static com.axehigh.platformer.ecs.components.Mappers.ANIMATION;
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
@@ -155,9 +158,11 @@ public class PlayerInputSystem extends IteratingSystem {
             || Gdx.input.isKeyJustPressed(Input.Keys.B)
             || touchMeleeRequested;
         if (meleePressed && player.meleeCooldown.isDone()) {
-            player.meleeAttack.start(MELEE_ATTACK_DURATION);
+            float attackDuration = findAttackDuration(entity);
+            player.meleeAttack.start(attackDuration);
             player.meleeHasHit = false;
-            player.meleeCooldown.start(MELEE_COOLDOWN);
+            // Cooldown must be at least as long as the animation to allow it to finish
+            player.meleeCooldown.start(Math.max(MELEE_COOLDOWN, attackDuration));
         }
 
         boolean shootPressed = Gdx.input.isKeyJustPressed(Input.Keys.K)
@@ -170,6 +175,18 @@ public class PlayerInputSystem extends IteratingSystem {
         }
 
         player.interactPressed = Gdx.input.isKeyJustPressed(Input.Keys.E) || touchInteractRequested;
+    }
+
+    private static float findAttackDuration(Entity entity) {
+        float attackDuration = MELEE_ATTACK_DURATION;
+        AnimationComponent anim = ANIMATION.get(entity);
+        if (anim != null) {
+            Animation<TextureRegion> attackAnim = anim.animations.get(AnimationComponent.State.ATTACKING);
+            if (attackAnim != null) {
+                attackDuration = attackAnim.getAnimationDuration();
+            }
+        }
+        return attackDuration;
     }
 
     private void spawnBullet(TransformComponent playerTransform, CollisionComponent playerCollision, PlayerComponent player) {
