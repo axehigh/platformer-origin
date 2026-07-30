@@ -71,6 +71,10 @@ public class EnemyShootSystem extends IteratingSystem {
         TransformComponent transform = TRANSFORM.get(entity);
         CollisionComponent collision = COLLISION.get(entity);
 
+        if (enemy.isDead) {
+            return;
+        }
+
         shooter.shootCooldown.update(deltaTime);
         if (enemy.hitStun.isActive()) {
             return;
@@ -99,7 +103,7 @@ public class EnemyShootSystem extends IteratingSystem {
         bullet.add(transform);
 
         TextureComponent textureComponent = engine.createComponent(TextureComponent.class);
-        textureComponent.region = new TextureRegion(assetManager.get("gfx/bullet.png", Texture.class));
+        textureComponent.region = new TextureRegion(assetManager.get("gfx/old/bullet.png", Texture.class));
         bullet.add(textureComponent);
 
         MovementComponent movement = engine.createComponent(MovementComponent.class);

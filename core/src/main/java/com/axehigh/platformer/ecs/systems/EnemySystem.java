@@ -71,7 +71,21 @@ public class EnemySystem extends IteratingSystem {
         CollisionComponent collision = COLLISION.get(entity);
         FlyingEnemyComponent flying = FLYING.get(entity);
 
+        if (enemy.isDead) {
+            enemy.deathTimer.update(deltaTime);
+            if (enemy.deathTimer.isDone()) {
+                getEngine().removeEntity(entity);
+            }
+            return;
+        }
+
+        boolean wasHitStunActive = enemy.hitStun.isActive();
         enemy.hitStun.update(deltaTime);
+        enemy.postHitIdle.update(deltaTime);
+
+        if (wasHitStunActive && !enemy.hitStun.isActive()) {
+            enemy.postHitIdle.start(EnemyDamageResolver.POST_HIT_IDLE_DURATION);
+        }
 
         boolean roomActive = enemy.roomIndex < 0 || enemy.roomIndex == roomState.activeRoomIndex;
         if (!roomActive) {
@@ -83,6 +97,14 @@ public class EnemySystem extends IteratingSystem {
         }
 
         if (enemy.hitStun.isActive()) {
+            return;
+        }
+
+        if (enemy.postHitIdle.isActive()) {
+            movement.velocity.x = 0;
+            if (flying != null) {
+                movement.velocity.y = 0;
+            }
             return;
         }
 

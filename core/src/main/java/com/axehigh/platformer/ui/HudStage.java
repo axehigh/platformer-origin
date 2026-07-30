@@ -1,5 +1,6 @@
 package com.axehigh.platformer.ui;
 
+import com.axehigh.platformer.assets.GameAssetRegistry;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
@@ -13,6 +14,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.Viewport;
+
+import static com.axehigh.platformer.assets.GameAssetRegistry.HERO_ASSET;
 
 /**
  * Top HUD overlay: avatar + heart icons (top-left), coin counter (top-center), item tracker +
@@ -35,12 +38,12 @@ public class HudStage extends Stage {
         addActor(root);
 
         Table leftGroup = new Table();
-        TextureAtlas heroAtlas = assetManager.get("gfx/hero/knight2.atlas", TextureAtlas.class);
+        TextureAtlas heroAtlas = assetManager.get(HERO_ASSET, TextureAtlas.class);
         Image avatar = new Image(heroAtlas.findRegion("idle"));
         leftGroup.add(avatar).size(16f, 16f).padRight(4f);
 
         Table heartsTable = new Table();
-        Texture heartTexture = assetManager.get("gfx/heart.png", Texture.class);
+        Texture heartTexture = assetManager.get("gfx/old/heart.png", Texture.class);
         heartImages = new Image[playerComponent.maxHealth];
         for (int i = 0; i < heartImages.length; i++) {
             heartImages[i] = new Image(new TextureRegion(heartTexture));
@@ -49,13 +52,13 @@ public class HudStage extends Stage {
         leftGroup.add(heartsTable);
 
         Table centerGroup = new Table();
-        Image coinIcon = new Image(new TextureRegion(assetManager.get("gfx/coin.png", Texture.class)));
+        Image coinIcon = new Image(new TextureRegion(assetManager.get("gfx/old/coin.png", Texture.class)));
         centerGroup.add(coinIcon).size(8f, 8f).padRight(4f);
         coinLabel = new Label("", skin);
         centerGroup.add(coinLabel);
 
         Table rightGroup = new Table();
-        Image itemIcon = new Image(new TextureRegion(assetManager.get("gfx/dagger.png", Texture.class)));
+        Image itemIcon = new Image(new TextureRegion(assetManager.get("gfx/old/dagger.png", Texture.class)));
         rightGroup.add(itemIcon).size(16f, 16f).padRight(4f);
         itemLabel = new Label("", skin);
         rightGroup.add(itemLabel).padRight(8f);

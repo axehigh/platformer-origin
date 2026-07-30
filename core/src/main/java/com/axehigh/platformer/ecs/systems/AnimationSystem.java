@@ -62,7 +62,10 @@ public class AnimationSystem extends IteratingSystem {
 
         Animation<TextureRegion> animation = animationComponent.animations.get(animationComponent.currentState);
         if (animation != null) {
-            textureComponent.region = animation.getKeyFrame(animationComponent.stateTime, true);
+            boolean looping = animationComponent.currentState != AnimationComponent.State.HURT &&
+                             animationComponent.currentState != AnimationComponent.State.DEATH &&
+                             animationComponent.currentState != AnimationComponent.State.ATTACKING;
+            textureComponent.region = animation.getKeyFrame(animationComponent.stateTime, looping);
         }
     }
 
@@ -89,8 +92,14 @@ public class AnimationSystem extends IteratingSystem {
     }
 
     private AnimationComponent.State resolveEnemyState(EnemyComponent enemy, MovementComponent movement) {
+        if (enemy.isDead) {
+            return AnimationComponent.State.DEATH;
+        }
         if (enemy.hitStun.isActive()) {
             return AnimationComponent.State.HURT;
+        }
+        if (enemy.postHitIdle.isActive()) {
+            return AnimationComponent.State.IDLE;
         }
         if (Math.abs(movement.velocity.x) > 0.01f) {
             return AnimationComponent.State.WALKING;

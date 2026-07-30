@@ -86,10 +86,7 @@ public class MeleeAttackSystem extends IteratingSystem {
                 EnemyComponent enemy = ENEMY.get(hitEnemy);
                 MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
                 boolean isFlying = FLYING.get(hitEnemy) != null;
-                boolean died = EnemyDamageResolver.applyHit(enemy, enemyMovement, player.swordDamage, player.facingDirection, isFlying, unitScale);
-                if (died) {
-                    getEngine().removeEntity(hitEnemy);
-                }
+                EnemyDamageResolver.applyHit(hitEnemy, enemy, enemyMovement, player.swordDamage, player.facingDirection, isFlying, unitScale);
                 player.meleeHasHit = true;
             } else {
                 Entity hitChest = findHit(strikeBounds, chests);
@@ -99,7 +96,7 @@ public class MeleeAttackSystem extends IteratingSystem {
                         chest.opened = true;
                         chest.disappearTimer.start(CHEST_DISAPPEAR_DELAY);
                         TextureComponent texture = TEXTURE.get(hitChest);
-                        texture.region = new TextureRegion(assetManager.get("gfx/chest_open.png", Texture.class));
+                        texture.region = new TextureRegion(assetManager.get("gfx/old/chest_open.png", Texture.class));
                     }
                     player.meleeHasHit = true;
                 }

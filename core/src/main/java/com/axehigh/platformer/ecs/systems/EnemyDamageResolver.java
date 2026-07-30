@@ -1,7 +1,12 @@
 package com.axehigh.platformer.ecs.systems;
 
+import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.EnemyComponent;
+import com.axehigh.platformer.ecs.components.Mappers;
 import com.axehigh.platformer.ecs.components.MovementComponent;
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
  * Shared enemy-damage resolution used by both {@code MeleeAttackSystem} and {@code CollisionSystem}
@@ -11,6 +16,7 @@ import com.axehigh.platformer.ecs.components.MovementComponent;
 final class EnemyDamageResolver {
     /** Grace period after a hit during which the enemy is immune to further damage/knockback. */
     private static final float HIT_STUN_DURATION = 0.3f;
+    static final float POST_HIT_IDLE_DURATION = 0.5f;
     private static final float KNOCKBACK_SPEED_X = 90f;
     private static final float KNOCKBACK_SPEED_Y = 140f;
 
@@ -26,13 +32,25 @@ final class EnemyDamageResolver {
      * forever) while the horizontal knockback and hit-stun still apply. Returns {@code true} if
      * the enemy's health reached 0.
      */
-    static boolean applyHit(EnemyComponent enemy, MovementComponent movement, float damage, int knockbackDirection, boolean isFlying, float unitScale) {
-        if (enemy.hitStun.isActive()) {
+    static boolean applyHit(Entity enemyEntity, EnemyComponent enemy, MovementComponent movement, float damage, int knockbackDirection, boolean isFlying, float unitScale) {
+        if (enemy.isDead || enemy.hitStun.isActive()) {
             return false;
         }
 
         enemy.health -= damage;
         if (enemy.health <= 0f) {
+            enemy.isDead = true;
+            movement.velocity.set(0, 0);
+
+            AnimationComponent anim = Mappers.ANIMATION.get(enemyEntity);
+            float duration = 0.5f;
+            if (anim != null) {
+                Animation<TextureRegion> deathAnim = anim.animations.get(AnimationComponent.State.DEATH);
+                if (deathAnim != null) {
+                    duration = deathAnim.getAnimationDuration();
+                }
+            }
+            enemy.deathTimer.start(duration);
             return true;
         }
 
@@ -40,7 +58,18 @@ final class EnemyDamageResolver {
         if (!isFlying) {
             movement.velocity.y = KNOCKBACK_SPEED_Y * unitScale;
         }
-        enemy.hitStun.start(HIT_STUN_DURATION);
+
+        float stunDuration = HIT_STUN_DURATION;
+        AnimationComponent anim = Mappers.ANIMATION.get(enemyEntity);
+        if (anim != null) {
+            Animation<TextureRegion> hurtAnim = anim.animations.get(AnimationComponent.State.HURT);
+            if (hurtAnim != null) {
+                // Use the animation duration, but at least HIT_STUN_DURATION to ensure it's visible
+                stunDuration = Math.max(HIT_STUN_DURATION, hurtAnim.getAnimationDuration());
+            }
+        }
+        enemy.hitStun.start(stunDuration);
+        enemy.postHitIdle.reset();
         return false;
     }
 }

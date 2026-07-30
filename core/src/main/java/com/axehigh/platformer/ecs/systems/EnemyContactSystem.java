@@ -12,6 +12,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Rectangle;
 
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
+import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
 import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 
@@ -51,6 +52,11 @@ public class EnemyContactSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity enemyEntity, float deltaTime) {
+        EnemyComponent enemy = ENEMY.get(enemyEntity);
+        if (enemy.isDead) {
+            return;
+        }
+
         if (players.size() == 0) {
             return;
         }

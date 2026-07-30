@@ -24,6 +24,17 @@ public class EnemyComponent implements Component {
      */
     public Timer hitStun = new Timer();
     /**
+     * Brief pause after hitStun ends during which the enemy stays idle before resuming patrol.
+     */
+    public final Timer postHitIdle = new Timer();
+    /**
+     * Set to {@code true} when health reaches zero; triggers the death sequence (animation
+     * followed by entity removal).
+     */
+    public boolean isDead = false;
+    /** Tracks the duration of the death animation before the entity is removed. */
+    public Timer deathTimer = new Timer();
+    /**
      * Index into {@code RoomState.rooms} of the Room rectangle this enemy was spawned inside of,
      * or {@code -1} if it wasn't inside any known room. {@code EnemySystem}/{@code
      * EnemyShootSystem} freeze this enemy's AI/firing while its room isn't the currently active

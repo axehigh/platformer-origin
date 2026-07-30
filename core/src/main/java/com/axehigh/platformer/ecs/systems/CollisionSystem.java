@@ -78,10 +78,7 @@ public class CollisionSystem extends IteratingSystem {
             MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
             int knockbackDirection = movement.velocity.x >= 0f ? 1 : -1;
             boolean isFlying = FLYING.get(hitEnemy) != null;
-            boolean died = EnemyDamageResolver.applyHit(enemy, enemyMovement, bullet.damage, knockbackDirection, isFlying, unitScale);
-            if (died) {
-                getEngine().removeEntity(hitEnemy);
-            }
+            EnemyDamageResolver.applyHit(hitEnemy, enemy, enemyMovement, bullet.damage, knockbackDirection, isFlying, unitScale);
             getEngine().removeEntity(bulletEntity);
         }
     }

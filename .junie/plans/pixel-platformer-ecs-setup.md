@@ -297,7 +297,7 @@ Pressing **Y** only throws a dagger while `PlayerComponent.items > 0`, consuming
 Walking over a dagger object on the map increases the player's ammo count, up to the existing cap.
 - Add `DaggerPickupComponent` (`amount`, default 5) as a marker component for pickup entities.
 - Implement `PickupSystem`: looks up the single player entity in `addedToEngine` (mirroring `CollisionSystem`'s enemy lookup), then for each `DaggerPickupComponent` entity checks AABB overlap against the player; on overlap, increments `player.items` capped at `maxItems` and removes the pickup entity.
-- Extend `EntityFactory.spawnObjects` with a `"dagger"` case that builds a `Transform`+`Texture`+`Collision`+`DaggerPickupComponent` entity using a new placeholder `assets/gfx/dagger.png` texture.
+- Extend `EntityFactory.spawnObjects` with a `"dagger"` case that builds a `Transform`+`Texture`+`Collision`+`DaggerPickupComponent` entity using a new placeholder `../../assets/gfx/old/dagger.png` texture.
 - Add 2 `dagger` object markers to `assets/maps/demo_room.tmx`'s object layer, and register `PickupSystem` plus the new texture load in `GameScreen`.
 
 ### ✓ Step 10: Update HUD/touch controls for the 3-button layout and sync gameplay documentation

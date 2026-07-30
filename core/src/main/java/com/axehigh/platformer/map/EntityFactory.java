@@ -1,20 +1,7 @@
 package com.axehigh.platformer.map;
 
 import com.axehigh.platformer.assets.SpriteConstants;
-import com.axehigh.platformer.ecs.components.AnimationComponent;
-import com.axehigh.platformer.ecs.components.ChestComponent;
-import com.axehigh.platformer.ecs.components.CoinPickupComponent;
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.DaggerPickupComponent;
-import com.axehigh.platformer.ecs.components.EnemyComponent;
-import com.axehigh.platformer.ecs.components.EnemyShooterComponent;
-import com.axehigh.platformer.ecs.components.FlyingEnemyComponent;
-import com.axehigh.platformer.ecs.components.LevelExitComponent;
-import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.components.PoppedItemComponent;
-import com.axehigh.platformer.ecs.components.TextureComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.assets.AssetManager;
@@ -32,6 +19,13 @@ import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
+
+import static com.axehigh.platformer.assets.GameAssetRegistry.HERO_ASSET;
+import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
+import static com.axehigh.platformer.ecs.components.AnimationComponent.State.*;
+import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
+import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.NORMAL;
 
 /**
  * Builds Ashley entities for the player and for object-layer markers (coin, chest, torch, exit gate).
@@ -46,7 +40,7 @@ public class EntityFactory {
 
     public EntityFactory(AssetManager assetManager) {
         this.assetManager = assetManager;
-        this.originAtlas = assetManager.get("gfx/origin-game.atlas", TextureAtlas.class);
+        this.originAtlas = assetManager.get(ORIGIN_GAME_GFX, TextureAtlas.class);
     }
 
     public void setUnitScale(float unitScale) {
@@ -54,7 +48,7 @@ public class EntityFactory {
     }
 
     public Entity createPlayer(float x, float y) {
-        TextureAtlas heroAtlas = assetManager.get("gfx/hero/knight2.atlas", TextureAtlas.class);
+        TextureAtlas heroAtlas = assetManager.get(HERO_ASSET, TextureAtlas.class);
         TextureRegion region = heroAtlas.findRegion("idle");
 
         float scaleFactor = SpriteConstants.PlayerScale; // Scaling factor for the new larger graphics
@@ -153,7 +147,7 @@ public class EntityFactory {
                     spawned = true;
                     break;
                 case "torch":
-                    engine.addEntity(createDecoration(spawnX, spawnY, "gfx/torch.png"));
+                    engine.addEntity(createDecoration(spawnX, spawnY, "gfx/old/torch.png"));
                     spawned = true;
                     break;
                 case "exitGate":
@@ -218,7 +212,7 @@ public class EntityFactory {
      * dead-end final level.
      */
     private Entity createExitGate(float x, float y, String nextLevelPath) {
-        Texture texture = getTexture("gfx/exit_gate.png");
+        Texture texture = getTexture("gfx/old/exit_gate.png");
 
         Entity entity = new Entity();
 
@@ -246,7 +240,7 @@ public class EntityFactory {
     }
 
     private Entity createChest(float x, float y) {
-        Texture texture = getTexture("gfx/chest.png");
+        Texture texture = getTexture("gfx/old/chest.png");
 
         Entity entity = new Entity();
 
@@ -299,7 +293,7 @@ public class EntityFactory {
      * Builds a static, standalone coin pickup entity (used for map object markers).
      */
     public Entity createCoinPickup(float x, float y) {
-        Texture texture = getTexture("gfx/coin.png");
+        Texture texture = getTexture("gfx/old/coin.png");
 
         Entity entity = new Entity();
 
@@ -357,8 +351,8 @@ public class EntityFactory {
 
             Animation<TextureRegion> animation = new Animation<>(frameDuration, regions);
             AnimationComponent animComp = new AnimationComponent();
-            animComp.animations.put(AnimationComponent.State.IDLE, animation);
-            animComp.currentState = AnimationComponent.State.IDLE;
+            animComp.animations.put(IDLE, animation);
+            animComp.currentState = IDLE;
             entity.add(animComp);
         }
 
@@ -426,15 +420,16 @@ public class EntityFactory {
         // Animations
         AnimationComponent animComp = new AnimationComponent();
         float frameDuration = 0.1f;
-        animComp.animations.put(AnimationComponent.State.IDLE, new Animation<>(frameDuration, originAtlas.findRegions(atlasPrefix + "_idle"), Animation.PlayMode.LOOP));
-        animComp.animations.put(AnimationComponent.State.WALKING, new Animation<>(frameDuration, originAtlas.findRegions(atlasPrefix + "_" + walkRegionName), Animation.PlayMode.LOOP));
-        animComp.animations.put(AnimationComponent.State.ATTACKING, new Animation<>(frameDuration, originAtlas.findRegions(atlasPrefix + "_attack"), Animation.PlayMode.NORMAL));
-        animComp.animations.put(AnimationComponent.State.HURT, new Animation<>(frameDuration, originAtlas.findRegions(atlasPrefix + "_hurt"), Animation.PlayMode.NORMAL));
-        animComp.animations.put(AnimationComponent.State.DEATH, new Animation<>(frameDuration, originAtlas.findRegions(atlasPrefix + "_death"), Animation.PlayMode.NORMAL));
-        animComp.currentState = AnimationComponent.State.IDLE;
+        animComp.animations.put(IDLE, createEnemyAnimation(frameDuration, atlasPrefix + "_idle", LOOP));
+        animComp.animations.put(WALKING, createEnemyAnimation(frameDuration, atlasPrefix + "_" + walkRegionName, LOOP));
+        animComp.animations.put(ATTACKING, createEnemyAnimation(frameDuration, atlasPrefix + "_attack", NORMAL));
+        animComp.animations.put(HURT, createEnemyAnimation(frameDuration, atlasPrefix + "_hurt", NORMAL));
+        animComp.animations.put(DEATH, createEnemyAnimation(frameDuration, atlasPrefix + "_death", NORMAL));
+        animComp.currentState = IDLE;
         entity.add(animComp);
 
-        TextureRegion initialRegion = animComp.animations.get(AnimationComponent.State.IDLE).getKeyFrame(0);
+        Animation<TextureRegion> idleAnim = animComp.animations.get(IDLE);
+        TextureRegion initialRegion = findInitialRegion(idleAnim, atlasPrefix);
 
 
         TransformComponent transform = new TransformComponent();
@@ -483,8 +478,16 @@ public class EntityFactory {
         return entity;
     }
 
+    private TextureRegion findInitialRegion(Animation<TextureRegion> idleAnim, String atlasPrefix) {
+        TextureRegion initialRegion = idleAnim.getKeyFrame(0f);
+        if (initialRegion == null) {
+            initialRegion = originAtlas.findRegion(atlasPrefix + "_idle1");
+        }
+        return initialRegion;
+    }
+
     private Entity createDaggerPickup(float x, float y) {
-        Texture texture = getTexture("gfx/dagger.png");
+        Texture texture = getTexture("gfx/old/dagger.png");
 
         Entity entity = new Entity();
 
@@ -511,5 +514,41 @@ public class EntityFactory {
         Texture texture = assetManager.get(path, Texture.class);
         texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
         return texture;
+    }
+
+    private Animation<TextureRegion> createEnemyAnimation(float frameDuration, String regionName, Animation.PlayMode playMode) {
+        Array<AtlasRegion> regions = new Array<>();
+        Array<AtlasRegion> found = originAtlas.findRegions(regionName);
+        if (found.size > 0) {
+            regions.addAll(found);
+        } else {
+            // Fallback for numbered naming: name1, name2, ... or name_1, name_2, ...
+            for (int i = 0; i <= 10; i++) {
+                AtlasRegion region = originAtlas.findRegion(regionName + i);
+                if (region != null) regions.add(region);
+                region = originAtlas.findRegion(regionName + "_" + i);
+                if (region != null) regions.add(region);
+            }
+        }
+
+        if (regions.size == 0) {
+            // Emergency fallback: just find the first region that starts with the prefix
+            for (AtlasRegion region : originAtlas.getRegions()) {
+                if (region.name.startsWith(regionName)) {
+                    regions.add(region);
+                    break;
+                }
+            }
+        }
+
+        // If STILL empty, use a global fallback to prevent division-by-zero crash
+        if (regions.size == 0) {
+            AtlasRegion fallback = originAtlas.findRegion("goblin_idle1");
+            if (fallback != null) {
+                regions.add(fallback);
+            }
+        }
+
+        return new Animation<>(frameDuration, regions, playMode);
     }
 }

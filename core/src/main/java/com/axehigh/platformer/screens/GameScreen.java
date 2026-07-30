@@ -29,6 +29,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import static com.axehigh.platformer.GameConstants.FontScale;
+import static com.axehigh.platformer.assets.GameAssetRegistry.HERO_ASSET;
 import static com.axehigh.platformer.ecs.components.AnimationComponent.State.*;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
@@ -325,7 +326,7 @@ public class GameScreen implements Screen {
     }
 
     private void attachPlayerAnimations(Entity player) {
-        TextureAtlas heroAtlas = assetManager.get("gfx/hero/knight2.atlas", TextureAtlas.class);
+        TextureAtlas heroAtlas = assetManager.get(HERO_ASSET, TextureAtlas.class);
 
         AnimationComponent animationComponent = new AnimationComponent();
         animationComponent.animations.put(IDLE, new Animation<>(0.15f, heroAtlas.findRegions("idle"), LOOP));

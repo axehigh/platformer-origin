@@ -34,7 +34,7 @@ prettyPrint=false
 legacyOutput=false
 
 scaleFactors=[{suffix:"",factor:1,resampling:bicubic}]
-inputFiles=[{path:enemy/goblin,type:Input,dirFilePrefix:null,recursive:false,flattenPaths:false},{path:enemy/spider,type:Input,dirFilePrefix:null,recursive:false,flattenPaths:false},{path:enemy/mosquito,type:Input,dirFilePrefix:null,recursive:false,flattenPaths:false}]
+inputFiles=[{path:enemy/goblin,type:Input,dirFilePrefix:null,recursive:false,flattenPaths:false},{path:enemy/spider,type:Input,dirFilePrefix:null,recursive:false,flattenPaths:false},{path:enemy/mosquito,type:Input,dirFilePrefix:null,recursive:false,flattenPaths:false},{path:attacks,type:Input,dirFilePrefix:null,recursive:false,flattenPaths:false}]
 keepInputFileExtensions=false
 
 
