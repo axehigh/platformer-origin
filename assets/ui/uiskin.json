@@ -32,6 +32,12 @@ com.badlogic.gdx.graphics.Color: {
 		b: 0
 		a: 1
 	}
+	WHITE: {
+		r: 1
+		g: 0.9882353
+		b: 1
+		a: 1
+	}
 	YELLOW: {
 		r: 1
 		g: 1
@@ -42,14 +48,31 @@ com.badlogic.gdx.graphics.Color: {
 com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
 	default: {
 		up: button
+		down: button
 	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.CheckBox$CheckBoxStyle: {
 	default: {
-		checkboxOn: button
-		checkboxOff: button
+		checkboxOn: button_on
+		checkboxOff: button_off
 		font: edgeofgalaxy
 		fontColor: GREEN
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.ImageButton$ImageButtonStyle: {
+	default: {
+		imageUp: button
+		imageDown: button
+		pressedOffsetY: -3
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton$ImageTextButtonStyle: {
+	default: {
+		font: edgeofgalaxy
+		fontColor: WHITE
+		up: button_empty
+		down: button_empty
+		pressedOffsetY: -5
 	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
@@ -58,10 +81,23 @@ com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 		fontColor: GREEN
 	}
 }
+com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle: {
+	default-horizontal: {
+		background: rope_big_horisontal
+		knob: star
+	}
+	default-vertical: {
+		background: rope_big
+		knob: star
+	}
+}
 com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
 	default: {
 		font: edgeofgalaxy
-		fontColor: GREEN
+		fontColor: WHITE
+		up: button_empty
+		down: button_empty
+		pressedOffsetY: -5
 	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle: {
@@ -77,7 +113,7 @@ com.badlogic.gdx.scenes.scene2d.ui.TextTooltip$TextTooltipStyle: {
 }
 com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
 	default: {
-		background: scroll_large
+		background: table
 		titleFont: edgeofgalaxy
 		titleFontColor: BLACK
 	}

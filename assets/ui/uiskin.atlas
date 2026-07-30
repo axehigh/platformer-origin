@@ -6,42 +6,84 @@ filter: Linear, Linear
 repeat: none
 edgeofgalaxy
   rotate: false
-  xy: 1, 160
+  xy: 1, 186
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 sansserif
   rotate: false
-  xy: 1105, 1405
+  xy: 1105, 1431
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 button
   rotate: false
-  xy: 940, 1114
+  xy: 1105, 1341
   size: 81, 46
   orig: 81, 46
   offset: 0, 0
   index: -1
+button_empty
+  rotate: false
+  xy: 1619, 1768
+  size: 326, 175
+  orig: 326, 175
+  offset: 0, 0
+  index: -1
+button_off
+  rotate: false
+  xy: 940, 1123
+  size: 131, 63
+  orig: 131, 63
+  offset: 0, 0
+  index: -1
+button_on
+  rotate: false
+  xy: 1, 121
+  size: 131, 63
+  orig: 131, 63
+  offset: 0, 0
+  index: -1
+rope_big
+  rotate: false
+  xy: 940, 649
+  size: 40, 472
+  orig: 40, 472
+  offset: 0, 0
+  index: -1
+rope_big_horisontal
+  rotate: false
+  xy: 1105, 1389
+  size: 472, 40
+  orig: 472, 40
+  offset: 0, 0
+  index: -1
+star
+  rotate: false
+  xy: 1579, 1391
+  size: 38, 38
+  orig: 38, 38
+  offset: 0, 0
+  index: -1
 scroll_info
   rotate: false
-  xy: 1619, 1586
+  xy: 515, 367
   size: 300, 331
   orig: 300, 331
   offset: 0, 0
   index: -1
 scroll_large
   rotate: false
-  xy: 1, 674
+  xy: 1, 700
   size: 937, 486
   orig: 937, 486
   offset: 0, 0
   index: -1
 table
   rotate: false
-  xy: 1, 1162
+  xy: 1, 1188
   size: 1102, 755
   orig: 1102, 755
   offset: 0, 0
