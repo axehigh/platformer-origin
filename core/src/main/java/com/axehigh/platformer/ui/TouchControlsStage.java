@@ -98,10 +98,10 @@ public class TouchControlsStage extends Stage {
         });
         interactButton.setVisible(false);
 
-        root.add(interactButton).colspan(2).size(UI_Button_Action_Size, UI_Button_Action_Size).padBottom(6f);
+        root.add(interactButton).colspan(2).size(UI_Button_Action_Size, UI_Button_Action_Size).padBottom(25f);
         root.row();
-        root.add(dpad).expandX().left().bottom().pad(20f);
-        root.add(actions).expandX().right().pad(20f);
+        root.add(dpad).expandX().left().bottom().pad(83f);
+        root.add(actions).expandX().right().pad(83f);
     }
 
     /**

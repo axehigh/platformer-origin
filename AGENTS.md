@@ -10,7 +10,8 @@ utilizing the Ashley ECS framework and Tiled maps.
 *   **Framework:** libGDX (Java) with **Ashley ECS (Entity Component System)**.
 *   **Design Pattern:** ECS. Decouple data (Components) completely from logic (Systems).
 *   **Physics/Movement:** Custom AABB grid-based collision handling inside a dedicated Ashley `MovementSystem`. 
-*   **Resolution & Scaling:** Target a fixed virtual resolution (e.g., 480x270 or 320x180) to maintain a crisp pixel-art style, scaled up via `FitViewport`. Set texture filtering to `TextureFilter.Nearest`.
+*   **Resolution & Scaling:** The game camera targets a fixed virtual resolution (`VIRTUAL_WIDTH` x `VIRTUAL_HEIGHT`, 480x272), scaled by the tile-size factor and rendered through a `FitViewport` for crisp pixel-art. Set texture filtering to `TextureFilter.Nearest`.
+*   **UI Resolution:** All Scene2D UI — menus, HUD, touch controls, and dialogs — renders at `SCREEN_WIDTH` x `SCREEN_HEIGHT` (1980x1080) through an `ExtendViewport`. Keep UI off the small game-camera resolution; menu-style assets (e.g. the 1102x755 `table` window panel) must be scaled uniformly, never squished, so they don't distort.
 
 ---
 
@@ -39,6 +40,7 @@ See @resources/docs-ai/ashley-ecs.md for the full, AI-usable overview of every E
     *   **Bottom Left:** Left/Right D-pad arrows.
     *   **Contextual Action Button:** Up arrow (used near interactable doors/exits).
     *   **Bottom Right:** Action buttons labeled **A**, **B**, and **Y** (Jump, Attack, Special).
+*   **Dialogs:** Pause and game-over dialogs render on the shared 1980x1080 UI stage (never the game-HUD stage) and are sized to a uniform scale of the `table` panel so the background is never distorted.
 
 ---
 

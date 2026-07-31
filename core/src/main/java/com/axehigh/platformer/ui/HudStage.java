@@ -40,34 +40,34 @@ public class HudStage extends Stage {
         Table leftGroup = new Table();
         TextureAtlas heroAtlas = assetManager.get(HERO_ASSET, TextureAtlas.class);
         Image avatar = new Image(heroAtlas.findRegion("idle"));
-        leftGroup.add(avatar).size(16f, 16f).padRight(4f);
+        leftGroup.add(avatar).size(66f, 66f).padRight(17f);
 
         Table heartsTable = new Table();
         Texture heartTexture = assetManager.get("gfx/old/heart.png", Texture.class);
         heartImages = new Image[playerComponent.maxHealth];
         for (int i = 0; i < heartImages.length; i++) {
             heartImages[i] = new Image(new TextureRegion(heartTexture));
-            heartsTable.add(heartImages[i]).size(8f, 8f).padRight(2f);
+            heartsTable.add(heartImages[i]).size(34f, 34f).padRight(8f);
         }
         leftGroup.add(heartsTable);
 
         Table centerGroup = new Table();
         Image coinIcon = new Image(new TextureRegion(assetManager.get("gfx/old/coin.png", Texture.class)));
-        centerGroup.add(coinIcon).size(8f, 8f).padRight(4f);
+        centerGroup.add(coinIcon).size(34f, 34f).padRight(17f);
         coinLabel = new Label("", skin);
         centerGroup.add(coinLabel);
 
         Table rightGroup = new Table();
         Image itemIcon = new Image(new TextureRegion(assetManager.get("gfx/old/dagger.png", Texture.class)));
-        rightGroup.add(itemIcon).size(16f, 16f).padRight(4f);
+        rightGroup.add(itemIcon).size(66f, 66f).padRight(17f);
         itemLabel = new Label("", skin);
-        rightGroup.add(itemLabel).padRight(8f);
+        rightGroup.add(itemLabel).padRight(33f);
         pauseButton = new TextButton("||", skin);
-        rightGroup.add(pauseButton).size(20f, 16f);
+        rightGroup.add(pauseButton).size(83f, 66f);
 
-        root.add(leftGroup).expandX().left().pad(6f);
-        root.add(centerGroup).expandX().center().pad(6f);
-        root.add(rightGroup).expandX().right().pad(6f);
+        root.add(leftGroup).expandX().left().pad(25f);
+        root.add(centerGroup).expandX().center().pad(25f);
+        root.add(rightGroup).expandX().right().pad(25f);
 
         refresh();
     }

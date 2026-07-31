@@ -21,6 +21,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -49,6 +51,8 @@ public class GameScreen extends BaseScreen {
     private static final int PRIORITY_MAP_RENDER = 20;
     private static final int PRIORITY_ENTITY_RENDER = 30;
     private static final int PRIORITY_DEBUG_RENDER = 40;
+
+    private static final float DIALOG_PANEL_SCALE = 0.7f;
 
     private final AssetManager assetManager = new AssetManager();
     private final PooledEngine engine = new PooledEngine();
@@ -172,8 +176,8 @@ public class GameScreen extends BaseScreen {
         CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y);
 
         playerComponent = PLAYER.get(player);
-        Viewport hudViewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
-        Viewport touchViewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+        Viewport hudViewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT);
+        Viewport touchViewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT);
         hudStage = new HudStage(hudViewport, skin, assetManager, playerComponent);
         hudStage.getPauseButton().addListener(new ChangeListener() {
             @Override
@@ -184,6 +188,7 @@ public class GameScreen extends BaseScreen {
         touchControlsStage = new TouchControlsStage(touchViewport, skin, playerInputSystem);
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
+        inputMultiplexer.addProcessor(stage);
         inputMultiplexer.addProcessor(touchControlsStage);
         inputMultiplexer.addProcessor(hudStage);
         inputMultiplexer.addProcessor(new InputAdapter() {
@@ -224,8 +229,8 @@ public class GameScreen extends BaseScreen {
             }
         };
         dialog.getTitleLabel().setFontScale(FontScale);
-        dialog.getContentTable().defaults().pad(2f);
-        dialog.getButtonTable().defaults().pad(2f);
+        dialog.getContentTable().defaults().pad(UI_PADDING);
+        dialog.getButtonTable().defaults().pad(UI_PADDING);
 
         TextButton resumeButton = new TextButton("Resume", skin);
         resumeButton.getLabel().setFontScale(FontScale);
@@ -245,23 +250,23 @@ public class GameScreen extends BaseScreen {
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
                 musicEnabled = !musicEnabled;
                 musicButton.setText("Music: " + (musicEnabled ? "ON" : "OFF"));
-                // Placeholder for actual music toggle logic
             }
         });
-        dialog.getContentTable().add(musicButton).width(80f).pad(4f).row();
+        dialog.getContentTable().add(musicButton).minWidth(240f).pad(UI_PADDING).row();
 
         TextButton exitButton = new TextButton("Exit", skin);
         exitButton.getLabel().setFontScale(FontScale);
         exitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                game.setScreen(new MainMenuScreen(game));
+                changeScreen(new MainMenuScreen(game));
             }
         });
 
         dialog.button(exitButton);
 
-        dialog.show(hudStage);
+        dialog.show(stage);
+        sizeDialogToPanel(dialog);
     }
 
     private void showGameOverDialog() {
@@ -299,12 +304,21 @@ public class GameScreen extends BaseScreen {
         exitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                game.setScreen(new MainMenuScreen(game));
+                changeScreen(new MainMenuScreen(game));
             }
         });
         dialog.button(exitButton);
 
-        dialog.show(hudStage);
+        dialog.show(stage);
+        sizeDialogToPanel(dialog);
+    }
+
+    private void sizeDialogToPanel(Dialog dialog) {
+        TextureRegionDrawable panel = (TextureRegionDrawable) skin.getDrawable("table");
+        float width = panel.getRegion().getRegionWidth() * DIALOG_PANEL_SCALE;
+        float height = panel.getRegion().getRegionHeight() * DIALOG_PANEL_SCALE;
+        dialog.setSize(width, height);
+        dialog.setPosition(Math.round((stage.getWidth() - width) / 2f), Math.round((stage.getHeight() - height) / 2f));
     }
 
     private void applySaveData(Entity player, SaveData saveData) {
@@ -357,6 +371,7 @@ public class GameScreen extends BaseScreen {
         if (width <= 0 || height <= 0) {
             return;
         }
+        super.resize(width, height);
         viewport.update(width, height);
         hudStage.getViewport().update(width, height, true);
         touchControlsStage.getViewport().update(width, height, true);
