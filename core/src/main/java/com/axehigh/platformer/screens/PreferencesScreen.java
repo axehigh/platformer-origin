@@ -4,7 +4,7 @@ import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.common.BaseScreen;
 import com.axehigh.platformer.util.GamePreferences;
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
@@ -16,7 +16,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
  * Settings screen: music/SFX volume sliders and a debug-mode checkbox, bound to {@link GamePreferences}.
  */
 public class PreferencesScreen extends BaseScreen {
-    private final GamePreferences preferences = new GamePreferences();
 
     public PreferencesScreen(Game game) {
         super(game);
@@ -25,6 +24,8 @@ public class PreferencesScreen extends BaseScreen {
     @Override
     public void show() {
         super.show();
+        GamePreferences preferences = new GamePreferences();
+
         Table table = new Table();
         table.setFillParent(true);
         stage.addActor(table);
@@ -39,7 +40,7 @@ public class PreferencesScreen extends BaseScreen {
         musicSlider.setValue(preferences.getMusicVolume());
         musicSlider.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 preferences.setMusicVolume(musicSlider.getValue());
             }
         });
@@ -52,7 +53,7 @@ public class PreferencesScreen extends BaseScreen {
         sfxSlider.setValue(preferences.getSfxVolume());
         sfxSlider.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 preferences.setSfxVolume(sfxSlider.getValue());
             }
         });
@@ -64,7 +65,7 @@ public class PreferencesScreen extends BaseScreen {
         debugCheckBox.setChecked(preferences.isDebugMode());
         debugCheckBox.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 preferences.setDebugMode(debugCheckBox.isChecked());
             }
         });
@@ -74,13 +75,12 @@ public class PreferencesScreen extends BaseScreen {
         backButton.getLabel().setFontScale(GameConstants.FontScale);
         backButton.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                game.setScreen(new MainMenuScreen(game));
+            public void changed(ChangeEvent event, Actor actor) {
+                changeScreen(new MainMenuScreen(game));
             }
         });
         table.add(backButton).colspan(2).row();
-
-        Gdx.input.setInputProcessor(stage);
     }
 
 }
+

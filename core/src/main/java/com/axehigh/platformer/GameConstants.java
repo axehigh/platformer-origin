@@ -24,6 +24,9 @@ public final class GameConstants {
      */
     public static final float VIRTUAL_HEIGHT = 272f;
 
+    /** Duration (seconds) of the fade-in/fade-out transition between screens. */
+    public static final float SCREEN_FADE_TIMER = 0.5f;
+
     //Movement MaxSpeedX/Y
     public static float MaxSpeedX = 100f;
     public static float MaxSpeedY = 400f;

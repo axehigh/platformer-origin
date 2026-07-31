@@ -1,24 +1,25 @@
 package com.axehigh.platformer.screens;
 
-import com.axehigh.platformer.common.BaseScreen;import com.axehigh.platformer.map.LevelCatalog;
+import com.axehigh.platformer.common.BaseScreen;
+import com.axehigh.platformer.map.LevelCatalog;
 import com.axehigh.platformer.map.SaveData;
 import com.axehigh.platformer.util.SaveManager;
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
-import static com.axehigh.platformer.GameConstants.*;
+import static com.axehigh.platformer.GameConstants.FontScale;
 
 public class MainMenuScreen extends BaseScreen {
 
     public MainMenuScreen(Game game) {
         super(game);
     }
-
 
     @Override
     public void show() {
@@ -29,7 +30,6 @@ public class MainMenuScreen extends BaseScreen {
         stage.addActor(table);
 
         Label title = new Label("Origin", skin);
-//        title.setFontScale(FontScale);
         table.add(title).padBottom(8f).row();
 
         TextButton newGameButton = new TextButton("New Game", skin);
@@ -48,7 +48,7 @@ public class MainMenuScreen extends BaseScreen {
             continueButton.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
-                    game.setScreen(new GameScreen(game, SaveManager.load()));
+                    changeScreen(new GameScreen(game, SaveManager.load()));
                 }
             });
         } else {
@@ -62,7 +62,7 @@ public class MainMenuScreen extends BaseScreen {
         selectLevelButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new LevelSelectScreen(game));
+                changeScreen(new LevelSelectScreen(game));
             }
         });
         table.add(selectLevelButton).padBottom(4f).row();
@@ -72,12 +72,10 @@ public class MainMenuScreen extends BaseScreen {
         preferencesButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new PreferencesScreen(game));
+                changeScreen(new PreferencesScreen(game));
             }
         });
         table.add(preferencesButton).row();
-
-        Gdx.input.setInputProcessor(stage);
     }
 
     private void newGame() {
@@ -92,7 +90,8 @@ public class MainMenuScreen extends BaseScreen {
         freshSaveData.daggerBandolierPurchased = false;
         freshSaveData.ironHeartCount = 0;
         freshSaveData.triesRemaining = 3;
-        game.setScreen(new GameScreen(game, freshSaveData));
+        changeScreen(new GameScreen(game, freshSaveData));
     }
 
 }
+

@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import static com.axehigh.platformer.GameConstants.SCREEN_FADE_TIMER;
 import static com.axehigh.platformer.GameConstants.SCREEN_HEIGHT;
 import static com.axehigh.platformer.GameConstants.SCREEN_WIDTH;
 
@@ -52,7 +53,7 @@ public class BaseScreen implements Screen {
         fadeOverlay.setTouchable(Touchable.enabled);
         fadeOverlay.getColor().a = 1;
         fadeOverlay.addAction(Actions.sequence(
-            Actions.fadeOut(0.5f),
+            Actions.fadeOut(SCREEN_FADE_TIMER),
             Actions.touchable(Touchable.disabled)
         ));
     }
@@ -60,7 +61,7 @@ public class BaseScreen implements Screen {
     public void changeScreen(final Screen nextScreen) {
         fadeOverlay.setTouchable(Touchable.enabled); // Block input during fade-out
         fadeOverlay.addAction(Actions.sequence(
-            Actions.fadeIn(0.5f),
+            Actions.fadeIn(SCREEN_FADE_TIMER),
             Actions.run(new Runnable() {
                 @Override
                 public void run() {

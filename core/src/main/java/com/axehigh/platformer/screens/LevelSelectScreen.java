@@ -1,11 +1,12 @@
 package com.axehigh.platformer.screens;
 
 import com.axehigh.platformer.GameConstants;
-import com.axehigh.platformer.common.BaseScreen;import com.axehigh.platformer.map.LevelCatalog;
+import com.axehigh.platformer.common.BaseScreen;
+import com.axehigh.platformer.map.LevelCatalog;
 import com.axehigh.platformer.map.LevelDefinition;
 import com.axehigh.platformer.util.SaveManager;
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -34,7 +35,7 @@ public class LevelSelectScreen extends BaseScreen {
         title.setFontScale(GameConstants.FontScale);
         table.add(title).padBottom(20f).row();
 
-        Array<String> completedLevelIds = SaveManager.hasSave() ? SaveManager.load().completedLevelIds : new Array<String>();
+        Array<String> completedLevelIds = SaveManager.hasSave() ? SaveManager.load().completedLevelIds : new Array<>();
 
         for (LevelDefinition level : LevelCatalog.levels()) {
             String buttonText = findButtonTextFor(level, completedLevelIds);
@@ -42,8 +43,8 @@ public class LevelSelectScreen extends BaseScreen {
             levelButton.getLabel().setFontScale(GameConstants.FontScale);
             levelButton.addListener(new ChangeListener() {
                 @Override
-                public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                    game.setScreen(new GameScreen(game, level.tmxPath));
+                public void changed(ChangeEvent event, Actor actor) {
+                    changeScreen(new GameScreen(game, level.tmxPath));
                 }
             });
             table.add(levelButton).padBottom(6f).row();
@@ -53,13 +54,11 @@ public class LevelSelectScreen extends BaseScreen {
         backButton.getLabel().setFontScale(GameConstants.FontScale);
         backButton.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                game.setScreen(new MainMenuScreen(game));
+            public void changed(ChangeEvent event, Actor actor) {
+                changeScreen(new MainMenuScreen(game));
             }
         });
         table.add(backButton).padTop(10f).row();
-
-        Gdx.input.setInputProcessor(stage);
     }
 
     private static String findButtonTextFor(LevelDefinition level, Array<String> completedLevelIds) {
