@@ -26,9 +26,11 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
  * {@code collisionRects}), plus the current level's Room rectangles ({@code RoomState.rooms}, in
  * cyan, with the currently active one highlighted in orange) and the player's current melee
  * strike hitbox ({@code MeleeAttackSystem#getActiveStrikeBounds()}, in red, while a swing is live),
- * as outlined rectangles via a {@code ShapeRenderer}, toggled on/off with SHIFT+D (see AGENTS.md
- * "Debugging"). Disabled by default; drawing is skipped entirely while off, so there's no per-frame
- * cost in normal play. Must run after {@code RenderSystem} so its {@code ShapeRenderer} block never
+ * as outlined rectangles via a {@code ShapeRenderer}, toggled with SHIFT+D (desktop) or from the
+ * pause menu's "Collision Debug" button (all platforms, see {@code GameScreen#showPauseDialog}),
+ * see AGENTS.md "Debugging". The toggle is static so it survives level reloads within a session.
+ * Disabled by default; drawing is skipped entirely while off, so there's no per-frame cost in
+ * normal play. Must run after {@code RenderSystem} so its {@code ShapeRenderer} block never
  * overlaps the {@code SpriteBatch} block (the two can never be open at the same time).
  */
 public class DebugRenderSystem extends EntitySystem implements Disposable {
@@ -38,7 +40,7 @@ public class DebugRenderSystem extends EntitySystem implements Disposable {
     private final RoomState roomState;
     private ImmutableArray<Entity> collidables;
     private MeleeAttackSystem meleeAttackSystem;
-    private boolean debugEnabled = false;
+    private static boolean debugEnabled = false;
 
     public DebugRenderSystem(OrthographicCamera camera, Array<Rectangle> staticCollisionRects, RoomState roomState) {
         this(camera, staticCollisionRects, roomState, 0);
@@ -49,6 +51,14 @@ public class DebugRenderSystem extends EntitySystem implements Disposable {
         this.camera = camera;
         this.staticCollisionRects = staticCollisionRects;
         this.roomState = roomState;
+    }
+
+    public static boolean isDebugEnabled() {
+        return debugEnabled;
+    }
+
+    public static void setDebugEnabled(boolean enabled) {
+        debugEnabled = enabled;
     }
 
     @Override

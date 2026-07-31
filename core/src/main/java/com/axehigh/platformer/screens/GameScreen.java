@@ -17,8 +17,10 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -53,6 +55,7 @@ public class GameScreen extends BaseScreen {
     private static final int PRIORITY_DEBUG_RENDER = 40;
 
     private static final float DIALOG_PANEL_SCALE = 0.7f;
+    private static final float DIALOG_PANEL_MARGIN = 40f;
 
     private final AssetManager assetManager = new AssetManager();
     private final PooledEngine engine = new PooledEngine();
@@ -73,6 +76,7 @@ public class GameScreen extends BaseScreen {
     private boolean gameOverActive = false;
     private boolean gamePaused = false;
     private boolean musicEnabled = true;
+    private boolean debugTouchLogging = false;
 
     /** Defaults to the catalog's first level. */
     public GameScreen(Game game) {
@@ -188,6 +192,26 @@ public class GameScreen extends BaseScreen {
         touchControlsStage = new TouchControlsStage(touchViewport, skin, playerInputSystem);
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
+        inputMultiplexer.addProcessor(new InputAdapter() {
+            @Override
+            public boolean keyDown(int keycode) {
+                boolean shiftHeld = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT);
+                if (shiftHeld && keycode == Input.Keys.D) {
+                    debugTouchLogging = !debugTouchLogging;
+                    Gdx.app.log("TouchDebug", "logging " + (debugTouchLogging ? "ON" : "OFF"));
+                    return false;
+                }
+                return false;
+            }
+
+            @Override
+            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+                if (debugTouchLogging) {
+                    logTouch(screenX, screenY);
+                }
+                return false;
+            }
+        });
         inputMultiplexer.addProcessor(stage);
         inputMultiplexer.addProcessor(touchControlsStage);
         inputMultiplexer.addProcessor(hudStage);
@@ -254,6 +278,31 @@ public class GameScreen extends BaseScreen {
         });
         dialog.getContentTable().add(musicButton).minWidth(240f).pad(UI_PADDING).row();
 
+        final TextButton collisionDebugButton = new TextButton("Collision Debug: " + (DebugRenderSystem.isDebugEnabled() ? "ON" : "OFF"), skin);
+        collisionDebugButton.getLabel().setFontScale(FontScale);
+        collisionDebugButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                DebugRenderSystem.setDebugEnabled(!DebugRenderSystem.isDebugEnabled());
+                collisionDebugButton.setText("Collision Debug: " + (DebugRenderSystem.isDebugEnabled() ? "ON" : "OFF"));
+            }
+        });
+
+        final TextButton touchDebugButton = new TextButton("Touch Debug: " + (debugTouchLogging ? "ON" : "OFF"), skin);
+        touchDebugButton.getLabel().setFontScale(FontScale);
+        touchDebugButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                debugTouchLogging = !debugTouchLogging;
+                touchDebugButton.setText("Touch Debug: " + (debugTouchLogging ? "ON" : "OFF"));
+            }
+        });
+
+        Table debugRow = new Table();
+        debugRow.add(collisionDebugButton).minWidth(240f).padRight(UI_PADDING);
+        debugRow.add(touchDebugButton).minWidth(240f);
+        dialog.getContentTable().add(debugRow).pad(UI_PADDING).row();
+
         TextButton exitButton = new TextButton("Exit", skin);
         exitButton.getLabel().setFontScale(FontScale);
         exitButton.addListener(new ChangeListener() {
@@ -266,7 +315,7 @@ public class GameScreen extends BaseScreen {
         dialog.button(exitButton);
 
         dialog.show(stage);
-        sizeDialogToPanel(dialog);
+        fitDialogToPanel(dialog);
     }
 
     private void showGameOverDialog() {
@@ -321,6 +370,19 @@ public class GameScreen extends BaseScreen {
         dialog.setPosition(Math.round((stage.getWidth() - width) / 2f), Math.round((stage.getHeight() - height) / 2f));
     }
 
+    private void fitDialogToPanel(Dialog dialog) {
+        TextureRegionDrawable panel = (TextureRegionDrawable) skin.getDrawable("table");
+        float panelW = panel.getRegion().getRegionWidth();
+        float panelH = panel.getRegion().getRegionHeight();
+        float scale = Math.max(dialog.getPrefWidth() / panelW, (dialog.getPrefHeight() + DIALOG_PANEL_MARGIN) / panelH);
+        float maxScale = Math.min((stage.getWidth() * 0.95f) / panelW, (stage.getHeight() * 0.95f) / panelH);
+        scale = Math.min(scale, maxScale);
+        float width = panelW * scale;
+        float height = panelH * scale;
+        dialog.setSize(width, height);
+        dialog.setPosition(Math.round((stage.getWidth() - width) / 2f), Math.round((stage.getHeight() - height) / 2f));
+    }
+
     private void applySaveData(Entity player, SaveData saveData) {
         PlayerComponent playerComponent = PLAYER.get(player);
         playerComponent.health = saveData.health;
@@ -352,7 +414,11 @@ public class GameScreen extends BaseScreen {
 
     @Override
     public void render(float delta) {
+        syncViewports();
+
         super.render(delta);
+
+        viewport.apply();
 
         if (!gameOverActive && !gamePaused) {
             engine.update(Gdx.graphics.getDeltaTime());
@@ -360,8 +426,10 @@ public class GameScreen extends BaseScreen {
 
         touchControlsStage.setInteractVisible(playerComponent.nearExit);
 
+        hudStage.getViewport().apply();
         hudStage.act(delta);
         hudStage.draw();
+        touchControlsStage.getViewport().apply();
         touchControlsStage.act(delta);
         touchControlsStage.draw();
     }
@@ -375,6 +443,48 @@ public class GameScreen extends BaseScreen {
         viewport.update(width, height);
         hudStage.getViewport().update(width, height, true);
         touchControlsStage.getViewport().update(width, height, true);
+    }
+
+    /**
+     * Self-heals stale viewports: Android can drop or mis-order resize events
+     * during heavy level transitions, leaving the Scene2D stages sized to a
+     * stale surface while touch coordinates no longer line up with the buttons.
+     */
+    private void syncViewports() {
+        int width = Gdx.graphics.getWidth();
+        int height = Gdx.graphics.getHeight();
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+        if (viewport.getScreenWidth() != width || viewport.getScreenHeight() != height) {
+            viewport.update(width, height);
+        }
+        if (stage.getViewport().getScreenWidth() != width || stage.getViewport().getScreenHeight() != height) {
+            stage.getViewport().update(width, height, true);
+        }
+        if (transitionStage.getViewport().getScreenWidth() != width || transitionStage.getViewport().getScreenHeight() != height) {
+            transitionStage.getViewport().update(width, height, true);
+        }
+        if (hudStage.getViewport().getScreenWidth() != width || hudStage.getViewport().getScreenHeight() != height) {
+            hudStage.getViewport().update(width, height, true);
+        }
+        if (touchControlsStage.getViewport().getScreenWidth() != width || touchControlsStage.getViewport().getScreenHeight() != height) {
+            touchControlsStage.getViewport().update(width, height, true);
+        }
+    }
+
+    private void logTouch(int screenX, int screenY) {
+        Viewport touchViewport = touchControlsStage.getViewport();
+        Vector2 stageCoords = touchViewport.unproject(new Vector2(screenX, screenY));
+        Actor hit = touchControlsStage.hit(stageCoords.x, stageCoords.y, true);
+        Gdx.app.log("TouchDebug",
+            "surface=" + Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight()
+                + " gameVp=" + (int) viewport.getScreenWidth() + "x" + (int) viewport.getScreenHeight()
+                + " baseStageVp=" + (int) stage.getViewport().getScreenWidth() + "x" + (int) stage.getViewport().getScreenHeight()
+                + " touchVp=" + (int) touchViewport.getScreenWidth() + "x" + (int) touchViewport.getScreenHeight()
+                + " raw=" + screenX + "," + screenY
+                + " ->stage=" + Math.round(stageCoords.x) + "," + Math.round(stageCoords.y)
+                + " hit=" + (hit != null ? hit.getClass().getSimpleName() : "none"));
     }
 
     @Override

@@ -64,5 +64,6 @@ See @resources/docs-ai/ashley-ecs.md for the full, AI-usable overview of every E
 *   **Start Framing:** On level start/swap, `CameraSystem.snapToRoom(...)` frames the starting room — never the player: flip rooms center, scroll rooms clamp the player-start into view.
 
 ## Debugging
-Turn on and off debugging with SHIFT+D.
+Turn on and off collision debugging with SHIFT+D (desktop) or the "Collision Debug" button in the in-game Pause dialog (all platforms; the toggle persists across level reloads within a session).
 Use ShapeRenderer for debugging (see `DebugRenderSystem`, which outlines every live `CollisionComponent` AABB plus the static map collision rects).
+The Pause dialog also exposes a "Touch Debug" button that logs every touch to logcat under the `TouchDebug` tag (surface/viewport sizes, raw vs stage-mapped coords, and the hit actor), for diagnosing touch-input misalignment.

@@ -77,6 +77,7 @@ public class BaseScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         stage.act(Math.min(delta, 1 / 30f));
+        stage.getViewport().apply();
         stage.draw();
 
         renderTransition(delta);
@@ -84,6 +85,7 @@ public class BaseScreen implements Screen {
 
     protected void renderTransition(float delta) {
         transitionStage.act(delta);
+        transitionStage.getViewport().apply();
         transitionStage.draw();
     }
 
