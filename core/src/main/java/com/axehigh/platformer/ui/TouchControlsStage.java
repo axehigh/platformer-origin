@@ -100,7 +100,7 @@ public class TouchControlsStage extends Stage {
 
         root.add(interactButton).colspan(2).size(UI_Button_Action_Size, UI_Button_Action_Size).padBottom(6f);
         root.row();
-        root.add(dpad).expandX().left().pad(20f);
+        root.add(dpad).expandX().left().bottom().pad(20f);
         root.add(actions).expandX().right().pad(20f);
     }
 

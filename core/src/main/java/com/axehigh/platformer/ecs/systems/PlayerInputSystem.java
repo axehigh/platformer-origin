@@ -205,7 +205,7 @@ public class PlayerInputSystem extends IteratingSystem {
         bullet.add(transform);
 
         TextureComponent textureComponent = engine.createComponent(TextureComponent.class);
-        textureComponent.region = new TextureRegion(assetManager.get("gfx/bullet.png", Texture.class));
+        textureComponent.region = new TextureRegion(assetManager.get("gfx/old/bullet.png", Texture.class));
         bullet.add(textureComponent);
 
         MovementComponent movement = engine.createComponent(MovementComponent.class);

@@ -173,7 +173,6 @@ public class GameScreen extends BaseScreen {
 
         playerComponent = PLAYER.get(player);
         Viewport hudViewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
-        hudViewport.setWorldSize(VIRTUAL_WIDTH , VIRTUAL_HEIGHT );
         Viewport touchViewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
         hudStage = new HudStage(hudViewport, skin, assetManager, playerComponent);
         hudStage.getPauseButton().addListener(new ChangeListener() {
