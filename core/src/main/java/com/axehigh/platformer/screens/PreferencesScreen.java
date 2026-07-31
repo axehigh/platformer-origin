@@ -1,40 +1,30 @@
 package com.axehigh.platformer.screens;
 
 import com.axehigh.platformer.GameConstants;
-import com.axehigh.platformer.ui.SkinFactory;
+import com.axehigh.platformer.common.BaseScreen;
 import com.axehigh.platformer.util.GamePreferences;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 
-/** Settings screen: music/SFX volume sliders and a debug-mode checkbox, bound to {@link GamePreferences}. */
-public class PreferencesScreen implements Screen {
-    private final Game game;
+/**
+ * Settings screen: music/SFX volume sliders and a debug-mode checkbox, bound to {@link GamePreferences}.
+ */
+public class PreferencesScreen extends BaseScreen {
     private final GamePreferences preferences = new GamePreferences();
-    private Skin skin;
-    private Stage stage;
 
     public PreferencesScreen(Game game) {
-        this.game = game;
+        super(game);
     }
 
     @Override
     public void show() {
-        skin = SkinFactory.getSkin();
-        Viewport viewport = new FitViewport(GameConstants.VIRTUAL_WIDTH, GameConstants.VIRTUAL_HEIGHT);
-        stage = new Stage(viewport);
-
+        super.show();
         Table table = new Table();
         table.setFillParent(true);
         stage.addActor(table);
@@ -54,7 +44,7 @@ public class PreferencesScreen implements Screen {
             }
         });
         table.add(musicLabel).padRight(12f);
-        table.add(musicSlider).width(120f).padBottom(6f).row();
+        table.add(musicSlider).padBottom(6f).row();
 
         Label sfxLabel = new Label("SFX Volume", skin);
         sfxLabel.setFontScale(GameConstants.FontScale);
@@ -67,7 +57,7 @@ public class PreferencesScreen implements Screen {
             }
         });
         table.add(sfxLabel).padRight(12f);
-        table.add(sfxSlider).width(120f).padBottom(6f).row();
+        table.add(sfxSlider).padBottom(6f).row();
 
         CheckBox debugCheckBox = new CheckBox(" Debug Mode", skin);
         debugCheckBox.getLabel().setFontScale(GameConstants.FontScale);
@@ -88,41 +78,9 @@ public class PreferencesScreen implements Screen {
                 game.setScreen(new MainMenuScreen(game));
             }
         });
-        table.add(backButton).colspan(2).width(120f).row();
+        table.add(backButton).colspan(2).row();
 
         Gdx.input.setInputProcessor(stage);
     }
 
-    @Override
-    public void render(float delta) {
-        ScreenUtils.clear(0.1f, 0.1f, 0.15f, 1f);
-        stage.act(delta);
-        stage.draw();
-    }
-
-    @Override
-    public void resize(int width, int height) {
-        if (width <= 0 || height <= 0) {
-            return;
-        }
-        stage.getViewport().update(width, height, true);
-    }
-
-    @Override
-    public void pause() {
-    }
-
-    @Override
-    public void resume() {
-    }
-
-    @Override
-    public void hide() {
-    }
-
-    @Override
-    public void dispose() {
-        stage.dispose();
-        skin.dispose();
-    }
 }

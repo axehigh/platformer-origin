@@ -4,6 +4,15 @@ package com.axehigh.platformer;
  * Shared, project-wide constants.
  */
 public final class GameConstants {
+
+
+    //Launcher
+    public static final int WINDOW_SCREEN_WIDTH = 1280;
+    public static final int WINDOW_SCREEN_HEIGHT = 720;
+
+    public static final float SCREEN_WIDTH = 1980f;
+    public static final float SCREEN_HEIGHT = 1080f;
+
     /**
      * Virtual resolution width, in world units (1 unit == 1 pixel), used by the FitViewport.
      */
@@ -29,7 +38,7 @@ public final class GameConstants {
     public static float UI_Button_Move_Size = 40f;
     public static final float UI_PADDING = 8f;
     public static final float UI_BUTTON_ALPHA = 0.6f;
-    public static float FontScale = 0.6f;
+    public static float FontScale = 1f;
 
     private GameConstants() {
     }

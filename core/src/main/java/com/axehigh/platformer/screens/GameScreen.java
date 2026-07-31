@@ -1,13 +1,11 @@
 package com.axehigh.platformer.screens;
 
-import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.assets.GameAssetRegistry;
-import com.axehigh.platformer.ecs.components.AnimationComponent;
+import com.axehigh.platformer.common.BaseScreen;import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.systems.*;
 import com.axehigh.platformer.map.*;
 import com.axehigh.platformer.ui.HudStage;
-import com.axehigh.platformer.ui.SkinFactory;
 import com.axehigh.platformer.ui.TouchControlsStage;
 import com.axehigh.platformer.util.SaveManager;
 import com.badlogic.ashley.core.Entity;
@@ -21,14 +19,12 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import static com.axehigh.platformer.GameConstants.FontScale;
+import static com.axehigh.platformer.GameConstants.*;
 import static com.axehigh.platformer.assets.GameAssetRegistry.HERO_ASSET;
 import static com.axehigh.platformer.ecs.components.AnimationComponent.State.*;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
@@ -36,7 +32,7 @@ import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.NORMAL;
 
 /** Owns the Ashley Engine, the fixed-resolution viewport/camera, and drives the game loop. */
-public class GameScreen implements Screen {
+public class GameScreen extends BaseScreen {
     private static final int PRIORITY_INPUT = 0;
     private static final int PRIORITY_ENEMY = 4;
     private static final int PRIORITY_MOVEMENT = 5;
@@ -58,9 +54,8 @@ public class GameScreen implements Screen {
     private final PooledEngine engine = new PooledEngine();
     private final SpriteBatch batch = new SpriteBatch();
     private final OrthographicCamera camera = new OrthographicCamera();
-    private final Viewport viewport = new FitViewport(GameConstants.VIRTUAL_WIDTH, GameConstants.VIRTUAL_HEIGHT, camera);
+    private final Viewport viewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, camera);
 
-    private final Game game;
     private final String levelPath;
     private final SaveData saveData;
 
@@ -69,7 +64,6 @@ public class GameScreen implements Screen {
     private LevelManager levelManager;
     private PlayerComponent playerComponent;
     private Entity playerEntity;
-    private Skin uiSkin;
     private HudStage hudStage;
     private TouchControlsStage touchControlsStage;
     private boolean gameOverActive = false;
@@ -82,26 +76,27 @@ public class GameScreen implements Screen {
     }
 
     public GameScreen(Game game, String levelPath) {
-        this.game = game;
+        super(game);
         this.levelPath = levelPath;
         this.saveData = null;
     }
 
     /** Resumes from a save: loads {@code saveData.levelPath} and applies its stats onto the new player. */
     public GameScreen(Game game, SaveData saveData) {
-        this.game = game;
+        super(game);
         this.levelPath = saveData.levelPath;
         this.saveData = saveData;
     }
 
     @Override
     public void show() {
+        super.show();
         GameAssetRegistry.loadAssets(assetManager);
         assetManager.finishLoading();
 
         MapLoader mapLoader = new MapLoader(levelPath);
         float scale = mapLoader.getTileWidth() / 16f;
-        viewport.setWorldSize(GameConstants.VIRTUAL_WIDTH * scale, GameConstants.VIRTUAL_HEIGHT * scale);
+        viewport.setWorldSize(VIRTUAL_WIDTH * scale, VIRTUAL_HEIGHT * scale);
         viewport.apply();
 
         EntityFactory entityFactory = new EntityFactory(assetManager);
@@ -176,18 +171,18 @@ public class GameScreen implements Screen {
         entityFactory.spawnObjects(engine, mapLoader.getEnemiesLayer(), roomState);
         CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y);
 
-        uiSkin = SkinFactory.getSkin();
         playerComponent = PLAYER.get(player);
-        Viewport hudViewport = new FitViewport(GameConstants.VIRTUAL_WIDTH, GameConstants.VIRTUAL_HEIGHT);
-        Viewport touchViewport = new FitViewport(GameConstants.VIRTUAL_WIDTH, GameConstants.VIRTUAL_HEIGHT);
-        hudStage = new HudStage(hudViewport, uiSkin, assetManager, playerComponent);
+        Viewport hudViewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+        hudViewport.setWorldSize(VIRTUAL_WIDTH , VIRTUAL_HEIGHT );
+        Viewport touchViewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+        hudStage = new HudStage(hudViewport, skin, assetManager, playerComponent);
         hudStage.getPauseButton().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
                 togglePause();
             }
         });
-        touchControlsStage = new TouchControlsStage(touchViewport, uiSkin, playerInputSystem);
+        touchControlsStage = new TouchControlsStage(touchViewport, skin, playerInputSystem);
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
         inputMultiplexer.addProcessor(touchControlsStage);
@@ -223,7 +218,7 @@ public class GameScreen implements Screen {
     }
 
     private void showPauseDialog() {
-        Dialog dialog = new Dialog("Paused", uiSkin) {
+        Dialog dialog = new Dialog("Paused", skin) {
             @Override
             protected void result(Object object) {
                 gamePaused = false;
@@ -233,7 +228,7 @@ public class GameScreen implements Screen {
         dialog.getContentTable().defaults().pad(2f);
         dialog.getButtonTable().defaults().pad(2f);
 
-        TextButton resumeButton = new TextButton("Resume", uiSkin);
+        TextButton resumeButton = new TextButton("Resume", skin);
         resumeButton.getLabel().setFontScale(FontScale);
         resumeButton.addListener(new ChangeListener() {
             @Override
@@ -244,7 +239,7 @@ public class GameScreen implements Screen {
         });
         dialog.button(resumeButton);
 
-        final TextButton musicButton = new TextButton("Music: " + (musicEnabled ? "ON" : "OFF"), uiSkin);
+        final TextButton musicButton = new TextButton("Music: " + (musicEnabled ? "ON" : "OFF"), skin);
         musicButton.getLabel().setFontScale(FontScale);
         musicButton.addListener(new ChangeListener() {
             @Override
@@ -256,7 +251,7 @@ public class GameScreen implements Screen {
         });
         dialog.getContentTable().add(musicButton).width(80f).pad(4f).row();
 
-        TextButton exitButton = new TextButton("Exit", uiSkin);
+        TextButton exitButton = new TextButton("Exit", skin);
         exitButton.getLabel().setFontScale(FontScale);
         exitButton.addListener(new ChangeListener() {
             @Override
@@ -273,18 +268,18 @@ public class GameScreen implements Screen {
     private void showGameOverDialog() {
         SaveData currentSave = SaveManager.hasSave() ? SaveManager.load() : new SaveData();
 
-        Dialog dialog = new Dialog("Game Over", uiSkin) {
+        Dialog dialog = new Dialog("Game Over", skin) {
             @Override
             protected void result(Object object) {
             }
         };
         dialog.getTitleLabel().setFontScale(FontScale);
-        Label deathLabel = new Label("You died!", uiSkin);
+        Label deathLabel = new Label("You died!", skin);
         deathLabel.setFontScale(FontScale);
         dialog.text(deathLabel);
 
         if (currentSave.triesRemaining > 0) {
-            TextButton continueButton = new TextButton("Continue (uses 1 try)", uiSkin);
+            TextButton continueButton = new TextButton("Continue (uses 1 try)", skin);
             continueButton.getLabel().setFontScale(FontScale);
             continueButton.addListener(new ChangeListener() {
                 @Override
@@ -300,7 +295,7 @@ public class GameScreen implements Screen {
             dialog.button(continueButton);
         }
 
-        TextButton exitButton = new TextButton("Exit to Main Menu", uiSkin);
+        TextButton exitButton = new TextButton("Exit to Main Menu", skin);
         exitButton.getLabel().setFontScale(FontScale);
         exitButton.addListener(new ChangeListener() {
             @Override
@@ -344,8 +339,8 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(0.1f, 0.1f, 0.15f, 1f);
-        viewport.apply();
+        super.render(delta);
+
         if (!gameOverActive && !gamePaused) {
             engine.update(Gdx.graphics.getDeltaTime());
         }
@@ -369,19 +364,8 @@ public class GameScreen implements Screen {
     }
 
     @Override
-    public void pause() {
-    }
-
-    @Override
-    public void resume() {
-    }
-
-    @Override
-    public void hide() {
-    }
-
-    @Override
     public void dispose() {
+        super.dispose();
         batch.dispose();
         assetManager.dispose();
         if (tiledMapRenderSystem != null) {
@@ -399,8 +383,8 @@ public class GameScreen implements Screen {
         if (touchControlsStage != null) {
             touchControlsStage.dispose();
         }
-        if (uiSkin != null) {
-            uiSkin.dispose();
-        }
+//        if (skin != null) {
+//            skin.dispose();
+//        }
     }
 }
