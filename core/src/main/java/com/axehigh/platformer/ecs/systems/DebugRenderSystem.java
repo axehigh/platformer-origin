@@ -24,11 +24,12 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 /**
  * Draws every active {@code CollisionComponent} AABB (both entity bounds and the static map
  * {@code collisionRects}), plus the current level's Room rectangles ({@code RoomState.rooms}, in
- * cyan, with the currently active one highlighted in orange), as outlined rectangles via a
- * {@code ShapeRenderer}, toggled on/off with SHIFT+D (see AGENTS.md "Debugging"). Disabled by
- * default; drawing is skipped entirely while off, so there's no per-frame cost in normal play.
- * Must run after {@code RenderSystem} so its {@code ShapeRenderer} block never overlaps the
- * {@code SpriteBatch} block (the two can never be open at the same time).
+ * cyan, with the currently active one highlighted in orange) and the player's current melee
+ * strike hitbox ({@code MeleeAttackSystem#getActiveStrikeBounds()}, in red, while a swing is live),
+ * as outlined rectangles via a {@code ShapeRenderer}, toggled on/off with SHIFT+D (see AGENTS.md
+ * "Debugging"). Disabled by default; drawing is skipped entirely while off, so there's no per-frame
+ * cost in normal play. Must run after {@code RenderSystem} so its {@code ShapeRenderer} block never
+ * overlaps the {@code SpriteBatch} block (the two can never be open at the same time).
  */
 public class DebugRenderSystem extends EntitySystem implements Disposable {
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
@@ -36,6 +37,7 @@ public class DebugRenderSystem extends EntitySystem implements Disposable {
     private final Array<Rectangle> staticCollisionRects;
     private final RoomState roomState;
     private ImmutableArray<Entity> collidables;
+    private MeleeAttackSystem meleeAttackSystem;
     private boolean debugEnabled = false;
 
     public DebugRenderSystem(OrthographicCamera camera, Array<Rectangle> staticCollisionRects, RoomState roomState) {
@@ -52,6 +54,7 @@ public class DebugRenderSystem extends EntitySystem implements Disposable {
     @Override
     public void addedToEngine(Engine engine) {
         collidables = engine.getEntitiesFor(Family.all(TransformComponent.class, CollisionComponent.class).get());
+        meleeAttackSystem = engine.getSystem(MeleeAttackSystem.class);
     }
 
     @Override
@@ -82,6 +85,14 @@ public class DebugRenderSystem extends EntitySystem implements Disposable {
             Rectangle room = roomState.rooms.get(i);
             shapeRenderer.setColor(i == roomState.activeRoomIndex ? Color.ORANGE : Color.CYAN);
             shapeRenderer.rect(room.x, room.y, room.width, room.height);
+        }
+
+        if (meleeAttackSystem != null) {
+            Rectangle strike = meleeAttackSystem.getActiveStrikeBounds();
+            if (strike != null) {
+                shapeRenderer.setColor(Color.RED);
+                shapeRenderer.rect(strike.x, strike.y, strike.width, strike.height);
+            }
         }
 
         shapeRenderer.end();
