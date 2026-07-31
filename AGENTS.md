@@ -56,14 +56,12 @@ See @resources/docs-ai/ashley-ecs.md for the full, AI-usable overview of every E
 *   **Enum** Use enum if you can.
 *   **Grill Before Building:** For any new feature request (new mechanic, enemy type, system, visual behavior, etc.), before implementing, "grill" the requester with focused clarifying/challenging questions about the ambiguous design decisions (e.g. exact motion/behavior shape, tunable defaults, edge cases, how it interacts with existing systems) rather than silently guessing. Only proceed with implementation once those decisions are confirmed.
 
-## 6. Flip-Screen (Room-Based) Camera System
-*   **Virtual Screen Dimensions:** Define explicit constants for `VIRTUAL_WIDTH` and `VIRTUAL_HEIGHT` (e.g., 480x270).
-*   **Camera Tracking:** Do NOT track the player smoothly. Instead, implement a `CameraSystem` that calculates the current room index based on the player's position:
-    *   `int roomX = (int)(player.x / VIRTUAL_WIDTH);`
-    *   `int roomY = (int)(player.y / VIRTUAL_HEIGHT);`
-*   **Camera Position:** Set the camera's center position precisely to:
-    *   `camera.position.set((roomX * VIRTUAL_WIDTH) + (VIRTUAL_WIDTH / 2f), (roomY * VIRTUAL_HEIGHT) + (VIRTUAL_HEIGHT / 2f), 0);`
-*   **Transitions (Optional):** When `roomX` or `roomY` changes, freeze player input/physics for a split second and linearly interpolate (`lerp`) the camera to the new room center to create a smooth sliding screen transition.
+## 6. Hybrid Flip-Screen / Dead-Zone Scroll Camera System
+*   **Virtual Screen Dimensions:** Define explicit constants for `VIRTUAL_WIDTH` and `VIRTUAL_HEIGHT` (e.g., 480x270), scaled by the tile-size factor for the game viewport.
+*   **Room Definitions:** Rooms come from the map's `Rooms` object layer (`MapLoader.getRooms()` → `Array<Room>`). A map with no `Rooms` layer is treated as one room covering the whole map. Rooms do NOT have to match the viewport size.
+*   **Camera Modes (per axis):** `CameraSystem` frames the active room per axis. If the room is no bigger than the viewport on an axis — or is forced via the per-room `camera="flip"` Tiled property — the camera locks to the room's center (static flip-screen framing) and snaps instantly when the player enters the room. If the room is bigger than the viewport on an axis — or forced via `camera="scroll"` — the camera uses a dead zone: it stays still while the player roams more than `GameConstants.CAMERA_SCROLL_MARGIN` from a screen edge, and only scrolls once the player crosses that margin, clamped to the room's bounds.
+*   **No Smooth Tracking:** Do NOT smoothly follow the player. Camera movement is either static (flip rooms) or dead-zone-triggered (scroll rooms); room-to-room transitions are instant snaps (no lerp, no input freeze).
+*   **Start Framing:** On level start/swap, `CameraSystem.snapToRoom(...)` frames the starting room — never the player: flip rooms center, scroll rooms clamp the player-start into view.
 
 ## Debugging
 Turn on and off debugging with SHIFT+D.

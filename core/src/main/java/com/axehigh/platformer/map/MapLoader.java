@@ -26,6 +26,8 @@ public class MapLoader implements Disposable {
     private static final String ENEMIES_LAYER = "enemies";
     private static final String ROOMS_LAYER = "Rooms";
     private static final String TYPE_PLAYER_START = "playerStart";
+    /** Optional per-room property choosing the camera mode: "flip" or "scroll" (default: infer by size). */
+    private static final String PROPERTY_CAMERA = "camera";
     /** Tile property distinguishing solid wall tiles from non-blocking ones (e.g. natural passageways). */
     private static final String PROPERTY_SOLID = "solid";
 
@@ -110,23 +112,48 @@ public class MapLoader implements Disposable {
     }
 
     /**
-     * Extracts every rectangle from the "Rooms" object layer, each defining a distinct room zone
-     * used by {@code CameraSystem} to clamp the camera and by {@code EnemySystem}/{@code
-     * EnemyShootSystem} to tell whether an enemy's owning room is the currently active one.
-     * Returns an empty array if the map has no such layer.
+     * Extracts every rectangle from the "Rooms" object layer as a {@link Room}, each defining a
+     * distinct room zone used by {@code CameraSystem} to frame/scroll the camera and by {@code
+     * EnemySystem}/{@code EnemyShootSystem} to tell whether an enemy's owning room is the currently
+     * active one. Each room's {@link Room.Mode} is read from an optional {@code camera} custom
+     * property ("flip" or "scroll"); absent, the mode is inferred from the room's size. A map with
+     * **no** "Rooms" layer at all falls back to a single room covering the whole map, so a map
+     * without rooms still gets camera framing and enemy activation for its entire area. Returns an
+     * empty array only for a "Rooms" layer that contains no rectangles.
      */
-    public Array<Rectangle> getRooms() {
-        Array<Rectangle> rooms = new Array<>();
+    public Array<Room> getRooms() {
+        Array<Room> rooms = new Array<>();
         MapLayer layer = map.getLayers().get(ROOMS_LAYER);
         if (layer == null) {
+            float mapWidth = map.getProperties().get("width", 0, Integer.class) * tileWidth;
+            float mapHeight = map.getProperties().get("height", 0, Integer.class) * tileHeight;
+            if (mapWidth > 0 && mapHeight > 0) {
+                rooms.add(new Room(0f, 0f, mapWidth, mapHeight));
+            }
             return rooms;
         }
         for (MapObject object : layer.getObjects()) {
             if (object instanceof RectangleMapObject) {
-                rooms.add(((RectangleMapObject) object).getRectangle());
+                RectangleMapObject rectObject = (RectangleMapObject) object;
+                Rectangle rect = rectObject.getRectangle();
+                String camera = rectObject.getProperties().get(PROPERTY_CAMERA, String.class);
+                rooms.add(new Room(rect.x, rect.y, rect.width, rect.height, parseCameraMode(camera)));
             }
         }
         return rooms;
+    }
+
+    /** Maps the {@code camera} property string onto a {@link Room.Mode}; anything unrecognized = {@code AUTO}. */
+    private Room.Mode parseCameraMode(String camera) {
+        if (camera != null) {
+            if (camera.equalsIgnoreCase("flip")) {
+                return Room.Mode.FLIP;
+            }
+            if (camera.equalsIgnoreCase("scroll")) {
+                return Room.Mode.SCROLL;
+            }
+        }
+        return Room.Mode.AUTO;
     }
 
     public Vector2 findPlayerStart() {

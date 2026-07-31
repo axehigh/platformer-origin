@@ -3,6 +3,7 @@ package com.axehigh.platformer.ecs.systems;
 import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.map.Room;
 import com.axehigh.platformer.map.RoomState;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -11,23 +12,28 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
 
 import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 
 /**
- * Room-based camera: tracks which Tiled "Rooms" rectangle (see {@code RoomState}/{@code
- * MapLoader#getRooms()}) currently contains the player, then clamps the camera's fixed
- * VIRTUAL_WIDTH/HEIGHT viewport within that room's edges every frame. A room no bigger than the
- * viewport on an axis keeps the camera centered on the room on that axis (static, no scrolling,
- * with the viewport allowed to overshoot the room's edges); a bigger room lets the camera
- * continuously follow the player while never showing anything past the room's own edges. Replaces
- * the previous fixed VIRTUAL_WIDTH/HEIGHT flip-screen grid entirely.
+ * Hybrid flip-screen / dead-zone scroll camera driven by the map's "Rooms" rectangles (see {@code
+ * RoomState}/{@code MapLoader#getRooms()}). Each room's camera mode is resolved per axis from its
+ * {@link Room.Mode} (defaulting to inference by size): a flip axis (room no bigger than the
+ * viewport on that axis) keeps the camera locked to the room's center — static, with the viewport
+ * allowed to overshoot the room's edges — and snaps instantly to that center when the player
+ * enters the room; a scroll axis (room bigger than the viewport) holds the camera still while the
+ * player roams anywhere inside a dead zone (each screen edge inset by {@code
+ * GameConstants.CAMERA_SCROLL_MARGIN}) and only scrolls once the player crosses that margin,
+ * clamped so the viewport never shows anything past the room's own edges. A map with no "Rooms"
+ * layer is treated as a single room covering the whole map (see {@code MapLoader#getRooms()}), so
+ * it scrolls exactly like a normal room. Replaces the old fixed VIRTUAL_WIDTH/HEIGHT flip-screen
+ * grid entirely.
  */
 public class CameraSystem extends EntitySystem {
     private final OrthographicCamera camera;
     private final RoomState roomState;
     private ImmutableArray<Entity> players;
+    private int lastActiveRoomIndex = -1;
 
     public CameraSystem(OrthographicCamera camera, RoomState roomState) {
         this(camera, roomState, 0);
@@ -51,13 +57,97 @@ public class CameraSystem extends EntitySystem {
         }
 
         TransformComponent transform = TRANSFORM.get(players.first());
-        snapToRoom(camera, roomState, transform.position.x, transform.position.y);
+        updateCamera(camera, roomState, transform.position.x, transform.position.y);
+    }
+
+    private void updateCamera(OrthographicCamera camera, RoomState roomState, float x, float y) {
+        int index = roomState.findRoomIndexContaining(x, y);
+        if (index >= 0) {
+            roomState.activeRoomIndex = index;
+        }
+
+        Room room = (roomState.activeRoomIndex >= 0 && roomState.activeRoomIndex < roomState.rooms.size)
+            ? roomState.rooms.get(roomState.activeRoomIndex)
+            : null;
+
+        if (room == null) {
+            camera.position.set(x, y, 0f);
+            camera.update();
+            return;
+        }
+
+        boolean roomChanged = roomState.activeRoomIndex != lastActiveRoomIndex;
+        lastActiveRoomIndex = roomState.activeRoomIndex;
+
+        float camX = roomChanged
+            ? frameAxis(x, room.x, room.width, camera.viewportWidth, room)
+            : deadZoneAxis(camera.position.x, x, room.x, room.width, camera.viewportWidth, room);
+        float camY = roomChanged
+            ? frameAxis(y, room.y, room.height, camera.viewportHeight, room)
+            : deadZoneAxis(camera.position.y, y, room.y, room.height, camera.viewportHeight, room);
+
+        camera.position.set(camX, camY, 0f);
+        camera.update();
+    }
+
+    /**
+     * Frames the camera for a just-entered room (instant snap / level start) from the player's
+     * position: scroll axes clamp so the player stays in view, flip axes center on the room.
+     */
+    private static float frameAxis(float playerPos, float roomMin, float roomSize, float viewportSize, Room room) {
+        if (isScrollAxis(room, roomSize, viewportSize)) {
+            return clampAxis(playerPos, roomMin, roomSize, viewportSize);
+        }
+        return roomMin + roomSize / 2f;
+    }
+
+    /**
+     * Dead-zone camera axis: the camera keeps its current position while the player stays within a
+     * screen-edge margin, chases only when the player crosses that margin (keeping the player at
+     * the margin line), and is clamped so the viewport never crosses the room's edges. Flip axes
+     * simply stay centered on the room.
+     */
+    private static float deadZoneAxis(float currentCam, float playerPos, float roomMin, float roomSize,
+                                      float viewportSize, Room room) {
+        if (!isScrollAxis(room, roomSize, viewportSize)) {
+            return roomMin + roomSize / 2f;
+        }
+        float half = viewportSize / 2f;
+        float margin = GameConstants.CAMERA_SCROLL_MARGIN;
+        float cam = currentCam;
+        float leftLine = cam - half + margin;
+        float rightLine = cam + half - margin;
+        if (playerPos < leftLine) {
+            cam = playerPos + half - margin;
+        } else if (playerPos > rightLine) {
+            cam = playerPos - half + margin;
+        }
+        return clampAxis(cam, roomMin, roomSize, viewportSize);
+    }
+
+    /**
+     * Whether the camera scrolls (dead-zone) on an axis for the given room, honoring {@link
+     * Room.Mode}. A room can only ever scroll on an axis it is actually bigger than the viewport
+     * on, so a forced {@code SCROLL} room smaller than the screen still falls back to centering.
+     */
+    private static boolean isScrollAxis(Room room, float roomSize, float viewportSize) {
+        if (roomSize <= viewportSize || room.mode == Room.Mode.FLIP) {
+            return false;
+        }
+        return room.mode == Room.Mode.SCROLL || room.mode == Room.Mode.AUTO;
+    }
+
+    /** Clamps the camera's center along one axis so the viewport never leaves the room's bounds. */
+    private static float clampAxis(float value, float roomMin, float roomSize, float viewportSize) {
+        float half = viewportSize / 2f;
+        return MathUtils.clamp(value, roomMin + half, roomMin + roomSize - half);
     }
 
     /**
      * Updates {@code roomState.activeRoomIndex} (if the given point lies within a known room) and
-     * repositions/clamps {@code camera} to that room's bounds. Static so {@code LevelManager} can
-     * reuse the exact same placement logic right after a level swap.
+     * frames {@code camera} for that room: flip axes center on the room, scroll axes clamp the
+     * player position within the room's bounds. Static so {@code GameScreen}/{@code LevelManager}
+     * can reuse the exact same placement logic right after a level swap/start.
      */
     public static void snapToRoom(OrthographicCamera camera, RoomState roomState, float x, float y) {
         int index = roomState.findRoomIndexContaining(x, y);
@@ -65,26 +155,13 @@ public class CameraSystem extends EntitySystem {
             roomState.activeRoomIndex = index;
         }
 
-        Rectangle room = (roomState.activeRoomIndex >= 0 && roomState.activeRoomIndex < roomState.rooms.size)
+        Room room = (roomState.activeRoomIndex >= 0 && roomState.activeRoomIndex < roomState.rooms.size)
             ? roomState.rooms.get(roomState.activeRoomIndex)
             : null;
 
-        float camX = room != null ? clampAxis(x, room.x, room.width, camera.viewportWidth) : x;
-        float camY = room != null ? clampAxis(y, room.y, room.height, camera.viewportHeight) : y;
+        float camX = room != null ? frameAxis(x, room.x, room.width, camera.viewportWidth, room) : x;
+        float camY = room != null ? frameAxis(y, room.y, room.height, camera.viewportHeight, room) : y;
         camera.position.set(camX, camY, 0f);
         camera.update();
-    }
-
-    /**
-     * Clamps the camera's center along one axis to the room's edges; if the room is no bigger
-     * than the viewport on this axis, centers on the room instead (letting the viewport overshoot
-     * the room's edges rather than clamping into an impossible, too-small range).
-     */
-    private static float clampAxis(float playerPos, float roomMin, float roomSize, float viewportSize) {
-        if (roomSize <= viewportSize) {
-            return roomMin + roomSize / 2f;
-        }
-        float half = viewportSize / 2f;
-        return MathUtils.clamp(playerPos, roomMin + half, roomMin + roomSize - half);
     }
 }

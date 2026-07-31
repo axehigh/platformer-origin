@@ -19,10 +19,17 @@ public final class GameConstants {
     public static final float VIRTUAL_WIDTH = 480f;
     /**
      * Virtual resolution height, in world units (1 unit == 1 pixel), used by the FitViewport.
-     * Kept as an exact multiple of the 16px tile size (17 rows) so room-sized map blocks tile
-     * perfectly and the flip-screen {@code CameraSystem} never desyncs from the Tiled room grid.
+     * Kept as an exact multiple of the 16px tile size (17 rows) so map blocks tile perfectly and
+     * screen-sized room blocks align cleanly with the camera viewport.
      */
     public static final float VIRTUAL_HEIGHT = 272f;
+
+    /**
+     * Dead-zone scroll margin (world units, 1 unit == 1 pixel) used by {@code CameraSystem} in
+     * scroll rooms: the camera holds still while the player roams anywhere more than this many
+     * pixels from a screen edge, and only starts scrolling once the player crosses that margin.
+     */
+    public static final float CAMERA_SCROLL_MARGIN = 320f;
 
     /** Duration (seconds) of the fade-in/fade-out transition between screens. */
     public static final float SCREEN_FADE_TIMER = 0.5f;
