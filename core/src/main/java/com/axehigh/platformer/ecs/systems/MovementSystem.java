@@ -127,12 +127,22 @@ public class MovementSystem extends IteratingSystem {
     }
 
     /**
-     * Spawns a smoke puff at a random spot under the player's feet when landing from a jump. Only
-     * fires on the exact landing frame: {@code player.jumpCount > 0} proves a jump happened, so
-     * walking off a ledge and falling back down spawns nothing. The puff scales up with impact
+     * Spawns a smoke puff at a random spot under the player's feet when landing from a jump.
+     * Only fires on the exact landing frame: {@code player.jumpCount > 0} proves a jump happened,
+     * so walking off a ledge and falling back down spawns nothing. The puff scales up with impact
      * speed (a proxy for fall duration): small for short hops, larger for long falls.
      */
     private void spawnLandingSmoke(TransformComponent transform, CollisionComponent collision, float fallSpeed, float maxSpeedY) {
+        spawnLandingSmoke(engine, transform, collision, fallSpeed, maxSpeedY);
+    }
+
+    /**
+     * Shared landing-smoke emitter used by both ground landings (this system) and platform
+     * landings ({@code MovingPlatformSystem}), so every landing surface produces identical smoke.
+     * Requires a {@link PooledEngine} (particle spawns use it); a no-op under a plain {@code
+     * Engine} (e.g. headless tests).
+     */
+    static void spawnLandingSmoke(PooledEngine engine, TransformComponent transform, CollisionComponent collision, float fallSpeed, float maxSpeedY) {
         if (engine == null) {
             return;
         }

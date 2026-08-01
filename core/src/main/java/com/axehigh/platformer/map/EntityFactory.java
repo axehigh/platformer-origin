@@ -23,6 +23,7 @@ import com.badlogic.gdx.utils.Array;
 
 import static com.axehigh.platformer.assets.GameAssetRegistry.HERO_ASSET;
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
+import static com.axehigh.platformer.assets.GameAssetRegistry.PLATFORM_ASSET;
 import static com.axehigh.platformer.ecs.components.AnimationComponent.State.*;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.NORMAL;
@@ -33,6 +34,10 @@ import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.NORMAL;
 public class EntityFactory {
     private static final float DECOR_Z = 5f;
     private static final float PLAYER_Z = 10f;
+    /** Moving platforms draw above decorations but below the player. */
+    private static final float PLATFORM_Z = 6f;
+    /** Default oscillation angular frequency (rad/s) when a platform omits the {@code speed} property. */
+    private static final float DEFAULT_PLATFORM_SPEED = 1f;
 
     private final AssetManager assetManager;
     private final TextureAtlas originAtlas;
@@ -108,12 +113,16 @@ public class EntityFactory {
             boolean spawned = false;
 
             float spawnX, spawnY;
+            float objectWidth = 0f;
+            float objectHeight = 0f;
             if (object instanceof RectangleMapObject) {
                 Rectangle rect = ((RectangleMapObject) object).getRectangle();
                 spawnX = rect.x;
                 spawnY = rect.y;
                 centerX = rect.x + rect.width / 2f;
                 centerY = rect.y + rect.height / 2f;
+                objectWidth = rect.width;
+                objectHeight = rect.height;
             } else if (object instanceof TiledMapTileMapObject) {
                 TiledMapTileMapObject tileObj = (TiledMapTileMapObject) object;
                 tile = tileObj.getTile();
@@ -128,6 +137,8 @@ public class EntityFactory {
                 spawnY = tileObj.getY();
                 centerX = spawnX + width / 2f;
                 centerY = spawnY + height / 2f;
+                objectWidth = width;
+                objectHeight = height;
             } else {
                 continue;
             }
@@ -165,6 +176,11 @@ public class EntityFactory {
                     engine.addEntity(createEnemy(spawnX, spawnY, enemyType, roomIndex));
                     spawned = true;
                     break;
+                case "platform":
+                    int platformRoomIndex = roomState.findRoomIndexContaining(centerX, centerY);
+                    engine.addEntity(createPlatform(spawnX, spawnY, objectWidth, objectHeight, tile, object, platformRoomIndex));
+                    spawned = true;
+                    break;
                 default:
                     // "playerStart" and any unrecognized type: nothing to spawn here.
                     break;
@@ -184,6 +200,73 @@ public class EntityFactory {
             value = tile.getProperties().get(key, String.class);
         }
         return value != null ? value : defaultValue;
+    }
+
+    /** Reads a numeric custom property from the object (or its tile), tolerating int/float/string encodings. */
+    private float getFloatProperty(MapObject object, TiledMapTile tile, String key, float defaultValue) {
+        Object value = object.getProperties().get(key);
+        if (value == null && tile != null) {
+            value = tile.getProperties().get(key);
+        }
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).floatValue();
+        }
+        try {
+            return Float.parseFloat(String.valueOf(value));
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Builds a scripted moving-platform entity from a Tiled object of type {@code platform}. The
+     * object rectangle (or the tile drawn in it, stretched to its width/height) defines both the
+     * sprite and the collision box; the platform oscillates around that spawn rectangle, driven by
+     * {@code MovingPlatformSystem}. Custom properties: {@code amplitudeX}/{@code amplitudeY}
+     * (travel distance per axis in world units), {@code speed} (rad/s, default 1), {@code phase}
+     * (radians, default 0), and optionally {@code axis} ("x" / "y" / "both", a convenience that
+     * zeroes the other axis). {@code roomIndex} mirrors the enemy pattern: the platform only moves
+     * while its owning room is active.
+     */
+    private Entity createPlatform(float x, float y, float width, float height, TiledMapTile tile, MapObject object, int roomIndex) {
+        TextureRegion region = tile != null ? tile.getTextureRegion() : new TextureRegion(getTexture(PLATFORM_ASSET));
+
+        Entity entity = new Entity();
+
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(x, y);
+        transform.scale.set(width / region.getRegionWidth(), height / region.getRegionHeight());
+        transform.z = PLATFORM_Z;
+        entity.add(transform);
+
+        TextureComponent textureComponent = new TextureComponent();
+        textureComponent.region = region;
+        entity.add(textureComponent);
+
+        CollisionComponent collisionComponent = new CollisionComponent();
+        collisionComponent.bounds.setSize(width, height);
+        entity.add(collisionComponent);
+
+        MovingPlatformComponent platform = new MovingPlatformComponent();
+        platform.baseX = x;
+        platform.baseY = y;
+        String axis = getProperty(object, tile, "axis", null);
+        if ("x".equalsIgnoreCase(axis)) {
+            platform.amplitudeY = 0f;
+        } else if ("y".equalsIgnoreCase(axis)) {
+            platform.amplitudeX = 0f;
+        }
+        platform.amplitudeX = getFloatProperty(object, tile, "amplitudeX", platform.amplitudeX);
+        platform.amplitudeY = getFloatProperty(object, tile, "amplitudeY", platform.amplitudeY);
+        platform.speed = getFloatProperty(object, tile, "speed", DEFAULT_PLATFORM_SPEED);
+        platform.phase = getFloatProperty(object, tile, "phase", 0f);
+        platform.roomIndex = roomIndex;
+        entity.add(platform);
+
+        return entity;
     }
 
     private Entity createDecoration(float x, float y, String texturePath) {

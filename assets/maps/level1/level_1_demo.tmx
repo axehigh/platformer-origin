@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="16" height="12" tilewidth="128" tileheight="128" infinite="0" nextlayerid="5" nextobjectid="7">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="16" height="12" tilewidth="128" tileheight="128" infinite="0" nextlayerid="5" nextobjectid="10">
  <tileset firstgid="1" source="cave_tileset.tsx"/>
  <layer id="1" name="background" width="16" height="12">
   <data encoding="csv">
@@ -22,11 +22,11 @@
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
-2,0,0,0,0,0,0,2,2,2,0,0,0,0,0,2,
-2,0,2,2,2,0,0,0,0,0,0,0,0,0,0,2,
+2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,2,2,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
-2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+2,0,0,0,0,2,2,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
@@ -42,8 +42,22 @@
     <property name="nextLevel" value="maps/level1/level_1_demo_2.tmx"/>
    </properties>
   </object>
+  <object id="7" name="Platform" x="911.264" y="648.299" width="174.442" height="114.559">
+   <properties>
+    <property name="amplitudeX" value="80"/>
+    <property name="speed" value="1"/>
+    <property name="type" value="platform"/>
+   </properties>
+  </object>
+  <object id="9" name="Platform" x="235.627" y="643.092" width="174.442" height="114.559">
+   <properties>
+    <property name="amplitudeY" value="80"/>
+    <property name="speed" value="1"/>
+    <property name="type" value="platform"/>
+   </properties>
+  </object>
  </objectgroup>
- <objectgroup id="4" name="Rooms">
+ <objectgroup id="4" name="Rooms" locked="1">
   <object id="2" x="0" y="0" width="2048" height="1539.51"/>
  </objectgroup>
 </map>

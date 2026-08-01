@@ -67,3 +67,6 @@ See @resources/docs-ai/ashley-ecs.md for the full, AI-usable overview of every E
 Turn on and off collision debugging with SHIFT+D (desktop) or the "Collision Debug" button in the in-game Pause dialog (all platforms; the toggle persists across level reloads within a session).
 Use ShapeRenderer for debugging (see `DebugRenderSystem`, which outlines every live `CollisionComponent` AABB plus the static map collision rects).
 The Pause dialog also exposes a "Touch Debug" button that logs every touch to logcat under the `TouchDebug` tag (surface/viewport sizes, raw vs stage-mapped coords, and the hit actor), for diagnosing touch-input misalignment.
+
+# Testing and build
+*   **No Need to Build Android APK Every Time:** You can test most changes on the desktop version without rebuilding the Android APK.

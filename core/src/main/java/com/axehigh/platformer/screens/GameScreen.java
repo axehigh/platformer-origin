@@ -44,6 +44,7 @@ public class GameScreen extends BaseScreen {
     private static final int PRIORITY_ENEMY = 4;
     private static final int PRIORITY_MOVEMENT = 5;
     private static final int PRIORITY_BOUNDS = 6;
+    private static final int PRIORITY_MOVING_PLATFORM = 6;
     private static final int PRIORITY_COLLISION = 7;
     private static final int PRIORITY_MELEE = 8;
     private static final int PRIORITY_SFX = 8;
@@ -145,6 +146,7 @@ public class GameScreen extends BaseScreen {
         enemyBulletSystem.setUnitScale(scale);
         engine.addSystem(enemyBulletSystem);
         engine.addSystem(new CollisionBoundsSystem(PRIORITY_BOUNDS));
+        engine.addSystem(new MovingPlatformSystem(mapLoader.getCollisionRects(), roomState, PRIORITY_MOVING_PLATFORM));
 
         MeleeAttackSystem meleeSystem = new MeleeAttackSystem(assetManager, PRIORITY_MELEE);
         meleeSystem.setUnitScale(scale);

@@ -12,6 +12,7 @@ public final class GameAssetRegistry {
     public static final String ORIGIN_GAME_GFX = "gfx/origin-game.atlas";
     public static final String ORIGIN_UI_JSON = "ui/uiskin.json";
     public static final String ORIGIN_UI_GFX = "ui/uiskin.atlas";
+    public static final String PLATFORM_ASSET = "gfx/old/platform.png";
 
     private GameAssetRegistry() {
     }
@@ -36,6 +37,7 @@ public final class GameAssetRegistry {
         assetManager.load("gfx/old/bullet.png", Texture.class);
         assetManager.load("gfx/old/dagger.png", Texture.class);
         assetManager.load("gfx/old/chest_open.png", Texture.class);
+        assetManager.load("gfx/old/platform.png", Texture.class);
     }
 
     public static void loadParticles(AssetManager assetManager) {
