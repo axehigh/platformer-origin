@@ -22,7 +22,6 @@
 
 ### Terrain
 - Terrain obstacles (acid, fire, spikes)
-- Moving platforms, side to side, up and down
 - keys and doors
 - levers that opens doors
 - teleporters
