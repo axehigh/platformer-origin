@@ -26,14 +26,14 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
  * removal), but resolves the "hit" case against the cached player entity instead of the enemy
  * family. On hitting the player, the bullet is always removed and, while the shared
  * {@code player.hitInvulnerability} grace-period timer (also used by {@code EnemyContactSystem})
- * is done, decrements {@code player.health} by one and restarts that timer — the exact same
- * damage rule as touching an enemy.
+ * is done, applies the exact same damage rule as touching an enemy via the shared
+ * {@code PlayerDamageResolver} (health decrement, brief hit-stun lock, knockback push in the
+ * bullet's travel direction, invulnerability restart).
  */
 public class EnemyBulletCollisionSystem extends IteratingSystem {
-    private static final float HIT_INVULNERABILITY_DURATION = 1.0f;
-
     private final Array<Rectangle> collisionRects;
     private ImmutableArray<Entity> players;
+    private float unitScale = 1f;
 
     public EnemyBulletCollisionSystem(Array<Rectangle> collisionRects) {
         this(collisionRects, 0);
@@ -42,6 +42,10 @@ public class EnemyBulletCollisionSystem extends IteratingSystem {
     public EnemyBulletCollisionSystem(Array<Rectangle> collisionRects, int priority) {
         super(Family.all(BulletComponent.class, EnemyBulletComponent.class, TransformComponent.class, MovementComponent.class, CollisionComponent.class).get(), priority);
         this.collisionRects = collisionRects;
+    }
+
+    public void setUnitScale(float unitScale) {
+        this.unitScale = unitScale;
     }
 
     @Override
@@ -71,7 +75,7 @@ public class EnemyBulletCollisionSystem extends IteratingSystem {
             return;
         }
 
-        if (hitsPlayer(collision.worldBounds)) {
+        if (hitsPlayer(collision.worldBounds, movement)) {
             getEngine().removeEntity(bulletEntity);
         }
     }
@@ -85,7 +89,7 @@ public class EnemyBulletCollisionSystem extends IteratingSystem {
         return false;
     }
 
-    private boolean hitsPlayer(Rectangle bounds) {
+    private boolean hitsPlayer(Rectangle bounds, MovementComponent movement) {
         if (players.size() == 0) {
             return false;
         }
@@ -97,10 +101,8 @@ public class EnemyBulletCollisionSystem extends IteratingSystem {
         }
 
         PlayerComponent player = PLAYER.get(playerEntity);
-        if (player.hitInvulnerability.isDone()) {
-            player.health = Math.max(0, player.health - 1);
-            player.hitInvulnerability.start(HIT_INVULNERABILITY_DURATION);
-        }
+        int knockbackDirection = movement.velocity.x >= 0f ? 1 : -1;
+        PlayerDamageResolver.applyHit(playerEntity, player, movement, knockbackDirection, unitScale);
         return true;
     }
 }

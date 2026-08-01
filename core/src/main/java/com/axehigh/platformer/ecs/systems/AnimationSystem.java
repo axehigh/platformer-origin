@@ -22,6 +22,9 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 /** Advances the current animation state timer and updates the visible TextureRegion. */
 public class AnimationSystem extends IteratingSystem {
 
+    /** Blink frequency (Hz): number of visibility toggles per second while invulnerable. */
+    private static final float BLINK_FREQUENCY = 10f;
+
     public AnimationSystem() {
         this(0);
     }
@@ -67,13 +70,27 @@ public class AnimationSystem extends IteratingSystem {
                              animationComponent.currentState != AnimationComponent.State.ATTACKING;
             textureComponent.region = animation.getKeyFrame(animationComponent.stateTime, looping);
         }
+
+        // Invulnerability blink: once the HURT clip has finished (hurtTimer done) but while the
+        // hit-invulnerability grace period is still running, flash the sprite at ~10Hz so the
+        // remaining invulnerability is readable without freezing the player in the hurt pose.
+        // A null region is skipped by RenderSystem, giving the blink effect.
+        PlayerComponent player = PLAYER.get(entity);
+        if (player != null && player.hitInvulnerability.isActive() && !player.hurtTimer.isActive() && !player.isDead) {
+            animationComponent.blinkTimer += deltaTime;
+            if (((int) (animationComponent.blinkTimer * BLINK_FREQUENCY)) % 2 == 1) {
+                textureComponent.region = null;
+            }
+        } else {
+            animationComponent.blinkTimer = 0f;
+        }
     }
 
     private AnimationComponent.State resolvePlayerState(PlayerComponent player, MovementComponent movement) {
         if (player.isDead) {
             return AnimationComponent.State.DEATH;
         }
-        if (player.hitInvulnerability.isActive()) {
+        if (player.hurtTimer.isActive()) {
             return AnimationComponent.State.HURT;
         }
         if (player.meleeAttack.isActive()) {

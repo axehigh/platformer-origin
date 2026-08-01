@@ -2,6 +2,7 @@ package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.EnemyComponent;
+import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.badlogic.ashley.core.Engine;
@@ -13,19 +14,21 @@ import com.badlogic.gdx.math.Rectangle;
 
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
+import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
 import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 
 /**
  * Resolves enemy-vs-player contact damage: looks up the single player entity once, then for each
  * enemy checks AABB overlap against it. On overlap, while the player's {@code hitInvulnerability}
- * timer is done, decrements the player's health by one and starts a grace period so a single
+ * timer is done, applies damage through the shared {@code PlayerDamageResolver} — one point of
+ * health, a brief hit-stun lock (during which the player's input is frozen so the knockback pop
+ * can play out), a small knockback push away from the enemy, and a grace period so a single
  * sustained overlap (or several enemies at once) doesn't shred health in one frame.
  */
 public class EnemyContactSystem extends IteratingSystem {
-    private static final float HIT_INVULNERABILITY_DURATION = 1.0f;
-
     private ImmutableArray<Entity> players;
+    private float unitScale = 1f;
 
     public EnemyContactSystem() {
         this(0);
@@ -33,6 +36,10 @@ public class EnemyContactSystem extends IteratingSystem {
 
     public EnemyContactSystem(int priority) {
         super(Family.all(EnemyComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
+    }
+
+    public void setUnitScale(float unitScale) {
+        this.unitScale = unitScale;
     }
 
     @Override
@@ -46,6 +53,7 @@ public class EnemyContactSystem extends IteratingSystem {
         if (players.size() > 0) {
             PlayerComponent player = PLAYER.get(players.first());
             player.hitInvulnerability.update(deltaTime);
+            player.hurtTimer.update(deltaTime);
         }
         super.update(deltaTime);
     }
@@ -70,9 +78,10 @@ public class EnemyContactSystem extends IteratingSystem {
             return;
         }
 
-        if (player.hitInvulnerability.isDone()) {
-            player.health = Math.max(0, player.health - 1);
-            player.hitInvulnerability.start(HIT_INVULNERABILITY_DURATION);
-        }
+        TransformComponent enemyTransform = TRANSFORM.get(enemyEntity);
+        float playerCenterX = playerTransform.position.x + playerCollision.bounds.x + playerCollision.bounds.width / 2f;
+        float enemyCenterX = enemyTransform.position.x + enemyCollision.bounds.x + enemyCollision.bounds.width / 2f;
+        int knockbackDirection = playerCenterX >= enemyCenterX ? 1 : -1;
+        PlayerDamageResolver.applyHit(playerEntity, player, MOVEMENT.get(playerEntity), knockbackDirection, unitScale);
     }
 }

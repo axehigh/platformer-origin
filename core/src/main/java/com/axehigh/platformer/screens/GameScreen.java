@@ -5,6 +5,7 @@ import com.axehigh.platformer.common.BaseScreen;import com.axehigh.platformer.ec
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.systems.*;
 import com.axehigh.platformer.map.*;
+import com.axehigh.platformer.particles.ParticleHelper;
 import com.axehigh.platformer.ui.HudStage;
 import com.axehigh.platformer.ui.TouchControlsStage;
 import com.axehigh.platformer.util.SaveManager;
@@ -52,6 +53,7 @@ public class GameScreen extends BaseScreen {
     private static final int PRIORITY_ANIMATION = 10;
     private static final int PRIORITY_MAP_RENDER = 20;
     private static final int PRIORITY_ENTITY_RENDER = 30;
+    private static final int PRIORITY_PARTICLE_RENDER = 35;
     private static final int PRIORITY_DEBUG_RENDER = 40;
 
     private static final float DIALOG_PANEL_SCALE = 0.7f;
@@ -101,6 +103,7 @@ public class GameScreen extends BaseScreen {
         super.show();
         GameAssetRegistry.loadAssets(assetManager);
         assetManager.finishLoading();
+        ParticleHelper.load(assetManager);
 
         MapLoader mapLoader = new MapLoader(levelPath);
         float scale = mapLoader.getTileWidth() / 16f;
@@ -136,7 +139,9 @@ public class GameScreen extends BaseScreen {
         collisionSystem.setUnitScale(scale);
         engine.addSystem(collisionSystem);
 
-        engine.addSystem(new EnemyBulletCollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION));
+        EnemyBulletCollisionSystem enemyBulletSystem = new EnemyBulletCollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION);
+        enemyBulletSystem.setUnitScale(scale);
+        engine.addSystem(enemyBulletSystem);
         engine.addSystem(new CollisionBoundsSystem(PRIORITY_BOUNDS));
 
         MeleeAttackSystem meleeSystem = new MeleeAttackSystem(assetManager, PRIORITY_MELEE);
@@ -149,11 +154,14 @@ public class GameScreen extends BaseScreen {
         chestSystem.setUnitScale(scale);
         engine.addSystem(chestSystem);
 
-        engine.addSystem(new EnemyContactSystem(PRIORITY_ENEMY_CONTACT));
+        EnemyContactSystem enemyContactSystem = new EnemyContactSystem(PRIORITY_ENEMY_CONTACT);
+        enemyContactSystem.setUnitScale(scale);
+        engine.addSystem(enemyContactSystem);
         engine.addSystem(new CameraSystem(camera, roomState, PRIORITY_CAMERA));
         engine.addSystem(new AnimationSystem(PRIORITY_ANIMATION));
         engine.addSystem(tiledMapRenderSystem);
         engine.addSystem(new RenderSystem(batch, camera, PRIORITY_ENTITY_RENDER));
+        engine.addSystem(new ParticleSystem(batch, camera, PRIORITY_PARTICLE_RENDER));
         debugRenderSystem = new DebugRenderSystem(camera, mapLoader.getCollisionRects(), roomState, PRIORITY_DEBUG_RENDER);
         engine.addSystem(debugRenderSystem);
 
@@ -490,6 +498,7 @@ public class GameScreen extends BaseScreen {
     @Override
     public void dispose() {
         super.dispose();
+        ParticleHelper.dispose();
         batch.dispose();
         assetManager.dispose();
         if (tiledMapRenderSystem != null) {

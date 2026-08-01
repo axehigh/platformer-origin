@@ -1,7 +1,9 @@
 package com.axehigh.platformer.assets;
 
+import com.axehigh.platformer.particles.GlobalParticles;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 
 public final class GameAssetRegistry {
@@ -15,6 +17,11 @@ public final class GameAssetRegistry {
     }
 
     public static void loadAssets(AssetManager assetManager) {
+        loadGFX(assetManager);
+        loadParticles(assetManager);
+    }
+
+    private static void loadGFX(AssetManager assetManager) {
         assetManager.load(HERO_ASSET, TextureAtlas.class);
         assetManager.load(ORIGIN_GAME_GFX, TextureAtlas.class);
         assetManager.load(ORIGIN_UI_GFX, TextureAtlas.class);
@@ -29,5 +36,12 @@ public final class GameAssetRegistry {
         assetManager.load("gfx/old/bullet.png", Texture.class);
         assetManager.load("gfx/old/dagger.png", Texture.class);
         assetManager.load("gfx/old/chest_open.png", Texture.class);
+    }
+
+    public static void loadParticles(AssetManager assetManager) {
+        assetManager.load(GlobalParticles.EXPLOSION, ParticleEffect.class);
+        assetManager.load(GlobalParticles.GHOST, ParticleEffect.class);
+        assetManager.load(GlobalParticles.SMOKE, ParticleEffect.class);
+        assetManager.load(GlobalParticles.SPARKS, ParticleEffect.class);
     }
 }

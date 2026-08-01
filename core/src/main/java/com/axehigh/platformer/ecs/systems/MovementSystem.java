@@ -6,8 +6,11 @@ import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.particles.ParticleHelper;
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -28,9 +31,13 @@ public class MovementSystem extends IteratingSystem {
     private static final float GRAVITY = -600f;
     private static final float WALL_SLIDE_GRAVITY = -100f;
     private static final float WALL_SLIDE_MAX_FALL_SPEED = -40f;
+    /** Landing smoke scale range: base size, plus up to this extra based on fall impact speed. */
+    private static final float LANDING_SMOKE_BASE_SCALE = 5f;
+    private static final float LANDING_SMOKE_EXTRA_SCALE = 5f;
 
     private final Array<Rectangle> collisionRects;
     private final Rectangle entityBounds = new Rectangle();
+    private PooledEngine engine;
     private float unitScale = 1f;
 
     public MovementSystem(Array<Rectangle> collisionRects) {
@@ -46,6 +53,15 @@ public class MovementSystem extends IteratingSystem {
 
     public void setUnitScale(float unitScale) {
         this.unitScale = unitScale;
+    }
+
+    @Override
+    public void addedToEngine(Engine engine) {
+        super.addedToEngine(engine);
+        // Headless unit tests use a plain Engine; particle spawns need a PooledEngine.
+        if (engine instanceof PooledEngine) {
+            this.engine = (PooledEngine) engine;
+        }
     }
 
     @Override
@@ -81,6 +97,7 @@ public class MovementSystem extends IteratingSystem {
 
         float attemptedDeltaX = movement.velocity.x;
         boolean hitWallX = moveX(transform, movement, collision, deltaTime);
+        float fallSpeed = movement.velocity.y;
         moveY(transform, movement, collision, deltaTime);
 
         // Popped pickups (e.g. chest-dropped coins) have no ground friction of their own; freeze
@@ -91,7 +108,13 @@ public class MovementSystem extends IteratingSystem {
 
         if (player != null) {
             if (movement.grounded) {
+                if (player.jumpCount > 0) {
+                    spawnLandingSmoke(transform, collision, fallSpeed, movement.maxSpeedY);
+                }
                 player.jumpCount = 0;
+                player.isWallClimbing = false;
+            } else if (player.hurtTimer.isActive()) {
+                // While hurt, a knockback push into a wall must not fake a wall-grab.
                 player.isWallClimbing = false;
             } else if (hitWallX && attemptedDeltaX != 0f) {
                 player.isWallClimbing = true;
@@ -100,6 +123,23 @@ public class MovementSystem extends IteratingSystem {
                 player.isWallClimbing = false;
             }
         }
+    }
+
+    /**
+     * Spawns a smoke puff at a random spot under the player's feet when landing from a jump. Only
+     * fires on the exact landing frame: {@code player.jumpCount > 0} proves a jump happened, so
+     * walking off a ledge and falling back down spawns nothing. The puff scales up with impact
+     * speed (a proxy for fall duration): small for short hops, larger for long falls.
+     */
+    private void spawnLandingSmoke(TransformComponent transform, CollisionComponent collision, float fallSpeed, float maxSpeedY) {
+        if (engine == null) {
+            return;
+        }
+        float feetX = transform.position.x + collision.bounds.x + MathUtils.random(collision.bounds.width);
+        float feetY = transform.position.y + collision.bounds.y;
+        float fallRatio = (maxSpeedY > 0f) ? MathUtils.clamp(Math.abs(fallSpeed) / maxSpeedY, 0f, 1f) : 0f;
+        float scale = LANDING_SMOKE_BASE_SCALE + fallRatio * LANDING_SMOKE_EXTRA_SCALE;
+        ParticleHelper.spawnSmallSmoke(engine, feetX, feetY, scale);
     }
 
     /**

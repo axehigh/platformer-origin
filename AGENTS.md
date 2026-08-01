@@ -12,7 +12,7 @@ utilizing the Ashley ECS framework and Tiled maps.
 *   **Physics/Movement:** Custom AABB grid-based collision handling inside a dedicated Ashley `MovementSystem`. 
 *   **Resolution & Scaling:** The game camera targets a fixed virtual resolution (`VIRTUAL_WIDTH` x `VIRTUAL_HEIGHT`, 480x272), scaled by the tile-size factor and rendered through a `FitViewport` for crisp pixel-art. Set texture filtering to `TextureFilter.Nearest`.
 *   **UI Resolution:** All Scene2D UI — menus, HUD, touch controls, and dialogs — renders at `SCREEN_WIDTH` x `SCREEN_HEIGHT` (1980x1080) through an `ExtendViewport`. Keep UI off the small game-camera resolution; menu-style assets (e.g. the 1102x755 `table` window panel) must be scaled uniformly, never squished, so they don't distort.
-
+*   **Classic Platformer** Suggestions should indicate classic platformer conventions (e.g., Mario, Castlevania, Metroid).
 ---
 
 ## 2. Ashley ECS Component & System Breakdown
@@ -31,7 +31,7 @@ See @resources/docs-ai/ashley-ecs.md for the full, AI-usable overview of every E
 ---
 
 ## 4. Visual Style & UI Layout
-*   **Art Style:** 8-bit/16-bit medieval dungeon theme. Heavy use of tiled stone walls, brick backgrounds, torches, and wooden platforms.
+*   **Art Style:** Medieval dungeon theme. Heavy use of tiled stone walls, brick backgrounds, torches, and wooden platforms.
 *   **HUD (Top Overlay):**
     *   **Top Left:** Player avatar preview with a health counter using heart icons.
     *   **Top Center:** Coin counter (`Coin Icon x 0000`).

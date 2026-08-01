@@ -4,11 +4,13 @@ import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.FlyingEnemyComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
+import com.axehigh.platformer.ecs.components.ParticleComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.PoppedItemComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import org.junit.Before;
@@ -19,6 +21,7 @@ import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
 import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -152,5 +155,94 @@ public class MovementSystemTest extends SystemTestBase {
         engine.update(DT);
 
         assertEquals(5f, movement.velocity.y, EPSILON);
+    }
+
+    @Test
+    public void landingAfterJumpSpawnsSmokePuff() {
+        PooledEngine pooled = new PooledEngine();
+        MovementSystem pooledSystem = new MovementSystem(collisionRects);
+        pooledSystem.setUnitScale(1f);
+        pooled.addSystem(pooledSystem);
+
+        collisionRects.add(new Rectangle(0f, 0f, 300f, 100f));
+        TransformComponent transform = transform(0f, 130f);
+        transform.scale.x = 0f;
+        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        place(transform, collision, 0f, 130f);
+        MovementComponent movement = movement();
+        PlayerComponent player = player();
+        player.jumpCount = 2;
+        pooled.addEntity(entity(transform, movement, collision, player));
+
+        pooled.update(DT);
+
+        assertEquals(1, particleEntityCount(pooled));
+    }
+
+    @Test
+    public void landingAfterLedgeFallSpawnsNoSmoke() {
+        PooledEngine pooled = new PooledEngine();
+        MovementSystem pooledSystem = new MovementSystem(collisionRects);
+        pooledSystem.setUnitScale(1f);
+        pooled.addSystem(pooledSystem);
+
+        collisionRects.add(new Rectangle(0f, 0f, 300f, 100f));
+        TransformComponent transform = transform(0f, 130f);
+        transform.scale.x = 0f;
+        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        place(transform, collision, 0f, 130f);
+        MovementComponent movement = movement();
+        PlayerComponent player = player();
+        player.jumpCount = 0;
+        pooled.addEntity(entity(transform, movement, collision, player));
+
+        pooled.update(DT);
+
+        assertEquals(0, particleEntityCount(pooled));
+    }
+
+    @Test
+    public void landingPuffScalesWithFallSpeed() {
+        PooledEngine pooled = new PooledEngine();
+        MovementSystem pooledSystem = new MovementSystem(collisionRects);
+        pooledSystem.setUnitScale(1f);
+        pooled.addSystem(pooledSystem);
+
+        collisionRects.add(new Rectangle(0f, 0f, 300f, 100f));
+        TransformComponent transform = transform(0f, 130f);
+        transform.scale.x = 0f;
+        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        place(transform, collision, 0f, 130f);
+        MovementComponent movement = movement();
+        movement.velocity.y = -GameConstants.MaxSpeedY;
+        PlayerComponent player = player();
+        player.jumpCount = 2;
+        pooled.addEntity(entity(transform, movement, collision, player));
+
+        pooled.update(DT);
+
+        ParticleComponent pc = firstParticle(pooled);
+        assertNotNull(pc);
+        assertEquals(10f, pc.scale, EPSILON);
+    }
+
+    private static ParticleComponent firstParticle(Engine engine) {
+        for (Entity entity : engine.getEntities()) {
+            ParticleComponent pc = entity.getComponent(ParticleComponent.class);
+            if (pc != null) {
+                return pc;
+            }
+        }
+        return null;
+    }
+
+    private static int particleEntityCount(Engine engine) {
+        int count = 0;
+        for (Entity entity : engine.getEntities()) {
+            if (entity.getComponent(ParticleComponent.class) != null) {
+                count++;
+            }
+        }
+        return count;
     }
 }

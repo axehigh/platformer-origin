@@ -39,6 +39,13 @@ public class PlayerComponent implements Component {
     public boolean meleeHasHit = false;
     /** Grace period after being hit by an enemy, during which further enemy contact is ignored. */
     public Timer hitInvulnerability = new Timer();
+    /**
+     * Short hit-stun window after being hit (at least long enough to play the HURT animation once).
+     * While active, the player's movement/jump/melee/shoot input is locked (a knockback pop can play
+     * out) and the HURT animation state is shown; the longer {@code hitInvulnerability} window that
+     * runs past it is communicated by blinking the sprite instead.
+     */
+    public Timer hurtTimer = new Timer();
     
     /** Flag to track death status. */
     public boolean isDead = false;

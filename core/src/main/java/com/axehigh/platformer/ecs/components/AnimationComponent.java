@@ -15,4 +15,10 @@ public class AnimationComponent implements Component {
     public State currentState = State.IDLE;
     public State previousState = State.IDLE;
     public float stateTime = 0f;
+    /**
+     * Elapsed-time accumulator driving the invulnerability blink (toggling sprite visibility at a
+     * fixed frequency) after the HURT clip finishes but while {@code hitInvulnerability} is still
+     * active. Reset to 0 whenever the player is not in the blink phase.
+     */
+    public float blinkTimer = 0f;
 }

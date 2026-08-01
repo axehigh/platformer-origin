@@ -7,6 +7,7 @@ import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TextureComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.particles.ParticleHelper;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -18,6 +19,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 
 import static com.axehigh.platformer.ecs.components.Mappers.ANIMATION;
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
@@ -125,13 +127,17 @@ public class PlayerInputSystem extends IteratingSystem {
         boolean left = Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT) || touchLeft;
         boolean right = Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT) || touchRight;
 
-        if (left && !right) {
+        // Hit-stun lock: while hurt, the player loses control — no horizontal input (so the
+        // knockback pop set by PlayerDamageResolver isn't overwritten), no jump/melee/shoot.
+        boolean hurt = player.hurtTimer.isActive();
+
+        if (!hurt && left && !right) {
             movement.velocity.x = -MOVE_SPEED * unitScale;
             player.facingDirection = -1;
-        } else if (right && !left) {
+        } else if (!hurt && right && !left) {
             movement.velocity.x = MOVE_SPEED * unitScale;
             player.facingDirection = 1;
-        } else {
+        } else if (!hurt) {
             movement.velocity.x = 0f;
         }
 
@@ -140,7 +146,10 @@ public class PlayerInputSystem extends IteratingSystem {
             || Gdx.input.isKeyJustPressed(UP)
             || touchJumpRequested;
 
-        if (jumpPressed && player.jumpCount < player.maxJumps) {
+        if (!hurt && jumpPressed && player.jumpCount < player.maxJumps) {
+            if (movement.grounded) {
+                spawnJumpSmoke(transform, collision);
+            }
             float jumpVelocity = JUMP_VELOCITY * unitScale;
             if (player.jumpCount > 0) {
                 jumpVelocity *= DOUBLE_JUMP_FACTOR;
@@ -157,7 +166,7 @@ public class PlayerInputSystem extends IteratingSystem {
         boolean meleePressed = Gdx.input.isKeyJustPressed(Input.Keys.J)
             || Gdx.input.isKeyJustPressed(Input.Keys.B)
             || touchMeleeRequested;
-        if (meleePressed && player.meleeCooldown.isDone()) {
+        if (!hurt && meleePressed && player.meleeCooldown.isDone()) {
             float attackDuration = findAttackDuration(entity);
             player.meleeAttack.start(attackDuration);
             player.meleeHasHit = false;
@@ -168,13 +177,19 @@ public class PlayerInputSystem extends IteratingSystem {
         boolean shootPressed = Gdx.input.isKeyJustPressed(Input.Keys.K)
             || Gdx.input.isKeyJustPressed(Input.Keys.Y)
             || touchShootRequested;
-        if (shootPressed && player.shootCooldown.isDone() && player.items > 0) {
+        if (!hurt && shootPressed && player.shootCooldown.isDone() && player.items > 0) {
             spawnBullet(transform, collision, player);
             player.items--;
             player.shootCooldown.start(SHOOT_COOLDOWN);
         }
 
         player.interactPressed = Gdx.input.isKeyJustPressed(Input.Keys.E) || touchInteractRequested;
+    }
+
+    private void spawnJumpSmoke(TransformComponent transform, CollisionComponent collision) {
+        float feetX = transform.position.x + collision.bounds.x + MathUtils.random(collision.bounds.width);
+        float feetY = transform.position.y + collision.bounds.y;
+        ParticleHelper.spawnSmallSmoke(engine, feetX, feetY);
     }
 
     private static float findAttackDuration(Entity entity) {
