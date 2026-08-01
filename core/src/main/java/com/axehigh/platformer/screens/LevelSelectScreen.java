@@ -1,6 +1,7 @@
 package com.axehigh.platformer.screens;
 
 import com.axehigh.platformer.GameConstants;
+import com.axehigh.platformer.audio.AudioManager;
 import com.axehigh.platformer.common.BaseScreen;
 import com.axehigh.platformer.map.LevelCatalog;
 import com.axehigh.platformer.map.LevelDefinition;
@@ -44,6 +45,7 @@ public class LevelSelectScreen extends BaseScreen {
             levelButton.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
+                    AudioManager.get().playClick();
                     changeScreen(new GameScreen(game, level.tmxPath));
                 }
             });
@@ -55,6 +57,7 @@ public class LevelSelectScreen extends BaseScreen {
         backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                AudioManager.get().playClick();
                 changeScreen(new MainMenuScreen(game));
             }
         });

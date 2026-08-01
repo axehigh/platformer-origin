@@ -1,5 +1,6 @@
 package com.axehigh.platformer.screens;
 
+import com.axehigh.platformer.audio.AudioManager;
 import com.axehigh.platformer.common.BaseScreen;
 import com.axehigh.platformer.map.LevelCatalog;
 import com.axehigh.platformer.map.SaveData;
@@ -24,6 +25,7 @@ public class MainMenuScreen extends BaseScreen {
     @Override
     public void show() {
         super.show();
+        AudioManager.get().playMenuMusic();
 
         Table table = new Table();
         table.setFillParent(true);
@@ -37,6 +39,7 @@ public class MainMenuScreen extends BaseScreen {
         newGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                AudioManager.get().playClick();
                 newGame();
             }
         });
@@ -48,6 +51,7 @@ public class MainMenuScreen extends BaseScreen {
             continueButton.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
+                    AudioManager.get().playClick();
                     changeScreen(new GameScreen(game, SaveManager.load()));
                 }
             });
@@ -62,6 +66,7 @@ public class MainMenuScreen extends BaseScreen {
         selectLevelButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                AudioManager.get().playClick();
                 changeScreen(new LevelSelectScreen(game));
             }
         });
@@ -72,6 +77,7 @@ public class MainMenuScreen extends BaseScreen {
         preferencesButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                AudioManager.get().playClick();
                 changeScreen(new PreferencesScreen(game));
             }
         });

@@ -245,7 +245,9 @@ A dedicated `DebugRenderSystem` (see `resources/docs-ai/ashley-ecs.md`) draws ev
 3. **Dialog:** A Scene2D `Dialog` (titled "Paused") is shown on the `hudStage`.
 4. **Options:**
     *   **Resume:** Closes the dialog and sets `gamePaused = false`.
-    *   **Music (ON/OFF):** A placeholder toggle for background music volume.
+    *   **Music (ON/OFF):** Toggles background music on/off via `AudioManager.setMusicEnabled(...)` (persisted in `GamePreferences`). While paused, the music keeps playing — the toggle is what mutes it.
+    *   **Sound Effects (ON/OFF):** Toggles one-shot SFX on/off via `AudioManager.setSfxEnabled(...)` (persisted in `GamePreferences`).
+    *   **Collision Debug (ON/OFF) / Touch Debug (ON/OFF):** Toggle the debug overlays (see AGENTS.md "Debugging"); Collision Debug persists per-session, Touch Debug is per-screen.
     *   **Exit to Main Menu:** Returns the player to the `MainMenuScreen`.
 5. **Interaction:** The pause menu is disabled while the Game Over dialog is active.
 
@@ -259,3 +261,9 @@ A dedicated `DebugRenderSystem` (see `resources/docs-ai/ashley-ecs.md`) draws ev
 2. **Locked Movement:** The collision box target offset is chosen based on `facingDirection` (`PlayerOffsetRight` when facing right, `PlayerOffsetLeft` when facing left). Vertical offset `PlayerOffsetY` is applied constantly.
 3. **Smoothing:** `MovementSystem` smoothly interpolates `CollisionComponent.currentOffsetX` towards the target offset using a lerp, preventing position snaps when turning against walls.
 4. **Visual Anchoring:** `RenderSystem` anchors the sprite such that the character's center remains locked to the collision box center (compensated for offsets). To prevent the character from "jumping" in world space when flipping off-center frames, the system dynamically compensates by flipping the sign of the directional offsets (`currentOffsetX/Y`) when calculating the sprite's `frameCenterX/Y`. This ensures that both the character and its collision box remain stable and aligned during turns, even if the character is not centered in the sprite frame.
+
+### U. Audio & Music (`AudioManager`, `MusicSystem`, `SfxSystem`, screens)
+1. **Ownership:** A single app-scoped `AudioManager` (`com.axehigh.platformer.audio`) owns all four audio assets, the currently playing music track, and the volume/enabled state persisted through `GamePreferences` (`musicVolume`, `sfxVolume`, `musicEnabled`, `sfxEnabled` — all default to full/ON). It is initialized once in `Main.create()` and disposed in `Main.dispose()`; screens reach it via `AudioManager.get()`.
+2. **Music:** `music/Game-Menu_Looping.mp3` plays on the menu screens and `music/Dark-Things.ogg` (both looping) during gameplay. The menu track is started in `MainMenuScreen.show()` (so it also restarts when returning to the menu from a game); the in-game track is started by the ECS `MusicSystem` on its first engine update. Music is independent of the engine loop: it keeps playing through pauses and the game-over dialog.
+3. **Sound effects:** `sfx/Creepy1.mp3` chirps on coin pickup (triggered through the ECS `SfxSystem.playCoin()`, called by `PickupSystem` when a coin is collected — dagger pickups are silent); `sfx/Clank_8.mp3` plays on every Scene2D button click in the menus, preferences, and pause/game-over dialogs (wired directly to `AudioManager.playClick()` from the button listeners, not through the ECS).
+4. **Volume & toggles:** The Preferences screen exposes Music/SFX ON-OFF checkboxes plus the Music/SFX volume sliders; the pause menu exposes the same ON-OFF toggles. All writes go through `AudioManager` so they apply live (music volume/pause immediately, SFX guard on the next play) and persist across restarts.

@@ -1,5 +1,6 @@
 package com.axehigh.platformer;
 
+import com.axehigh.platformer.audio.AudioManager;
 import com.axehigh.platformer.screens.MainMenuScreen;
 import com.badlogic.gdx.Game;
 
@@ -7,6 +8,13 @@ import com.badlogic.gdx.Game;
 public class Main extends Game {
     @Override
     public void create() {
+        AudioManager.get();
         setScreen(new MainMenuScreen(this));
+    }
+
+    @Override
+    public void dispose() {
+        AudioManager.get().dispose();
+        super.dispose();
     }
 }

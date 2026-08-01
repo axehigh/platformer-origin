@@ -12,19 +12,25 @@ import org.junit.Test;
 
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Headless unit tests for {@code PickupSystem}: coin/dagger overlap resolution, the ammo cap at
- * {@code maxItems}, and that a non-overlapping pickup is left untouched.
+ * {@code maxItems}, that a non-overlapping pickup is left untouched, and that only a coin pickup
+ * triggers the coin SFX.
  */
 public class PickupSystemTest extends SystemTestBase {
 
     private Engine engine;
     private PickupSystem system;
+    private SfxSystem sfxSystem;
 
     @Before
     public void setUp() {
-        system = new PickupSystem();
+        sfxSystem = mock(SfxSystem.class);
+        system = new PickupSystem(sfxSystem, 0);
         engine = newEngine();
         engine.addSystem(system);
     }
@@ -58,6 +64,26 @@ public class PickupSystemTest extends SystemTestBase {
         Entity entity = entity(transform, collision, dagger);
         engine.addEntity(entity);
         return entity;
+    }
+
+    @Test
+    public void coinPickupPlaysCoinSfx() {
+        player(0f, 130f);
+        coin(0f, 130f, 1);
+
+        engine.update(DT);
+
+        verify(sfxSystem).playCoin();
+    }
+
+    @Test
+    public void daggerPickupDoesNotPlaySfx() {
+        player(0f, 130f);
+        dagger(0f, 130f, 1);
+
+        engine.update(DT);
+
+        verifyNoInteractions(sfxSystem);
     }
 
     @Test

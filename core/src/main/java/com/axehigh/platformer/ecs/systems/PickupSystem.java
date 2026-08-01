@@ -25,15 +25,17 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
  * pickup entity.
  */
 public class PickupSystem extends IteratingSystem {
+    private final SfxSystem sfxSystem;
     private ImmutableArray<Entity> players;
 
     public PickupSystem() {
-        this(0);
+        this(null, 0);
     }
 
-    public PickupSystem(int priority) {
+    public PickupSystem(SfxSystem sfxSystem, int priority) {
         super(Family.one(DaggerPickupComponent.class, CoinPickupComponent.class)
             .get(), priority);
+        this.sfxSystem = sfxSystem;
     }
 
     @Override
@@ -62,6 +64,9 @@ public class PickupSystem extends IteratingSystem {
         } else {
             CoinPickupComponent coinPickup = COIN_PICKUP.get(pickupEntity);
             player.coins += coinPickup.amount;
+            if (sfxSystem != null) {
+                sfxSystem.playCoin();
+            }
         }
         getEngine().removeEntity(pickupEntity);
     }

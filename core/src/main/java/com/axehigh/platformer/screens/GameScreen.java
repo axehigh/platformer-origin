@@ -1,6 +1,7 @@
 package com.axehigh.platformer.screens;
 
 import com.axehigh.platformer.assets.GameAssetRegistry;
+import com.axehigh.platformer.audio.AudioManager;
 import com.axehigh.platformer.common.BaseScreen;import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.systems.*;
@@ -39,11 +40,13 @@ import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.NORMAL;
 /** Owns the Ashley Engine, the fixed-resolution viewport/camera, and drives the game loop. */
 public class GameScreen extends BaseScreen {
     private static final int PRIORITY_INPUT = 0;
+    private static final int PRIORITY_MUSIC = 1;
     private static final int PRIORITY_ENEMY = 4;
     private static final int PRIORITY_MOVEMENT = 5;
     private static final int PRIORITY_BOUNDS = 6;
     private static final int PRIORITY_COLLISION = 7;
     private static final int PRIORITY_MELEE = 8;
+    private static final int PRIORITY_SFX = 8;
     private static final int PRIORITY_PICKUP = 8;
     private static final int PRIORITY_CHEST = 8;
     private static final int PRIORITY_ENEMY_CONTACT = 8;
@@ -77,7 +80,6 @@ public class GameScreen extends BaseScreen {
     private TouchControlsStage touchControlsStage;
     private boolean gameOverActive = false;
     private boolean gamePaused = false;
-    private boolean musicEnabled = true;
     private boolean debugTouchLogging = false;
 
     /** Defaults to the catalog's first level. */
@@ -148,7 +150,11 @@ public class GameScreen extends BaseScreen {
         meleeSystem.setUnitScale(scale);
         engine.addSystem(meleeSystem);
 
-        engine.addSystem(new PickupSystem(PRIORITY_PICKUP));
+        engine.addSystem(new MusicSystem(AudioManager.get(), PRIORITY_MUSIC));
+        SfxSystem sfxSystem = new SfxSystem(AudioManager.get(), PRIORITY_SFX);
+        engine.addSystem(sfxSystem);
+
+        engine.addSystem(new PickupSystem(sfxSystem, PRIORITY_PICKUP));
 
         ChestSystem chestSystem = new ChestSystem(entityFactory, PRIORITY_CHEST);
         chestSystem.setUnitScale(scale);
@@ -271,28 +277,43 @@ public class GameScreen extends BaseScreen {
         resumeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                AudioManager.get().playClick();
                 dialog.hide();
                 gamePaused = false;
             }
         });
         dialog.button(resumeButton);
 
-        final TextButton musicButton = new TextButton("Music: " + (musicEnabled ? "ON" : "OFF"), skin);
+        final TextButton musicButton = new TextButton("Music: " + (AudioManager.get().isMusicEnabled() ? "ON" : "OFF"), skin);
         musicButton.getLabel().setFontScale(FontScale);
         musicButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                musicEnabled = !musicEnabled;
-                musicButton.setText("Music: " + (musicEnabled ? "ON" : "OFF"));
+                AudioManager.get().playClick();
+                AudioManager.get().setMusicEnabled(!AudioManager.get().isMusicEnabled());
+                musicButton.setText("Music: " + (AudioManager.get().isMusicEnabled() ? "ON" : "OFF"));
             }
         });
         dialog.getContentTable().add(musicButton).minWidth(240f).pad(UI_PADDING).row();
+
+        final TextButton sfxButton = new TextButton("Sound Effects: " + (AudioManager.get().isSfxEnabled() ? "ON" : "OFF"), skin);
+        sfxButton.getLabel().setFontScale(FontScale);
+        sfxButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                AudioManager.get().playClick();
+                AudioManager.get().setSfxEnabled(!AudioManager.get().isSfxEnabled());
+                sfxButton.setText("Sound Effects: " + (AudioManager.get().isSfxEnabled() ? "ON" : "OFF"));
+            }
+        });
+        dialog.getContentTable().add(sfxButton).minWidth(240f).pad(UI_PADDING).row();
 
         final TextButton collisionDebugButton = new TextButton("Collision Debug: " + (DebugRenderSystem.isDebugEnabled() ? "ON" : "OFF"), skin);
         collisionDebugButton.getLabel().setFontScale(FontScale);
         collisionDebugButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                AudioManager.get().playClick();
                 DebugRenderSystem.setDebugEnabled(!DebugRenderSystem.isDebugEnabled());
                 collisionDebugButton.setText("Collision Debug: " + (DebugRenderSystem.isDebugEnabled() ? "ON" : "OFF"));
             }
@@ -303,6 +324,7 @@ public class GameScreen extends BaseScreen {
         touchDebugButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                AudioManager.get().playClick();
                 debugTouchLogging = !debugTouchLogging;
                 touchDebugButton.setText("Touch Debug: " + (debugTouchLogging ? "ON" : "OFF"));
             }
@@ -318,6 +340,7 @@ public class GameScreen extends BaseScreen {
         exitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                AudioManager.get().playClick();
                 changeScreen(new MainMenuScreen(game));
             }
         });
@@ -347,6 +370,7 @@ public class GameScreen extends BaseScreen {
             continueButton.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                    AudioManager.get().playClick();
                     currentSave.triesRemaining--;
                     SaveManager.save(currentSave);
                     levelManager.loadLevel(levelManager.getCurrentLevelPath(), playerEntity);
@@ -364,6 +388,7 @@ public class GameScreen extends BaseScreen {
         exitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                AudioManager.get().playClick();
                 changeScreen(new MainMenuScreen(game));
             }
         });
@@ -501,6 +526,7 @@ public class GameScreen extends BaseScreen {
     @Override
     public void dispose() {
         super.dispose();
+        AudioManager.get().stopMusic();
         ParticleHelper.dispose();
         batch.dispose();
         assetManager.dispose();
