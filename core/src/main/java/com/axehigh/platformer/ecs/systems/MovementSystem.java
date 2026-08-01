@@ -113,8 +113,9 @@ public class MovementSystem extends IteratingSystem {
                 }
                 player.jumpCount = 0;
                 player.isWallClimbing = false;
-            } else if (player.hurtTimer.isActive()) {
-                // While hurt, a knockback push into a wall must not fake a wall-grab.
+            } else if (player.hurtTimer.isActive() || player.isDead) {
+                // While hurt, a knockback push into a wall must not fake a wall-grab; a dead
+                // player must not latch onto walls either.
                 player.isWallClimbing = false;
             } else if (hitWallX && attemptedDeltaX != 0f) {
                 player.isWallClimbing = true;

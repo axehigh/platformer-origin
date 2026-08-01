@@ -129,15 +129,17 @@ public class PlayerInputSystem extends IteratingSystem {
 
         // Hit-stun lock: while hurt, the player loses control — no horizontal input (so the
         // knockback pop set by PlayerDamageResolver isn't overwritten), no jump/melee/shoot.
+        // A dead player (death animation playing before the Game Over dialog) is locked too.
         boolean hurt = player.hurtTimer.isActive();
+        boolean locked = hurt || player.isDead;
 
-        if (!hurt && left && !right) {
+        if (!locked && left && !right) {
             movement.velocity.x = -MOVE_SPEED * unitScale;
             player.facingDirection = -1;
-        } else if (!hurt && right && !left) {
+        } else if (!locked && right && !left) {
             movement.velocity.x = MOVE_SPEED * unitScale;
             player.facingDirection = 1;
-        } else if (!hurt) {
+        } else if (!locked) {
             movement.velocity.x = 0f;
         }
 
@@ -146,7 +148,7 @@ public class PlayerInputSystem extends IteratingSystem {
             || Gdx.input.isKeyJustPressed(UP)
             || touchJumpRequested;
 
-        if (!hurt && jumpPressed && player.jumpCount < player.maxJumps) {
+        if (!locked && jumpPressed && player.jumpCount < player.maxJumps) {
             if (movement.grounded) {
                 spawnJumpSmoke(transform, collision);
             }
@@ -166,7 +168,7 @@ public class PlayerInputSystem extends IteratingSystem {
         boolean meleePressed = Gdx.input.isKeyJustPressed(Input.Keys.J)
             || Gdx.input.isKeyJustPressed(Input.Keys.B)
             || touchMeleeRequested;
-        if (!hurt && meleePressed && player.meleeCooldown.isDone()) {
+        if (!locked && meleePressed && player.meleeCooldown.isDone()) {
             float attackDuration = findAttackDuration(entity);
             player.meleeAttack.start(attackDuration);
             player.meleeHasHit = false;
@@ -177,7 +179,7 @@ public class PlayerInputSystem extends IteratingSystem {
         boolean shootPressed = Gdx.input.isKeyJustPressed(Input.Keys.K)
             || Gdx.input.isKeyJustPressed(Input.Keys.Y)
             || touchShootRequested;
-        if (!hurt && shootPressed && player.shootCooldown.isDone() && player.items > 0) {
+        if (!locked && shootPressed && player.shootCooldown.isDone() && player.items > 0) {
             spawnBullet(transform, collision, player);
             player.items--;
             player.shootCooldown.start(SHOOT_COOLDOWN);

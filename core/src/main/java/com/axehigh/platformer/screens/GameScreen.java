@@ -246,7 +246,9 @@ public class GameScreen extends BaseScreen {
     }
 
     private void togglePause() {
-        if (gameOverActive) return;
+        // Can't pause while the game-over dialog is up, or while the death animation is still
+        // playing (the dialog appears once PlayerDeathSystem's death-wait elapses).
+        if (gameOverActive || playerComponent.isDead) return;
         gamePaused = !gamePaused;
         if (gamePaused) {
             showPauseDialog();
@@ -349,6 +351,7 @@ public class GameScreen extends BaseScreen {
                     SaveManager.save(currentSave);
                     levelManager.loadLevel(levelManager.getCurrentLevelPath(), playerEntity);
                     playerComponent.health = playerComponent.maxHealth;
+                    playerComponent.isDead = false;
                     dialog.hide();
                     gameOverActive = false;
                 }
