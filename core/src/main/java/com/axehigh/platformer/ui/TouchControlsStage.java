@@ -85,8 +85,9 @@ public class TouchControlsStage extends Stage {
             }
         });
         actions.add(yButton).size(UI_Button_Action_Size, UI_Button_Action_Size).pad(UI_PADDING);
-        actions.row();
         actions.add(bButton).size(UI_Button_Action_Size, UI_Button_Action_Size).pad(UI_PADDING);
+        actions.row();
+        actions.add().size(UI_Button_Action_Size, UI_Button_Action_Size).pad(UI_PADDING);
         actions.add(aButton).size(UI_Button_Action_Size, UI_Button_Action_Size).pad(UI_PADDING);
 
         interactButton = new TextButton("^", skin);
