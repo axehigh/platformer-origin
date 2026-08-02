@@ -9,6 +9,7 @@ import com.axehigh.platformer.map.*;
 import com.axehigh.platformer.particles.ParticleHelper;
 import com.axehigh.platformer.ui.HudStage;
 import com.axehigh.platformer.ui.TouchControlsStage;
+import com.axehigh.platformer.util.FeatureFlags;
 import com.axehigh.platformer.util.SaveManager;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
@@ -332,10 +333,25 @@ public class GameScreen extends BaseScreen {
             }
         });
 
+        final TextButton wallClimbButton = new TextButton("Wall Climb: " + (FeatureFlags.isWallClimbingEnabled() ? "ON" : "OFF"), skin);
+        wallClimbButton.getLabel().setFontScale(FontScale);
+        wallClimbButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                AudioManager.get().playClick();
+                FeatureFlags.setWallClimbingEnabled(!FeatureFlags.isWallClimbingEnabled());
+                wallClimbButton.setText("Wall Climb: " + (FeatureFlags.isWallClimbingEnabled() ? "ON" : "OFF"));
+            }
+        });
+
         Table debugRow = new Table();
         debugRow.add(collisionDebugButton).minWidth(240f).padRight(UI_PADDING);
         debugRow.add(touchDebugButton).minWidth(240f);
         dialog.getContentTable().add(debugRow).pad(UI_PADDING).row();
+
+        Table featureRow = new Table();
+        featureRow.add(wallClimbButton).minWidth(240f);
+        dialog.getContentTable().add(featureRow).pad(UI_PADDING).row();
 
         TextButton exitButton = new TextButton("Exit", skin);
         exitButton.getLabel().setFontScale(FontScale);

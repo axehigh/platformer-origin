@@ -104,7 +104,7 @@ public class MovingPlatformSystem extends IteratingSystem {
         Rectangle platformBounds = platformCollision.worldBounds;
 
         if (overlapsHorizontally(playerBounds, platformBounds)
-            && isWithinLandingBand(playerMovement, playerBounds, platformBounds, deltaTime)
+            && isWithinLandingBand(playerMovement, playerBounds, platformBounds, deltaTime, deltaY)
             && playerMovement.velocity.y <= 0f) {
             // Carry: move the player by the platform's per-frame delta, then snap the feet exactly
             // onto the (already moved) platform top. Carrying before snapping avoids double-counting
@@ -138,11 +138,16 @@ public class MovingPlatformSystem extends IteratingSystem {
     /**
      * The player's feet are "on" the platform when they are inside a band around the platform's
      * top surface. The band is at least {@link #SNAP_EXTRA_TOLERANCE} wide and widens to cover the
-     * distance fallen this frame, so a fast fall into a thin platform is still caught.
+     * distance fallen this frame, so a fast fall into a thin platform is still caught. It also
+     * widens by the platform's own per-frame vertical travel, because the player is re-dropped by
+     * gravity every frame in {@code MovementSystem} (which runs before this system and has no
+     * knowledge of platforms): without that extra tolerance a vertically-moving platform travelling
+     * faster than the player's per-frame fall would drift out of the band and the player would fall
+     * straight through it.
      */
-    private boolean isWithinLandingBand(MovementComponent playerMovement, Rectangle playerBounds, Rectangle platformBounds, float deltaTime) {
+    private boolean isWithinLandingBand(MovementComponent playerMovement, Rectangle playerBounds, Rectangle platformBounds, float deltaTime, float platformDeltaY) {
         float fallDistance = Math.max(0f, -playerMovement.velocity.y * deltaTime);
-        float tolerance = SNAP_EXTRA_TOLERANCE + fallDistance;
+        float tolerance = SNAP_EXTRA_TOLERANCE + fallDistance + Math.abs(platformDeltaY);
         float feetY = playerBounds.y;
         float platformTopY = platformBounds.y + platformBounds.height;
         return feetY <= platformTopY + tolerance && feetY >= platformTopY - tolerance;

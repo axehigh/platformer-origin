@@ -7,6 +7,7 @@ import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.particles.ParticleHelper;
+import com.axehigh.platformer.util.FeatureFlags;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -25,7 +26,9 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 
 /**
  * Integrates velocity into position and resolves AABB collisions against the static map boundary
- * set. Also drives the player-specific jump-count reset and wall-climb latch/release.
+ * set. Also drives the player-specific jump-count reset and wall-climb latch/release, the latter
+ * gated on {@code FeatureFlags.isWallClimbingEnabled()} (when wall-climb is disabled the player
+ * falls at full gravity along walls and never gains the extra wall-jump latch).
  */
 public class MovementSystem extends IteratingSystem {
     private static final float GRAVITY = -600f;
@@ -71,7 +74,7 @@ public class MovementSystem extends IteratingSystem {
         CollisionComponent collision = COLLISION.get(entity);
         PlayerComponent player = PLAYER.get(entity);
 
-        boolean wallClimbing = player != null && player.isWallClimbing;
+        boolean wallClimbing = player != null && player.isWallClimbing && FeatureFlags.isWallClimbingEnabled();
         boolean flying = FLYING.get(entity) != null;
 
         if (player != null) {
@@ -117,7 +120,7 @@ public class MovementSystem extends IteratingSystem {
                 // While hurt, a knockback push into a wall must not fake a wall-grab; a dead
                 // player must not latch onto walls either.
                 player.isWallClimbing = false;
-            } else if (hitWallX && attemptedDeltaX != 0f) {
+            } else if (FeatureFlags.isWallClimbingEnabled() && hitWallX && attemptedDeltaX != 0f) {
                 player.isWallClimbing = true;
                 player.jumpCount = 1;
             } else if (player.isWallClimbing) {

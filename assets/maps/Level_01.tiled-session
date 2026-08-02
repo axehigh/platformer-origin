@@ -1,13 +1,13 @@
 {
     "activeFile": "level1/level_1_demo.tmx",
     "expandedProjectPaths": [
-        "C:/Users/lona/dev/libgdx/origin/assets",
-        "level1",
+        "level2",
+        "C:/skuld/dev_olona/libgdx/platformer-origin/assets/ui",
         ".",
         "level3",
         "C:/skuld/dev_olona/libgdx/platformer-origin/assets",
-        "C:/skuld/dev_olona/libgdx/platformer-origin/assets/ui",
-        "level2"
+        "level1",
+        "C:/Users/lona/dev/libgdx/origin/assets"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -96,11 +96,11 @@
         },
         "level1/level_1_demo.tmx": {
             "expandedObjectLayers": [
-                4,
-                3
+                3,
+                4
             ],
             "scale": 0.38408203124999996,
-            "selectedLayer": 2,
+            "selectedLayer": 1,
             "viewCenter": {
                 "x": 472.55530129672024,
                 "y": 766.7632850241548
@@ -108,8 +108,8 @@
         },
         "level1/level_1_demo_2.tmx": {
             "expandedObjectLayers": [
-                4,
-                3
+                3,
+                4
             ],
             "scale": 0.25,
             "selectedLayer": 3,

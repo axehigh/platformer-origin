@@ -46,6 +46,23 @@ public class GamePreferencesTest {
     }
 
     @Test
+    public void wallClimbingIsEnabledByDefault() {
+        when(preferences.getBoolean("wallClimbEnabled", true)).thenReturn(true);
+
+        assertTrue(gamePreferences.isWallClimbingEnabled());
+    }
+
+    @Test
+    public void disablingWallClimbingPersistsAndReloads() {
+        gamePreferences.setWallClimbingEnabled(false);
+        when(preferences.getBoolean("wallClimbEnabled", true)).thenReturn(false);
+
+        verify(preferences).putBoolean("wallClimbEnabled", false);
+        verify(preferences).flush();
+        assertFalse(gamePreferences.isWallClimbingEnabled());
+    }
+
+    @Test
     public void disablingMusicPersistsAndReloads() {
         gamePreferences.setMusicEnabled(false);
         when(preferences.getBoolean("musicEnabled", true)).thenReturn(false);

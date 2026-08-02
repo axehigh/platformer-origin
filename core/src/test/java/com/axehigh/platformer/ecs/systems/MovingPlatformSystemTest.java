@@ -150,6 +150,36 @@ public class MovingPlatformSystemTest extends SystemTestBase {
     }
 
     @Test
+    public void keepsCarryingPlayerThroughFullFastVerticalCycle() {
+        // amplitudeY * speed = 120 px/s (2 px/frame), more than the old ~1.17 px landing band,
+        // so the player would fall through mid-travel. Run a full up-and-down cycle and assert
+        // the player stays glued to the top on every frame.
+        platform(100f, 100f, 100f, 16f, 0f, 60f, 2f, 0f, -1);
+        Entity playerEntity = player(110f, 116f);
+        MOVEMENT.get(playerEntity).velocity.y = 0f;
+
+        for (int i = 0; i < 200; i++) {
+            engine.update(DT);
+
+            Entity platformEntity = null;
+            for (Entity e : engine.getEntities()) {
+                if (MOVING_PLATFORM.get(e) != null) {
+                    platformEntity = e;
+                    break;
+                }
+            }
+            CollisionComponent platformCollision = COLLISION.get(platformEntity);
+            float platformTop = platformCollision.worldBounds.y + platformCollision.worldBounds.height;
+
+            CollisionComponent playerCollision = COLLISION.get(playerEntity);
+            float playerFeet = playerCollision.worldBounds.y;
+
+            assertEquals("frame " + i, platformTop, playerFeet, EPSILON);
+            assertTrue("frame " + i, MOVEMENT.get(playerEntity).grounded);
+        }
+    }
+
+    @Test
     public void doesNotSnapRisingPlayer() {
         platform(100f, 50f, 100f, 16f, 0f, 0f, 1f, 0f, -1);
         Entity playerEntity = player(110f, 65f);
