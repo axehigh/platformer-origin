@@ -18,6 +18,7 @@ import static com.axehigh.platformer.GameConstants.*;
  */
 public class TouchControlsStage extends Stage {
     private final TextButton interactButton;
+    private final TextButton dropButton;
 
     public TouchControlsStage(Viewport viewport, Skin skin, PlayerInputSystem inputSystem) {
         super(viewport);
@@ -98,7 +99,19 @@ public class TouchControlsStage extends Stage {
         });
         interactButton.setVisible(false);
 
-        root.add(interactButton).colspan(2).size(UI_Button_Action_Size, UI_Button_Action_Size).padBottom(25f);
+        dropButton = new TextButton("v", skin);
+        dropButton.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                inputSystem.requestTouchDrop();
+                return true;
+            }
+        });
+        dropButton.setVisible(false);
+
+        root.add(interactButton).colspan(2).size(UI_Button_Action_Size, UI_Button_Action_Size).padBottom(10f);
+        root.row();
+        root.add(dropButton).colspan(2).size(UI_Button_Action_Size, UI_Button_Action_Size).padBottom(25f);
         root.row();
         root.add(dpad).expandX().left().bottom().pad(83f);
         root.add(actions).expandX().right().pad(83f);
@@ -109,5 +122,13 @@ public class TouchControlsStage extends Stage {
      */
     public void setInteractVisible(boolean visible) {
         interactButton.setVisible(visible);
+    }
+
+    /**
+     * Shows/hides the contextual drop-through button, e.g. while the player is standing on a
+     * drop-through platform.
+     */
+    public void setDropVisible(boolean visible) {
+        dropButton.setVisible(visible);
     }
 }

@@ -54,4 +54,14 @@ public class PlayerComponent implements Component {
     public boolean interactPressed = false;
     /** True while the player is inside any exit gate's proximity sensor; drives the interact UI prompt. */
     public boolean nearExit = false;
+
+    /** One-shot: true only during the frame a drop-through request (down/S/touch) was made. */
+    public boolean dropRequested = false;
+    /** True while the player is standing on (or falling through) a drop-through platform; drives the contextual drop button. */
+    public boolean onDropTile = false;
+    /**
+     * Short window after a drop request during which the player falls through drop-through platforms
+     * instead of landing on them; while active the one-way rects are skipped in MovementSystem.
+     */
+    public Timer dropWindow = new Timer();
 }

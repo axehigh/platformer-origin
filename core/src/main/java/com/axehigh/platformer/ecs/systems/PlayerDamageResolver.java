@@ -10,11 +10,12 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import static com.axehigh.platformer.ecs.components.Mappers.ANIMATION;
 
 /**
- * Shared player-damage resolution used by both {@code EnemyContactSystem} (touch) and
- * {@code EnemyBulletCollisionSystem} (enemy bullet) so the two damage sources react identically:
- * health decrement, a brief hit-stun window that locks movement input (long enough to play the
- * HURT animation once), a small horizontal knockback pop away from the attacker, and the shared
- * invulnerability grace period. The animation counterpart of {@code EnemyDamageResolver}.
+ * Shared player-damage resolution used by {@code EnemyContactSystem} (touch),
+ * {@code EnemyBulletCollisionSystem} (enemy bullet), and {@code HazardSystem} (spikes/lava, via the
+ * no-knockback variant) so the damage sources react identically: health decrement, a brief hit-stun
+ * window that locks movement input (long enough to play the HURT animation once), an optional small
+ * horizontal knockback pop away from the attacker (hazards omit it), and the shared invulnerability
+ * grace period. The animation counterpart of {@code EnemyDamageResolver}.
  */
 final class PlayerDamageResolver {
     /** Shortest hit-stun window; extended to cover the HURT animation if that is longer. */
@@ -44,7 +45,27 @@ final class PlayerDamageResolver {
 
         player.health = Math.max(0, player.health - 1);
         movement.velocity.x = KNOCKBACK_SPEED_X * knockbackDirection * unitScale;
+        applyStunAndGrace(playerEntity, player);
+        return true;
+    }
 
+    /**
+     * Same as {@link #applyHit(Entity, PlayerComponent, MovementComponent, int, float)} but with
+     * no knockback: the player's horizontal velocity is left untouched. Used by {@code HazardSystem}
+     * for tile hazards (spikes/lava), where a directional push makes no sense and could shove the
+     * player back into the hazard. Hit-stun lock and the invulnerability grace period still apply.
+     */
+    static boolean applyHitWithoutKnockback(Entity playerEntity, PlayerComponent player) {
+        if (player.isDead || player.hitInvulnerability.isActive()) {
+            return false;
+        }
+
+        player.health = Math.max(0, player.health - 1);
+        applyStunAndGrace(playerEntity, player);
+        return true;
+    }
+
+    private static void applyStunAndGrace(Entity playerEntity, PlayerComponent player) {
         float stunDuration = HIT_STUN_DURATION;
         AnimationComponent anim = ANIMATION.get(playerEntity);
         if (anim != null) {
@@ -56,6 +77,5 @@ final class PlayerDamageResolver {
         }
         player.hurtTimer.start(stunDuration);
         player.hitInvulnerability.start(HIT_INVULNERABILITY_DURATION);
-        return true;
     }
 }

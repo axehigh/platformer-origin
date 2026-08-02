@@ -37,21 +37,33 @@ public class MovementSystem extends IteratingSystem {
     /** Landing smoke scale range: base size, plus up to this extra based on fall impact speed. */
     private static final float LANDING_SMOKE_BASE_SCALE = 5f;
     private static final float LANDING_SMOKE_EXTRA_SCALE = 5f;
+    /** Tolerances a falling player's pre-move feet position against a one-way platform's top before a top-only landing sticks. */
+    private static final float ONE_WAY_LANDING_EPSILON = 0.5f;
 
     private final Array<Rectangle> collisionRects;
+    private final Array<Rectangle> oneWayRects;
     private final Rectangle entityBounds = new Rectangle();
     private PooledEngine engine;
     private float unitScale = 1f;
 
     public MovementSystem(Array<Rectangle> collisionRects) {
-        this(collisionRects, 0);
+        this(collisionRects, new Array<>(), 0);
     }
 
     public MovementSystem(Array<Rectangle> collisionRects, int priority) {
+        this(collisionRects, new Array<>(), priority);
+    }
+
+    public MovementSystem(Array<Rectangle> collisionRects, Array<Rectangle> oneWayRects) {
+        this(collisionRects, oneWayRects, 0);
+    }
+
+    public MovementSystem(Array<Rectangle> collisionRects, Array<Rectangle> oneWayRects, int priority) {
         // Bullets are excluded: CollisionSystem owns their integration/collision/lifetime handling.
         super(Family.all(TransformComponent.class, MovementComponent.class, CollisionComponent.class)
             .exclude(BulletComponent.class).get(), priority);
         this.collisionRects = collisionRects;
+        this.oneWayRects = oneWayRects;
     }
 
     public void setUnitScale(float unitScale) {
@@ -101,7 +113,7 @@ public class MovementSystem extends IteratingSystem {
         float attemptedDeltaX = movement.velocity.x;
         boolean hitWallX = moveX(transform, movement, collision, deltaTime);
         float fallSpeed = movement.velocity.y;
-        moveY(transform, movement, collision, deltaTime);
+        moveY(transform, movement, collision, deltaTime, player);
 
         // Popped pickups (e.g. chest-dropped coins) have no ground friction of their own; freeze
         // them dead in place the moment they first touch down instead of sliding indefinitely.
@@ -183,7 +195,7 @@ public class MovementSystem extends IteratingSystem {
         return true;
     }
 
-    private void moveY(TransformComponent transform, MovementComponent movement, CollisionComponent collision, float deltaTime) {
+    private void moveY(TransformComponent transform, MovementComponent movement, CollisionComponent collision, float deltaTime, PlayerComponent player) {
         float deltaY = movement.velocity.y * deltaTime;
         movement.grounded = false;
 
@@ -191,8 +203,16 @@ public class MovementSystem extends IteratingSystem {
         entityBounds.set(transform.position.x + collision.bounds.x, newY + collision.bounds.y, collision.bounds.width, collision.bounds.height);
 
         Rectangle hit = findCollision(entityBounds);
+        boolean landedOnOneWay = false;
+        if (hit == null) {
+            hit = findOneWayCollision(transform, movement, collision, deltaTime, player);
+            landedOnOneWay = hit != null;
+        }
         if (hit == null) {
             transform.position.y = newY;
+            if (player != null) {
+                player.onDropTile = false;
+            }
             return;
         }
 
@@ -203,6 +223,30 @@ public class MovementSystem extends IteratingSystem {
             transform.position.y = hit.y - collision.bounds.height - collision.bounds.y;
         }
         movement.velocity.y = 0f;
+        if (player != null) {
+            player.onDropTile = landedOnOneWay;
+        }
+    }
+
+    /**
+     * Finds a drop-through platform the entity lands on. One-way platforms are player-only: only
+     * an entity with a {@link PlayerComponent} can stand on them, and only while falling ({@code
+     * deltaY < 0}) — rising through them is always allowed (jump up-through). A standing player who
+     * has just pressed drop passes straight through while the {@code dropWindow} is active. Landing
+     * sticks only when the player's feet were at or above the platform's top before this move, so
+     * the sides and underside never block. Returns the rect landed on, or null (fall through).
+     */
+    private Rectangle findOneWayCollision(TransformComponent transform, MovementComponent movement, CollisionComponent collision, float deltaTime, PlayerComponent player) {
+        if (player == null || movement.velocity.y >= 0f || player.dropWindow.isActive()) {
+            return null;
+        }
+        float feetY = transform.position.y + collision.bounds.y;
+        for (Rectangle rect : oneWayRects) {
+            if (feetY >= rect.y + rect.height - ONE_WAY_LANDING_EPSILON && entityBounds.overlaps(rect)) {
+                return rect;
+            }
+        }
+        return null;
     }
 
     private Rectangle findCollision(Rectangle bounds) {

@@ -135,7 +135,7 @@ public class GameScreen extends BaseScreen {
         shootSystem.setUnitScale(scale);
         engine.addSystem(shootSystem);
 
-        MovementSystem movementSystem = new MovementSystem(mapLoader.getCollisionRects(), PRIORITY_MOVEMENT);
+        MovementSystem movementSystem = new MovementSystem(mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), PRIORITY_MOVEMENT);
         movementSystem.setUnitScale(scale);
         engine.addSystem(movementSystem);
 
@@ -166,15 +166,16 @@ public class GameScreen extends BaseScreen {
         EnemyContactSystem enemyContactSystem = new EnemyContactSystem(PRIORITY_ENEMY_CONTACT);
         enemyContactSystem.setUnitScale(scale);
         engine.addSystem(enemyContactSystem);
+        engine.addSystem(new HazardSystem(mapLoader.getHazardRects(), PRIORITY_ENEMY_CONTACT));
         engine.addSystem(new CameraSystem(camera, roomState, PRIORITY_CAMERA));
         engine.addSystem(new AnimationSystem(PRIORITY_ANIMATION));
         engine.addSystem(tiledMapRenderSystem);
         engine.addSystem(new RenderSystem(batch, camera, PRIORITY_ENTITY_RENDER));
         engine.addSystem(new ParticleSystem(batch, camera, PRIORITY_PARTICLE_RENDER));
-        debugRenderSystem = new DebugRenderSystem(camera, mapLoader.getCollisionRects(), roomState, PRIORITY_DEBUG_RENDER);
+        debugRenderSystem = new DebugRenderSystem(camera, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), roomState, PRIORITY_DEBUG_RENDER);
         engine.addSystem(debugRenderSystem);
 
-        levelManager = new LevelManager(engine, entityFactory, viewport, tiledMapRenderSystem, mapLoader.getCollisionRects(), roomState, mapLoader);
+        levelManager = new LevelManager(engine, entityFactory, viewport, tiledMapRenderSystem, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), roomState, mapLoader);
 
         LevelExitSystem exitSystem = new LevelExitSystem(levelManager, PRIORITY_LEVEL_EXIT);
         exitSystem.setUnitScale(scale);
@@ -479,6 +480,7 @@ public class GameScreen extends BaseScreen {
         }
 
         touchControlsStage.setInteractVisible(playerComponent.nearExit);
+        touchControlsStage.setDropVisible(playerComponent.onDropTile);
 
         hudStage.getViewport().apply();
         hudStage.act(delta);

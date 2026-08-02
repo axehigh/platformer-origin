@@ -47,6 +47,7 @@ public class PlayerInputSystem extends IteratingSystem {
 
     private static final float MELEE_COOLDOWN = 0.2f;
     private static final float MELEE_ATTACK_DURATION = 0.2f;
+    private static final float DROP_WINDOW_DURATION = 0.25f;
 
     private final AssetManager assetManager;
 
@@ -58,6 +59,7 @@ public class PlayerInputSystem extends IteratingSystem {
     private boolean touchMeleeRequested = false;
     private boolean touchShootRequested = false;
     private boolean touchInteractRequested = false;
+    private boolean touchDropRequested = false;
 
     public PlayerInputSystem(AssetManager assetManager) {
         this(assetManager, 0);
@@ -98,6 +100,11 @@ public class PlayerInputSystem extends IteratingSystem {
         touchInteractRequested = true;
     }
 
+    /** Called by the contextual down-arrow button (drop through a drop-through platform). */
+    public void requestTouchDrop() {
+        touchDropRequested = true;
+    }
+
     public void setUnitScale(float unitScale) {
         this.unitScale = unitScale;
     }
@@ -115,6 +122,7 @@ public class PlayerInputSystem extends IteratingSystem {
         touchMeleeRequested = false;
         touchShootRequested = false;
         touchInteractRequested = false;
+        touchDropRequested = false;
     }
 
     @Override
@@ -164,6 +172,7 @@ public class PlayerInputSystem extends IteratingSystem {
 
         player.shootCooldown.update(deltaTime);
         player.meleeCooldown.update(deltaTime);
+        player.dropWindow.update(deltaTime);
 
         boolean meleePressed = Gdx.input.isKeyJustPressed(Input.Keys.J)
             || Gdx.input.isKeyJustPressed(Input.Keys.B)
@@ -186,6 +195,15 @@ public class PlayerInputSystem extends IteratingSystem {
         }
 
         player.interactPressed = Gdx.input.isKeyJustPressed(Input.Keys.E) || touchInteractRequested;
+
+        boolean dropPressed = Gdx.input.isKeyJustPressed(Input.Keys.S)
+            || Gdx.input.isKeyJustPressed(Input.Keys.DOWN)
+            || touchDropRequested;
+        if (!locked && dropPressed) {
+            player.dropWindow.start(DROP_WINDOW_DURATION);
+            player.onDropTile = false;
+        }
+        player.dropRequested = dropPressed && !locked;
     }
 
     private void spawnJumpSmoke(TransformComponent transform, CollisionComponent collision) {

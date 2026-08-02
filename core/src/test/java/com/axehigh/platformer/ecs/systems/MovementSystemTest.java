@@ -2,6 +2,7 @@ package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
+import com.axehigh.platformer.ecs.components.EnemyComponent;
 import com.axehigh.platformer.ecs.components.FlyingEnemyComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.ParticleComponent;
@@ -36,13 +37,14 @@ import static org.junit.Assert.assertTrue;
 public class MovementSystemTest extends SystemTestBase {
 
     private final Array<Rectangle> collisionRects = new Array<>();
+    private final Array<Rectangle> oneWayRects = new Array<>();
     private Engine engine;
     private MovementSystem system;
 
     @Before
     public void setUp() {
         FeatureFlags.setWallClimbingEnabled(true);
-        system = new MovementSystem(collisionRects);
+        system = new MovementSystem(collisionRects, oneWayRects);
         system.setUnitScale(1f);
         engine = newEngine();
         engine.addSystem(system);
@@ -157,6 +159,97 @@ public class MovementSystemTest extends SystemTestBase {
         // -600 (full gravity) * unitScale * DT, NOT clamped to the wall-slide max fall speed of -40.
         assertEquals(-600f * DT, movement.velocity.y, EPSILON);
         assertFalse(player.isWallClimbing);
+    }
+
+    @Test
+    public void landsOnOneWayPlatformFromAbove() {
+        oneWayRects.add(new Rectangle(0f, 0f, 100f, 20f));
+        Entity entity = player(0f, 55f);
+        MovementComponent movement = MOVEMENT.get(entity);
+        TransformComponent transform = TRANSFORM.get(entity);
+        PlayerComponent player = PLAYER.get(entity);
+        player.jumpCount = 2;
+        movement.velocity.y = -400f;
+
+        engine.update(DT);
+        float yAfterFirstFrame = transform.position.y;
+        assertTrue(movement.grounded);
+        assertEquals(50f, yAfterFirstFrame, EPSILON);
+        assertEquals(0f, movement.velocity.y, EPSILON);
+        assertTrue(player.onDropTile);
+        assertEquals(0, player.jumpCount);
+
+        engine.update(DT);
+        assertEquals(50f, transform.position.y, EPSILON);
+        assertTrue(movement.grounded);
+        assertTrue(player.onDropTile);
+    }
+
+    @Test
+    public void risesUpThroughOneWayPlatform() {
+        oneWayRects.add(new Rectangle(0f, 100f, 100f, 20f));
+        Entity entity = player(0f, 129f);
+        MovementComponent movement = MOVEMENT.get(entity);
+        TransformComponent transform = TRANSFORM.get(entity);
+        movement.velocity.y = 200f;
+
+        engine.update(DT);
+
+        assertFalse(movement.grounded);
+        assertEquals(129f + (200f - 600f * DT) * DT, transform.position.y, EPSILON);
+        assertFalse(PLAYER.get(entity).onDropTile);
+    }
+
+    @Test
+    public void dropWindowFallsThroughOneWayPlatform() {
+        oneWayRects.add(new Rectangle(0f, 0f, 100f, 20f));
+        Entity entity = player(0f, 50f);
+        MovementComponent movement = MOVEMENT.get(entity);
+        TransformComponent transform = TRANSFORM.get(entity);
+        PlayerComponent player = PLAYER.get(entity);
+        player.dropWindow.start(0.25f);
+
+        engine.update(DT);
+
+        assertFalse(movement.grounded);
+        assertTrue(transform.position.y < 50f);
+        assertFalse(player.onDropTile);
+    }
+
+    @Test
+    public void droppedPlayerFallsThroughToFloorBelow() {
+        collisionRects.add(new Rectangle(-200f, -400f, 800f, 200f));
+        oneWayRects.add(new Rectangle(0f, 0f, 100f, 20f));
+        Entity entity = player(0f, 50f);
+        MovementComponent movement = MOVEMENT.get(entity);
+        TransformComponent transform = TRANSFORM.get(entity);
+        PlayerComponent player = PLAYER.get(entity);
+        player.dropWindow.start(0.25f);
+
+        for (int i = 0; i < 240; i++) {
+            engine.update(DT);
+        }
+
+        assertTrue(movement.grounded);
+        assertEquals(-170f, transform.position.y, EPSILON);
+        assertFalse(player.onDropTile);
+    }
+
+    @Test
+    public void nonPlayerEntityFallsThroughOneWayPlatform() {
+        oneWayRects.add(new Rectangle(0f, 0f, 100f, 20f));
+        TransformComponent transform = transform(0f, 55f);
+        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        place(transform, collision, 0f, 55f);
+        MovementComponent movement = movement();
+        movement.velocity.y = -400f;
+        Entity entity = entity(transform, movement, collision, new EnemyComponent());
+        engine.addEntity(entity);
+
+        engine.update(DT);
+
+        assertFalse(movement.grounded);
+        assertEquals(55f - 400f * DT, transform.position.y, EPSILON);
     }
 
     @Test

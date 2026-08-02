@@ -37,19 +37,23 @@ public class DebugRenderSystem extends EntitySystem implements Disposable {
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
     private final OrthographicCamera camera;
     private final Array<Rectangle> staticCollisionRects;
+    private final Array<Rectangle> oneWayRects;
+    private final Array<Rectangle> hazardRects;
     private final RoomState roomState;
     private ImmutableArray<Entity> collidables;
     private MeleeAttackSystem meleeAttackSystem;
     private static boolean debugEnabled = false;
 
-    public DebugRenderSystem(OrthographicCamera camera, Array<Rectangle> staticCollisionRects, RoomState roomState) {
-        this(camera, staticCollisionRects, roomState, 0);
+    public DebugRenderSystem(OrthographicCamera camera, Array<Rectangle> staticCollisionRects, Array<Rectangle> oneWayRects, Array<Rectangle> hazardRects, RoomState roomState) {
+        this(camera, staticCollisionRects, oneWayRects, hazardRects, roomState, 0);
     }
 
-    public DebugRenderSystem(OrthographicCamera camera, Array<Rectangle> staticCollisionRects, RoomState roomState, int priority) {
+    public DebugRenderSystem(OrthographicCamera camera, Array<Rectangle> staticCollisionRects, Array<Rectangle> oneWayRects, Array<Rectangle> hazardRects, RoomState roomState, int priority) {
         super(priority);
         this.camera = camera;
         this.staticCollisionRects = staticCollisionRects;
+        this.oneWayRects = oneWayRects;
+        this.hazardRects = hazardRects;
         this.roomState = roomState;
     }
 
@@ -82,6 +86,16 @@ public class DebugRenderSystem extends EntitySystem implements Disposable {
 
         shapeRenderer.setColor(Color.YELLOW);
         for (Rectangle rect : staticCollisionRects) {
+            shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
+        }
+
+        shapeRenderer.setColor(Color.CYAN);
+        for (Rectangle rect : oneWayRects) {
+            shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
+        }
+
+        shapeRenderer.setColor(Color.RED);
+        for (Rectangle rect : hazardRects) {
             shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
         }
 

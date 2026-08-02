@@ -51,12 +51,16 @@ Only **tile** layers render visually; object layers are never drawn, they only s
 
 ## 3. The `collision` layer — the tile language
 
-The collision layer is a tile grid. `MapLoader.buildCollisionRects()` walks every cell and adds an AABB for every **non-empty** cell:
+The collision layer is a tile grid. `MapLoader.buildCollisionRects()` walks every cell and classifies it:
 
 *   **Empty cell** (`0`) → free space (a platforming gap).
-*   **Painted tile** → solid, unless that specific tile has a `solid = false` boolean custom property.
+*   **Painted tile** → one of the kinds below, decided by that tile's boolean custom properties (see the full table in §5). Precedence, first match wins:
+    1.  `hazard = true` → **non-solid hazard** AABB (spikes/lava; damages the player on touch — see §3.2).
+    2.  `solid = false` → free space (passage doorways).
+    3.  `oneWay = true` → **drop-through platform** AABB (player-only, top-only solid — see §3.3).
+    4.  anything else → **solid wall**.
 
-### The passage rule
+### §3.1 The passage rule
 
 Room-to-room doorways must be a tile marked **non-solid**. In Tiled:
 
@@ -65,6 +69,22 @@ Room-to-room doorways must be a tile marked **non-solid**. In Tiled:
 3.  Add a **boolean custom property `solid` set to `false`** on that tile.
 
 That single tileset edit makes every map using the tile treat it as a walk-through doorway. (This is the only way to connect two rooms — the walls between rooms are otherwise solid.) If you forget it, the doorway is an invisible wall and the player can't progress.
+
+### §3.2 Hazards (spikes, lava)
+
+A **non-solid** tile that damages the player on contact. Paint it in the `collision` layer; the tile's `hazard = true` property (set on the tileset tile, e.g. `assets/maps/level1/hazards.tsx`) turns it into a damage zone instead of a wall:
+
+*   On AABB overlap the player loses **1 HP**, gets the usual 0.3s hit-stun + 1s invulnerability grace, and is **not** knocked back (no directional push).
+*   Hazards are fully non-solid — nothing (player, enemies, bullets) is blocked by them. The grace period turns a sustained overlap into one hit per second, not instant shredding.
+*   **Placement gotcha:** the player's collision box is *taller than a tile* (≈120×240 px vs a 128×128 tile) and its feet sit on the floor surface, so a hazard painted in the row directly on top of a floor tile sits at/below the player's feet and a standing player won't overlap it. Hazards damage reliably when the player's body travels **through** them (jump over a spike barrier, fall into a lava pool, walk a spike row you must jump). Put solid ground under a pit of lava/spikes so a falling player lands on it.
+
+### §3.3 Drop-through platforms (one-way)
+
+A **player-only, top-only** platform. Paint it in the `collision` layer; the tile's `oneWay = true` property (set on the tileset tile, e.g. `assets/maps/level1/drop_platform.tsx`) makes it a platform instead of a wall:
+
+*   The player can **land on its top** (it sticks only when the player's feet were at/above the platform's top before the move) and can **jump up through** it from below.
+*   While standing on it, the contextual **`v` button** appears (mobile) or **`S`/`DOWN`** (keyboard) starts a short ~0.25s pass-through window: the player drops straight through the platform, then normal gravity takes over.
+*   **Enemies and projectiles ignore one-way platforms entirely** — they never land on or collide with them. Only the player uses them.
 
 ### Perimeter / layout rules of thumb
 
@@ -143,7 +163,9 @@ angle += speed * dt        (each frame)
 
 | Property | Type | Default | Meaning |
 |---|---|---|---|
-| `solid` | boolean | `true` | Set `false` on a tileset tile to make that tile **non-blocking** even in the `collision` layer (the passage-doorway use case, §3). |
+| `solid` | boolean | `true` | Set `false` on a tileset tile to make that tile **non-blocking** even in the `collision` layer (the passage-doorway use case, §3.1). |
+| `oneWay` | boolean | `false` | Set `true` on a tileset tile to make it a **drop-through platform**: player-only, top-only solid; jump up through; drop with the `v` button / `S` / `DOWN` (see §3.3). Ignored when the tile is `hazard`. |
+| `hazard` | boolean | `false` | Set `true` on a tileset tile to make it a **non-solid hazard** (spikes/lava): 1 HP on touch, no knockback, invulnerability grace (see §3.2). Wins over `solid`/`oneWay`. |
 | `type` | string | — | On tileset tiles: lets you paint tile objects that auto-spawn as markers (`coin`, `chest`, `enemy`…). |
 
 ### Room properties (the `Rooms` layer)
@@ -181,9 +203,9 @@ For each axis (X and Y) independently:
 
 ## 7. Step-by-step: build a new level
 
-1.  **Map setup.** In Tiled: New map, orthogonal, tile size **128×128** (or matching your chain), infinite off, CSV tile format. Add tilesets (`cave_tileset.tsx` for terrain, `items.tsx` for pickups, `enemy.tsx` for enemies) from `assets/maps/level1/`.
+1.  **Map setup.** In Tiled: New map, orthogonal, tile size **128×128** (or matching your chain), infinite off, CSV tile format. Add tilesets from `assets/maps/level1/`: `cave_tileset.tsx` for terrain, `drop_platform.tsx` for drop-through platforms, `hazards.tsx` for spikes/lava, `items.tsx` for pickups, `enemy.tsx` for enemies.
 2.  **`background` layer.** Paint the decorative backdrop (walls, pillars, windows). Anything goes — it never blocks.
-3.  **`collision` layer.** Paint the solid geometry: floor, walls, platforms. Leave gaps where you want jumps. For any room-to-room doorway, use your `solid = false` passage tile (see §3). Keep the map's outer border solid.
+3.  **`collision` layer.** Paint the solid geometry: floor, walls, platforms. Leave gaps where you want jumps. Use `drop_platform.tsx` tiles for ledges you want to drop through and `hazards.tsx` tiles for spike/lava damage zones (their behavior is baked into the tileset tile properties — see §3.2, §3.3). For any room-to-room doorway, use your `solid = false` passage tile (see §3.1). Keep the map's outer border solid.
 4.  **`decoration` layer** (optional). Foreground decor that draws on top.
 5.  **`objects` layer.**
     *   Draw one `playerStart` rectangle where the player should spawn.
@@ -208,6 +230,8 @@ For each axis (X and Y) independently:
 *   **Enemy behaves oddly** — check `enemyType` spelling; flyers will fly into walls if `patrolRange` isn't clear of walls (they have no automatic wall avoidance — see `enemies.md`).
 *   **Camera snaps wrong room / player not in view** — `playerStart` isn't inside the intended `Rooms` rectangle, or the rooms don't tile the map.
 *   **Unexpectedly scrolling when you wanted flip** — the room is larger than the screen (30×17 tiles); add `camera="flip"` to force static framing.
+*   **Spikes/lava never hurt a standing player** — the player's collision box is taller than a tile and its feet sit on the floor, so hazards must be placed where the player's body travels *through* them (see §3.2).
+*   **Drop platform behaves like a wall** — the tile doesn't carry `oneWay = true` on the tileset tile; or the platform's collision was authored as a plain solid tile. Also remember one-way platforms are player-only (enemies fall straight through).
 
 ---
 

@@ -30,9 +30,15 @@ public class MapLoader implements Disposable {
     private static final String PROPERTY_CAMERA = "camera";
     /** Tile property distinguishing solid wall tiles from non-blocking ones (e.g. natural passageways). */
     private static final String PROPERTY_SOLID = "solid";
+    /** Tile property marking a player-only drop-through platform (top-only solid; drop with down/S). */
+    private static final String PROPERTY_ONE_WAY = "oneWay";
+    /** Tile property marking a non-solid hazard (spikes/lava) that damages the player on touch. */
+    private static final String PROPERTY_HAZARD = "hazard";
 
     private final TiledMap map;
     private final Array<Rectangle> collisionRects = new Array<>();
+    private final Array<Rectangle> oneWayRects = new Array<>();
+    private final Array<Rectangle> hazardRects = new Array<>();
     private final String tmxPath;
     private final float tileWidth;
     private final float tileHeight;
@@ -60,8 +66,20 @@ public class MapLoader implements Disposable {
         for (int y = 0; y < layer.getHeight(); y++) {
             for (int x = 0; x < layer.getWidth(); x++) {
                 TiledMapTileLayer.Cell cell = layer.getCell(x, y);
-                if (cell != null && isSolid(cell)) {
-                    collisionRects.add(new Rectangle(x * tileWidth, y * tileHeight, tileWidth, tileHeight));
+                if (cell == null || cell.getTile() == null) {
+                    continue;
+                }
+                Rectangle rect = new Rectangle(x * tileWidth, y * tileHeight, tileWidth, tileHeight);
+                TiledMapTile tile = cell.getTile();
+                if (tile.getProperties().get(PROPERTY_HAZARD, false, Boolean.class)) {
+                    hazardRects.add(rect);
+                } else if (!isSolid(cell)) {
+                    // solid=false passage tile: no collision at all.
+                    continue;
+                } else if (tile.getProperties().get(PROPERTY_ONE_WAY, false, Boolean.class)) {
+                    oneWayRects.add(rect);
+                } else {
+                    collisionRects.add(rect);
                 }
             }
         }
@@ -91,6 +109,16 @@ public class MapLoader implements Disposable {
 
     public Array<Rectangle> getCollisionRects() {
         return collisionRects;
+    }
+
+    /** Player-only drop-through platforms (collision-layer tiles flagged {@code oneWay=true}). */
+    public Array<Rectangle> getOneWayRects() {
+        return oneWayRects;
+    }
+
+    /** Non-solid hazard tiles (collision-layer tiles flagged {@code hazard=true}). */
+    public Array<Rectangle> getHazardRects() {
+        return hazardRects;
     }
 
     public float getTileWidth() {

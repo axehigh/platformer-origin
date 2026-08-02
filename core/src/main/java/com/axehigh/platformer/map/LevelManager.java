@@ -50,12 +50,15 @@ public class LevelManager implements Disposable {
     private final Viewport viewport;
     private final TiledMapRenderSystem tiledMapRenderSystem;
     private final Array<Rectangle> collisionRects;
+    private final Array<Rectangle> oneWayRects;
+    private final Array<Rectangle> hazardRects;
     private final RoomState roomState;
 
     private MapLoader mapLoader;
 
     public LevelManager(PooledEngine engine, EntityFactory entityFactory, Viewport viewport,
                          TiledMapRenderSystem tiledMapRenderSystem, Array<Rectangle> collisionRects,
+                         Array<Rectangle> oneWayRects, Array<Rectangle> hazardRects,
                          RoomState roomState, MapLoader initialMapLoader) {
         this.engine = engine;
         this.entityFactory = entityFactory;
@@ -63,6 +66,8 @@ public class LevelManager implements Disposable {
         this.camera = (OrthographicCamera) viewport.getCamera();
         this.tiledMapRenderSystem = tiledMapRenderSystem;
         this.collisionRects = collisionRects;
+        this.oneWayRects = oneWayRects;
+        this.hazardRects = hazardRects;
         this.roomState = roomState;
         this.mapLoader = initialMapLoader;
     }
@@ -117,6 +122,10 @@ public class LevelManager implements Disposable {
 
         collisionRects.clear();
         collisionRects.addAll(newMapLoader.getCollisionRects());
+        oneWayRects.clear();
+        oneWayRects.addAll(newMapLoader.getOneWayRects());
+        hazardRects.clear();
+        hazardRects.addAll(newMapLoader.getHazardRects());
 
         roomState.rooms.clear();
         roomState.rooms.addAll(newMapLoader.getRooms());
@@ -177,6 +186,9 @@ public class LevelManager implements Disposable {
             playerComponent.isWallClimbing = false;
             playerComponent.interactPressed = false;
             playerComponent.nearExit = false;
+            playerComponent.dropRequested = false;
+            playerComponent.onDropTile = false;
+            playerComponent.dropWindow.reset();
         }
 
         CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y);
