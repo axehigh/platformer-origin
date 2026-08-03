@@ -101,6 +101,32 @@ public class EntityFactory {
     }
 
     /**
+     * Recomputes a (persisted) player's collision offsets from the canonical idle frame, so a
+     * level swap never inherits offsets computed from whatever animation frame the player happened
+     * to be showing at that moment (e.g. the death frame, whose region is much larger), which would
+     * float the collision box far above the sprite. Mirrors the math in {@link #createPlayer(float, float)}.
+     */
+    public void resetPlayerCollision(CollisionComponent collisionComponent, float finalScale) {
+        TextureAtlas heroAtlas = assetManager.get(HERO_ASSET, TextureAtlas.class);
+        TextureRegion region = heroAtlas.findRegion("idle");
+        float collisionWidth = SpriteConstants.PlayerCollisionWidth;
+        float collisionHeight = SpriteConstants.PlayerCollisionHeight;
+        collisionComponent.bounds.setSize(collisionWidth * finalScale, collisionHeight * finalScale);
+        if (region instanceof AtlasRegion) {
+            AtlasRegion atlasRegion = (AtlasRegion) region;
+            collisionComponent.baseOffsetX = (atlasRegion.offsetX + (atlasRegion.getRegionWidth() - collisionWidth) / 2f) * finalScale;
+            collisionComponent.baseOffsetY = (atlasRegion.offsetY + (atlasRegion.getRegionHeight() - collisionHeight) / 2f) * finalScale;
+        } else {
+            collisionComponent.baseOffsetX = (region.getRegionWidth() - collisionWidth) / 2f * finalScale;
+            collisionComponent.baseOffsetY = (region.getRegionHeight() - collisionHeight) / 2f * finalScale;
+        }
+        collisionComponent.currentOffsetX = SpriteConstants.PlayerOffsetRight * finalScale;
+        collisionComponent.currentOffsetY = SpriteConstants.PlayerOffsetY * finalScale;
+        collisionComponent.bounds.setX(collisionComponent.baseOffsetX + collisionComponent.currentOffsetX);
+        collisionComponent.bounds.setY(collisionComponent.baseOffsetY + collisionComponent.currentOffsetY);
+    }
+
+    /**
      * Spawns decorative entities (coin, chest, torch, exit gate, enemy) found in the object layer.
      * {@code roomState} is used to assign each spawned enemy to whichever Room rectangle contains
      * its spawn point (see {@code EnemyComponent.roomIndex}).

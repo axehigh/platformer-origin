@@ -5,7 +5,6 @@ import com.axehigh.platformer.assets.SpriteConstants;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.components.TextureComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.ecs.systems.CameraSystem;
 import com.axehigh.platformer.ecs.systems.ChestSystem;
@@ -21,7 +20,6 @@ import com.axehigh.platformer.ecs.systems.TiledMapRenderSystem;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -31,7 +29,6 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
-import static com.axehigh.platformer.ecs.components.Mappers.TEXTURE;
 import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 
 /**
@@ -156,20 +153,7 @@ public class LevelManager implements Disposable {
 
         CollisionComponent playerCollision = COLLISION.get(player);
         if (playerCollision != null) {
-            float collisionWidth = SpriteConstants.PlayerCollisionWidth;
-            float collisionHeight = SpriteConstants.PlayerCollisionHeight;
-            playerCollision.bounds.setSize(collisionWidth * playerFinalScale, collisionHeight * playerFinalScale);
-
-            TextureComponent tex = TEXTURE.get(player);
-            if (tex != null && tex.region instanceof AtlasRegion) {
-                AtlasRegion atlasRegion = (AtlasRegion) tex.region;
-                playerCollision.baseOffsetX = (atlasRegion.offsetX + (atlasRegion.getRegionWidth() - collisionWidth) / 2f) * playerFinalScale;
-                playerCollision.baseOffsetY = (atlasRegion.offsetY + (atlasRegion.getRegionHeight() - collisionHeight) / 2f) * playerFinalScale;
-                playerCollision.currentOffsetX = SpriteConstants.PlayerOffsetRight * playerFinalScale;
-                playerCollision.currentOffsetY = SpriteConstants.PlayerOffsetY * playerFinalScale;
-                playerCollision.bounds.setX(playerCollision.baseOffsetX + playerCollision.currentOffsetX);
-                playerCollision.bounds.setY(playerCollision.baseOffsetY + playerCollision.currentOffsetY);
-            }
+            entityFactory.resetPlayerCollision(playerCollision, playerFinalScale);
         }
 
         MovementComponent movement = MOVEMENT.get(player);
