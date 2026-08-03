@@ -47,6 +47,9 @@
   <image source="../gfx/tiles/dungeon/breakable.png" width="128" height="128"/>
  </tile>
  <tile id="14">
+  <properties>
+   <property name="oneWay" type="bool" value="true"/>
+  </properties>
   <image source="../gfx/tiles/dungeon/bridge.png" width="128" height="128"/>
  </tile>
  <tile id="15">

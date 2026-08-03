@@ -72,7 +72,7 @@
   <object id="4" name="coin_r0" gid="70" x="768" y="2048" width="128" height="128"/>
   <object id="512" name="exitGate" type="exitGate" x="3584" y="1024" width="140" height="152">
    <properties>
-    <property name="nextLevel" value="maps/generated_room.tmx"/>
+    <property name="nextLevel" value="maps/level1/generated_room.tmx"/>
    </properties>
   </object>
  </objectgroup>

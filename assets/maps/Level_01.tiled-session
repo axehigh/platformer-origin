@@ -1,14 +1,14 @@
 {
     "activeFile": "level1/generated_room.tmx",
     "expandedProjectPaths": [
-        "level1",
         "level3",
-        "C:/skuld/dev_olona/libgdx/platformer-origin/assets",
-        "level2",
-        ".",
-        "C:/skuld/dev_olona/libgdx/platformer-origin/assets/ui",
         "gfx",
-        "C:/Users/lona/dev/libgdx/origin/assets"
+        "C:/Users/lona/dev/libgdx/origin/assets",
+        "level1",
+        "level2",
+        "C:/skuld/dev_olona/libgdx/platformer-origin/assets",
+        ".",
+        "C:/skuld/dev_olona/libgdx/platformer-origin/assets/ui"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -126,19 +126,25 @@
             "scaleInDock": 1
         },
         "level1/generated_room.tmx": {
+            "expandedObjectLayers": [
+                3
+            ],
             "scale": 0.25,
-            "selectedLayer": 0,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 4814,
-                "y": 1852
+                "x": 5428,
+                "y": 1536
             }
         },
         "level1/generated_single_room.tmx": {
-            "scale": 0.5,
-            "selectedLayer": 1,
+            "expandedObjectLayers": [
+                3
+            ],
+            "scale": 0.25,
+            "selectedLayer": 3,
             "viewCenter": {
-                "x": 1949,
-                "y": 1802
+                "x": 2316,
+                "y": 2252
             }
         },
         "level1/gfx/dungeon_tiles.tsx": {
@@ -161,7 +167,7 @@
                 4
             ],
             "scale": 0.38408203124999996,
-            "selectedLayer": 1,
+            "selectedLayer": 2,
             "viewCenter": {
                 "x": 1021.9171116196289,
                 "y": 768.0650902618866
@@ -175,8 +181,8 @@
             "scale": 0.33,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 2292.424242424242,
-                "y": 1424.2424242424242
+                "x": 2048.4848484848485,
+                "y": 1089.3939393939395
             }
         },
         "level1/level_1_demo_3.tmx": {
