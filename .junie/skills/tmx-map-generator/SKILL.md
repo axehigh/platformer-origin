@@ -15,9 +15,9 @@ doorway to its neighbour(s), plus a random scattering of enemies and items. The 
 hand-authored-style — no level catalog / exit-door / progression wiring, just the map file.
 
 The generator is **convention-driven**: it reads tile gids and properties live from the
-project's external tilesets (`cave_tileset.tsx`, `items.tsx`, `enemy.tsx`) via `Layout`, so it
-tracks the tilesets instead of hard-coding gid numbers. If a tileset changes, regeneration
-picks up the change automatically.
+project's external tilesets (`gfx/dungeon_tiles.tsx`, `level1/items.tsx`, `level1/enemy.tsx`)
+via `Layout`, so it tracks the tilesets instead of hard-coding gid numbers. If a tileset
+changes, regeneration picks up the change automatically.
 
 ## Usage
 
@@ -31,9 +31,10 @@ picks up the change automatically.
   128px = 3840×2176 (matches `GameConstants` `VIRTUAL_WIDTH/VIRTUAL_HEIGHT` scaled by tile size).
 - `--seed N` — deterministic RNG for enemy/item placement; same seed ⇒ byte-identical output.
 - `--out PATH` — output `.tmx`; the `tileset source=` is written relative to this path, so place
-  the map under `assets/maps/` (e.g. `assets/maps/generated_room.tmx`) and the sources resolve
-  to `level1/cave_tileset.tsx` etc.
-- `--tilesets-dir PATH` — default `assets/maps/level1`.
+  the map under `assets/maps/` (e.g. `assets/maps/generated_single_room.tmx`) and the sources
+  resolve to `gfx/dungeon_tiles.tsx` + `level1/items.tsx` + `level1/enemy.tsx`.
+- `--tilesets-dir PATH` — default `assets/maps/level1`; holds `items.tsx`/`enemy.tsx` (the
+  collision tileset is always `assets/maps/gfx/dungeon_tiles.tsx`).
 - `--enemy-types walker,flyer,shooter` — which enemy types may appear.
 
 Library use (`generate_map(...)`, `validate_map(...)`) is also supported; stdlib only
@@ -48,9 +49,9 @@ one on this machine; `python`/`python3` are not on PATH) runs it as-is.
   entities from `objects`/`enemies` layer properties (`enemyType`) and item tiles.
 - **Doorways:** each shared room wall has a 2-row gap in the collision layer (CSV rows
   `FLOOR_CSV_ROW-1` and `-2`, i.e. directly above the floor), tall enough for the ~240px
-  player collision box. If `cave_tileset.tsx` has a tile with `solid=false` (a "passage" tile),
-  doorways are filled with it (visible door); the current tileset has none, so doorways are
-  open gaps and the generator prints a note.
+  player collision box. If `gfx/dungeon_tiles.tsx` has a tile with `solid=false` (a "passage"
+  tile), doorways are filled with it (visible door); the current tileset has none, so doorways
+  are open gaps and the generator prints a note.
 - **Y-flip:** Tiled stores Y down; libGDX 1.14.2 `TmxMapLoader` flips object Y on load
   (`flipY=true`). The generator writes Tiled coordinates (tile objects: Y from map bottom;
   CSV rows: row 0 = top of map, floor = bottom row). `validate_map` converts back to world

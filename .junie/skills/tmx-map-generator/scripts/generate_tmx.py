@@ -4,7 +4,7 @@ a linear left-to-right chain of whole-screen rooms (default 3), each fully enclo
 solid collision tiles with a walk-through doorway connecting it to its neighbour(s),
 and a small random scattering of enemies/items.
 
-Conventions are read live from the project's external tilesets (cave_tileset.tsx,
+Conventions are read live from the project's external tilesets (dungeon_tiles.tsx,
 items.tsx, enemy.tsx) -- solid / one-way / hazard / passage tiles are resolved by their
 tile properties, and item/enemy markers by their tile `type` / `enemyType` -- so the
 output tracks the tilesets instead of hard-coded gids. See
@@ -34,7 +34,7 @@ FLOOR_CSV_ROW = SCREEN_TILE_H - 1
 WALK_CSV_ROW = FLOOR_CSV_ROW - 1
 PASSAGE_HEIGHT_TILES = 2
 
-COLLISION_TILESET = "cave_tileset.tsx"
+COLLISION_TILESET_PATH = "dungeon_tiles.tsx"
 ITEMS_TILESET = "items.tsx"
 ENEMY_TILESET = "enemy.tsx"
 
@@ -125,7 +125,7 @@ class Layout:
         def load(name):
             return Tileset(os.path.join(tilesets_dir, name))
 
-        self.cave = load(COLLISION_TILESET)
+        self.cave = Tileset(COLLISION_TILESET_PATH)
         self.items = load(ITEMS_TILESET)
         self.enemy = load(ENEMY_TILESET)
 
@@ -403,8 +403,8 @@ def generate_map(output_path, room_count=3, seed=None, tilesets_dir="assets/maps
 
     note = ""
     if not layout.passage_gids:
-        note = (" [no 'solid=false' tile found in cave_tileset.tsx -> doorways are open gaps; "
-                "add the property to a doorway tile for a visible door]")
+            note = (" [no 'solid=false' tile found in dungeon_tiles.tsx -> doorways are open gaps; "
+                    "add the property to a doorway tile for a visible door]")
     print(f"Generated {output_path}: {room_count} rooms, {len(passages)} doorways, "
           f"{len(objects)} object markers, {len(enemies)} enemy markers.{note}")
     return output_path
@@ -561,7 +561,8 @@ def main():
     parser.add_argument("--out", type=str, required=True, help="Output .tmx path.")
     parser.add_argument("--seed", type=int, default=None, help="Random seed for reproducible output.")
     parser.add_argument("--tilesets-dir", type=str, default="assets/maps/level1",
-                        help="Directory containing cave_tileset.tsx/items.tsx/enemy.tsx (default: assets/maps/level1).")
+                        help="Directory containing items.tsx/enemy.tsx (default: assets/maps/level1); "
+                             "the collision tileset is loaded from gfx/dungeon_tiles.tsx.")
     parser.add_argument("--enemy-types", type=str, default=None,
                         help="Comma-separated enemy types to scatter (default: walker,flyer,shooter).")
     args = parser.parse_args()
