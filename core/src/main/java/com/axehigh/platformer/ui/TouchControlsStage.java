@@ -110,12 +110,17 @@ public class TouchControlsStage extends Stage {
         });
         dropButton.setVisible(false);
 
-        root.add(interactButton).colspan(2).size(UI_Button_Action_Size, UI_Button_Action_Size).padBottom(10f);
-        root.row();
-        root.add(dropButton).colspan(2).size(UI_Button_Action_Size, UI_Button_Action_Size).padBottom(25f);
-        root.row();
+        Table contextual = new Table();
+        contextual.add().size(UI_Button_Action_Size, UI_Button_Action_Size).pad(UI_PADDING);
+        contextual.add(interactButton).size(UI_Button_Action_Size, UI_Button_Action_Size).pad(UI_PADDING);
+        contextual.row();
+        contextual.add().size(UI_Button_Action_Size, UI_Button_Action_Size).pad(UI_PADDING);
+        contextual.add(dropButton).size(UI_Button_Action_Size, UI_Button_Action_Size).pad(UI_PADDING);
+        contextual.row();
+        contextual.add(actions).colspan(2);
+
         root.add(dpad).expandX().left().bottom().pad(83f);
-        root.add(actions).expandX().right().pad(83f);
+        root.add(contextual).expandX().right().bottom().pad(83f);
     }
 
     /**
