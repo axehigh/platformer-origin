@@ -54,6 +54,7 @@ See @resources/docs-ai/ashley-ecs.md for the full, AI-usable overview of every E
 *   **Enemy Documentation Sync:** Any time an enemy type is added, removed, renamed, or has its stats/sprite/behavior changed, MUST be reflected with a corresponding update to `resources/docs-ai/enemies.md`, keeping it as the single source of truth for the enemy catalog.
 *   **Timer Convention:** For any new cooldown, countdown, attack-window, or grace-period effect, use the reusable `com.axehigh.platformer.util.Timer` helper (`start()`/`update()`/`isActive()`/`isDone()`) instead of hand-rolling a raw-`float` decrement, matching the existing usage in `PlayerComponent`/`ChestComponent`.
 *   **Enum** Use enum if you can.
+*   **Terse Output:** Keep responses minimal while working — follow the `caveman` skill style (no play-by-play, no filler, no intermediate reasoning). Surface only the final conclusion and anything needing user action. Skip only in security/irreversible-action cases.
 *   **Grill Before Building:** For any new feature request (new mechanic, enemy type, system, visual behavior, etc.), before implementing, "grill" the requester with focused clarifying/challenging questions about the ambiguous design decisions (e.g. exact motion/behavior shape, tunable defaults, edge cases, how it interacts with existing systems) rather than silently guessing. Only proceed with implementation once those decisions are confirmed.
 
 ## 6. Hybrid Flip-Screen / Dead-Zone Scroll Camera System
