@@ -4,6 +4,7 @@
 - Chest opening, should not disappear but change to a different tile, or change sprite.
 - resume a screen, all sprites disappears
 # effects
+- Improve the looks of the buttons.
 - when opening a chest, display smoke or any other particle effect.
 - when coins drop, it should be proper coins, not the simple coin sprite.
 - when jumping down, should have an effect that it shrinks a bit, and back up. 
