@@ -1,6 +1,11 @@
 # Agent Instructions: Features ideas
 
 # TODO
+- Chest opening, should not disappear but change to a different tile, or change sprite.
+- when opening a chest, display smoke or any other particle effect.
+- when jumping down, should have an effect that it shrinks a bit, and back up. 
+- Smoke effect when landing over a certain distance, also for jumping. 
+- resume a screen, all sprites disappears
 - Need to remove calls to version over 8 in java, instead use libgdx lists, arrays etc.
 - Collision layer, since we wont have strict square collision, ex half tiles etc. How do we do this best?
 - Should components have public values? Should the final values be in component or in a game constant?
