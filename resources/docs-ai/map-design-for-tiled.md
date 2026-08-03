@@ -237,7 +237,7 @@ For each axis (X and Y) independently:
 
 ## 9. Related tooling & docs
 
-*   `.opencode/skills/tmx-map-generator` — generates a standalone prototype `.tmx` (linear chain of rooms with enemies/items) so you can test a layout without hand-tracing collision CSVs. Output needs manual wiring into `LevelCatalog`/exit gates.
+*   `.opencode/skills/tmx-map-generator` — generates a standalone prototype `.tmx` (a linear chain of whole-screen 30×17-tile rooms with enemies/items and walk-through doorways) so you can test a layout without hand-tracing collision CSVs. Run `generate_tmx.py` with `--rooms N --seed S --out assets/maps/….tmx`; see the skill's SKILL.md for CLI + conventions. Output is standalone (no `LevelCatalog`/exit-gate wiring by design).
 *   `resources/docs-ai/enemies.md` — enemy catalog, stats, and how to add new types.
 *   `resources/docs-ai/ashley-ecs.md` — the `MapLoader`/`EntityFactory`/`Room`/`RoomState`/`CameraSystem` code shape and priorities.
 *   `resources/docs-ai/gameplay.md` — movement/combat mechanics and how they read map data.
