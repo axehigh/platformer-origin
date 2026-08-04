@@ -56,9 +56,11 @@ public class GameScreen extends BaseScreen {
     private static final int PRIORITY_PLAYER_DEATH = 8;
     private static final int PRIORITY_CAMERA = 9;
     private static final int PRIORITY_ANIMATION = 10;
+    private static final int PRIORITY_SQUASH = 25;
     private static final int PRIORITY_MAP_RENDER = 20;
     private static final int PRIORITY_ENTITY_RENDER = 30;
     private static final int PRIORITY_PARTICLE_RENDER = 35;
+    private static final int PRIORITY_LIGHT_RENDER = 36;
     private static final int PRIORITY_DEBUG_RENDER = 40;
 
     private static final float DIALOG_PANEL_SCALE = 0.7f;
@@ -75,6 +77,7 @@ public class GameScreen extends BaseScreen {
 
     private TiledMapRenderSystem tiledMapRenderSystem;
     private DebugRenderSystem debugRenderSystem;
+    private LightRenderSystem lightRenderSystem;
     private LevelManager levelManager;
     private PlayerComponent playerComponent;
     private Entity playerEntity;
@@ -147,7 +150,9 @@ public class GameScreen extends BaseScreen {
         enemyBulletSystem.setUnitScale(scale);
         engine.addSystem(enemyBulletSystem);
         engine.addSystem(new CollisionBoundsSystem(PRIORITY_BOUNDS));
-        engine.addSystem(new MovingPlatformSystem(mapLoader.getCollisionRects(), roomState, PRIORITY_MOVING_PLATFORM));
+        MovingPlatformSystem movingPlatformSystem = new MovingPlatformSystem(mapLoader.getCollisionRects(), roomState, PRIORITY_MOVING_PLATFORM);
+        movingPlatformSystem.setUnitScale(scale);
+        engine.addSystem(movingPlatformSystem);
 
         MeleeAttackSystem meleeSystem = new MeleeAttackSystem(assetManager, PRIORITY_MELEE);
         meleeSystem.setUnitScale(scale);
@@ -169,9 +174,12 @@ public class GameScreen extends BaseScreen {
         engine.addSystem(new HazardSystem(mapLoader.getHazardRects(), PRIORITY_ENEMY_CONTACT));
         engine.addSystem(new CameraSystem(camera, roomState, PRIORITY_CAMERA));
         engine.addSystem(new AnimationSystem(PRIORITY_ANIMATION));
+        engine.addSystem(new SquashSystem(PRIORITY_SQUASH));
         engine.addSystem(tiledMapRenderSystem);
         engine.addSystem(new RenderSystem(batch, camera, PRIORITY_ENTITY_RENDER));
         engine.addSystem(new ParticleSystem(batch, camera, PRIORITY_PARTICLE_RENDER));
+        lightRenderSystem = new LightRenderSystem(batch, camera, PRIORITY_LIGHT_RENDER);
+        engine.addSystem(lightRenderSystem);
         debugRenderSystem = new DebugRenderSystem(camera, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), roomState, PRIORITY_DEBUG_RENDER);
         engine.addSystem(debugRenderSystem);
 
@@ -460,7 +468,7 @@ public class GameScreen extends BaseScreen {
         animationComponent.animations.put(JUMPING, new Animation<>(0.1f, heroAtlas.findRegions("jump"), NORMAL));
         animationComponent.animations.put(DOUBLE_JUMPING, new Animation<>(0.1f, heroAtlas.findRegions("high_jump"), NORMAL));
         animationComponent.animations.put(WALL_CLIMBING, new Animation<>(0.1f, heroAtlas.findRegions("climb"), LOOP));
-        animationComponent.animations.put(ATTACKING, new Animation<>(0.1f, heroAtlas.findRegions("attack"), NORMAL));
+        animationComponent.animations.put(ATTACKING, new Animation<>(0.066f, heroAtlas.findRegions("attack"), NORMAL));
         animationComponent.animations.put(DEATH, new Animation<>(0.1f, heroAtlas.findRegions("death"), NORMAL));
         animationComponent.animations.put(HURT, new Animation<>(0.1f, heroAtlas.findRegions("hurt"), NORMAL));
 
@@ -555,6 +563,9 @@ public class GameScreen extends BaseScreen {
         }
         if (debugRenderSystem != null) {
             debugRenderSystem.dispose();
+        }
+        if (lightRenderSystem != null) {
+            lightRenderSystem.dispose();
         }
         if (levelManager != null) {
             levelManager.dispose();

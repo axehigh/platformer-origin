@@ -18,6 +18,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
@@ -38,6 +39,11 @@ public class EntityFactory {
     private static final float PLATFORM_Z = 6f;
     /** Default oscillation angular frequency (rad/s) when a platform omits the {@code speed} property. */
     private static final float DEFAULT_PLATFORM_SPEED = 1f;
+    /** Default glow halo radius (world units) for a torch light. */
+    private static final float DEFAULT_TORCH_LIGHT_RADIUS = 48f;
+    /** Flame offset within the 16x16 torch sprite (sprite-relative, scaled by {@code unitScale}). */
+    private static final float TORCH_FLAME_X = 8f;
+    private static final float TORCH_FLAME_Y = 13f;
 
     private final AssetManager assetManager;
     private final TextureAtlas originAtlas;
@@ -184,7 +190,7 @@ public class EntityFactory {
                     spawned = true;
                     break;
                 case "torch":
-                    engine.addEntity(createDecoration(spawnX, spawnY, "gfx/old/torch.png"));
+                    engine.addEntity(createTorch(spawnX, spawnY, object, tile));
                     spawned = true;
                     break;
                 case "exitGate":
@@ -314,6 +320,23 @@ public class EntityFactory {
     }
 
     /**
+     * Builds a torch decoration (same sprite as {@code createDecoration}) plus a flickering
+     * {@code LightComponent} halo centered on the flame at the sprite's top. An optional
+     * {@code lightRadius} Tiled custom property overrides the halo radius in world units.
+     */
+    private Entity createTorch(float x, float y, MapObject object, TiledMapTile tile) {
+        Entity entity = createDecoration(x, y, "gfx/old/torch.png");
+
+        LightComponent light = new LightComponent();
+        light.radius = getFloatProperty(object, tile, "lightRadius", DEFAULT_TORCH_LIGHT_RADIUS);
+        light.offset.set(TORCH_FLAME_X * unitScale, TORCH_FLAME_Y * unitScale);
+        light.phase = MathUtils.random(MathUtils.PI2);
+        entity.add(light);
+
+        return entity;
+    }
+
+    /**
      * Builds an exit-gate entity: the decorative sprite plus a {@code CollisionComponent} (sized
      * like other pickups) so {@code LevelExitSystem} has bounds to build its proximity sensor
      * from. Only gets a {@code LevelExitComponent} (and is thus an actual level-transition
@@ -431,19 +454,24 @@ public class EntityFactory {
     public Entity createCoinPickup(float x, float y, TiledMapTile tile) {
         Entity entity = new Entity();
 
+        TextureRegion region = tile.getTextureRegion();
+        float tileWidth = region.getRegionWidth();
+        float tileHeight = region.getRegionHeight();
+
         TransformComponent transform = new TransformComponent();
-        transform.position.set(x, y);
+        transform.position.set(
+            x + (tileWidth - region.getRegionWidth()) / 2f,
+            y + (tileHeight - region.getRegionHeight()) / 2f);
         transform.scale.set(1f, 1f);
         transform.z = DECOR_Z;
         entity.add(transform);
 
         TextureComponent textureComponent = new TextureComponent();
-        textureComponent.region = tile.getTextureRegion();
+        textureComponent.region = region;
         entity.add(textureComponent);
 
         CollisionComponent collisionComponent = new CollisionComponent();
-        collisionComponent.bounds.setSize(tile.getTextureRegion().getRegionWidth(),
-            tile.getTextureRegion().getRegionHeight());
+        collisionComponent.bounds.setSize(region.getRegionWidth(), region.getRegionHeight());
         entity.add(collisionComponent);
 
         entity.add(new CoinPickupComponent());

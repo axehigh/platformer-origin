@@ -1,12 +1,7 @@
 package com.axehigh.platformer.shop;
 
 import com.axehigh.platformer.ecs.components.PlayerComponent;
-
-import java.util.Collections;
-import java.util.List;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableList;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * Holds the fixed catalog of purchasable upgrades and applies purchases directly against a {@link
@@ -22,29 +17,28 @@ public class ShopManager {
     /** "Iron Heart": raises max health (and current health) by 1 (repeatable). */
     public static final String IRON_HEART = "Iron Heart";
 
-    private final List<ShopItem> catalog;
+    private final Array<ShopItem> catalog;
 
     public ShopManager() {
-        catalog = unmodifiableList(asList(
-            new ShopItem(SHARP_EDGE, 100,
-                player -> player.swordDamage = 8,
-                false,
-                player -> player.sharpEdgePurchased),
-            new ShopItem(DAGGER_BANDOLIER, 75,
-                player -> player.maxItems = 60,
-                false,
-                player -> player.daggerBandolierPurchased),
-            new ShopItem(IRON_HEART, 150,
-                player -> {
-                    player.maxHealth += 1;
-                    player.health += 1;
-                },
-                true,
-                null)
-        ));
+        catalog = new Array<>();
+        catalog.add(new ShopItem(SHARP_EDGE, 100,
+            player -> player.swordDamage = 8,
+            false,
+            player -> player.sharpEdgePurchased));
+        catalog.add(new ShopItem(DAGGER_BANDOLIER, 75,
+            player -> player.maxItems = 60,
+            false,
+            player -> player.daggerBandolierPurchased));
+        catalog.add(new ShopItem(IRON_HEART, 150,
+            player -> {
+                player.maxHealth += 1;
+                player.health += 1;
+            },
+            true,
+            null));
     }
 
-    public List<ShopItem> getCatalog() {
+    public Array<ShopItem> getCatalog() {
         return catalog;
     }
 
@@ -63,7 +57,7 @@ public class ShopManager {
         }
 
         player.coins -= item.cost;
-        item.effect.accept(player);
+        item.effect.apply(player);
 
         if (SHARP_EDGE.equals(item.name)) {
             player.sharpEdgePurchased = true;

@@ -37,6 +37,11 @@ public class MovementSystem extends IteratingSystem {
     /** Landing smoke scale range: base size, plus up to this extra based on fall impact speed. */
     private static final float LANDING_SMOKE_BASE_SCALE = 5f;
     private static final float LANDING_SMOKE_EXTRA_SCALE = 5f;
+    /**
+     * Minimum fall distance (world units at 1x scale) before landing dust spawns: one tile. At the
+     * 16px base tile size this is 16 world units; multiplied by {@code unitScale} for larger tiles.
+     */
+    private static final float LANDING_DUST_MIN_FALL = 16f;
     /** Tolerances a falling player's pre-move feet position against a one-way platform's top before a top-only landing sticks. */
     private static final float ONE_WAY_LANDING_EPSILON = 0.5f;
 
@@ -123,22 +128,53 @@ public class MovementSystem extends IteratingSystem {
 
         if (player != null) {
             if (movement.grounded) {
-                if (player.jumpCount > 0) {
-                    spawnLandingSmoke(transform, collision, fallSpeed, movement.maxSpeedY);
-                }
+                onLanding(player, transform, collision, fallSpeed, movement.maxSpeedY);
                 player.jumpCount = 0;
                 player.isWallClimbing = false;
-            } else if (player.hurtTimer.isActive() || player.isDead) {
-                // While hurt, a knockback push into a wall must not fake a wall-grab; a dead
-                // player must not latch onto walls either.
-                player.isWallClimbing = false;
-            } else if (FeatureFlags.isWallClimbingEnabled() && hitWallX && attemptedDeltaX != 0f) {
-                player.isWallClimbing = true;
-                player.jumpCount = 1;
-            } else if (player.isWallClimbing) {
-                player.isWallClimbing = false;
+            } else {
+                float feetY = transform.position.y + collision.bounds.y;
+                if (!player.inAir) {
+                    player.inAir = true;
+                    player.maxAirHeight = feetY;
+                } else if (feetY > player.maxAirHeight) {
+                    player.maxAirHeight = feetY;
+                }
+                if (player.hurtTimer.isActive() || player.isDead) {
+                    // While hurt, a knockback push into a wall must not fake a wall-grab; a dead
+                    // player must not latch onto walls either.
+                    player.isWallClimbing = false;
+                } else if (FeatureFlags.isWallClimbingEnabled() && hitWallX && attemptedDeltaX != 0f) {
+                    player.isWallClimbing = true;
+                    player.jumpCount = 1;
+                } else if (player.isWallClimbing) {
+                    player.isWallClimbing = false;
+                }
             }
         }
+    }
+
+    /**
+     * Landing callback for the player: spawns landing dust only when the fall exceeded one tile,
+     * and triggers the landing squash for jump landings. Resets the airborne tracking. Shared with
+     * {@code MovingPlatformSystem} so every landing surface behaves identically.
+     */
+    private void onLanding(PlayerComponent player, TransformComponent transform, CollisionComponent collision, float fallSpeed, float maxSpeedY) {
+        onLanding(engine, player, transform, collision, fallSpeed, maxSpeedY, unitScale);
+    }
+
+    static void onLanding(PooledEngine engine, PlayerComponent player, TransformComponent transform, CollisionComponent collision, float fallSpeed, float maxSpeedY, float unitScale) {
+        if (!player.inAir) {
+            return;
+        }
+        float feetY = transform.position.y + collision.bounds.y;
+        float fallDistance = player.maxAirHeight - feetY;
+        if (fallDistance > LANDING_DUST_MIN_FALL * unitScale) {
+            spawnLandingSmoke(engine, transform, collision, fallSpeed, maxSpeedY);
+        }
+        if (player.jumpCount > 0 && FeatureFlags.isSquashEnabled()) {
+            SquashSystem.trigger(player, transform, false);
+        }
+        player.inAir = false;
     }
 
     /**

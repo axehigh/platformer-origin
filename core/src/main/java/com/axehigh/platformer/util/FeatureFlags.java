@@ -13,6 +13,7 @@ import com.badlogic.gdx.Gdx;
  */
 public final class FeatureFlags {
     private static boolean wallClimbingEnabled = GamePreferences.DEFAULT_WALL_CLIMB_ENABLED;
+    private static boolean squashEnabled = GamePreferences.DEFAULT_SQUASH_ENABLED;
     private static boolean initialized = false;
 
     private FeatureFlags() {
@@ -25,6 +26,7 @@ public final class FeatureFlags {
         initialized = true;
         GamePreferences preferences = new GamePreferences();
         wallClimbingEnabled = preferences.isWallClimbingEnabled();
+        squashEnabled = preferences.isSquashEnabled();
     }
 
     /** Whether wall-climb (wall-slide gravity + wall-jump latch) is enabled. Defaults to {@code true}. */
@@ -42,12 +44,28 @@ public final class FeatureFlags {
         }
     }
 
+    /** Whether the player landing squash pulse is enabled. Defaults to {@code false} (disabled for now). */
+    public static boolean isSquashEnabled() {
+        ensureInitialized();
+        return squashEnabled;
+    }
+
+    /** Enables/disables the squash pulse for the whole session and persists the choice. */
+    public static void setSquashEnabled(boolean enabled) {
+        squashEnabled = enabled;
+        initialized = true;
+        if (Gdx.app != null) {
+            new GamePreferences().setSquashEnabled(enabled);
+        }
+    }
+
     /**
      * Restores the pristine pre-init state. Test support (same package): headless tests must call
      * this before/after exercising the static so no state bleeds across test methods.
      */
     static void resetForTests() {
         wallClimbingEnabled = GamePreferences.DEFAULT_WALL_CLIMB_ENABLED;
+        squashEnabled = GamePreferences.DEFAULT_SQUASH_ENABLED;
         initialized = false;
     }
 }

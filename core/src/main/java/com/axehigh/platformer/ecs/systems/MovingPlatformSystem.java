@@ -49,6 +49,7 @@ public class MovingPlatformSystem extends IteratingSystem {
 
     private ImmutableArray<Entity> players;
     private PooledEngine engine;
+    private float unitScale = 1f;
 
     public MovingPlatformSystem(Array<Rectangle> collisionRects, RoomState roomState) {
         this(collisionRects, roomState, 0);
@@ -58,6 +59,10 @@ public class MovingPlatformSystem extends IteratingSystem {
         super(Family.all(TransformComponent.class, CollisionComponent.class, MovingPlatformComponent.class).get(), priority);
         this.collisionRects = collisionRects;
         this.roomState = roomState;
+    }
+
+    public void setUnitScale(float unitScale) {
+        this.unitScale = unitScale;
     }
 
     @Override
@@ -113,9 +118,7 @@ public class MovingPlatformSystem extends IteratingSystem {
             playerCollision.updateWorldBounds(playerTransform.position);
             playerBounds = playerCollision.worldBounds;
             playerTransform.position.y += platformBounds.y + platformBounds.height - playerBounds.y;
-            if (player.jumpCount > 0) {
-                MovementSystem.spawnLandingSmoke(engine, playerTransform, playerCollision, playerMovement.velocity.y, playerMovement.maxSpeedY);
-            }
+            MovementSystem.onLanding(engine, player, playerTransform, playerCollision, playerMovement.velocity.y, playerMovement.maxSpeedY, unitScale);
             playerMovement.grounded = true;
             playerMovement.velocity.y = 0f;
             player.jumpCount = 0;

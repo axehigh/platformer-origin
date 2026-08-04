@@ -1,17 +1,22 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.ecs.components.AnimationComponent;
+import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.EnemyComponent;
 import com.axehigh.platformer.ecs.components.Mappers;
 import com.axehigh.platformer.ecs.components.MovementComponent;
+import com.axehigh.platformer.particles.GlobalParticles;
+import com.axehigh.platformer.particles.ParticleHelper;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
  * Shared enemy-damage resolution used by both {@code MeleeAttackSystem} and {@code CollisionSystem}
  * (bullet hits): applies damage, a brief hit-stun grace period, and a knockback pop, all in one
- * place so the two damage sources stay perfectly consistent.
+ * place so the two damage sources stay perfectly consistent. A surviving hit also spawns a spark
+ * burst (via {@code ParticleHelper}) when a {@link PooledEngine} is supplied.
  */
 final class EnemyDamageResolver {
     /** Grace period after a hit during which the enemy is immune to further damage/knockback. */
@@ -19,6 +24,7 @@ final class EnemyDamageResolver {
     static final float POST_HIT_IDLE_DURATION = 0.5f;
     private static final float KNOCKBACK_SPEED_X = 90f;
     private static final float KNOCKBACK_SPEED_Y = 140f;
+    private static final float HIT_SPARK_SCALE = 1.2f;
 
     private EnemyDamageResolver() {
     }
@@ -33,9 +39,19 @@ final class EnemyDamageResolver {
      * the enemy's health reached 0.
      */
     static boolean applyHit(Entity enemyEntity, EnemyComponent enemy, MovementComponent movement, float damage, int knockbackDirection, boolean isFlying, float unitScale) {
+        return applyHit(enemyEntity, enemy, movement, damage, knockbackDirection, isFlying, unitScale, null);
+    }
+
+    /**
+     * Same as {@link #applyHit(Entity, EnemyComponent, MovementComponent, float, int, boolean, float)}
+     * plus a {@link PooledEngine} used to spawn a spark burst at the enemy on an applied hit.
+     */
+    static boolean applyHit(Entity enemyEntity, EnemyComponent enemy, MovementComponent movement, float damage, int knockbackDirection, boolean isFlying, float unitScale, PooledEngine engine) {
         if (enemy.isDead || enemy.hitStun.isActive()) {
             return false;
         }
+
+        spawnHitSpark(enemyEntity, engine);
 
         enemy.health -= damage;
         if (enemy.health <= 0f) {
@@ -71,5 +87,19 @@ final class EnemyDamageResolver {
         enemy.hitStun.start(stunDuration);
         enemy.postHitIdle.reset();
         return false;
+    }
+
+    /** One-shot spark burst at the enemy's collision-center; a no-op without a PooledEngine. */
+    private static void spawnHitSpark(Entity enemyEntity, PooledEngine engine) {
+        if (engine == null) {
+            return;
+        }
+        CollisionComponent collision = Mappers.COLLISION.get(enemyEntity);
+        if (collision == null) {
+            return;
+        }
+        float centerX = collision.worldBounds.x + collision.worldBounds.width / 2f;
+        float centerY = collision.worldBounds.y + collision.worldBounds.height / 2f;
+        ParticleHelper.spawnParticle(engine, GlobalParticles.SPARKS, centerX, centerY, 0f, HIT_SPARK_SCALE);
     }
 }

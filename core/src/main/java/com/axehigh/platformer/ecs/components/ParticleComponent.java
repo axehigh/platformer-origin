@@ -10,6 +10,10 @@ public class ParticleComponent implements Component, Pool.Poolable {
     public float delay = 0;
     public boolean started = false;
     public float scale = 1f;
+    /** Seconds the effect has been running; forces removal once it reaches {@link #maxLifetime}. */
+    public float lifeTimer = 0f;
+    /** Hard cap (seconds) on how long the effect may run, so a looping/runaway effect never lingers. */
+    public float maxLifetime = 4f;
 
     @Override
     public void reset() {
@@ -21,5 +25,7 @@ public class ParticleComponent implements Component, Pool.Poolable {
         delay = 0;
         started = false;
         scale = 1f;
+        lifeTimer = 0f;
+        maxLifetime = 4f;
     }
 }

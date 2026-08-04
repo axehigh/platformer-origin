@@ -5,11 +5,13 @@ import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -19,9 +21,14 @@ import static com.axehigh.platformer.assets.GameAssetRegistry.HERO_ASSET;
 
 /**
  * Top HUD overlay: avatar + heart icons (top-left), coin counter (top-center), item tracker +
- * pause button (top-right) — reflecting the live values on {@link PlayerComponent}.
+ * pause button (top-right) — reflecting the live values on {@link PlayerComponent}. The coin/item
+ * text uses a dedicated drop-shadowed clone of the skin font so it stays legible against bright
+ * background tiles.
  */
 public class HudStage extends Stage {
+    private static final float HEART_SIZE = 28f;
+    private static final float HEART_PAD = 6f;
+
     private final PlayerComponent playerComponent;
     private final Image[] heartImages;
     private final Label coinLabel;
@@ -31,6 +38,8 @@ public class HudStage extends Stage {
     public HudStage(Viewport viewport, Skin skin, AssetManager assetManager, PlayerComponent playerComponent) {
         super(viewport);
         this.playerComponent = playerComponent;
+
+        LabelStyle counterStyle = skin.get(LabelStyle.class);
 
         Table root = new Table();
         root.setFillParent(true);
@@ -47,20 +56,20 @@ public class HudStage extends Stage {
         heartImages = new Image[playerComponent.maxHealth];
         for (int i = 0; i < heartImages.length; i++) {
             heartImages[i] = new Image(new TextureRegion(heartTexture));
-            heartsTable.add(heartImages[i]).size(34f, 34f).padRight(8f);
+            heartsTable.add(heartImages[i]).size(HEART_SIZE, HEART_SIZE).padRight(HEART_PAD);
         }
         leftGroup.add(heartsTable);
 
         Table centerGroup = new Table();
         Image coinIcon = new Image(new TextureRegion(assetManager.get("gfx/old/coin.png", Texture.class)));
         centerGroup.add(coinIcon).size(34f, 34f).padRight(17f);
-        coinLabel = new Label("", skin);
+        coinLabel = new ShadowLabel("", counterStyle);
         centerGroup.add(coinLabel);
 
         Table rightGroup = new Table();
         Image itemIcon = new Image(new TextureRegion(assetManager.get("gfx/old/dagger.png", Texture.class)));
         rightGroup.add(itemIcon).size(66f, 66f).padRight(17f);
-        itemLabel = new Label("", skin);
+        itemLabel = new ShadowLabel("", counterStyle);
         rightGroup.add(itemLabel).padRight(33f);
         pauseButton = new TextButton("||", skin);
         rightGroup.add(pauseButton).size(83f, 66f);

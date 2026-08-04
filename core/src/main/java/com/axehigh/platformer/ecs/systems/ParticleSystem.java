@@ -53,7 +53,8 @@ public class ParticleSystem extends IteratingSystem {
         particle.effect.update(deltaTime);
         particle.effect.draw(batch);
 
-        if (particle.effect.isComplete()) {
+        particle.lifeTimer += deltaTime;
+        if (particle.effect.isComplete() || particle.lifeTimer >= particle.maxLifetime) {
             particle.isDead = true;
             getEngine().removeEntity(entity);
         }

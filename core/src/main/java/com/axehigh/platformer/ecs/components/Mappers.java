@@ -22,6 +22,7 @@ public final class Mappers {
     public static final ComponentMapper<LevelExitComponent> LEVEL_EXIT = ComponentMapper.getFor(LevelExitComponent.class);
     public static final ComponentMapper<MovingPlatformComponent> MOVING_PLATFORM = ComponentMapper.getFor(MovingPlatformComponent.class);
     public static final ComponentMapper<ParticleComponent> PARTICLE = ComponentMapper.getFor(ParticleComponent.class);
+    public static final ComponentMapper<LightComponent> LIGHT = ComponentMapper.getFor(LightComponent.class);
 
     private Mappers() {
     }

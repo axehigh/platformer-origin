@@ -9,6 +9,7 @@ import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Rectangle;
@@ -29,6 +30,7 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 public class CollisionSystem extends IteratingSystem {
     private final Array<Rectangle> collisionRects;
     private ImmutableArray<Entity> enemies;
+    private PooledEngine engine;
     private float unitScale = 1f;
 
     public CollisionSystem(Array<Rectangle> collisionRects) {
@@ -48,6 +50,9 @@ public class CollisionSystem extends IteratingSystem {
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
+        if (engine instanceof PooledEngine) {
+            this.engine = (PooledEngine) engine;
+        }
         enemies = engine.getEntitiesFor(Family.all(EnemyComponent.class, TransformComponent.class, CollisionComponent.class).get());
     }
 
@@ -78,7 +83,7 @@ public class CollisionSystem extends IteratingSystem {
             MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
             int knockbackDirection = movement.velocity.x >= 0f ? 1 : -1;
             boolean isFlying = FLYING.get(hitEnemy) != null;
-            EnemyDamageResolver.applyHit(hitEnemy, enemy, enemyMovement, bullet.damage, knockbackDirection, isFlying, unitScale);
+            EnemyDamageResolver.applyHit(hitEnemy, enemy, enemyMovement, bullet.damage, knockbackDirection, isFlying, unitScale, engine);
             getEngine().removeEntity(bulletEntity);
         }
     }

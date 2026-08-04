@@ -14,10 +14,10 @@ import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 
 /**
- * Owns the opened-chest disappear-timer countdown: once an opened chest's timer reaches 0, it is
- * removed from the engine and a random number of coin pickups pop out of its position, each with
- * a random upward + horizontal launch velocity, before gravity/collision (via MovementSystem) pulls
- * them back down to rest nearby.
+ * Owns the opened-chest coin-pop: once an opened chest's timer reaches 0 (and it hasn't already
+ * dropped), a random number of coin pickups pop out of its position, each with a random upward +
+ * horizontal launch velocity, before gravity/collision (via MovementSystem) pulls them back down
+ * to rest nearby. The chest entity itself stays in the world with its open sprite as decoration.
  */
 public class ChestSystem extends IteratingSystem {
     private static final int MIN_COIN_DROPS = 2;
@@ -50,7 +50,7 @@ public class ChestSystem extends IteratingSystem {
         }
 
         chest.disappearTimer.update(deltaTime);
-        if (chest.disappearTimer.isActive()) {
+        if (chest.disappearTimer.isActive() || chest.coinsDropped) {
             return;
         }
 
@@ -70,6 +70,6 @@ public class ChestSystem extends IteratingSystem {
             getEngine().addEntity(entityFactory.createPoppedCoinPickup(centerX, centerY, velocityX, velocityY));
         }
 
-        getEngine().removeEntity(entity);
+        chest.coinsDropped = true;
     }
 }

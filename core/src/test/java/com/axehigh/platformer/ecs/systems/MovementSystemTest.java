@@ -292,13 +292,15 @@ public class MovementSystemTest extends SystemTestBase {
         pooled.addSystem(pooledSystem);
 
         collisionRects.add(new Rectangle(0f, 0f, 300f, 100f));
-        TransformComponent transform = transform(0f, 130f);
+        TransformComponent transform = transform(0f, 130.1f);
         transform.scale.x = 0f;
         CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
-        place(transform, collision, 0f, 130f);
+        place(transform, collision, 0f, 130.1f);
         MovementComponent movement = movement();
         PlayerComponent player = player();
         player.jumpCount = 2;
+        player.inAir = true;
+        player.maxAirHeight = 100.1f + 20f;
         pooled.addEntity(entity(transform, movement, collision, player));
 
         pooled.update(DT);
@@ -307,20 +309,22 @@ public class MovementSystemTest extends SystemTestBase {
     }
 
     @Test
-    public void landingAfterLedgeFallSpawnsNoSmoke() {
+    public void shortFallSpawnsNoSmoke() {
         PooledEngine pooled = new PooledEngine();
         MovementSystem pooledSystem = new MovementSystem(collisionRects);
         pooledSystem.setUnitScale(1f);
         pooled.addSystem(pooledSystem);
 
         collisionRects.add(new Rectangle(0f, 0f, 300f, 100f));
-        TransformComponent transform = transform(0f, 130f);
+        TransformComponent transform = transform(0f, 130.1f);
         transform.scale.x = 0f;
         CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
-        place(transform, collision, 0f, 130f);
+        place(transform, collision, 0f, 130.1f);
         MovementComponent movement = movement();
         PlayerComponent player = player();
         player.jumpCount = 0;
+        player.inAir = true;
+        player.maxAirHeight = 100.1f + 10f;
         pooled.addEntity(entity(transform, movement, collision, player));
 
         pooled.update(DT);
@@ -336,14 +340,16 @@ public class MovementSystemTest extends SystemTestBase {
         pooled.addSystem(pooledSystem);
 
         collisionRects.add(new Rectangle(0f, 0f, 300f, 100f));
-        TransformComponent transform = transform(0f, 130f);
+        TransformComponent transform = transform(0f, 130.1f);
         transform.scale.x = 0f;
         CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
-        place(transform, collision, 0f, 130f);
+        place(transform, collision, 0f, 130.1f);
         MovementComponent movement = movement();
         movement.velocity.y = -GameConstants.MaxSpeedY;
         PlayerComponent player = player();
         player.jumpCount = 2;
+        player.inAir = true;
+        player.maxAirHeight = 100.1f + 20f;
         pooled.addEntity(entity(transform, movement, collision, player));
 
         pooled.update(DT);

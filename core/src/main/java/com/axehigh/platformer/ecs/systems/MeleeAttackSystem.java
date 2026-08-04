@@ -8,9 +8,11 @@ import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TextureComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.particles.ParticleHelper;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.assets.AssetManager;
@@ -49,6 +51,7 @@ public class MeleeAttackSystem extends IteratingSystem {
     private final AssetManager assetManager;
     private float unitScale = 1f;
 
+    private PooledEngine engine;
     private final Rectangle strikeBounds = new Rectangle();
     private Rectangle activeStrikeBounds;
     private ImmutableArray<Entity> enemies;
@@ -75,6 +78,9 @@ public class MeleeAttackSystem extends IteratingSystem {
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
+        if (engine instanceof PooledEngine) {
+            this.engine = (PooledEngine) engine;
+        }
         enemies = engine.getEntitiesFor(Family.all(EnemyComponent.class, TransformComponent.class, CollisionComponent.class).get());
         chests = engine.getEntitiesFor(Family.all(ChestComponent.class, TransformComponent.class, CollisionComponent.class).get());
     }
@@ -102,7 +108,7 @@ public class MeleeAttackSystem extends IteratingSystem {
                 EnemyComponent enemy = ENEMY.get(hitEnemy);
                 MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
                 boolean isFlying = FLYING.get(hitEnemy) != null;
-                EnemyDamageResolver.applyHit(hitEnemy, enemy, enemyMovement, player.swordDamage, player.facingDirection, isFlying, unitScale);
+                EnemyDamageResolver.applyHit(hitEnemy, enemy, enemyMovement, player.swordDamage, player.facingDirection, isFlying, unitScale, engine);
                 player.meleeHasHit = true;
             } else {
                 Entity hitChest = findHit(strikeBounds, chests);
@@ -113,6 +119,12 @@ public class MeleeAttackSystem extends IteratingSystem {
                         chest.disappearTimer.start(CHEST_DISAPPEAR_DELAY);
                         TextureComponent texture = TEXTURE.get(hitChest);
                         texture.region = new TextureRegion(assetManager.get("gfx/old/chest_open.png", Texture.class));
+                        CollisionComponent chestCollision = COLLISION.get(hitChest);
+                        if (engine != null && chestCollision != null) {
+                            ParticleHelper.spawnSmallSmoke(engine,
+                                chestCollision.worldBounds.x + chestCollision.worldBounds.width / 2f,
+                                chestCollision.worldBounds.y + chestCollision.worldBounds.height / 2f);
+                        }
                     }
                     player.meleeHasHit = true;
                 }

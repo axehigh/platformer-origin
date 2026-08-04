@@ -53,6 +53,10 @@ public class ParticleHelper {
     }
 
     public static void spawnParticle(PooledEngine engine, String particlePath, float x, float y, float delay, float scale) {
+        spawnParticle(engine, particlePath, x, y, delay, scale, 4f);
+    }
+
+    public static void spawnParticle(PooledEngine engine, String particlePath, float x, float y, float delay, float scale, float maxLifetime) {
         if (Gdx.gl == null) {
             // For headless tests, create a dummy entity mirroring the production shape
             // (TransformComponent + ParticleComponent) to allow testing if particles were triggered.
@@ -64,6 +68,7 @@ public class ParticleHelper {
             com.axehigh.platformer.ecs.components.ParticleComponent pc = engine.createComponent(ParticleComponent.class);
             pc.delay = delay;
             pc.scale = scale;
+            pc.maxLifetime = maxLifetime;
 
             dummy.add(pc);
             engine.addEntity(dummy);
@@ -88,6 +93,7 @@ public class ParticleHelper {
         pc.effect.scaleEffect(scale);
         pc.delay = delay;
         pc.scale = scale;
+        pc.maxLifetime = maxLifetime;
         particleEntity.add(pc);
 
         engine.addEntity(particleEntity);

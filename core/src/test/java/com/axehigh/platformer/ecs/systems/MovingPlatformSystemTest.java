@@ -245,23 +245,27 @@ public class MovingPlatformSystemTest extends SystemTestBase {
         platform(pooled, 100f, 50f, 100f, 16f, 0f, 0f, 1f, 0f, -1);
         Entity playerEntity = player(pooled, 110f, 65f);
         MOVEMENT.get(playerEntity).velocity.y = -GameConstants.MaxSpeedY;
-        PLAYER.get(playerEntity).jumpCount = 2;
-
+        PlayerComponent player = PLAYER.get(playerEntity);
+        player.jumpCount = 2;
+        player.inAir = true;
+        player.maxAirHeight = 66f + 20f;
         pooled.update(DT);
 
         assertEquals(1, particleEntityCount(pooled));
     }
 
     @Test
-    public void landingAfterLedgeFallSpawnsNoSmoke() {
+    public void shortFallSpawnsNoSmoke() {
         PooledEngine pooled = new PooledEngine();
         pooled.addSystem(new MovingPlatformSystem(collisionRects, roomState));
 
         platform(pooled, 100f, 50f, 100f, 16f, 0f, 0f, 1f, 0f, -1);
         Entity playerEntity = player(pooled, 110f, 65f);
         MOVEMENT.get(playerEntity).velocity.y = -GameConstants.MaxSpeedY;
-        PLAYER.get(playerEntity).jumpCount = 0;
-
+        PlayerComponent player = PLAYER.get(playerEntity);
+        player.jumpCount = 0;
+        player.inAir = true;
+        player.maxAirHeight = 66f + 10f;
         pooled.update(DT);
 
         assertEquals(0, particleEntityCount(pooled));
@@ -275,8 +279,10 @@ public class MovingPlatformSystemTest extends SystemTestBase {
         platform(pooled, 100f, 50f, 100f, 16f, 0f, 0f, 1f, 0f, -1);
         Entity playerEntity = player(pooled, 110f, 65f);
         MOVEMENT.get(playerEntity).velocity.y = -GameConstants.MaxSpeedY;
-        PLAYER.get(playerEntity).jumpCount = 2;
-
+        PlayerComponent player = PLAYER.get(playerEntity);
+        player.jumpCount = 2;
+        player.inAir = true;
+        player.maxAirHeight = 66f + 20f;
         pooled.update(DT);
 
         ParticleComponent pc = firstParticle(pooled);

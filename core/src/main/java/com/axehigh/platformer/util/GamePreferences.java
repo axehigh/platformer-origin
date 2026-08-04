@@ -12,6 +12,7 @@ public class GamePreferences {
     private static final String KEY_SFX_ENABLED = "sfxEnabled";
     private static final String KEY_DEBUG_MODE = "debugMode";
     private static final String KEY_WALL_CLIMB_ENABLED = "wallClimbEnabled";
+    private static final String KEY_SQUASH_ENABLED = "squashEnabled";
 
     private static final float DEFAULT_MUSIC_VOLUME = 100f;
     private static final float DEFAULT_SFX_VOLUME = 100f;
@@ -20,6 +21,8 @@ public class GamePreferences {
     private static final boolean DEFAULT_DEBUG_MODE = false;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
     static final boolean DEFAULT_WALL_CLIMB_ENABLED = true;
+    /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
+    static final boolean DEFAULT_SQUASH_ENABLED = false;
 
     private final Preferences preferences;
 
@@ -82,6 +85,19 @@ public class GamePreferences {
 
     public void setWallClimbingEnabled(boolean wallClimbingEnabled) {
         preferences.putBoolean(KEY_WALL_CLIMB_ENABLED, wallClimbingEnabled);
+        preferences.flush();
+    }
+
+    /**
+     * Whether the player landing squash-and-stretch pulse is enabled. A developer feature flag
+     * (default {@code false} — the squash look is not final); see {@code FeatureFlags}.
+     */
+    public boolean isSquashEnabled() {
+        return preferences.getBoolean(KEY_SQUASH_ENABLED, DEFAULT_SQUASH_ENABLED);
+    }
+
+    public void setSquashEnabled(boolean squashEnabled) {
+        preferences.putBoolean(KEY_SQUASH_ENABLED, squashEnabled);
         preferences.flush();
     }
 }

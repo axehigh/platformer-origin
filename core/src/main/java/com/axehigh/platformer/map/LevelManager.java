@@ -16,6 +16,7 @@ import com.axehigh.platformer.ecs.systems.EnemySystem;
 import com.axehigh.platformer.ecs.systems.LevelExitSystem;
 import com.axehigh.platformer.ecs.systems.MeleeAttackSystem;
 import com.axehigh.platformer.ecs.systems.MovementSystem;
+import com.axehigh.platformer.ecs.systems.MovingPlatformSystem;
 import com.axehigh.platformer.ecs.systems.TiledMapRenderSystem;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
@@ -114,6 +115,10 @@ public class LevelManager implements Disposable {
         if (exitSystem != null) {
             exitSystem.setUnitScale(newScale);
         }
+        MovingPlatformSystem movingPlatformSystem = engine.getSystem(MovingPlatformSystem.class);
+        if (movingPlatformSystem != null) {
+            movingPlatformSystem.setUnitScale(newScale);
+        }
 
         tiledMapRenderSystem.setMap(newMapLoader.getMap());
 
@@ -173,6 +178,10 @@ public class LevelManager implements Disposable {
             playerComponent.dropRequested = false;
             playerComponent.onDropTile = false;
             playerComponent.dropWindow.reset();
+            playerComponent.squashActive = false;
+            playerComponent.squashAmount = 0f;
+            playerComponent.inAir = false;
+            playerComponent.maxAirHeight = 0f;
         }
 
         CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y);

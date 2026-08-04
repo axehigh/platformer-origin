@@ -5,9 +5,12 @@ import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.DaggerPickupComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.particles.GlobalParticles;
+import com.axehigh.platformer.particles.ParticleHelper;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Rectangle;
@@ -25,8 +28,13 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
  * pickup entity.
  */
 public class PickupSystem extends IteratingSystem {
+    private static final float COIN_SPARK_SCALE = 1.5f;
+    /** Coin sparkles must not linger: forced removal once this many seconds have elapsed. */
+    private static final float COIN_SPARK_MAX_LIFETIME = 1.5f;
+
     private final SfxSystem sfxSystem;
     private ImmutableArray<Entity> players;
+    private PooledEngine engine;
 
     public PickupSystem() {
         this(null, 0);
@@ -41,6 +49,9 @@ public class PickupSystem extends IteratingSystem {
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
+        if (engine instanceof PooledEngine) {
+            this.engine = (PooledEngine) engine;
+        }
         players = engine.getEntitiesFor(Family.all(PlayerComponent.class, TransformComponent.class, CollisionComponent.class).get());
     }
 
@@ -67,7 +78,18 @@ public class PickupSystem extends IteratingSystem {
             if (sfxSystem != null) {
                 sfxSystem.playCoin();
             }
+            spawnCoinSpark(pickupCollision);
         }
         getEngine().removeEntity(pickupEntity);
+    }
+
+    /** One-shot sparkle burst at the picked-up coin; a no-op without a PooledEngine. */
+    private void spawnCoinSpark(CollisionComponent pickupCollision) {
+        if (engine == null) {
+            return;
+        }
+        float centerX = pickupCollision.worldBounds.x + pickupCollision.worldBounds.width / 2f;
+        float centerY = pickupCollision.worldBounds.y + pickupCollision.worldBounds.height / 2f;
+        ParticleHelper.spawnParticle(engine, GlobalParticles.SPARKS, centerX, centerY, 0f, COIN_SPARK_SCALE, COIN_SPARK_MAX_LIFETIME);
     }
 }

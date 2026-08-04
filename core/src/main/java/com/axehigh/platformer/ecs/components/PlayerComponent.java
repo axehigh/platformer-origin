@@ -64,4 +64,19 @@ public class PlayerComponent implements Component {
      * instead of landing on them; while active the one-way rects are skipped in MovementSystem.
      */
     public Timer dropWindow = new Timer();
+
+    /** True from the frame the player leaves the ground until the next grounded frame. */
+    public boolean inAir = false;
+    /** Highest feet Y (world units) reached while airborne; used to gate landing dust. */
+    public float maxAirHeight = 0f;
+
+    /** Squash-and-stretch visual pulse: true while the player sprite is scaling through a pulse. */
+    public boolean squashActive = false;
+    /** True = jump stretch (taller/thinner), false = landing squash (flatter/wider). Jump stretch is currently unused. */
+    public boolean squashIsStretch = false;
+    /** Current deviation magnitude (0..1) of the pulse; decays toward 0 each frame. */
+    public float squashAmount = 0f;
+    /** Base (resting) scale captured when the pulse started, before the deviation. */
+    public float squashBaseX = 1f;
+    public float squashBaseY = 1f;
 }
