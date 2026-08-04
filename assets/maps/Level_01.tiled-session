@@ -1,14 +1,14 @@
 {
-    "activeFile": "level1/generated_room.tmx",
+    "activeFile": "level1/level_1_demo.tmx",
     "expandedProjectPaths": [
-        "level3",
-        "gfx",
-        "C:/Users/lona/dev/libgdx/origin/assets",
-        "level1",
+        "C:/skuld/dev_olona/libgdx/platformer-origin/assets/ui",
         "level2",
         "C:/skuld/dev_olona/libgdx/platformer-origin/assets",
+        "level1",
+        "gfx",
+        "level3",
         ".",
-        "C:/skuld/dev_olona/libgdx/platformer-origin/assets/ui"
+        "C:/Users/lona/dev/libgdx/origin/assets"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -127,13 +127,14 @@
         },
         "level1/generated_room.tmx": {
             "expandedObjectLayers": [
-                3
+                3,
+                7
             ],
             "scale": 0.25,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 5428,
-                "y": 1536
+                "x": 3074,
+                "y": 868
             }
         },
         "level1/generated_single_room.tmx": {
@@ -143,8 +144,8 @@
             "scale": 0.25,
             "selectedLayer": 3,
             "viewCenter": {
-                "x": 2316,
-                "y": 2252
+                "x": 2314,
+                "y": 932
             }
         },
         "level1/gfx/dungeon_tiles.tsx": {
@@ -167,10 +168,10 @@
                 4
             ],
             "scale": 0.38408203124999996,
-            "selectedLayer": 2,
+            "selectedLayer": 0,
             "viewCenter": {
                 "x": 1021.9171116196289,
-                "y": 768.0650902618866
+                "y": 1197.6608187134502
             }
         },
         "level1/level_1_demo_2.tmx": {
@@ -181,20 +182,20 @@
             "scale": 0.33,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 2048.4848484848485,
-                "y": 1089.3939393939395
+                "x": 2046.969696969697,
+                "y": 1090.909090909091
             }
         },
         "level1/level_1_demo_3.tmx": {
             "expandedObjectLayers": [
-                7,
-                3
+                3,
+                7
             ],
             "scale": 0.25,
             "selectedLayer": 3,
             "viewCenter": {
-                "x": 2048,
-                "y": 1086
+                "x": 2046,
+                "y": 1084
             }
         },
         "level2/level_02_demo.tmx": {
@@ -282,21 +283,22 @@
         "level1/level_1_demo.tmx",
         "level1/level_1_demo_2.tmx",
         "level1/dungeon_tiles.tsx",
-        "level1/generated_room.tmx"
+        "level1/generated_room.tmx",
+        "level1/level_1_demo_3.tmx"
     ],
     "project": "Level_01.tiled-project",
     "property.type": "bool",
     "recentFiles": [
         "level1/generated_single_room.tmx",
-        "level1/level_1_demo.tmx",
-        "level1/level_1_demo_2.tmx",
-        "level1/dungeon_tiles.tsx",
+        "level1/level_1_demo_3.tmx",
         "level1/generated_room.tmx",
+        "level1/dungeon_tiles.tsx",
+        "level1/level_1_demo_2.tmx",
+        "level1/level_1_demo.tmx",
         "generated_single_room.tmx",
         "generated_room.tmx",
         "gfx/dungeon_tiles.tsx",
         "level1/cave_tileset.tsx",
-        "level1/level_1_demo_3.tmx",
         "level1/items.tsx",
         "level2/level_02_demo.tmx"
     ],
