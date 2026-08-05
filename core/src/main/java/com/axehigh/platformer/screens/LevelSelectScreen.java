@@ -1,7 +1,6 @@
 package com.axehigh.platformer.screens;
 
 import com.axehigh.platformer.audio.AudioManager;
-import com.axehigh.platformer.common.BaseScreen;
 import com.axehigh.platformer.map.LevelCatalog;
 import com.axehigh.platformer.map.LevelDefinition;
 import com.axehigh.platformer.util.SaveManager;
@@ -11,7 +10,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton.ImageTextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -28,11 +26,9 @@ import static com.axehigh.platformer.GameConstants.FontScale;
  * Lists every level in {@link LevelCatalog} in a scrollable 3-column grid and launches
  * {@link GameScreen} for the chosen one. Supports keyboard navigation (arrows/WASD + Enter).
  */
-public class LevelSelectScreen extends BaseScreen {
+public class LevelSelectScreen extends MenuScreen {
 
     private static final int COLUMNS = 3;
-    private static final float PANEL_WIDTH = 1517f;
-    private static final float PANEL_HEIGHT = 1040f;
     private static final float BUTTON_WIDTH = 430f;
     private static final float BUTTON_HEIGHT = 90f;
     private static final float GRID_WIDTH = 1350f;
@@ -53,19 +49,13 @@ public class LevelSelectScreen extends BaseScreen {
 
         Array<String> completedLevelIds = SaveManager.hasSave() ? SaveManager.load().completedLevelIds : new Array<>();
 
-        Image panel = new Image(skin.getDrawable("table"));
-        panel.setScaling(Scaling.fit);
-        panel.setSize(PANEL_WIDTH, PANEL_HEIGHT);
-        panel.setPosition((stage.getWidth() - PANEL_WIDTH) / 2f, (stage.getHeight() - PANEL_HEIGHT) / 2f);
-        stage.addActor(panel);
+        addMenuPanel();
 
         Table content = new Table();
         content.setFillParent(true);
         stage.addActor(content);
 
-        Label title = new Label("Select Level", skin);
-        title.setFontScale(FontScale * 1.4f);
-        content.add(title).padBottom(6f).row();
+        content.add(createMenuTitle("Select Level")).padBottom(6f).row();
 
         Label progress = new Label(progressText(completedLevelIds), skin);
         progress.setFontScale(FontScale);
@@ -91,16 +81,8 @@ public class LevelSelectScreen extends BaseScreen {
         scrollPane.setFadeScrollBars(false);
         content.add(scrollPane).size(GRID_WIDTH, GRID_HEIGHT).row();
 
-        TextButton backButton = new TextButton("Back", skin);
-        backButton.getLabel().setFontScale(FontScale);
-        backButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                AudioManager.get().playClick();
-                changeScreen(new MainMenuScreen(game));
-            }
-        });
-        content.add(backButton).padTop(16f).row();
+        TextButton backButton = createMenuButton("Back", () -> changeScreen(new MainMenuScreen(game)));
+        content.add(backButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).padTop(16f).row();
 
         stage.addListener(new InputListener() {
             @Override

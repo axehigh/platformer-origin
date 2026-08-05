@@ -2,7 +2,6 @@ package com.axehigh.platformer.screens;
 
 import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.audio.AudioManager;
-import com.axehigh.platformer.common.BaseScreen;
 import com.axehigh.platformer.util.GamePreferences;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -10,13 +9,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
 /**
  * Settings screen: music/SFX volume sliders and a debug-mode checkbox, bound to {@link GamePreferences}.
  */
-public class PreferencesScreen extends BaseScreen {
+public class PreferencesScreen extends MenuScreen {
 
     public PreferencesScreen(Game game) {
         super(game);
@@ -28,13 +26,13 @@ public class PreferencesScreen extends BaseScreen {
         GamePreferences preferences = new GamePreferences();
         AudioManager audio = AudioManager.get();
 
-        Table table = new Table();
-        table.setFillParent(true);
-        stage.addActor(table);
+        addMenuPanel();
 
-        Label title = new Label("Preferences", skin);
-        title.setFontScale(GameConstants.FontScale);
-        table.add(title).colspan(2).padBottom(10f).row();
+        Table content = new Table();
+        content.setFillParent(true);
+        stage.addActor(content);
+
+        content.add(createMenuTitle("Preferences")).colspan(2).padBottom(12f).row();
 
         CheckBox musicCheckBox = new CheckBox(" Music", skin);
         musicCheckBox.getLabel().setFontScale(GameConstants.FontScale);
@@ -46,7 +44,7 @@ public class PreferencesScreen extends BaseScreen {
                 audio.setMusicEnabled(musicCheckBox.isChecked());
             }
         });
-        table.add(musicCheckBox).colspan(2).padBottom(6f).row();
+        content.add(musicCheckBox).colspan(2).padBottom(6f).row();
 
         Label musicLabel = new Label("Music Volume", skin);
         musicLabel.setFontScale(GameConstants.FontScale);
@@ -58,8 +56,8 @@ public class PreferencesScreen extends BaseScreen {
                 audio.setMusicVolume(musicSlider.getValue());
             }
         });
-        table.add(musicLabel).padRight(12f);
-        table.add(musicSlider).padBottom(6f).row();
+        content.add(musicLabel).padRight(12f);
+        content.add(musicSlider).padBottom(6f).row();
 
         CheckBox sfxCheckBox = new CheckBox(" Sound Effects", skin);
         sfxCheckBox.getLabel().setFontScale(GameConstants.FontScale);
@@ -71,7 +69,7 @@ public class PreferencesScreen extends BaseScreen {
                 audio.setSfxEnabled(sfxCheckBox.isChecked());
             }
         });
-        table.add(sfxCheckBox).colspan(2).padBottom(6f).row();
+        content.add(sfxCheckBox).colspan(2).padBottom(6f).row();
 
         Label sfxLabel = new Label("SFX Volume", skin);
         sfxLabel.setFontScale(GameConstants.FontScale);
@@ -83,8 +81,8 @@ public class PreferencesScreen extends BaseScreen {
                 audio.setSfxVolume(sfxSlider.getValue());
             }
         });
-        table.add(sfxLabel).padRight(12f);
-        table.add(sfxSlider).padBottom(6f).row();
+        content.add(sfxLabel).padRight(12f);
+        content.add(sfxSlider).padBottom(6f).row();
 
         CheckBox debugCheckBox = new CheckBox(" Debug Mode", skin);
         debugCheckBox.getLabel().setFontScale(GameConstants.FontScale);
@@ -95,19 +93,10 @@ public class PreferencesScreen extends BaseScreen {
                 preferences.setDebugMode(debugCheckBox.isChecked());
             }
         });
-        table.add(debugCheckBox).colspan(2).padBottom(10f).row();
+        content.add(debugCheckBox).colspan(2).padBottom(10f).row();
 
-        TextButton backButton = new TextButton("Back", skin);
-        backButton.getLabel().setFontScale(GameConstants.FontScale);
-        backButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                audio.playClick();
-                changeScreen(new MainMenuScreen(game));
-            }
-        });
-        table.add(backButton).colspan(2).row();
+        content.add(createMenuButton("Back", () -> changeScreen(new MainMenuScreen(game))))
+            .colspan(2).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).row();
     }
 
 }
-
