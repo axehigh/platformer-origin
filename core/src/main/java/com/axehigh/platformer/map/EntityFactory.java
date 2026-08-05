@@ -44,6 +44,10 @@ public class EntityFactory {
     /** Flame offset within the 16x16 torch sprite (sprite-relative, scaled by {@code unitScale}). */
     private static final float TORCH_FLAME_X = 8f;
     private static final float TORCH_FLAME_Y = 13f;
+    /** Popped-coin launch velocity ranges (world units/s, scaled by {@code unitScale} on use). */
+    private static final float MIN_POP_VELOCITY_Y = 80f;
+    private static final float MAX_POP_VELOCITY_Y = 140f;
+    private static final float MAX_POP_VELOCITY_X = 40f;
 
     private final AssetManager assetManager;
     private final TextureAtlas originAtlas;
@@ -499,7 +503,7 @@ public class EntityFactory {
     /**
      * Builds a coin pickup entity that launches with the given initial velocity (a small upward
      * pop plus horizontal scatter) instead of sitting still, so it visibly arcs up and out before
-     * gravity/collision pulls it back down to rest. Used only for chest-dropped coins.
+     * gravity/collision pulls it back down to rest. Used for chest- and enemy-dropped coins.
      */
     public Entity createPoppedCoinPickup(float x, float y, float velocityX, float velocityY) {
         Entity entity = createCoinPickup(x, y);
@@ -511,6 +515,20 @@ public class EntityFactory {
         entity.add(new PoppedItemComponent());
 
         return entity;
+    }
+
+    /**
+     * Spawns {@code count} popped coin pickups at {@code (x, y)} into {@code engine}, each launched
+     * with a random upward velocity ({@value #MIN_POP_VELOCITY_Y}-{@value #MAX_POP_VELOCITY_Y} u/s)
+     * and horizontal scatter ({@value #MAX_POP_VELOCITY_X} u/s), scaled by {@code unitScale}.
+     * Shared by {@code ChestSystem} and {@code EnemySystem} so chest and enemy coin drops feel identical.
+     */
+    public void popCoins(Engine engine, float x, float y, int count, float unitScale) {
+        for (int i = 0; i < count; i++) {
+            float velocityX = MathUtils.random(-MAX_POP_VELOCITY_X, MAX_POP_VELOCITY_X) * unitScale;
+            float velocityY = MathUtils.random(MIN_POP_VELOCITY_Y, MAX_POP_VELOCITY_Y) * unitScale;
+            engine.addEntity(createPoppedCoinPickup(x, y, velocityX, velocityY));
+        }
     }
 
     private Entity createEnemy(float x, float y, String enemyType, int roomIndex) {
@@ -602,6 +620,7 @@ public class EntityFactory {
 
         if ("flyer".equals(enemyType)) {
             enemyComponent.health = 5f;
+            enemyComponent.maxHealth = 5f;
             FlyingEnemyComponent flying = new FlyingEnemyComponent();
             flying.bobAmplitude *= unitScale;
             entity.add(flying);
@@ -609,6 +628,7 @@ public class EntityFactory {
             entity.add(new EnemyShooterComponent());
         } else if ("knight".equals(enemyType)) {
             enemyComponent.health = 15f;
+            enemyComponent.maxHealth = 15f;
         }
         entity.add(enemyComponent);
 

@@ -5,6 +5,7 @@ import com.axehigh.platformer.ecs.components.EnemyComponent;
 import com.axehigh.platformer.ecs.components.FlyingEnemyComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.map.EntityFactory;
 import com.axehigh.platformer.map.RoomState;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -43,18 +44,22 @@ public class EnemySystem extends IteratingSystem {
     private static final float LEDGE_PROBE_AHEAD = 4f;
     /** How far below the enemy's feet the ground sensor probe reaches. */
     private static final float LEDGE_PROBE_DEPTH = 4f;
+    /** Coins dropped per full {@code EnemyComponent.maxHealth} pool on death. */
+    private static final float COINS_PER_HEALTH = 5f;
 
+    private final EntityFactory entityFactory;
     private final Array<Rectangle> collisionRects;
     private final RoomState roomState;
     private final Rectangle ledgeProbe = new Rectangle();
     private float unitScale = 1f;
 
-    public EnemySystem(Array<Rectangle> collisionRects, RoomState roomState) {
-        this(collisionRects, roomState, 0);
+    public EnemySystem(EntityFactory entityFactory, Array<Rectangle> collisionRects, RoomState roomState) {
+        this(entityFactory, collisionRects, roomState, 0);
     }
 
-    public EnemySystem(Array<Rectangle> collisionRects, RoomState roomState, int priority) {
+    public EnemySystem(EntityFactory entityFactory, Array<Rectangle> collisionRects, RoomState roomState, int priority) {
         super(Family.all(EnemyComponent.class, MovementComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
+        this.entityFactory = entityFactory;
         this.collisionRects = collisionRects;
         this.roomState = roomState;
     }
@@ -74,6 +79,7 @@ public class EnemySystem extends IteratingSystem {
         if (enemy.isDead) {
             enemy.deathTimer.update(deltaTime);
             if (enemy.deathTimer.isDone()) {
+                dropCoins(enemy, transform, collision);
                 getEngine().removeEntity(entity);
             }
             return;
@@ -124,6 +130,21 @@ public class EnemySystem extends IteratingSystem {
             flying.bobTime += deltaTime;
             movement.velocity.y = flying.bobAmplitude * flying.bobFrequency * MathUtils.cos(flying.bobTime * flying.bobFrequency);
         }
+    }
+
+    /** Spawns the death coin drop (1 coin per full {@link #COINS_PER_HEALTH} max health) at the enemy's center. */
+    private void dropCoins(EnemyComponent enemy, TransformComponent transform, CollisionComponent collision) {
+        int coinCount = (int) (enemy.maxHealth / COINS_PER_HEALTH);
+        if (coinCount <= 0) {
+            return;
+        }
+        float centerX = transform.position.x;
+        float centerY = transform.position.y;
+        if (collision != null) {
+            centerX = collision.worldBounds.x + collision.worldBounds.width / 2f;
+            centerY = collision.worldBounds.y + collision.worldBounds.height / 2f;
+        }
+        entityFactory.popCoins(getEngine(), centerX, centerY, coinCount, unitScale);
     }
 
     /** Probes a small area just past the enemy's leading foot, at foot level, for solid ground. */

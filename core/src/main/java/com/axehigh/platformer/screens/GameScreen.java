@@ -130,7 +130,7 @@ public class GameScreen extends BaseScreen {
         tiledMapRenderSystem = new TiledMapRenderSystem(mapLoader.getMap(), camera, PRIORITY_MAP_RENDER);
         engine.addSystem(playerInputSystem);
 
-        EnemySystem enemySystem = new EnemySystem(mapLoader.getCollisionRects(), roomState, PRIORITY_ENEMY);
+        EnemySystem enemySystem = new EnemySystem(entityFactory, mapLoader.getCollisionRects(), roomState, PRIORITY_ENEMY);
         enemySystem.setUnitScale(scale);
         engine.addSystem(enemySystem);
 

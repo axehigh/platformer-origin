@@ -10,6 +10,8 @@ import com.badlogic.ashley.core.Component;
  */
 public class EnemyComponent implements Component {
     public float health = 10f;
+    /** Starting/full health, set alongside {@code health} by {@code EntityFactory}; used to size coin drops on death. */
+    public float maxHealth = 10f;
     /** Horizontal patrol speed, in world units/second. */
     public float speed = 20f;
     /** Current patrol direction: {@code 1} for right, {@code -1} for left. */

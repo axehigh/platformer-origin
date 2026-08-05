@@ -22,9 +22,6 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 public class ChestSystem extends IteratingSystem {
     private static final int MIN_COIN_DROPS = 2;
     private static final int MAX_COIN_DROPS = 6;
-    private static final float MIN_POP_VELOCITY_Y = 80f;
-    private static final float MAX_POP_VELOCITY_Y = 140f;
-    private static final float MAX_POP_VELOCITY_X = 40f;
 
     private final EntityFactory entityFactory;
     private float unitScale = 1f;
@@ -64,11 +61,7 @@ public class ChestSystem extends IteratingSystem {
         }
 
         int coinCount = MathUtils.random(MIN_COIN_DROPS, MAX_COIN_DROPS);
-        for (int i = 0; i < coinCount; i++) {
-            float velocityX = MathUtils.random(-MAX_POP_VELOCITY_X, MAX_POP_VELOCITY_X) * unitScale;
-            float velocityY = MathUtils.random(MIN_POP_VELOCITY_Y, MAX_POP_VELOCITY_Y) * unitScale;
-            getEngine().addEntity(entityFactory.createPoppedCoinPickup(centerX, centerY, velocityX, velocityY));
-        }
+        entityFactory.popCoins(getEngine(), centerX, centerY, coinCount, unitScale);
 
         chest.coinsDropped = true;
     }

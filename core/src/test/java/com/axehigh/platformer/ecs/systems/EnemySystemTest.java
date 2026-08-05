@@ -5,6 +5,7 @@ import com.axehigh.platformer.ecs.components.EnemyComponent;
 import com.axehigh.platformer.ecs.components.FlyingEnemyComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.map.EntityFactory;
 import com.axehigh.platformer.map.RoomState;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -18,11 +19,19 @@ import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
 import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  * Headless unit tests for {@code EnemySystem}: patrol velocity, range/ledge/wall turn-arounds,
- * hit-stun and post-hit-idle pauses, room-based freezing, flying bob, and the death-timer removal.
- * A thin floor rect keeps the ledge probe satisfied so tests can isolate each turn trigger.
+ * hit-stun and post-hit-idle pauses, room-based freezing, flying bob, the death-timer removal,
+ * and the death coin drop. A thin floor rect keeps the ledge probe satisfied so tests can isolate
+ * each turn trigger.
  */
 public class EnemySystemTest extends SystemTestBase {
 
@@ -31,12 +40,13 @@ public class EnemySystemTest extends SystemTestBase {
 
     private final Array<Rectangle> collisionRects = new Array<>();
     private final RoomState roomState = new RoomState();
+    private final EntityFactory entityFactory = mock(EntityFactory.class);
     private Engine engine;
     private EnemySystem system;
 
     @Before
     public void setUp() {
-        system = new EnemySystem(collisionRects, roomState);
+        system = new EnemySystem(entityFactory, collisionRects, roomState);
         system.setUnitScale(1f);
         engine = newEngine();
         engine.addSystem(system);
@@ -178,5 +188,33 @@ public class EnemySystemTest extends SystemTestBase {
         engine.update(0.2f);
 
         assertEquals(0, engine.getEntities().size());
+    }
+
+    @Test
+    public void deadEnemyDropsCoinsOnRemoval() {
+        Entity entity = enemy(0f, 0f);
+        EnemyComponent enemyComponent = ENEMY.get(entity);
+        enemyComponent.isDead = true;
+        enemyComponent.deathTimer.start(0.1f);
+        enemyComponent.maxHealth = 10f;
+
+        engine.update(0.2f);
+
+        assertEquals(0, engine.getEntities().size());
+        verify(entityFactory).popCoins(eq(engine), anyFloat(), anyFloat(), eq(2), eq(1f));
+    }
+
+    @Test
+    public void deadEnemyWithTooLittleHealthDropsNoCoins() {
+        Entity entity = enemy(0f, 0f);
+        EnemyComponent enemyComponent = ENEMY.get(entity);
+        enemyComponent.isDead = true;
+        enemyComponent.deathTimer.start(0.1f);
+        enemyComponent.maxHealth = 3f;
+
+        engine.update(0.2f);
+
+        assertEquals(0, engine.getEntities().size());
+        verify(entityFactory, never()).popCoins(any(), anyFloat(), anyFloat(), anyInt(), anyFloat());
     }
 }
