@@ -8,11 +8,11 @@ import com.badlogic.gdx.utils.Pool.Poolable;
 /** Marks a glowing light source, drawn additively by {@code LightRenderSystem}. */
 public class LightComponent implements Component, Poolable {
     /** Halo radius in world units (before flicker scaling). */
-    public float radius = 48f;
+    public float radius = 96f;
     /** Tint of the halo (white core gradient is multiplied by this color). */
-    public Color color = new Color(1f, 0.78f, 0.45f, 1f);
+    public Color color = new Color(1f, 0.85f, 0.6f, 1f);
     /** Base alpha; flicker oscillates around it. */
-    public float baseAlpha = 0.55f;
+    public float baseAlpha = 0.85f;
     /** Fraction of the radius the flicker can add/subtract. */
     public float flickerAmplitude = 0.15f;
     /** Oscillation speed in rad/s. */
@@ -24,9 +24,9 @@ public class LightComponent implements Component, Poolable {
 
     @Override
     public void reset() {
-        radius = 48f;
-        color.set(1f, 0.78f, 0.45f, 1f);
-        baseAlpha = 0.55f;
+        radius = 96f;
+        color.set(1f, 0.85f, 0.6f, 1f);
+        baseAlpha = 0.85f;
         flickerAmplitude = 0.15f;
         flickerSpeed = 6f;
         phase = 0f;

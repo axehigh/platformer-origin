@@ -4,12 +4,17 @@ import com.axehigh.platformer.GameConstants;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.objects.CircleMapObject;
+import com.badlogic.gdx.maps.objects.EllipseMapObject;
+import com.badlogic.gdx.maps.objects.PolygonMapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
+import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Ellipse;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -72,7 +77,7 @@ public class MapLoader implements Disposable {
                 Rectangle rect = new Rectangle(x * tileWidth, y * tileHeight, tileWidth, tileHeight);
                 TiledMapTile tile = cell.getTile();
                 if (tile.getProperties().get(PROPERTY_HAZARD, false, Boolean.class)) {
-                    hazardRects.add(rect);
+                    addHazardRects(cell, x, y, tileWidth, tileHeight, rect);
                 } else if (!isSolid(cell)) {
                     // solid=false passage tile: no collision at all.
                     continue;
@@ -96,6 +101,58 @@ public class MapLoader implements Disposable {
             return true;
         }
         return tile.getProperties().get(PROPERTY_SOLID, true, Boolean.class);
+    }
+
+    /**
+     * Adds the hazard rect(s) for one hazard cell. When the tile carries collision-editor shapes
+     * (drawn in Tiled on the tile, e.g. a small hitbox on the spike art) and the cell isn't
+     * flipped, one world-space hazard rect is added per shape (rectangle/polygon/circle/ellipse
+     * bounding box), so spikes can have a smaller damage zone than the full tile; otherwise the
+     * full-tile rect is used. Shapes load in tile-local coordinates with a bottom-left Y-up origin,
+     * matching this world's axes.
+     */
+    private void addHazardRects(TiledMapTileLayer.Cell cell, float cellX, float cellY, float tileWidth, float tileHeight, Rectangle fullTile) {
+        if (cell.getFlipHorizontally() || cell.getFlipVertically() || cell.getRotation() != 0) {
+            hazardRects.add(fullTile);
+            return;
+        }
+        TiledMapTile tile = cell.getTile();
+        MapObjects shapes = tile.getObjects();
+        if (shapes.getCount() == 0) {
+            hazardRects.add(fullTile);
+            return;
+        }
+        boolean added = false;
+        for (MapObject shape : shapes) {
+            Rectangle local = shapeBounds(shape);
+            if (local == null) {
+                continue;
+            }
+            hazardRects.add(new Rectangle(cellX * tileWidth + local.x, cellY * tileHeight + local.y, local.width, local.height));
+            added = true;
+        }
+        if (!added) {
+            hazardRects.add(fullTile);
+        }
+    }
+
+    /** World-local bounding box (bottom-left origin) of one tile collision-editor shape, or null for unsupported shapes. */
+    private Rectangle shapeBounds(MapObject shape) {
+        if (shape instanceof RectangleMapObject) {
+            return new Rectangle(((RectangleMapObject) shape).getRectangle());
+        }
+        if (shape instanceof PolygonMapObject) {
+            return ((PolygonMapObject) shape).getPolygon().getBoundingRectangle();
+        }
+        if (shape instanceof CircleMapObject) {
+            Circle circle = ((CircleMapObject) shape).getCircle();
+            return new Rectangle(circle.x - circle.radius, circle.y - circle.radius, circle.radius * 2f, circle.radius * 2f);
+        }
+        if (shape instanceof EllipseMapObject) {
+            Ellipse ellipse = ((EllipseMapObject) shape).getEllipse();
+            return new Rectangle(ellipse.x, ellipse.y, ellipse.width, ellipse.height);
+        }
+        return null;
     }
 
     public TiledMap getMap() {

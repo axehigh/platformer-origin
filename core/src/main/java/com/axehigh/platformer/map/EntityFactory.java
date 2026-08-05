@@ -40,10 +40,13 @@ public class EntityFactory {
     /** Default oscillation angular frequency (rad/s) when a platform omits the {@code speed} property. */
     private static final float DEFAULT_PLATFORM_SPEED = 1f;
     /** Default glow halo radius (world units) for a torch light. */
-    private static final float DEFAULT_TORCH_LIGHT_RADIUS = 48f;
+    private static final float DEFAULT_TORCH_LIGHT_RADIUS = 96f;
     /** Flame offset within the 16x16 torch sprite (sprite-relative, scaled by {@code unitScale}). */
     private static final float TORCH_FLAME_X = 8f;
     private static final float TORCH_FLAME_Y = 13f;
+    /** Fallback gate trigger size (world units) when the Tiled object rect has no dimensions. */
+    private static final float DEFAULT_EXIT_GATE_WIDTH = 140f;
+    private static final float DEFAULT_EXIT_GATE_HEIGHT = 152f;
     /** Popped-coin launch velocity ranges (world units/s, scaled by {@code unitScale} on use). */
     private static final float MIN_POP_VELOCITY_Y = 80f;
     private static final float MAX_POP_VELOCITY_Y = 140f;
@@ -199,7 +202,7 @@ public class EntityFactory {
                     break;
                 case "exitGate":
                     String nextLevelPath = getProperty(object, tile, "nextLevel", null);
-                    engine.addEntity(createExitGate(spawnX, spawnY, nextLevelPath));
+                    engine.addEntity(createExitGate(spawnX, spawnY, objectWidth, objectHeight, nextLevelPath));
                     spawned = true;
                     break;
                 case "dagger":
@@ -341,29 +344,26 @@ public class EntityFactory {
     }
 
     /**
-     * Builds an exit-gate entity: the decorative sprite plus a {@code CollisionComponent} (sized
-     * like other pickups) so {@code LevelExitSystem} has bounds to build its proximity sensor
-     * from. Only gets a {@code LevelExitComponent} (and is thus an actual level-transition
-     * trigger) when {@code nextLevelPath} is non-null; otherwise it's purely decorative, e.g. the
-     * dead-end final level.
+     * Builds an exit-gate trigger: logic-only, drawing **no sprite** — the door's decoration is
+     * painted by the level designer in the map layers (see {@code map-design-for-tiled.md}). The
+     * {@code CollisionComponent} is sized from the Tiled object rectangle (falling back to a
+     * default when the object carries no dimensions) so {@code LevelExitSystem} has bounds to build
+     * its proximity sensor from. Only gets a {@code LevelExitComponent} (and is thus an actual
+     * level-transition trigger) when {@code nextLevelPath} is non-null; otherwise it's purely
+     * decorative, e.g. the dead-end final level.
      */
-    private Entity createExitGate(float x, float y, String nextLevelPath) {
-        Texture texture = getTexture("gfx/old/exit_gate.png");
-
+    private Entity createExitGate(float x, float y, float width, float height, String nextLevelPath) {
         Entity entity = new Entity();
 
         TransformComponent transform = new TransformComponent();
         transform.position.set(x, y);
-        transform.scale.set(unitScale, unitScale);
         transform.z = DECOR_Z;
         entity.add(transform);
 
-        TextureComponent textureComponent = new TextureComponent();
-        textureComponent.region = new TextureRegion(texture);
-        entity.add(textureComponent);
-
+        float w = width > 0f ? width : DEFAULT_EXIT_GATE_WIDTH;
+        float h = height > 0f ? height : DEFAULT_EXIT_GATE_HEIGHT;
         CollisionComponent collisionComponent = new CollisionComponent();
-        collisionComponent.bounds.setSize(texture.getWidth() * unitScale, texture.getHeight() * unitScale);
+        collisionComponent.bounds.setSize(w * unitScale, h * unitScale);
         entity.add(collisionComponent);
 
         if (nextLevelPath != null) {

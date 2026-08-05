@@ -45,7 +45,7 @@ Layer **names matter — they are read by string**. Get them exactly right or th
 | `enemies` | Object layer | Enemy markers (see §4). Separate layer keeps enemies easy to find. | optional |
 | `Rooms` | Object layer | Plain rectangles defining camera zones (see §6). | optional (see §6) |
 
-Only **tile** layers render visually; object layers are never drawn, they only spawn entities.
+Only **tile** layers render visually; object layers are never drawn, they only spawn entities. The exit gate is the one exception worth knowing: its `exitGate` object spawns a **logic-only trigger** (no sprite — the gate's decoration is painted by you in the `background`/`decoration`/`collision` layers), so a gate needs real map art to be visible.
 
 ---
 
@@ -76,6 +76,7 @@ A **non-solid** tile that damages the player on contact. Paint it in the `collis
 
 *   On AABB overlap the player loses **1 HP**, gets the usual 0.3s hit-stun + 1s invulnerability grace, and is **not** knocked back (no directional push).
 *   Hazards are fully non-solid — nothing (player, enemies, bullets) is blocked by them. The grace period turns a sustained overlap into one hit per second, not instant shredding.
+*   **Smaller damage zone:** by default the danger box is the full tile. To shrink it, open the hazard tile in Tiled's **Tile Collision Editor** and draw a shape (rectangle or polygon) around the actual spikes/lava art — `MapLoader` then emits one world-space hazard box per shape instead of the full tile (a tile with no shapes, or a flipped cell, still gets the full tile). Verify with the SHIFT+D hazard overlay (red).
 *   **Placement gotcha:** the player's collision box is *taller than a tile* (≈120×240 px vs a 128×128 tile) and its feet sit on the floor surface, so a hazard painted in the row directly on top of a floor tile sits at/below the player's feet and a standing player won't overlap it. Hazards damage reliably when the player's body travels **through** them (jump over a spike barrier, fall into a lava pool, walk a spike row you must jump). Put solid ground under a pit of lava/spikes so a falling player lands on it.
 
 ### §3.3 Drop-through platforms (one-way)
@@ -112,7 +113,7 @@ Two ways to place a marker:
 | `chest` | Chest (opens on touch, drops coins) | — | `items.tsx` tileset. |
 | `torch` | Decorative torch | — | Flickers visually. |
 | `dagger` | Dagger pickup | — | Collectible item. |
-| `exitGate` | Exit gate / level transition | `nextLevel` (string, required to make it functional) | With `nextLevel` it's a real transition; without it, purely decorative (e.g. a final-level dead end). |
+| `exitGate` | Exit gate / level transition (trigger only, no sprite) | `nextLevel` (string, required to make it functional) | The gate spawns a **logic-only** entity: a collision box (sized from the object rectangle) + optional level transition. **No gate art is drawn** — paint the door's decoration yourself in the `background`/`decoration`/`collision` layers. With `nextLevel` it's a real transition; without it, purely decorative (e.g. a final-level dead end). |
 | `enemy` | Enemy | `enemyType` (string, default `"walker"`) | Put these on the `enemies` layer (or `objects`). Catalog: `walker` (goblin), `flyer` (mosquito), `shooter` (spider), `knight` (15 HP). See `resources/docs-ai/enemies.md`. |
 | `platform` | Moving platform | `amplitudeX`, `amplitudeY`, `speed`, `phase`, `axis` (see §5) | The object **rectangle size defines both the sprite and collision box**. |
 | (any other) | — | — | Ignored. `background`-type markers etc. won't spawn anything. |
@@ -211,7 +212,7 @@ For each axis (X and Y) independently:
     *   Draw one `playerStart` rectangle where the player should spawn.
     *   Scatter `coin` / `chest` / `dagger` / `torch` markers (either as rectangles with the right `type`, or stamp the pre-typed tiles from `items.tsx`).
     *   Add moving platforms as **rectangle objects** with `type="platform"` and the §5 properties.
-    *   Add the `exitGate` at the far end with `nextLevel = maps/<path>/<next>.tmx` (or leave it decorative for a final level).
+    *   Add the `exitGate` at the far end with `nextLevel = maps/<path>/<next>.tmx` (or leave it decorative for a final level). The object rectangle sizes the trigger zone; the gate itself draws no sprite, so paint the door's decoration into the map layers (see §4).
 6.  **`enemies` layer.** Place `enemy` markers (stamp from `enemy.tsx` or draw rectangles + `enemyType`). Refer to `enemies.md` for behavior tuning (flyers need patrol range clear of walls, shooters only fire in their own room).
 7.  **`Rooms` layer.** Draw one rectangle per room (see §6). Add `camera="flip"`/`"scroll"` only when you want to override the size-based default.
 8.  **Register the level.** Add `LEVELS.add(new LevelDefinition("my_key", "My Level Name", "maps/my_level.tmx"))` in `core/.../map/LevelCatalog.java`.

@@ -17,13 +17,8 @@ Status legend: ✅ done · 🔶 in progress · 🧊 backlog · ⬜ not started �
 - ✅ **Coin tile-center snap**: tile-based coins center on their tile cell in `EntityFactory`.
 - ⬜ **Restart-run option** in game-over dialog when `triesRemaining <= 0` (continue-only currently).
 - 🔶 **Resume-bug / input**: see P0.
-- 
-- **Spikes** Dangerous tiles, should not be block collision, but smaller. I have defind collision for them in Tiled.
-- When generating Entry Door and Exit door, no need to draw something, I will add the object, and decoration myself.
-- make the torch lighting double the size as its now. And brighter if you can.
-- Enemies
-- Make them walk a bit further than they do now. They should perhaps have a aiMode property. If nothing, keep as is, but if side-to-side then walk from left to right but collision will make them turn, ledges or dangerous terrain they wont walk over.
-- 
+- ⬜ **Enemies** Make them walk a bit further than they do now. They should perhaps have a aiMode property. If nothing, keep as is, but if side-to-side then walk from left to right but collision will make them turn, ledges or dangerous terrain they wont walk over.
+
 
 ## P2 — Code Quality
 - 🔶 **java.util removal** (`core` Java 8 target): `ShopItem`/`ShopManager` done (libGDX `Array` + custom functional interfaces). `RenderSystem` (`Comparator` → libGDX sort) still pending.
