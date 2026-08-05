@@ -48,6 +48,8 @@ public final class GameConstants {
     public static float UI_Button_Move_Size = 165f;
     public static final float UI_PADDING = 33f;
     public static final float UI_BUTTON_ALPHA = 0.4f;
+    public static final float UI_BUTTON_PRESS_SCALE = 0.95f;
+    public static final float UI_BUTTON_SCALE_DURATION = 0.05f;
     public static float FontScale = 1f;
 
     private GameConstants() {

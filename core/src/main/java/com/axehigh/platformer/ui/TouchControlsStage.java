@@ -2,12 +2,9 @@ package com.axehigh.platformer.ui;
 
 import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.systems.PlayerInputSystem;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import static com.axehigh.platformer.GameConstants.*;
@@ -17,8 +14,8 @@ import static com.axehigh.platformer.GameConstants.*;
  * All buttons drive the same {@link PlayerInputSystem} handlers used by the keyboard.
  */
 public class TouchControlsStage extends Stage {
-    private final TextButton interactButton;
-    private final TextButton dropButton;
+    private final TouchButton interactButton;
+    private final TouchButton dropButton;
 
     public TouchControlsStage(Viewport viewport, Skin skin, PlayerInputSystem inputSystem) {
         super(viewport);
@@ -30,84 +27,52 @@ public class TouchControlsStage extends Stage {
         addActor(root);
 
         Table dpad = new Table();
-        TextButton leftButton = new TextButton("<", skin);
-        TextButton rightButton = new TextButton(">", skin);
-        leftButton.addListener(new InputListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                inputSystem.setTouchLeft(true);
-                return true;
-            }
+        TouchButton leftButton = new TouchButton(skin, "flatLeft", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+                new TouchButton.Handler() {
+                    @Override
+                    public void onPress() {
+                        inputSystem.setTouchLeft(true);
+                    }
 
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                inputSystem.setTouchLeft(false);
-            }
-        });
-        rightButton.addListener(new InputListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                inputSystem.setTouchRight(true);
-                return true;
-            }
+                    @Override
+                    public void onRelease() {
+                        inputSystem.setTouchLeft(false);
+                    }
+                });
+        TouchButton rightButton = new TouchButton(skin, "flatRight", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+                new TouchButton.Handler() {
+                    @Override
+                    public void onPress() {
+                        inputSystem.setTouchRight(true);
+                    }
 
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                inputSystem.setTouchRight(false);
-            }
-        });
+                    @Override
+                    public void onRelease() {
+                        inputSystem.setTouchRight(false);
+                    }
+                });
         dpad.add(leftButton).size(UI_Button_Move_Size, UI_Button_Move_Size).padRight(UI_Button_Move_Size);
         dpad.add(rightButton).size(UI_Button_Move_Size, UI_Button_Move_Size);
 
         Table actions = new Table();
-        TextButton yButton = new TextButton("Y", skin);
-        TextButton bButton = new TextButton("B", skin);
-        TextButton aButton = new TextButton("A", skin);
-        yButton.addListener(new InputListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                inputSystem.requestTouchShoot();
-                return true;
-            }
-        });
-        bButton.addListener(new InputListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                inputSystem.requestTouchMelee();
-                return true;
-            }
-        });
-        aButton.addListener(new InputListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                inputSystem.requestTouchJump();
-                return true;
-            }
-        });
+        TouchButton yButton = new TouchButton(skin, "flatFlame", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+                () -> inputSystem.requestTouchShoot());
+        TouchButton bButton = new TouchButton(skin, "flatAttack", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+                () -> inputSystem.requestTouchMelee());
+        TouchButton aButton = new TouchButton(skin, "flatUp", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+                () -> inputSystem.requestTouchJump());
         actions.add(yButton).size(UI_Button_Action_Size, UI_Button_Action_Size).pad(UI_PADDING);
         actions.add(bButton).size(UI_Button_Action_Size, UI_Button_Action_Size).pad(UI_PADDING);
         actions.row();
         actions.add().size(UI_Button_Action_Size, UI_Button_Action_Size).pad(UI_PADDING);
         actions.add(aButton).size(UI_Button_Action_Size, UI_Button_Action_Size).pad(UI_PADDING);
 
-        interactButton = new TextButton("^", skin);
-        interactButton.addListener(new InputListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                inputSystem.requestTouchInteract();
-                return true;
-            }
-        });
+        interactButton = new TouchButton(skin, "flatFly", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+                () -> inputSystem.requestTouchInteract());
         interactButton.setVisible(false);
 
-        dropButton = new TextButton("v", skin);
-        dropButton.addListener(new InputListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                inputSystem.requestTouchDrop();
-                return true;
-            }
-        });
+        dropButton = new TouchButton(skin, "flatDown", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+                () -> inputSystem.requestTouchDrop());
         dropButton.setVisible(false);
 
         Table contextual = new Table();

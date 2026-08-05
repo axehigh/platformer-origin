@@ -70,37 +70,51 @@ public class PlayerInputSystem extends IteratingSystem {
         this.assetManager = assetManager;
     }
 
-    /** Called by the D-pad's left button (touch down/up). */
+    /**
+     * Called by the D-pad's left button (touch down/up).
+     */
     public void setTouchLeft(boolean pressed) {
         touchLeft = pressed;
     }
 
-    /** Called by the D-pad's right button (touch down/up). */
+    /**
+     * Called by the D-pad's right button (touch down/up).
+     */
     public void setTouchRight(boolean pressed) {
         touchRight = pressed;
     }
 
-    /** Called by the A button (jump). */
+    /**
+     * Called by the A button (jump).
+     */
     public void requestTouchJump() {
         touchJumpRequested = true;
     }
 
-    /** Called by the B button (close-combat strike). */
+    /**
+     * Called by the B button (close-combat strike).
+     */
     public void requestTouchMelee() {
         touchMeleeRequested = true;
     }
 
-    /** Called by the Y button (ranged dagger shoot). */
+    /**
+     * Called by the Y button (ranged dagger shoot).
+     */
     public void requestTouchShoot() {
         touchShootRequested = true;
     }
 
-    /** Called by the contextual up-arrow button (interact with a nearby exit gate). */
+    /**
+     * Called by the contextual up-arrow button (interact with a nearby exit gate).
+     */
     public void requestTouchInteract() {
         touchInteractRequested = true;
     }
 
-    /** Called by the contextual down-arrow button (drop through a drop-through platform). */
+    /**
+     * Called by the contextual down-arrow button (drop through a drop-through platform).
+     */
     public void requestTouchDrop() {
         touchDropRequested = true;
     }
@@ -151,10 +165,7 @@ public class PlayerInputSystem extends IteratingSystem {
             movement.velocity.x = 0f;
         }
 
-        boolean jumpPressed = Gdx.input.isKeyJustPressed(SPACE)
-            || Gdx.input.isKeyJustPressed(W)
-            || Gdx.input.isKeyJustPressed(UP)
-            || touchJumpRequested;
+        boolean jumpPressed = Gdx.input.isKeyJustPressed(W) || Gdx.input.isKeyJustPressed(UP) || touchJumpRequested;
 
         if (!locked && jumpPressed && player.jumpCount < player.maxJumps) {
             if (movement.grounded) {
@@ -174,9 +185,7 @@ public class PlayerInputSystem extends IteratingSystem {
         player.meleeCooldown.update(deltaTime);
         player.dropWindow.update(deltaTime);
 
-        boolean meleePressed = Gdx.input.isKeyJustPressed(Input.Keys.J)
-            || Gdx.input.isKeyJustPressed(Input.Keys.B)
-            || touchMeleeRequested;
+        boolean meleePressed = Gdx.input.isKeyJustPressed(Input.Keys.J) || Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || touchMeleeRequested;
         if (!locked && meleePressed && player.meleeCooldown.isDone()) {
             float attackDuration = findAttackDuration(entity);
             player.meleeAttack.start(attackDuration);
@@ -185,9 +194,7 @@ public class PlayerInputSystem extends IteratingSystem {
             player.meleeCooldown.start(Math.max(MELEE_COOLDOWN, attackDuration));
         }
 
-        boolean shootPressed = Gdx.input.isKeyJustPressed(Input.Keys.K)
-            || Gdx.input.isKeyJustPressed(Input.Keys.Y)
-            || touchShootRequested;
+        boolean shootPressed = Gdx.input.isKeyJustPressed(Input.Keys.K) || Gdx.input.isKeyJustPressed(Input.Keys.Y) || touchShootRequested;
         if (!locked && shootPressed && player.shootCooldown.isDone() && player.items > 0) {
             spawnBullet(transform, collision, player);
             player.items--;
