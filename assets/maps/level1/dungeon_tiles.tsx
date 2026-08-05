@@ -108,6 +108,9 @@
    <property name="hazard" type="bool" value="true"/>
   </properties>
   <image source="../gfx/tiles/dungeon/spikes.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="96" width="128" height="32"/>
+  </objectgroup>
  </tile>
  <tile id="37">
   <image source="../gfx/tiles/dungeon/water-middle.png" width="128" height="128"/>
@@ -159,6 +162,9 @@
    <property name="hazard" type="bool" value="true"/>
   </properties>
   <image source="../gfx/tiles/caves/bg-stalactite.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="5">
+   <object id="4" x="0" y="0" width="128" height="32"/>
+  </objectgroup>
  </tile>
  <tile id="51">
   <image source="../gfx/tiles/caves/bridge-3.png" width="128" height="129"/>

@@ -86,6 +86,14 @@ com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 		fontColor: GREEN
 	}
 }
+com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
+	default: {
+		vScroll: rope_big
+		vScrollKnob: star
+		hScroll: rope_big_horisontal
+		hScrollKnob: star
+	}
+}
 com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle: {
 	default-horizontal: {
 		background: rope_big_horisontal

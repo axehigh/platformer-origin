@@ -8,10 +8,10 @@ public class SpriteConstants {
     //Player Collision Box
     public static float PlayerScale = .5f; // Knight2.png
     public static float PlayerCollisionWidth = 30f;
-    public static float PlayerCollisionHeight = 60f;
+    public static float PlayerCollisionHeight = 40f;
     public static float PlayerOffsetRight = -16f;
     public static float PlayerOffsetLeft = -16f;
-    public static float PlayerOffsetY = -12f;
+    public static float PlayerOffsetY = -24f;
 
     /**
      * Horizontal reach (world units, 1 unit == 1 pixel, before {@code unitScale}) beyond the

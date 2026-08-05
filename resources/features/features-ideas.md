@@ -17,7 +17,7 @@ Status legend: ✅ done · 🔶 in progress · 🧊 backlog · ⬜ not started �
 - ✅ **Coin tile-center snap**: tile-based coins center on their tile cell in `EntityFactory`.
 - ⬜ **Restart-run option** in game-over dialog when `triesRemaining <= 0` (continue-only currently).
 - 🔶 **Resume-bug / input**: see P0.
-
+- ⬜ **Spikes** Dangerous tiles, should not be block collision, but smaller. Use Defind Collision in Tiled.
 ## P2 — Code Quality
 - 🔶 **java.util removal** (`core` Java 8 target): `ShopItem`/`ShopManager` done (libGDX `Array` + custom functional interfaces). `RenderSystem` (`Comparator` → libGDX sort) still pending.
 - 🧊 **Collision granularity**: half-tiles / non-square collision design — ❓ how best (see `CollisionSystem`).
