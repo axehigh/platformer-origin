@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="16" height="12" tilewidth="128" tileheight="128" infinite="0" nextlayerid="7" nextobjectid="15">
+ <tileset firstgid="1" source="cave_tileset.tsx"/>
+ <tileset firstgid="49" source="dungeon_tiles.tsx"/>
+ <tileset firstgid="106" source="enemy.tsx"/>
+ <layer id="1" name="background" width="16" height="12">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,93,96,0,0,0,0,0,0,0,0,0,0,0,95,0,
+0,96,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,95,93,96,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,93,0,0,0,0,70,0,
+0,0,0,0,0,0,0,0,0,93,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,93,0,0,95,96,0,0,
+0,70,0,0,0,0,0,0,0,93,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,93,0,0,0,0,0,0,
+90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,
+90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,
+90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90
+</data>
+ </layer>
+ <layer id="2" name="collision" width="16" height="12">
+  <data encoding="csv">
+2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+2,0,0,0,0,0,0,0,4,4,4,0,0,0,0,2,
+2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+2,0,0,0,0,0,0,0,0,0,0,0,2,2,90,2,
+2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+2,0,0,0,0,0,0,0,0,105,105,0,0,0,0,2,
+90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer id="5" name="Decoration" width="16" height="12">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <objectgroup id="3" name="objects">
+  <object id="3" name="playerStart" type="playerStart" x="128" y="768" width="128" height="128"/>
+  <object id="4" name="torchLeft" type="torch" x="0" y="384" width="128" height="128"/>
+  <object id="6" name="exitGate" type="exitGate" x="1792" y="512" width="140" height="152">
+   <properties>
+    <property name="nextLevel" value="maps/level1/level_1_demo_2.tmx"/>
+   </properties>
+  </object>
+  <object id="7" name="Platform" x="1024" y="640" width="174.442" height="114.559">
+   <properties>
+    <property name="amplitudeX" value="80"/>
+    <property name="speed" value="1"/>
+    <property name="type" value="platform"/>
+   </properties>
+  </object>
+  <object id="9" name="Platform" x="512" y="640" width="174.442" height="114.559">
+   <properties>
+    <property name="amplitudeY" value="80"/>
+    <property name="speed" value="1"/>
+    <property name="type" value="platform"/>
+   </properties>
+  </object>
+  <object id="12" gid="110" x="1664" y="1024" width="128" height="128"/>
+  <object id="13" gid="108" x="1152" y="384" width="128" height="128"/>
+  <object id="14" name="torchLeft" type="torch" x="1920" y="384" width="128" height="128"/>
+ </objectgroup>
+ <objectgroup id="6" name="enemies"/>
+ <objectgroup id="4" name="Rooms" locked="1">
+  <object id="2" x="0" y="0" width="2048" height="1539.51"/>
+ </objectgroup>
+</map>

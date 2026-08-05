@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="32" height="17" tilewidth="128" tileheight="128" infinite="0" nextlayerid="6" nextobjectid="16">
  <tileset firstgid="1" source="cave_tileset.tsx"/>
+ <tileset firstgid="49" source="dungeon_tiles.tsx"/>
  <layer id="1" name="background" width="32" height="17">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -39,7 +40,7 @@
 2,0,0,0,0,0,0,2,2,2,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,38,38,38,2,3,0,0,0,0,0,38,38,0,0,0,0,0,0,0,2,
-2,0,0,0,27,27,27,0,0,0,0,0,2,2,2,2,2,0,0,0,0,0,2,2,38,38,0,0,0,0,0,2,
+2,0,0,0,0,0,0,0,81,0,0,0,2,2,2,2,2,0,0,0,0,0,2,2,38,38,0,0,0,0,0,2,
 2,2,2,2,2,2,2,2,2,2,2,2,2,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
 </data>
  </layer>
@@ -70,8 +71,8 @@
   <object id="6" name="torchLeft" type="torch" x="1920" y="640" width="128" height="128"/>
   <object id="7" name="chest" type="chest" x="2176" y="1920" width="128" height="144"/>
   <object id="8" name="coin1" type="coin" x="1664" y="512" width="108" height="80"/>
-  <object id="9" name="dagger1" type="dagger" x="512" y="384" width="128" height="128"/>
-  <object id="10" name="enemy1" type="enemy" x="660.242" y="1935.39" width="68" height="88"/>
+  <object id="9" name="dagger1" type="dagger" x="1024" y="1408" width="128" height="128"/>
+  <object id="10" name="enemy1" type="enemy" x="384" y="1920" width="68" height="88"/>
   <object id="11" name="enemy1" type="enemy" x="1535.7" y="849.939" width="68" height="88"/>
   <object id="12" name="enemy1" type="enemy" x="2523.58" y="1940.85" width="68" height="88"/>
   <object id="13" name="enemy1" type="enemy" x="2466" y="889.333" width="68" height="88"/>
