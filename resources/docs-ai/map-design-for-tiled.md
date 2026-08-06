@@ -58,7 +58,8 @@ The collision layer is a tile grid. `MapLoader.buildCollisionRects()` walks ever
     1.  `hazard = true` → **non-solid hazard** AABB (spikes/lava; damages the player on touch — see §3.2).
     2.  `solid = false` → free space (passage doorways).
     3.  `oneWay = true` → **drop-through platform** AABB (player-only, top-only solid — see §3.3).
-    4.  anything else → **solid wall**.
+    4.  anything else → **solid wall** (blocks everything).
+    5.  A solid wall tile **additionally** marked `secret = true` is a **breakable secret wall** — solid exactly like a regular wall until the player melee-strikes it (see §3.4).
 
 ### §3.1 The passage rule
 
@@ -86,6 +87,15 @@ A **player-only, top-only** platform. Paint it in the `collision` layer; the til
 *   The player can **land on its top** (it sticks only when the player's feet were at/above the platform's top before the move) and can **jump up through** it from below.
 *   While standing on it, the contextual **`v` button** appears (mobile) or **`S`/`DOWN`** (keyboard) starts a short ~0.25s pass-through window: the player drops straight through the platform, then normal gravity takes over.
 *   **Enemies and projectiles ignore one-way platforms entirely** — they never land on or collide with them. Only the player uses them.
+
+### §3.4 Secret walls (breakable)
+
+A **solid** wall tile that opens a doorway when the player melee-strikes it. Paint it in the `collision` layer; the tile's `secret = true` property (set on the tileset tile, e.g. `assets/maps/level1/secret_wall.tsx`) marks it as breakable:
+
+*   The tile is **fully solid** (blocks the player, enemies, and bullets exactly like a regular wall) — breaking it is what opens the route. It is *not* a passage: an unbroken secret wall has no effect on movement until struck.
+*   **One melee swing breaks at most one** secret tile whose rect overlaps the strike hitbox (reach-dependent; see `gameplay.md` §2.Z). On break, the tile's sprite disappears (its collision-layer cell is blanked), its rect is removed from the collision set, a smoke puff spawns at the tile center, and a wall-break SFX plays — the doorway is walkable the very next frame.
+*   **Design the room behind it:** carve the alcove/room into the `collision` layer (solid walls on the other sides), drop a `Rooms` rectangle over it (put it *before* the enclosing room in the layer — see §6), and place pickups/enemies inside via the `objects`/`enemies` layers. See the `secretRoom1` example in `assets/maps/level1/generated_room.tmx` — a 5-tile-wide alcove in room 1's bottom-west corner (cols 31–35), sealed on the east by a `secret_wall.tsx` tile (col 36) that the player breaks from the main room.
+*   **Verify with SHIFT+D:** an unbroken secret wall shows as a normal yellow solid rect (it lives in the shared `collisionRects` set); after breaking, the rect is gone and the cell is empty.
 
 ### Perimeter / layout rules of thumb
 
@@ -170,6 +180,7 @@ angle += speed * dt        (each frame)
 | `solid` | boolean | `true` | Set `false` on a tileset tile to make that tile **non-blocking** even in the `collision` layer (the passage-doorway use case, §3.1). |
 | `oneWay` | boolean | `false` | Set `true` on a tileset tile to make it a **drop-through platform**: player-only, top-only solid; jump up through; drop with the `v` button / `S` / `DOWN` (see §3.3). Ignored when the tile is `hazard`. |
 | `hazard` | boolean | `false` | Set `true` on a tileset tile to make it a **non-solid hazard** (spikes/lava): 1 HP on touch, no knockback, invulnerability grace (see §3.2). Wins over `solid`/`oneWay`. |
+| `secret` | boolean | `false` | Set `true` on a **solid** tileset tile to make it a **breakable secret wall**: solid until the player melee-strikes it, then it disappears and opens the way (see §3.4). Ignored on `hazard` and `solid = false` tiles. |
 | `type` | string | — | On tileset tiles: lets you paint tile objects that auto-spawn as markers (`coin`, `chest`, `enemy`…). |
 
 ### Room properties (the `Rooms` layer)
@@ -202,14 +213,15 @@ For each axis (X and Y) independently:
 *   Rooms **wider/taller than 30×17 tiles** → dead-zone scroll; give the player room to roam.
 *   Small rooms (smaller than the screen) are fine — the camera centers on them and shows a little of the next area.
 *   Every `Rooms` rectangle should **contain the `playerStart` marker** (and each enemy/platform's spawn), or that entity won't be tied to any room (`roomIndex = -1`, always active).
+*   **Secret rooms:** a secret wall (§3.4) can hide an alcove behind it — carve the room into the `collision` layer, drop a `Rooms` rectangle over it, and place pickups/enemies inside. `RoomState.findRoomIndexContaining(...)` returns the **first** room rectangle containing a point, so put the secret room **above** (before) the enclosing room in the layer for it to win the camera framing (see `secretRoom1` in `assets/maps/level1/generated_room.tmx`).
 
 ---
 
 ## 7. Step-by-step: build a new level
 
-1.  **Map setup.** In Tiled: New map, orthogonal, tile size **128×128** (or matching your chain), infinite off, CSV tile format. Add tilesets from `assets/maps/level1/`: `cave_tileset.tsx` for terrain, `drop_platform.tsx` for drop-through platforms, `hazards.tsx` for spikes/lava, `items.tsx` for pickups, `enemy.tsx` for enemies.
+1.  **Map setup.** In Tiled: New map, orthogonal, tile size **128×128** (or matching your chain), infinite off, CSV tile format. Add tilesets from `assets/maps/level1/`: `cave_tileset.tsx` for terrain, `drop_platform.tsx` for drop-through platforms, `hazards.tsx` for spikes/lava, `items.tsx` for pickups, `enemy.tsx` for enemies, `secret_wall.tsx` for breakable secret walls.
 2.  **`background` layer.** Paint the decorative backdrop (walls, pillars, windows). Anything goes — it never blocks.
-3.  **`collision` layer.** Paint the solid geometry: floor, walls, platforms. Leave gaps where you want jumps. Use `drop_platform.tsx` tiles for ledges you want to drop through and `hazards.tsx` tiles for spike/lava damage zones (their behavior is baked into the tileset tile properties — see §3.2, §3.3). For any room-to-room doorway, use your `solid = false` passage tile (see §3.1). Keep the map's outer border solid.
+3.  **`collision` layer.** Paint the solid geometry: floor, walls, platforms. Leave gaps where you want jumps. Use `drop_platform.tsx` tiles for ledges you want to drop through, `hazards.tsx` tiles for spike/lava damage zones (their behavior is baked into the tileset tile properties — see §3.2, §3.3), and `secret_wall.tsx` tiles for breakable secret walls (§3.4). For any room-to-room doorway, use your `solid = false` passage tile (see §3.1). Keep the map's outer border solid.
 4.  **`decoration` layer** (optional). Foreground decor that draws on top.
 5.  **`objects` layer.**
     *   Draw one `playerStart` rectangle where the player should spawn.
@@ -236,6 +248,7 @@ For each axis (X and Y) independently:
 *   **Unexpectedly scrolling when you wanted flip** — the room is larger than the screen (30×17 tiles); add `camera="flip"` to force static framing.
 *   **Spikes/lava never hurt a standing player** — the player's collision box is taller than a tile and its feet sit on the floor, so hazards must be placed where the player's body travels *through* them (see §3.2).
 *   **Drop platform behaves like a wall** — the tile doesn't carry `oneWay = true` on the tileset tile; or the platform's collision was authored as a plain solid tile. Also remember one-way platforms are player-only (enemies fall straight through).
+*   **Secret wall doesn't break** — the tile isn't flagged `secret = true` on the tileset tile (a plain solid tile won't break); also remember one swing breaks at most one tile, and the strike hitbox must actually reach the wall (it's a solid block until broken).
 
 ---
 

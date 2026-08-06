@@ -50,6 +50,7 @@ public class LevelManager implements Disposable {
     private final Array<Rectangle> collisionRects;
     private final Array<Rectangle> oneWayRects;
     private final Array<Rectangle> hazardRects;
+    private final Array<Rectangle> secretRects;
     private final RoomState roomState;
 
     private MapLoader mapLoader;
@@ -57,6 +58,7 @@ public class LevelManager implements Disposable {
     public LevelManager(PooledEngine engine, EntityFactory entityFactory, Viewport viewport,
                          TiledMapRenderSystem tiledMapRenderSystem, Array<Rectangle> collisionRects,
                          Array<Rectangle> oneWayRects, Array<Rectangle> hazardRects,
+                         Array<Rectangle> secretRects,
                          RoomState roomState, MapLoader initialMapLoader) {
         this.engine = engine;
         this.entityFactory = entityFactory;
@@ -66,6 +68,7 @@ public class LevelManager implements Disposable {
         this.collisionRects = collisionRects;
         this.oneWayRects = oneWayRects;
         this.hazardRects = hazardRects;
+        this.secretRects = secretRects;
         this.roomState = roomState;
         this.mapLoader = initialMapLoader;
     }
@@ -106,6 +109,7 @@ public class LevelManager implements Disposable {
         MeleeAttackSystem meleeSystem = engine.getSystem(MeleeAttackSystem.class);
         if (meleeSystem != null) {
             meleeSystem.setUnitScale(newScale);
+            meleeSystem.setCollisionLayer(newMapLoader.getCollisionLayer());
         }
         ChestSystem chestSystem = engine.getSystem(ChestSystem.class);
         if (chestSystem != null) {
@@ -128,6 +132,8 @@ public class LevelManager implements Disposable {
         oneWayRects.addAll(newMapLoader.getOneWayRects());
         hazardRects.clear();
         hazardRects.addAll(newMapLoader.getHazardRects());
+        secretRects.clear();
+        secretRects.addAll(newMapLoader.getSecretRects());
 
         roomState.rooms.clear();
         roomState.rooms.addAll(newMapLoader.getRooms());

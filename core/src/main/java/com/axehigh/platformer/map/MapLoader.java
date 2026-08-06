@@ -39,11 +39,14 @@ public class MapLoader implements Disposable {
     private static final String PROPERTY_ONE_WAY = "oneWay";
     /** Tile property marking a non-solid hazard (spikes/lava) that damages the player on touch. */
     private static final String PROPERTY_HAZARD = "hazard";
+    /** Tile property marking a solid breakable wall tile that opens a secret room when melee-struck. */
+    private static final String PROPERTY_SECRET = "secret";
 
     private final TiledMap map;
     private final Array<Rectangle> collisionRects = new Array<>();
     private final Array<Rectangle> oneWayRects = new Array<>();
     private final Array<Rectangle> hazardRects = new Array<>();
+    private final Array<Rectangle> secretRects = new Array<>();
     private final String tmxPath;
     private final float tileWidth;
     private final float tileHeight;
@@ -84,6 +87,12 @@ public class MapLoader implements Disposable {
                 } else if (tile.getProperties().get(PROPERTY_ONE_WAY, false, Boolean.class)) {
                     oneWayRects.add(rect);
                 } else {
+                    // A secret wall tile is fully solid until struck (unlike hazard, which is never
+                    // solid), so it lands in the normal collision set too; breaking it later removes
+                    // the rect from both arrays to open the doorway.
+                    if (tile.getProperties().get(PROPERTY_SECRET, false, Boolean.class)) {
+                        secretRects.add(rect);
+                    }
                     collisionRects.add(rect);
                 }
             }
@@ -176,6 +185,17 @@ public class MapLoader implements Disposable {
     /** Non-solid hazard tiles (collision-layer tiles flagged {@code hazard=true}). */
     public Array<Rectangle> getHazardRects() {
         return hazardRects;
+    }
+
+    /** Solid breakable secret-wall tiles (collision-layer tiles flagged {@code secret=true}), also present in {@link #getCollisionRects()} until struck. */
+    public Array<Rectangle> getSecretRects() {
+        return secretRects;
+    }
+
+    /** The {@code collision} tile layer itself (the visual wall layer) so secret-wall cells can be blanked when broken. */
+    public TiledMapTileLayer getCollisionLayer() {
+        MapLayer layer = map.getLayers().get(COLLISION_LAYER);
+        return layer instanceof TiledMapTileLayer ? (TiledMapTileLayer) layer : null;
     }
 
     public float getTileWidth() {

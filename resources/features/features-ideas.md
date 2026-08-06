@@ -15,9 +15,7 @@ Status legend: ✅ done · 🔶 in progress · 🧊 backlog · ⬜ not started �
 - ✅ **Jump-down squash & stretch**: new `SquashSystem` (landing squash, exponential decay; **jump stretch path removed** for feel, retained unused via `squashIsStretch`); triggered only on jump landings from the shared `MovementSystem.onLanding(...)` (ground + platforms); reset in `LevelManager`. **Disabled by default** (look not final): trigger gated on `FeatureFlags.isSquashEnabled()` (persisted pref, default `false`) — flip the pref to re-enable.
 - ✅ **HUD text contrast**: new `ShadowLabel` widget (drop-shadow pass; no `BitmapFontData.setShadow` in this libGDX fork); heart icons tightened (28px / 6px pad).
 - ✅ **Coin tile-center snap**: tile-based coins center on their tile cell in `EntityFactory`.
-- ⬜ **Restart-run option** in game-over dialog when `triesRemaining <= 0` (continue-only currently).
 - 🔶 **Resume-bug / input**: see P0.
-- ⬜ **Enemies** Make them walk a bit further than they do now. They should perhaps have a aiMode property. If nothing, keep as is, but if side-to-side then walk from left to right but collision will make them turn, ledges or dangerous terrain they wont walk over.
 
 
 ## P2 — Code Quality

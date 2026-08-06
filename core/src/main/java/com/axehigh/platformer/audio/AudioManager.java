@@ -17,6 +17,7 @@ public class AudioManager {
     public static final String MUSIC_GAME = "music/Dark-Things.ogg";
     public static final String SFX_COIN = "sfx/Creepy1.mp3";
     public static final String SFX_CLICK = "sfx/Clank_8.mp3";
+    public static final String SFX_WALL_BREAK = "sfx/Explosion1.mp3";
 
     private static AudioManager instance;
 
@@ -27,6 +28,7 @@ public class AudioManager {
     private Music gameMusic;
     private Sound coinSound;
     private Sound clickSound;
+    private Sound wallBreakSound;
     private Music currentMusic;
 
     private AudioManager() {
@@ -34,6 +36,7 @@ public class AudioManager {
         assetManager.load(MUSIC_GAME, Music.class);
         assetManager.load(SFX_COIN, Sound.class);
         assetManager.load(SFX_CLICK, Sound.class);
+        assetManager.load(SFX_WALL_BREAK, Sound.class);
         assetManager.finishLoading();
 
         menuMusic = assetManager.get(MUSIC_MENU, Music.class);
@@ -42,6 +45,7 @@ public class AudioManager {
         gameMusic.setLooping(true);
         coinSound = assetManager.get(SFX_COIN, Sound.class);
         clickSound = assetManager.get(SFX_CLICK, Sound.class);
+        wallBreakSound = assetManager.get(SFX_WALL_BREAK, Sound.class);
     }
 
     public static AudioManager get() {
@@ -72,6 +76,10 @@ public class AudioManager {
 
     public void playClick() {
         playSfx(clickSound);
+    }
+
+    public void playWallBreak() {
+        playSfx(wallBreakSound);
     }
 
     public boolean isMusicEnabled() {

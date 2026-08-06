@@ -21,4 +21,14 @@ public class SfxSystemTest extends SystemTestBase {
 
         verify(audio).playCoin();
     }
+
+    @Test
+    public void playWallBreakDelegatesToAudioManager() {
+        AudioManager audio = mock(AudioManager.class);
+        SfxSystem system = new SfxSystem(audio, 0);
+
+        system.playWallBreak();
+
+        verify(audio).playWallBreak();
+    }
 }

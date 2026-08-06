@@ -19,7 +19,9 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 
 import static com.axehigh.platformer.assets.SpriteConstants.PLAYER_ATTACK_REACH;
 import static com.axehigh.platformer.assets.SpriteConstants.PLAYER_MAX_ATTACK_REACH;
@@ -35,14 +37,14 @@ import static com.axehigh.platformer.ecs.components.Mappers.TEXTURE;
 /**
  * Resolves the close-combat strike attack: while the player's {@code meleeAttack} timer is active,
  * builds a frame-indexed hitbox rectangle offset from the player's collision bounds (in the
- * direction the player is facing) and checks it against enemies and chests. The hitbox is only
- * "live" while the sword is actually extended: each frame of the {@code ATTACKING} animation maps
- * to a reach in the sprite's reach table, {@link SpriteConstants#PLAYER_ATTACK_REACH} (0 =
- * windup/recovery frames don't hit at all, so a swing never registers before the blade reaches out
- * or after it pulls back). Damage is applied (or a chest opened) at most once per swing via {@code
- * meleeHasHit}, using {@code EnemyDamageResolver} for enemy hit-stun/knockback. The current frame's
- * box is always exposed via {@link #getActiveStrikeBounds()} so {@code DebugRenderSystem} can
- * visualize it under SHIFT+D.
+ * direction the player is facing) and checks it against enemies, chests, and secret walls. The
+ * hitbox is only "live" while the sword is actually extended: each frame of the {@code ATTACKING}
+ * animation maps to a reach in the sprite's reach table, {@link SpriteConstants#PLAYER_ATTACK_REACH}
+ * (0 = windup/recovery frames don't hit at all, so a swing never registers before the blade reaches
+ * out or after it pulls back). Damage is applied (or a chest opened / a secret wall broken) at most
+ * once per swing via {@code meleeHasHit}, using {@code EnemyDamageResolver} for enemy
+ * hit-stun/knockback. The current frame's box is always exposed via {@link #getActiveStrikeBounds()}
+ * so {@code DebugRenderSystem} can visualize it under SHIFT+D.
  */
 public class MeleeAttackSystem extends IteratingSystem {
 
@@ -56,18 +58,39 @@ public class MeleeAttackSystem extends IteratingSystem {
     private Rectangle activeStrikeBounds;
     private ImmutableArray<Entity> enemies;
     private ImmutableArray<Entity> chests;
+    private Array<Rectangle> secretRects;
+    private Array<Rectangle> collisionRects;
+    private TiledMapTileLayer collisionLayer;
+    private SfxSystem sfxSystem;
 
     public MeleeAttackSystem(AssetManager assetManager) {
-        this(assetManager, 0);
+        this(assetManager, null, null, null, null, 0);
     }
 
     public MeleeAttackSystem(AssetManager assetManager, int priority) {
+        this(assetManager, null, null, null, null, priority);
+    }
+
+    /** Fully wired constructor: the shared secret/collision rect arrays, the collision tile layer
+     * (blanked cell = removed sprite), and the SFX system for the wall-break sound. */
+    public MeleeAttackSystem(AssetManager assetManager, Array<Rectangle> secretRects,
+                             Array<Rectangle> collisionRects, TiledMapTileLayer collisionLayer,
+                             SfxSystem sfxSystem, int priority) {
         super(Family.all(PlayerComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
         this.assetManager = assetManager;
+        this.secretRects = secretRects;
+        this.collisionRects = collisionRects;
+        this.collisionLayer = collisionLayer;
+        this.sfxSystem = sfxSystem;
     }
 
     public void setUnitScale(float unitScale) {
         this.unitScale = unitScale;
+    }
+
+    /** Swaps the collision tile layer (blanked cells = removed sprites) on a level change. */
+    public void setCollisionLayer(TiledMapTileLayer collisionLayer) {
+        this.collisionLayer = collisionLayer;
     }
 
     /** The current strike hitbox (last frame's), or {@code null} while not attacking / on non-hitting frames. */
@@ -127,11 +150,54 @@ public class MeleeAttackSystem extends IteratingSystem {
                         }
                     }
                     player.meleeHasHit = true;
+                } else if (breakSecretWall(strikeBounds)) {
+                    player.meleeHasHit = true;
                 }
             }
         }
 
         player.meleeAttack.update(deltaTime);
+    }
+
+    /**
+     * Breaks at most one secret wall overlapping the strike box: removes the wall rect from both the
+     * shared {@code secretRects} and {@code collisionRects} sets (passable next frame), blanks its
+     * cell in the collision layer (the tile sprite disappears), spawns the smoke puff at the tile
+     * center, and plays the wall-break SFX. Returns {@code true} when a wall was broken.
+     */
+    private boolean breakSecretWall(Rectangle bounds) {
+        if (secretRects == null || collisionLayer == null) {
+            return false;
+        }
+        for (int i = 0; i < secretRects.size; i++) {
+            Rectangle rect = secretRects.get(i);
+            if (!bounds.overlaps(rect)) {
+                continue;
+            }
+            secretRects.removeIndex(i);
+            if (collisionRects != null) {
+                collisionRects.removeValue(rect, true);
+            }
+            blankSecretTile(rect);
+            if (engine != null) {
+                ParticleHelper.spawnSmallSmoke(engine, rect.x + rect.width / 2f, rect.y + rect.height / 2f);
+            }
+            if (sfxSystem != null) {
+                sfxSystem.playWallBreak();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /** Blanks the collision-layer cell underneath a broken secret-wall rect (removes its sprite). */
+    private void blankSecretTile(Rectangle rect) {
+        int tileX = (int) (rect.x / collisionLayer.getTileWidth());
+        int tileY = (int) (rect.y / collisionLayer.getTileHeight());
+        TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
+        if (cell != null) {
+            cell.setTile(null);
+        }
     }
 
     /**

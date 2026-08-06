@@ -1,6 +1,6 @@
 # Feature Plan: Secret Rooms with Breakable Walls
 
-Status: Planned (not yet implemented)
+Status: Implemented — code, headless tests, and a demo secret room (`secretRoom1` in `assets/maps/level1/generated_room.tmx`: a 5-tile alcove in room 1's bottom-west corner, cols 31–35, whose east wall at col 36 is the `secret=true` tile the player breaks from the main room) are in. Pending: in-game verification on desktop.
 Approved decisions: sealed-room hiding, per-swing tile break, gap reveal, smoke + SFX feedback.
 
 ## Concept
