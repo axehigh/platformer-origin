@@ -212,7 +212,7 @@ public class EntityFactory {
                 case "enemy":
                     String enemyType = getProperty(object, tile, "enemyType", "walker");
                     int roomIndex = roomState.findRoomIndexContaining(centerX, centerY);
-                    engine.addEntity(createEnemy(spawnX, spawnY, enemyType, roomIndex));
+                    engine.addEntity(createEnemy(spawnX, spawnY, enemyType, object, tile, roomIndex));
                     spawned = true;
                     break;
                 case "platform":
@@ -531,7 +531,14 @@ public class EntityFactory {
         }
     }
 
-    private Entity createEnemy(float x, float y, String enemyType, int roomIndex) {
+    /**
+     * Builds an enemy entity from a Tiled {@code "enemy"} marker. Per-marker custom properties may
+     * override the defaults: {@code enemyType} picks the sprite/stats/behavior variant,
+     * {@code aiMode} ({@code "side-to-side"}/{@code "sidetoside"}, case-insensitive) switches the
+     * patrol behavior to endless walking, and {@code speed}/{@code patrolRange} override the patrol
+     * speed/range in world units before they're scaled by {@code unitScale}.
+     */
+    private Entity createEnemy(float x, float y, String enemyType, MapObject object, TiledMapTile tile, int roomIndex) {
         String atlasPrefix;
         String walkRegionName;
         float colWidth, colHeight, colOffsetY, enemyScale;
@@ -615,6 +622,18 @@ public class EntityFactory {
         EnemyComponent enemyComponent = new EnemyComponent();
         enemyComponent.originX = x;
         enemyComponent.roomIndex = roomIndex;
+        String aiMode = getProperty(object, tile, "aiMode", null);
+        if ("side-to-side".equalsIgnoreCase(aiMode) || "sidetoside".equalsIgnoreCase(aiMode)) {
+            enemyComponent.aiMode = EnemyComponent.AiMode.SIDE_TO_SIDE;
+        }
+        float speedOverride = getFloatProperty(object, tile, "speed", Float.NaN);
+        if (!Float.isNaN(speedOverride)) {
+            enemyComponent.speed = speedOverride;
+        }
+        float patrolRangeOverride = getFloatProperty(object, tile, "patrolRange", Float.NaN);
+        if (!Float.isNaN(patrolRangeOverride)) {
+            enemyComponent.patrolRange = patrolRangeOverride;
+        }
         enemyComponent.speed *= unitScale;
         enemyComponent.patrolRange *= unitScale;
 

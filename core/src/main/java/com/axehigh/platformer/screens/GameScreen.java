@@ -130,7 +130,7 @@ public class GameScreen extends BaseScreen {
         tiledMapRenderSystem = new TiledMapRenderSystem(mapLoader.getMap(), camera, PRIORITY_MAP_RENDER);
         engine.addSystem(playerInputSystem);
 
-        EnemySystem enemySystem = new EnemySystem(entityFactory, mapLoader.getCollisionRects(), roomState, PRIORITY_ENEMY);
+        EnemySystem enemySystem = new EnemySystem(entityFactory, mapLoader.getCollisionRects(), mapLoader.getHazardRects(), roomState, PRIORITY_ENEMY);
         enemySystem.setUnitScale(scale);
         engine.addSystem(enemySystem);
 
@@ -154,13 +154,14 @@ public class GameScreen extends BaseScreen {
         movingPlatformSystem.setUnitScale(scale);
         engine.addSystem(movingPlatformSystem);
 
-        MeleeAttackSystem meleeSystem = new MeleeAttackSystem(assetManager, PRIORITY_MELEE);
-        meleeSystem.setUnitScale(scale);
-        engine.addSystem(meleeSystem);
-
         engine.addSystem(new MusicSystem(AudioManager.get(), PRIORITY_MUSIC));
         SfxSystem sfxSystem = new SfxSystem(AudioManager.get(), PRIORITY_SFX);
         engine.addSystem(sfxSystem);
+
+        MeleeAttackSystem meleeSystem = new MeleeAttackSystem(assetManager, mapLoader.getSecretRects(),
+            mapLoader.getCollisionRects(), mapLoader.getCollisionLayer(), sfxSystem, PRIORITY_MELEE);
+        meleeSystem.setUnitScale(scale);
+        engine.addSystem(meleeSystem);
 
         engine.addSystem(new PickupSystem(sfxSystem, PRIORITY_PICKUP));
 
@@ -183,7 +184,7 @@ public class GameScreen extends BaseScreen {
         debugRenderSystem = new DebugRenderSystem(camera, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), roomState, PRIORITY_DEBUG_RENDER);
         engine.addSystem(debugRenderSystem);
 
-        levelManager = new LevelManager(engine, entityFactory, viewport, tiledMapRenderSystem, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), roomState, mapLoader);
+        levelManager = new LevelManager(engine, entityFactory, viewport, tiledMapRenderSystem, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), mapLoader.getSecretRects(), roomState, mapLoader);
 
         LevelExitSystem exitSystem = new LevelExitSystem(levelManager, PRIORITY_LEVEL_EXIT);
         exitSystem.setUnitScale(scale);

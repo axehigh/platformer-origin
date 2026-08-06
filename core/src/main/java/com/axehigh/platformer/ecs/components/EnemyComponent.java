@@ -9,6 +9,15 @@ import com.badlogic.ashley.core.Component;
  * {@code MeleeAttackSystem}, which also apply a brief hit-stun/knockback via {@code hitStun}.
  */
 public class EnemyComponent implements Component {
+
+    /** Selects how the enemy's horizontal patrol behaves; see {@link AiMode}. */
+    public enum AiMode {
+        /** Origin-bounded patrol: turns at {@code patrolRange} from spawn, plus walls/ledges/hazards. */
+        PATROL,
+        /** Endless walking: turns only on walls, ledges, and hazards ({@code patrolRange} is ignored). */
+        SIDE_TO_SIDE
+    }
+
     public float health = 10f;
     /** Starting/full health, set alongside {@code health} by {@code EntityFactory}; used to size coin drops on death. */
     public float maxHealth = 10f;
@@ -16,8 +25,15 @@ public class EnemyComponent implements Component {
     public float speed = 20f;
     /** Current patrol direction: {@code 1} for right, {@code -1} for left. */
     public int direction = 1;
-    /** Max distance the enemy walks away from {@code originX} in either direction before turning around. */
-    public float patrolRange = 32f;
+    /** Max distance the enemy walks away from {@code originX} in either direction before turning around (PATROL mode only). */
+    public float patrolRange = 64f;
+    /** Which patrol behavior drives this enemy (see {@link AiMode}); set from the Tiled {@code aiMode} property. */
+    public AiMode aiMode = AiMode.PATROL;
+    /**
+     * Brief pause after a turn-around (wall, ledge, or hazard) during which the enemy stays
+     * stationary before resuming its patrol, so direction changes are visible instead of instant.
+     */
+    public final Timer turnPause = new Timer();
     /** World-space X position the enemy was spawned at; the center of its patrol path. */
     public float originX = 0f;
     /**

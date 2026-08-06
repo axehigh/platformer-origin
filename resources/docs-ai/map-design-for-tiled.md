@@ -114,7 +114,7 @@ Two ways to place a marker:
 | `torch` | Decorative torch | — | Flickers visually. |
 | `dagger` | Dagger pickup | — | Collectible item. |
 | `exitGate` | Exit gate / level transition (trigger only, no sprite) | `nextLevel` (string, required to make it functional) | The gate spawns a **logic-only** entity: a collision box (sized from the object rectangle) + optional level transition. **No gate art is drawn** — paint the door's decoration yourself in the `background`/`decoration`/`collision` layers. With `nextLevel` it's a real transition; without it, purely decorative (e.g. a final-level dead end). |
-| `enemy` | Enemy | `enemyType` (string, default `"walker"`) | Put these on the `enemies` layer (or `objects`). Catalog: `walker` (goblin), `flyer` (mosquito), `shooter` (spider), `knight` (15 HP). See `resources/docs-ai/enemies.md`. |
+| `enemy` | Enemy | `enemyType` (string, default `"walker"`), `aiMode` (string), `speed` (float), `patrolRange` (float) | Put these on the `enemies` layer (or `objects`). Catalog: `walker` (goblin), `flyer` (mosquito), `shooter` (spider), `knight` (15 HP). See `resources/docs-ai/enemies.md`. |
 | `platform` | Moving platform | `amplitudeX`, `amplitudeY`, `speed`, `phase`, `axis` (see §5) | The object **rectangle size defines both the sprite and collision box**. |
 | (any other) | — | — | Ignored. `background`-type markers etc. won't spawn anything. |
 
@@ -130,6 +130,9 @@ All properties are read as `float`/`string`/`boolean` and tolerate being set as 
 |---|---|---|---|
 | `type` | string | — | The marker discriminator (`playerStart`, `coin`, `chest`, `torch`, `dagger`, `exitGate`, `enemy`, `platform`). |
 | `enemyType` | string | `"walker"` | Picks the enemy variant: `walker` / `flyer` / `shooter` / `knight`. See `enemies.md`. |
+| `aiMode` | string | `"patrol"` | Enemy patrol behavior: `"side-to-side"` (or `"sidetoside"`, case-insensitive) → endless walking that turns only on walls/ledges/hazards; anything else/absent → origin-bounded `patrol`. Flyers ignore it (never grounded). See `enemies.md`. |
+| `speed` | float | per-type default (`20`) | (enemy only) Horizontal patrol speed override, world px/s. Applied before the `unitScale` (tile-size) scaling. |
+| `patrolRange` | float | per-type default (`64`) | (enemy only) Patrol-range override, world px. Only used in `PATROL` mode (`SIDE_TO_SIDE` ignores it). Applied before the `unitScale` scaling. |
 | `nextLevel` | string | — | (exitGate only) The next `.tmx` path **relative to the `assets/` folder**, e.g. `maps/level1/level_1_demo_2.tmx`. Cycles to that map on interaction. |
 
 ### Moving-platform properties (the `platform` rectangle)
