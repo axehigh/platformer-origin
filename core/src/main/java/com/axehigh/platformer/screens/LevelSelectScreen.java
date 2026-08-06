@@ -120,7 +120,7 @@ public class LevelSelectScreen extends MenuScreen {
     }
 
     private ImageTextButton createLevelButton(final LevelDefinition level, boolean completed) {
-        String text = completed ? level.displayName + " (Completed)" : level.displayName;
+        String text = completed ? level.displayName : level.displayName;
         ImageTextButton button;
         if (completed) {
             ImageTextButtonStyle style = new ImageTextButtonStyle(skin.get(ImageTextButtonStyle.class));

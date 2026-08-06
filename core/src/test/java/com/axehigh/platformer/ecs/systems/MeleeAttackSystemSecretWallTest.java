@@ -110,6 +110,16 @@ public class MeleeAttackSystemSecretWallTest extends SystemTestBase {
         return count;
     }
 
+    private ParticleComponent firstParticle() {
+        for (Entity entity : engine.getEntities()) {
+            ParticleComponent particle = entity.getComponent(ParticleComponent.class);
+            if (particle != null) {
+                return particle;
+            }
+        }
+        return null;
+    }
+
     @Test
     public void strikingWallRemovesRectsAndBlanksCell() {
         addSecretWall(16f, 105f);
@@ -148,6 +158,22 @@ public class MeleeAttackSystemSecretWallTest extends SystemTestBase {
         assertNotNull(collisionLayer.getCell((int) (2000f / TILE), 0).getTile());
         assertFalse(PLAYER.get(playerEntity).meleeHasHit);
         assertEquals(0, particleEntityCount());
+    }
+
+    @Test
+    public void strikingRegularWallSpawnsSpark() {
+        collisionRects.add(new Rectangle(16f, 105f, 128f, 128f));
+        Entity playerEntity = player(0f, 130f);
+        PLAYER.get(playerEntity).meleeAttack.start(0.15f);
+
+        engine.update(0f);
+
+        assertTrue(PLAYER.get(playerEntity).meleeHasHit);
+        assertEquals(1, particleEntityCount());
+        ParticleComponent spark = firstParticle();
+        assertNotNull(spark);
+        assertEquals(EnemyDamageResolver.HIT_SPARK_MAX_LIFETIME, spark.maxLifetime, EPSILON);
+        assertEquals(0, secretRects.size);
     }
 
     @Test

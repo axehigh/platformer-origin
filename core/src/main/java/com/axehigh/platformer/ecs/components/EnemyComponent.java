@@ -46,12 +46,20 @@ public class EnemyComponent implements Component {
      */
     public final Timer postHitIdle = new Timer();
     /**
-     * Set to {@code true} when health reaches zero; triggers the death sequence (animation
-     * followed by entity removal).
+     * Set to {@code true} when health reaches zero; triggers the death sequence (death animation,
+     * then a brief blink before entity removal).
      */
     public boolean isDead = false;
-    /** Tracks the duration of the death animation before the entity is removed. */
+    /**
+     * Tracks the death animation duration plus the {@code EnemyDamageResolver.DEATH_FLASH_DURATION}
+     * post-animation blink window; {@code EnemySystem} removes the entity once it elapses.
+     */
     public Timer deathTimer = new Timer();
+    /**
+     * Guard so the death coin drop fires exactly once, on the first frame {@code EnemySystem}
+     * observes the death — i.e. immediately on the kill, before the corpse lingers/flashes.
+     */
+    public boolean deathCoinsSpawned = false;
     /**
      * Index into {@code RoomState.rooms} of the Room rectangle this enemy was spawned inside of,
      * or {@code -1} if it wasn't inside any known room. {@code EnemySystem}/{@code

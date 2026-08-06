@@ -116,9 +116,9 @@ public class MovementSystem extends IteratingSystem {
         movement.velocity.y = MathUtils.clamp(movement.velocity.y, -movement.maxSpeedY, movement.maxSpeedY);
 
         float attemptedDeltaX = movement.velocity.x;
-        boolean hitWallX = moveX(transform, movement, collision, deltaTime);
+        boolean hitWallX = moveX(transform, movement, collision, deltaTime, entity);
         float fallSpeed = movement.velocity.y;
-        moveY(transform, movement, collision, deltaTime, player);
+        moveY(transform, movement, collision, deltaTime, entity);
 
         // Popped pickups (e.g. chest-dropped coins) have no ground friction of their own; freeze
         // them dead in place the moment they first touch down instead of sliding indefinitely.
@@ -207,7 +207,7 @@ public class MovementSystem extends IteratingSystem {
     /**
      * Moves the entity along the X axis, resolving collisions. Returns true if a wall was hit.
      */
-    private boolean moveX(TransformComponent transform, MovementComponent movement, CollisionComponent collision, float deltaTime) {
+    private boolean moveX(TransformComponent transform, MovementComponent movement, CollisionComponent collision, float deltaTime, Entity entity) {
         float deltaX = movement.velocity.x * deltaTime;
         if (deltaX == 0f) {
             return false;
@@ -217,6 +217,9 @@ public class MovementSystem extends IteratingSystem {
         entityBounds.set(newX + collision.bounds.x, transform.position.y + collision.bounds.y, collision.bounds.width, collision.bounds.height);
 
         Rectangle hit = findCollision(entityBounds);
+        if (hit == null && isOneWaySolid(entity)) {
+            hit = findCollision(entityBounds, oneWayRects);
+        }
         if (hit == null) {
             transform.position.x = newX;
             return false;
@@ -231,18 +234,23 @@ public class MovementSystem extends IteratingSystem {
         return true;
     }
 
-    private void moveY(TransformComponent transform, MovementComponent movement, CollisionComponent collision, float deltaTime, PlayerComponent player) {
+    private void moveY(TransformComponent transform, MovementComponent movement, CollisionComponent collision, float deltaTime, Entity entity) {
         float deltaY = movement.velocity.y * deltaTime;
         movement.grounded = false;
 
         float newY = transform.position.y + deltaY;
         entityBounds.set(transform.position.x + collision.bounds.x, newY + collision.bounds.y, collision.bounds.width, collision.bounds.height);
 
+        PlayerComponent player = PLAYER.get(entity);
         Rectangle hit = findCollision(entityBounds);
         boolean landedOnOneWay = false;
         if (hit == null) {
-            hit = findOneWayCollision(transform, movement, collision, deltaTime, player);
-            landedOnOneWay = hit != null;
+            if (player != null) {
+                hit = findOneWayCollision(transform, movement, collision, deltaTime, player);
+                landedOnOneWay = hit != null;
+            } else if (isOneWaySolid(entity)) {
+                hit = findCollision(entityBounds, oneWayRects);
+            }
         }
         if (hit == null) {
             transform.position.y = newY;
@@ -265,15 +273,17 @@ public class MovementSystem extends IteratingSystem {
     }
 
     /**
-     * Finds a drop-through platform the entity lands on. One-way platforms are player-only: only
-     * an entity with a {@link PlayerComponent} can stand on them, and only while falling ({@code
-     * deltaY < 0}) — rising through them is always allowed (jump up-through). A standing player who
-     * has just pressed drop passes straight through while the {@code dropWindow} is active. Landing
-     * sticks only when the player's feet were at or above the platform's top before this move, so
-     * the sides and underside never block. Returns the rect landed on, or null (fall through).
+     * Finds a drop-through platform the player lands on. One-way platforms are top-only **for the
+     * player**: only the player can stand on them (and only while falling, {@code deltaY < 0} —
+     * rising through them is always allowed, jump up-through), and a standing player who has just
+     * pressed drop passes straight through while the {@code dropWindow} is active. For everyone
+     * else, one-way tiles are resolved as fully solid by {@code moveX}/{@code moveY} via
+     * {@link #findCollision(Rectangle, Array)} (except flying enemies, which pass through entirely).
+     * Landing sticks only when the player's feet were at or above the platform's top before this
+     * move, so the sides and underside never block. Returns the rect landed on, or null (fall through).
      */
     private Rectangle findOneWayCollision(TransformComponent transform, MovementComponent movement, CollisionComponent collision, float deltaTime, PlayerComponent player) {
-        if (player == null || movement.velocity.y >= 0f || player.dropWindow.isActive()) {
+        if (movement.velocity.y >= 0f || player.dropWindow.isActive()) {
             return null;
         }
         float feetY = transform.position.y + collision.bounds.y;
@@ -285,8 +295,22 @@ public class MovementSystem extends IteratingSystem {
         return null;
     }
 
+    /**
+     * Whether {@code oneWay} rects act as fully-solid tiles for this entity: everyone except the
+     * player (who keeps the drop-through one-way behavior) and flying enemies (which pass through,
+     * keeping them airborne). Grounded enemies and popped coins therefore treat one-way tiles like
+     * any other solid tile — they can stand on them and are blocked by their sides and underside.
+     */
+    private boolean isOneWaySolid(Entity entity) {
+        return PLAYER.get(entity) == null && FLYING.get(entity) == null;
+    }
+
     private Rectangle findCollision(Rectangle bounds) {
-        for (Rectangle rect : collisionRects) {
+        return findCollision(bounds, collisionRects);
+    }
+
+    private Rectangle findCollision(Rectangle bounds, Array<Rectangle> rects) {
+        for (Rectangle rect : rects) {
             if (bounds.overlaps(rect)) {
                 return rect;
             }

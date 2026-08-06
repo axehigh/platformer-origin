@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -41,6 +42,7 @@ public class EnemySystemTest extends SystemTestBase {
     private static final Rectangle FLOOR = new Rectangle(-100f, -24f, 300f, 2f);
 
     private final Array<Rectangle> collisionRects = new Array<>();
+    private final Array<Rectangle> oneWayRects = new Array<>();
     private final Array<Rectangle> hazardRects = new Array<>();
     private final RoomState roomState = new RoomState();
     private final EntityFactory entityFactory = mock(EntityFactory.class);
@@ -49,7 +51,7 @@ public class EnemySystemTest extends SystemTestBase {
 
     @Before
     public void setUp() {
-        system = new EnemySystem(entityFactory, collisionRects, hazardRects, roomState);
+        system = new EnemySystem(entityFactory, collisionRects, oneWayRects, hazardRects, roomState);
         system.setUnitScale(1f);
         engine = newEngine();
         engine.addSystem(system);
@@ -179,6 +181,34 @@ public class EnemySystemTest extends SystemTestBase {
     }
 
     @Test
+    public void enemyOnOneWayTileDoesNotTurnMidPlatform() {
+        oneWayRects.add(new Rectangle(0f, -24f, 300f, 2f));
+        Entity entity = enemy(0f, 0f);
+        EnemyComponent enemyComponent = ENEMY.get(entity);
+        MovementComponent movement = MOVEMENT.get(entity);
+        movement.velocity.x = 20f;
+
+        engine.update(DT);
+
+        assertEquals(1, enemyComponent.direction);
+        assertEquals(20f, movement.velocity.x, EPSILON);
+    }
+
+    @Test
+    public void enemyTurnsAtTrueEdgeAfterOneWayPlatformEnds() {
+        oneWayRects.add(new Rectangle(0f, -24f, 8f, 2f));
+        Entity entity = enemy(0f, 0f);
+        EnemyComponent enemyComponent = ENEMY.get(entity);
+        MovementComponent movement = MOVEMENT.get(entity);
+        movement.velocity.x = 20f;
+
+        engine.update(DT);
+
+        assertEquals(-1, enemyComponent.direction);
+        assertTrue(enemyComponent.turnPause.isActive());
+    }
+
+    @Test
     public void hitStunSkipsPatrol() {
         Entity entity = enemy(0f, 0f);
         EnemyComponent enemyComponent = ENEMY.get(entity);
@@ -264,17 +294,32 @@ public class EnemySystemTest extends SystemTestBase {
     }
 
     @Test
-    public void deadEnemyDropsCoinsOnRemoval() {
+    public void deadEnemyDropsCoinsImmediatelyOnDeath() {
         Entity entity = enemy(0f, 0f);
         EnemyComponent enemyComponent = ENEMY.get(entity);
         enemyComponent.isDead = true;
-        enemyComponent.deathTimer.start(0.1f);
+        enemyComponent.deathTimer.start(1f);
         enemyComponent.maxHealth = 10f;
 
-        engine.update(0.2f);
+        engine.update(DT);
 
-        assertEquals(0, engine.getEntities().size());
+        assertEquals(1, engine.getEntities().size());
+        assertTrue(enemyComponent.deathCoinsSpawned);
         verify(entityFactory).popCoins(eq(engine), anyFloat(), anyFloat(), eq(2), eq(1f));
+    }
+
+    @Test
+    public void deadEnemyDropsCoinsOnlyOnce() {
+        Entity entity = enemy(0f, 0f);
+        EnemyComponent enemyComponent = ENEMY.get(entity);
+        enemyComponent.isDead = true;
+        enemyComponent.deathTimer.start(1f);
+        enemyComponent.maxHealth = 10f;
+
+        engine.update(DT);
+        engine.update(DT);
+
+        verify(entityFactory, times(1)).popCoins(any(), anyFloat(), anyFloat(), anyInt(), anyFloat());
     }
 
     @Test

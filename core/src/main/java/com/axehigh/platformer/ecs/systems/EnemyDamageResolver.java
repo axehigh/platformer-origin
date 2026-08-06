@@ -24,7 +24,16 @@ final class EnemyDamageResolver {
     static final float POST_HIT_IDLE_DURATION = 0.5f;
     private static final float KNOCKBACK_SPEED_X = 90f;
     private static final float KNOCKBACK_SPEED_Y = 140f;
-    private static final float HIT_SPARK_SCALE = 1.2f;
+    static final float HIT_SPARK_SCALE = 1.2f;
+    /** Hit sparks must not linger: forced removal once this many seconds have elapsed (the sparks
+     * effect is continuous, so it never self-completes). Shared with the sword-clank wall spark. */
+    static final float HIT_SPARK_MAX_LIFETIME = 1.0f;
+    /**
+     * Post-death blink window: after the death animation plays out, the corpse blinks at ~10Hz for
+     * this long (via {@code AnimationSystem}) before {@code EnemySystem} removes it. Added to the
+     * death-animation duration when {@code deathTimer} is started.
+     */
+    static final float DEATH_FLASH_DURATION = 0.8f;
 
     private EnemyDamageResolver() {
     }
@@ -66,7 +75,7 @@ final class EnemyDamageResolver {
                     duration = deathAnim.getAnimationDuration();
                 }
             }
-            enemy.deathTimer.start(duration);
+            enemy.deathTimer.start(duration + DEATH_FLASH_DURATION);
             return true;
         }
 
@@ -100,6 +109,6 @@ final class EnemyDamageResolver {
         }
         float centerX = collision.worldBounds.x + collision.worldBounds.width / 2f;
         float centerY = collision.worldBounds.y + collision.worldBounds.height / 2f;
-        ParticleHelper.spawnParticle(engine, GlobalParticles.SPARKS, centerX, centerY, 0f, HIT_SPARK_SCALE);
+        ParticleHelper.spawnParticle(engine, GlobalParticles.SPARKS, centerX, centerY, 0f, HIT_SPARK_SCALE, HIT_SPARK_MAX_LIFETIME);
     }
 }

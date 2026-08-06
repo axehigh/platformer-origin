@@ -236,7 +236,7 @@ public class MovementSystemTest extends SystemTestBase {
     }
 
     @Test
-    public void nonPlayerEntityFallsThroughOneWayPlatform() {
+    public void enemyLandsOnOneWayPlatformFromAbove() {
         oneWayRects.add(new Rectangle(0f, 0f, 100f, 20f));
         TransformComponent transform = transform(0f, 55f);
         CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
@@ -244,6 +244,64 @@ public class MovementSystemTest extends SystemTestBase {
         MovementComponent movement = movement();
         movement.velocity.y = -400f;
         Entity entity = entity(transform, movement, collision, new EnemyComponent());
+        engine.addEntity(entity);
+
+        engine.update(DT);
+
+        assertTrue(movement.grounded);
+        assertEquals(50f, transform.position.y, EPSILON);
+        assertEquals(0f, movement.velocity.y, EPSILON);
+    }
+
+    @Test
+    public void enemyBlockedByOneWayTileSide() {
+        collisionRects.add(new Rectangle(0f, 0f, 400f, 20f));
+        oneWayRects.add(new Rectangle(200f, 0f, 20f, 100f));
+        TransformComponent transform = transform(150f, 80f);
+        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        place(transform, collision, 150f, 80f);
+        MovementComponent movement = movement();
+        movement.velocity.y = -400f;
+        movement.velocity.x = 200f;
+        Entity entity = entity(transform, movement, collision, new EnemyComponent());
+        engine.addEntity(entity);
+
+        for (int i = 0; i < 60; i++) {
+            engine.update(DT);
+        }
+
+        assertTrue(movement.grounded);
+        assertEquals(185f, transform.position.x, EPSILON);
+        assertEquals(0f, movement.velocity.x, EPSILON);
+    }
+
+    @Test
+    public void poppedItemLandsOnOneWayPlatformFromAbove() {
+        oneWayRects.add(new Rectangle(0f, 0f, 100f, 20f));
+        TransformComponent transform = transform(0f, 55f);
+        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        place(transform, collision, 0f, 55f);
+        MovementComponent movement = movement();
+        movement.velocity.y = -400f;
+        Entity entity = entity(transform, movement, collision, new PoppedItemComponent());
+        engine.addEntity(entity);
+
+        engine.update(DT);
+
+        assertTrue(movement.grounded);
+        assertEquals(50f, transform.position.y, EPSILON);
+        assertEquals(0f, movement.velocity.x, EPSILON);
+    }
+
+    @Test
+    public void flyingEnemyFallsThroughOneWayPlatform() {
+        oneWayRects.add(new Rectangle(0f, 0f, 100f, 20f));
+        TransformComponent transform = transform(0f, 55f);
+        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        place(transform, collision, 0f, 55f);
+        MovementComponent movement = movement();
+        movement.velocity.y = -400f;
+        Entity entity = entity(transform, movement, collision, new FlyingEnemyComponent());
         engine.addEntity(entity);
 
         engine.update(DT);

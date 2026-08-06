@@ -23,7 +23,7 @@ final class PlayerDamageResolver {
     /** Small horizontal push applied to the player on a surviving hit (world units/second). */
     private static final float KNOCKBACK_SPEED_X = 60f;
     /** Full grace period during which further damage is ignored and the sprite blinks. */
-    static final float HIT_INVULNERABILITY_DURATION = 1.0f;
+    static final float HIT_INVULNERABILITY_DURATION = 2.0f;
 
     private PlayerDamageResolver() {
     }

@@ -74,6 +74,7 @@ public class EnemyDamageResolverTest extends SystemTestBase {
         assertEquals(0f, movement.velocity.x, EPSILON);
         assertEquals(0f, movement.velocity.y, EPSILON);
         assertTrue(enemy.deathTimer.isActive());
+        assertEquals(0.5f + EnemyDamageResolver.DEATH_FLASH_DURATION, enemy.deathTimer.getRemaining(), EPSILON);
     }
 
     @Test

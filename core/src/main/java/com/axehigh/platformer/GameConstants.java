@@ -44,12 +44,16 @@ public final class GameConstants {
     public static int MaxHealth = 3;
 
     //UI
-    public static float UI_Button_Action_Size = 150f;
-    public static float UI_Button_Move_Size = 165f;
-    public static final float UI_PADDING = 33f;
+
+    //UI Only for touch control
+    public static float UI_Button_Action_Size = 200f;
+    public static float UI_Button_Move_Size = 250f;
     public static final float UI_BUTTON_ALPHA = 0.4f;
     public static final float UI_BUTTON_PRESS_SCALE = 0.95f;
     public static final float UI_BUTTON_SCALE_DURATION = 0.05f;
+
+    //UI Menu, everything else.
+    public static final float UI_PADDING = 33f;
     public static float FontScale = 1f;
 
     private GameConstants() {

@@ -57,7 +57,7 @@ The collision layer is a tile grid. `MapLoader.buildCollisionRects()` walks ever
 *   **Painted tile** → one of the kinds below, decided by that tile's boolean custom properties (see the full table in §5). Precedence, first match wins:
     1.  `hazard = true` → **non-solid hazard** AABB (spikes/lava; damages the player on touch — see §3.2).
     2.  `solid = false` → free space (passage doorways).
-    3.  `oneWay = true` → **drop-through platform** AABB (player-only, top-only solid — see §3.3).
+    3.  `oneWay = true` → **drop-through platform** AABB (player top-only; fully solid for enemies/popped items; flyers pass through — see §3.3).
     4.  anything else → **solid wall** (blocks everything).
     5.  A solid wall tile **additionally** marked `secret = true` is a **breakable secret wall** — solid exactly like a regular wall until the player melee-strikes it (see §3.4).
 
@@ -75,18 +75,19 @@ That single tileset edit makes every map using the tile treat it as a walk-throu
 
 A **non-solid** tile that damages the player on contact. Paint it in the `collision` layer; the tile's `hazard = true` property (set on the tileset tile, e.g. `assets/maps/level1/hazards.tsx`) turns it into a damage zone instead of a wall:
 
-*   On AABB overlap the player loses **1 HP**, gets the usual 0.3s hit-stun + 1s invulnerability grace, and is **not** knocked back (no directional push).
+*   On AABB overlap the player loses **1 HP**, gets the usual 0.3s hit-stun + 2s invulnerability grace, and is **not** knocked back (no directional push).
 *   Hazards are fully non-solid — nothing (player, enemies, bullets) is blocked by them. The grace period turns a sustained overlap into one hit per second, not instant shredding.
 *   **Smaller damage zone:** by default the danger box is the full tile. To shrink it, open the hazard tile in Tiled's **Tile Collision Editor** and draw a shape (rectangle or polygon) around the actual spikes/lava art — `MapLoader` then emits one world-space hazard box per shape instead of the full tile (a tile with no shapes, or a flipped cell, still gets the full tile). Verify with the SHIFT+D hazard overlay (red).
 *   **Placement gotcha:** the player's collision box is *taller than a tile* (≈120×240 px vs a 128×128 tile) and its feet sit on the floor surface, so a hazard painted in the row directly on top of a floor tile sits at/below the player's feet and a standing player won't overlap it. Hazards damage reliably when the player's body travels **through** them (jump over a spike barrier, fall into a lava pool, walk a spike row you must jump). Put solid ground under a pit of lava/spikes so a falling player lands on it.
 
 ### §3.3 Drop-through platforms (one-way)
 
-A **player-only, top-only** platform. Paint it in the `collision` layer; the tile's `oneWay = true` property (set on the tileset tile, e.g. `assets/maps/level1/drop_platform.tsx`) makes it a platform instead of a wall:
+A **drop-through platform for the player, a normal solid tile for everyone else**. Paint it in the `collision` layer; the tile's `oneWay = true` property (set on the tileset tile, e.g. `assets/maps/level1/drop_platform.tsx`) makes it a platform instead of a wall:
 
 *   The player can **land on its top** (it sticks only when the player's feet were at/above the platform's top before the move) and can **jump up through** it from below.
 *   While standing on it, the contextual **`v` button** appears (mobile) or **`S`/`DOWN`** (keyboard) starts a short ~0.25s pass-through window: the player drops straight through the platform, then normal gravity takes over.
-*   **Enemies and projectiles ignore one-way platforms entirely** — they never land on or collide with them. Only the player uses them.
+*   **Enemies and popped items treat it as a fully-solid tile (all four sides)** — they land on top, are blocked by its sides/underside, and ground enemies patrol along it exactly like a regular floor. **Flying enemies pass through it entirely.**
+*   Player bullets still fly through (they're excluded from `MovementSystem` entirely, and `CollisionSystem` only resolves them against `collisionRects`).
 
 ### §3.4 Secret walls (breakable)
 
@@ -119,7 +120,7 @@ Two ways to place a marker:
 | `type` | Spawns | Custom properties | Notes |
 |---|---|---|---|
 | `playerStart` | The player | — | Exactly **one** per map, usually in the first room. Rectangle position = spawn point. |
-| `coin` | Coin pickup | — | Collectible objects are **never** drawn from the Tiled tile sprite — the spawned entity always renders its own `Coin_01..06` atlas spin animation, regardless of the marker source. So you can place coins as plain rectangles OR stamp any `items.tsx` coin tile (static or animated); the on-screen result is identical. The coin is uniformly min-fitted to **half** the marker rect (128x128 tile objects → a 64px coin). |
+| `coin` | Coin pickup | — | Collectible objects are **never** drawn from the Tiled tile sprite — the spawned entity always renders its own `Coin_01..06` atlas spin animation, regardless of the marker source. So you can place coins as plain rectangles OR stamp any `items.tsx` coin tile (static or animated); the on-screen result is identical. Every coin renders at **half a map tile** (`DEFAULT_COIN_SIZE * unitScale`, i.e. 64px on a 128px-tile map) **centered on the marker rect — the marker's drawn size is ignored** (it's a pure placement guide), so map coins and chest/enemy-dropped coins are always the same size. |
 | `chest` | Chest (opens on touch, drops coins) | — | Built from the `gfx/origin-game.atlas` `Chest_01_Locked`/`Chest_01_Unlocked` regions (128x128 → one map tile), never from a Tiled tile sprite. Any `items.tsx` chest tile just marks the spot. |
 | `torch` | Decorative torch | — | Flickers visually. |
 | `dagger` | Dagger pickup | — | Collectible item. |
@@ -178,7 +179,7 @@ angle += speed * dt        (each frame)
 | Property | Type | Default | Meaning |
 |---|---|---|---|
 | `solid` | boolean | `true` | Set `false` on a tileset tile to make that tile **non-blocking** even in the `collision` layer (the passage-doorway use case, §3.1). |
-| `oneWay` | boolean | `false` | Set `true` on a tileset tile to make it a **drop-through platform**: player-only, top-only solid; jump up through; drop with the `v` button / `S` / `DOWN` (see §3.3). Ignored when the tile is `hazard`. |
+| `oneWay` | boolean | `false` | Set `true` on a tileset tile to make it a **drop-through platform**: the player gets top-only solidity (jump up through; drop with the `v` button / `S` / `DOWN`), while enemies and popped items treat it as a fully-solid tile (all four sides) and flying enemies pass through (see §3.3). Ignored when the tile is `hazard`. |
 | `hazard` | boolean | `false` | Set `true` on a tileset tile to make it a **non-solid hazard** (spikes/lava): 1 HP on touch, no knockback, invulnerability grace (see §3.2). Wins over `solid`/`oneWay`. |
 | `secret` | boolean | `false` | Set `true` on a **solid** tileset tile to make it a **breakable secret wall**: solid until the player melee-strikes it, then it disappears and opens the way (see §3.4). Ignored on `hazard` and `solid = false` tiles. |
 | `type` | string | — | On tileset tiles: lets you paint tile objects that auto-spawn as markers (`coin`, `chest`, `enemy`…). |
@@ -247,7 +248,7 @@ For each axis (X and Y) independently:
 *   **Camera snaps wrong room / player not in view** — `playerStart` isn't inside the intended `Rooms` rectangle, or the rooms don't tile the map.
 *   **Unexpectedly scrolling when you wanted flip** — the room is larger than the screen (30×17 tiles); add `camera="flip"` to force static framing.
 *   **Spikes/lava never hurt a standing player** — the player's collision box is taller than a tile and its feet sit on the floor, so hazards must be placed where the player's body travels *through* them (see §3.2).
-*   **Drop platform behaves like a wall** — the tile doesn't carry `oneWay = true` on the tileset tile; or the platform's collision was authored as a plain solid tile. Also remember one-way platforms are player-only (enemies fall straight through).
+*   **Drop platform behaves like a wall** — the tile doesn't carry `oneWay = true` on the tileset tile; or the platform's collision was authored as a plain solid tile. Also remember one-way platforms are drop-through **only for the player** — enemies and popped items stand on them like solid tiles, and flying enemies fly through them.
 *   **Secret wall doesn't break** — the tile isn't flagged `secret = true` on the tileset tile (a plain solid tile won't break); also remember one swing breaks at most one tile, and the strike hitbox must actually reach the wall (it's a solid block until broken).
 
 ---

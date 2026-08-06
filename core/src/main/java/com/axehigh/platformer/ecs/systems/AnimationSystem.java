@@ -74,9 +74,16 @@ public class AnimationSystem extends IteratingSystem {
         // Invulnerability blink: once the HURT clip has finished (hurtTimer done) but while the
         // hit-invulnerability grace period is still running, flash the sprite at ~10Hz so the
         // remaining invulnerability is readable without freezing the player in the hurt pose.
-        // A null region is skipped by RenderSystem, giving the blink effect.
+        // Enemy death blink: while a dead enemy's deathTimer is in its final DEATH_FLASH_DURATION
+        // window, flash the corpse at the same ~10Hz so the body lingers, then blinks out just
+        // before removal. A null region is skipped by RenderSystem, giving the blink effect.
         PlayerComponent player = PLAYER.get(entity);
-        if (player != null && player.hitInvulnerability.isActive() && !player.hurtTimer.isActive() && !player.isDead) {
+        EnemyComponent enemy = ENEMY.get(entity);
+        boolean blinking = player != null
+            ? player.hitInvulnerability.isActive() && !player.hurtTimer.isActive() && !player.isDead
+            : enemy != null && enemy.isDead && enemy.deathTimer.isActive()
+                && enemy.deathTimer.getRemaining() <= EnemyDamageResolver.DEATH_FLASH_DURATION;
+        if (blinking) {
             animationComponent.blinkTimer += deltaTime;
             if (((int) (animationComponent.blinkTimer * BLINK_FREQUENCY)) % 2 == 1) {
                 textureComponent.region = null;

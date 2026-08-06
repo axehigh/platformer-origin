@@ -9,6 +9,7 @@ import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TextureComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.particles.GlobalParticles;
 import com.axehigh.platformer.particles.ParticleHelper;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -39,7 +40,8 @@ import static com.axehigh.platformer.ecs.components.Mappers.TEXTURE;
 /**
  * Resolves the close-combat strike attack: while the player's {@code meleeAttack} timer is active,
  * builds a frame-indexed hitbox rectangle offset from the player's collision bounds (in the
- * direction the player is facing) and checks it against enemies, chests, and secret walls. The
+ * direction the player is facing) and checks it against enemies, chests, and secret walls; a strike
+ * hitting a regular solid wall spawns a sword-clank spark. The
  * hitbox is only "live" while the sword is actually extended: each frame of the {@code ATTACKING}
  * animation maps to a reach in the sprite's reach table, {@link SpriteConstants#PLAYER_ATTACK_REACH}
  * (0 = windup/recovery frames don't hit at all, so a swing never registers before the blade reaches
@@ -155,6 +157,8 @@ public class MeleeAttackSystem extends IteratingSystem {
                     player.meleeHasHit = true;
                 } else if (breakSecretWall(strikeBounds)) {
                     player.meleeHasHit = true;
+                } else if (spawnWallClankSpark(strikeBounds)) {
+                    player.meleeHasHit = true;
                 }
             }
         }
@@ -193,8 +197,28 @@ public class MeleeAttackSystem extends IteratingSystem {
         return false;
     }
 
-    /** Blanks the collision-layer cell underneath a broken secret-wall rect (removes its sprite). */
-    private void blankSecretTile(Rectangle rect) {
+    /**
+     * Spawns a sword-clank spark at the first solid wall (non-secret {@code collisionRects} member)
+     * overlapping the strike box, when no enemy/chest/secret wall was hit. Returns {@code true} when
+     * a wall was clanked, so the swing is consumed (one clank per swing).
+     */
+    private boolean spawnWallClankSpark(Rectangle bounds) {
+        if (collisionRects == null || engine == null) {
+            return false;
+        }
+        for (Rectangle rect : collisionRects) {
+            if (!bounds.overlaps(rect)) {
+                continue;
+            }
+            ParticleHelper.spawnParticle(engine, GlobalParticles.SPARKS,
+                rect.x + rect.width / 2f, rect.y + rect.height / 2f,
+                0f, EnemyDamageResolver.HIT_SPARK_SCALE, EnemyDamageResolver.HIT_SPARK_MAX_LIFETIME);
+            return true;
+        }
+        return false;
+    }
+
+    /** Blanks the collision-layer cell underneath a broken secret-wall rect (removes its sprite). */    private void blankSecretTile(Rectangle rect) {
         int tileX = (int) (rect.x / collisionLayer.getTileWidth());
         int tileY = (int) (rect.y / collisionLayer.getTileHeight());
         TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);

@@ -78,7 +78,7 @@ public class EnemyContactSystemTest extends SystemTestBase {
         engine.update(0.5f);
         assertEquals(2, playerComponent.health);
 
-        engine.update(0.6f);
+        engine.update(1.6f);
         assertEquals(1, playerComponent.health);
         assertTrue(playerComponent.hitInvulnerability.isActive());
     }

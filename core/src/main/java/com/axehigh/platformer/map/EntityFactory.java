@@ -367,7 +367,7 @@ public class EntityFactory {
         float w = width > 0f ? width : DEFAULT_EXIT_GATE_WIDTH;
         float h = height > 0f ? height : DEFAULT_EXIT_GATE_HEIGHT;
         CollisionComponent collisionComponent = new CollisionComponent();
-        collisionComponent.bounds.setSize(w * unitScale, h * unitScale);
+        collisionComponent.bounds.setSize(w, h);
         entity.add(collisionComponent);
 
         if (nextLevelPath != null) {
@@ -421,15 +421,17 @@ public class EntityFactory {
 
     /**
      * Builds an animated coin pickup entity from the {@code Coin_01..06} atlas regions (never the
-     * Tiled tile sprite), uniformly min-fitted to **half** the given {@code width} x {@code height}
-     * marker rect and centered on it, so the round coin never distorts and a 128px tile marker
-     * yields a 64px coin. {@code (x, y)} is the rect's bottom-left corner, matching every other
+     * Tiled tile sprite), sized to **half a map tile** ({@code DEFAULT_COIN_SIZE * unitScale}) and
+     * centered on the given {@code width} x {@code height} marker rect, so the on-screen size is
+     * identical to popped coins regardless of how the marker was drawn in Tiled. The marker rect is
+     * purely a placement guide; {@code (x, y)} is its bottom-left corner, matching every other
      * object-layer spawn. The spin animation is driven by the generic {@code AnimationSystem}.
      */
     public Entity createCoinPickup(float x, float y, float width, float height) {
+        float size = DEFAULT_COIN_SIZE * unitScale;
         AtlasRegion region = originAtlas.findRegion(COIN_REGION_NAMES[0]);
-        float scale = Math.min(width, height) / region.getRegionWidth() / 2f;
-        return buildCoin(x, y, width, height, scale);
+        float scale = size / region.getRegionWidth();
+        return buildCoin(x + width / 2f - size / 2f, y + height / 2f - size / 2f, size, size, scale);
     }
 
     /**

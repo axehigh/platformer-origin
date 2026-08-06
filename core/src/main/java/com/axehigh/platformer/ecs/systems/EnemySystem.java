@@ -61,20 +61,22 @@ public class EnemySystem extends IteratingSystem {
 
     private final EntityFactory entityFactory;
     private final Array<Rectangle> collisionRects;
+    private final Array<Rectangle> oneWayRects;
     private final Array<Rectangle> hazardRects;
     private final RoomState roomState;
     private final Rectangle ledgeProbe = new Rectangle();
     private final Rectangle hazardProbe = new Rectangle();
     private float unitScale = 1f;
 
-    public EnemySystem(EntityFactory entityFactory, Array<Rectangle> collisionRects, Array<Rectangle> hazardRects, RoomState roomState) {
-        this(entityFactory, collisionRects, hazardRects, roomState, 0);
+    public EnemySystem(EntityFactory entityFactory, Array<Rectangle> collisionRects, Array<Rectangle> oneWayRects, Array<Rectangle> hazardRects, RoomState roomState) {
+        this(entityFactory, collisionRects, oneWayRects, hazardRects, roomState, 0);
     }
 
-    public EnemySystem(EntityFactory entityFactory, Array<Rectangle> collisionRects, Array<Rectangle> hazardRects, RoomState roomState, int priority) {
+    public EnemySystem(EntityFactory entityFactory, Array<Rectangle> collisionRects, Array<Rectangle> oneWayRects, Array<Rectangle> hazardRects, RoomState roomState, int priority) {
         super(Family.all(EnemyComponent.class, MovementComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
         this.entityFactory = entityFactory;
         this.collisionRects = collisionRects;
+        this.oneWayRects = oneWayRects;
         this.hazardRects = hazardRects;
         this.roomState = roomState;
     }
@@ -92,9 +94,12 @@ public class EnemySystem extends IteratingSystem {
         FlyingEnemyComponent flying = FLYING.get(entity);
 
         if (enemy.isDead) {
+            if (!enemy.deathCoinsSpawned) {
+                enemy.deathCoinsSpawned = true;
+                dropCoins(enemy, transform, collision);
+            }
             enemy.deathTimer.update(deltaTime);
             if (enemy.deathTimer.isDone()) {
-                dropCoins(enemy, transform, collision);
                 getEngine().removeEntity(entity);
             }
             return;
@@ -171,7 +176,11 @@ public class EnemySystem extends IteratingSystem {
         }
     }
 
-    /** Spawns the death coin drop (1 coin per full {@link #COINS_PER_HEALTH} max health) at the enemy's center. */
+    /**
+     * Spawns the death coin drop (1 coin per full {@link #COINS_PER_HEALTH} max health) at the
+     * enemy's center, on the first frame the death is observed — immediately on the kill, before
+     * the corpse lingers through the death animation and blinks out.
+     */
     private void dropCoins(EnemyComponent enemy, TransformComponent transform, CollisionComponent collision) {
         int coinCount = (int) (enemy.maxHealth / COINS_PER_HEALTH);
         if (coinCount <= 0) {
@@ -192,7 +201,11 @@ public class EnemySystem extends IteratingSystem {
         enemy.turnPause.start(TURN_PAUSE_DURATION * unitScale);
     }
 
-    /** Probes a small area just past the enemy's leading foot, at foot level, for solid ground. */
+    /**
+     * Probes a small area just past the enemy's leading foot, at foot level, for solid ground.
+     * Both regular {@code collisionRects} and one-way tiles ({@code oneWayRects}) count as ground,
+     * so enemies patrol on one-way tiles without jitter-turning mid-platform.
+     */
     private boolean hasGroundAhead(TransformComponent transform, CollisionComponent collision, int direction) {
         float probeX = direction > 0
             ? collision.worldBounds.x + collision.worldBounds.width
@@ -201,6 +214,11 @@ public class EnemySystem extends IteratingSystem {
         ledgeProbe.set(probeX, probeY, LEDGE_PROBE_AHEAD * unitScale, LEDGE_PROBE_DEPTH * unitScale);
 
         for (Rectangle rect : collisionRects) {
+            if (ledgeProbe.overlaps(rect)) {
+                return true;
+            }
+        }
+        for (Rectangle rect : oneWayRects) {
             if (ledgeProbe.overlaps(rect)) {
                 return true;
             }
