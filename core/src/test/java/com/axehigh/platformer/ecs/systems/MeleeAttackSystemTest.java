@@ -1,5 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
+import com.axehigh.platformer.assets.SpriteConstants;
 import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.ChestComponent;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
@@ -11,13 +12,15 @@ import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import org.junit.Before;
 import org.junit.Test;
 
+import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
 import static com.axehigh.platformer.ecs.components.Mappers.CHEST;
 import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
@@ -52,7 +55,9 @@ public class MeleeAttackSystemTest extends SystemTestBase {
 
     private static AssetManager mockAssets() {
         AssetManager assets = mock(AssetManager.class);
-        when(assets.get("gfx/old/chest_open.png", Texture.class)).thenReturn(mock(Texture.class));
+        TextureAtlas atlas = mock(TextureAtlas.class);
+        when(atlas.findRegion(SpriteConstants.CHEST_OPEN_REGION)).thenReturn(mock(AtlasRegion.class));
+        when(assets.get(ORIGIN_GAME_GFX, TextureAtlas.class)).thenReturn(atlas);
         return assets;
     }
 

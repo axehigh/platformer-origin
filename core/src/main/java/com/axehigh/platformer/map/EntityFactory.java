@@ -16,8 +16,6 @@ import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
-import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
-import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
@@ -51,6 +49,12 @@ public class EntityFactory {
     private static final float MIN_POP_VELOCITY_Y = 80f;
     private static final float MAX_POP_VELOCITY_Y = 140f;
     private static final float MAX_POP_VELOCITY_X = 40f;
+    /** Per-frame duration of the coin spin animation (matches the 100ms Tiled animation). */
+    private static final float COIN_FRAME_DURATION = 0.1f;
+    /** Atlas region names of the coin spin frames, in playback order. */
+    private static final String[] COIN_REGION_NAMES = {"Coin_01", "Coin_02", "Coin_03", "Coin_04", "Coin_05", "Coin_06"};
+    /** The coin sprite renders at half a map tile by default (8px base tile scaled by {@code unitScale}). */
+    private static final float DEFAULT_COIN_SIZE = 8f;
 
     private final AssetManager assetManager;
     private final TextureAtlas originAtlas;
@@ -189,11 +193,11 @@ public class EntityFactory {
 
             switch (type) {
                 case "coin":
-                    engine.addEntity(tile != null ? createCoinPickup(spawnX, spawnY, tile) : createCoinPickup(spawnX, spawnY));
+                    engine.addEntity(createCoinPickup(spawnX, spawnY, objectWidth, objectHeight));
                     spawned = true;
                     break;
                 case "chest":
-                    engine.addEntity(tile != null ? createChest(spawnX, spawnY, tile) : createChest(spawnX, spawnY));
+                    engine.addEntity(createChest(spawnX, spawnY));
                     spawned = true;
                     break;
                 case "torch":
@@ -375,97 +379,18 @@ public class EntityFactory {
         return entity;
     }
 
+    /**
+     * Builds a chest entity from the {@code Chest_01_Locked} atlas region (never the Tiled tile
+     * sprite). The region is tile-sized (128px), so it renders 1:1 at one map tile; the open
+     * variant is swapped in by {@code MeleeAttackSystem} when the chest is struck.
+     */
     private Entity createChest(float x, float y) {
-        Texture texture = getTexture("gfx/old/chest.png");
+        AtlasRegion region = originAtlas.findRegion(SpriteConstants.CHEST_CLOSED_REGION);
 
         Entity entity = new Entity();
 
         TransformComponent transform = new TransformComponent();
         transform.position.set(x, y);
-        transform.scale.set(unitScale, unitScale);
-        transform.z = DECOR_Z;
-        entity.add(transform);
-
-        TextureComponent textureComponent = new TextureComponent();
-        textureComponent.region = new TextureRegion(texture);
-        entity.add(textureComponent);
-
-        CollisionComponent collisionComponent = new CollisionComponent();
-        collisionComponent.bounds.setSize(texture.getWidth() * unitScale, texture.getHeight() * unitScale);
-        entity.add(collisionComponent);
-
-        entity.add(new ChestComponent());
-
-        return entity;
-    }
-
-    /**
-     * Builds a chest entity from a Tiled map tile.
-     */
-    public Entity createChest(float x, float y, TiledMapTile tile) {
-        Entity entity = new Entity();
-
-        TransformComponent transform = new TransformComponent();
-        transform.position.set(x, y);
-        transform.scale.set(1f, 1f);
-        transform.z = DECOR_Z;
-        entity.add(transform);
-
-        TextureComponent textureComponent = new TextureComponent();
-        textureComponent.region = tile.getTextureRegion();
-        entity.add(textureComponent);
-
-        CollisionComponent collisionComponent = new CollisionComponent();
-        collisionComponent.bounds.setSize(tile.getTextureRegion().getRegionWidth(),
-            tile.getTextureRegion().getRegionHeight());
-        entity.add(collisionComponent);
-
-        entity.add(new ChestComponent());
-
-        return entity;
-    }
-
-    /**
-     * Builds a static, standalone coin pickup entity (used for map object markers).
-     */
-    public Entity createCoinPickup(float x, float y) {
-        Texture texture = getTexture("gfx/old/coin.png");
-
-        Entity entity = new Entity();
-
-        TransformComponent transform = new TransformComponent();
-        transform.position.set(x, y);
-        transform.scale.set(unitScale, unitScale);
-        transform.z = DECOR_Z;
-        entity.add(transform);
-
-        TextureComponent textureComponent = new TextureComponent();
-        textureComponent.region = new TextureRegion(texture);
-        entity.add(textureComponent);
-
-        CollisionComponent collisionComponent = new CollisionComponent();
-        collisionComponent.bounds.setSize(texture.getWidth() * unitScale, texture.getHeight() * unitScale);
-        entity.add(collisionComponent);
-
-        entity.add(new CoinPickupComponent());
-
-        return entity;
-    }
-
-    /**
-     * Builds a coin pickup from a Tiled map tile, supporting animation if defined in the tileset.
-     */
-    public Entity createCoinPickup(float x, float y, TiledMapTile tile) {
-        Entity entity = new Entity();
-
-        TextureRegion region = tile.getTextureRegion();
-        float tileWidth = region.getRegionWidth();
-        float tileHeight = region.getRegionHeight();
-
-        TransformComponent transform = new TransformComponent();
-        transform.position.set(
-            x + (tileWidth - region.getRegionWidth()) / 2f,
-            y + (tileHeight - region.getRegionHeight()) / 2f);
         transform.scale.set(1f, 1f);
         transform.z = DECOR_Z;
         entity.add(transform);
@@ -478,26 +403,90 @@ public class EntityFactory {
         collisionComponent.bounds.setSize(region.getRegionWidth(), region.getRegionHeight());
         entity.add(collisionComponent);
 
-        entity.add(new CoinPickupComponent());
-
-        if (tile instanceof AnimatedTiledMapTile) {
-            AnimatedTiledMapTile animatedTile = (AnimatedTiledMapTile) tile;
-            StaticTiledMapTile[] frames = animatedTile.getFrameTiles();
-            TextureRegion[] regions = new TextureRegion[frames.length];
-            for (int i = 0; i < frames.length; i++) {
-                regions[i] = frames[i].getTextureRegion();
-            }
-            int[] intervals = animatedTile.getAnimationIntervals();
-            float frameDuration = intervals.length > 0 ? intervals[0] / 1000f : 0.1f;
-
-            Animation<TextureRegion> animation = new Animation<>(frameDuration, regions);
-            AnimationComponent animComp = new AnimationComponent();
-            animComp.animations.put(IDLE, animation);
-            animComp.currentState = IDLE;
-            entity.add(animComp);
-        }
+        entity.add(new ChestComponent());
 
         return entity;
+    }
+
+    /**
+     * Builds an animated coin pickup entity sized to half a map tile (base 8px scaled by
+     * {@code unitScale}), centered on {@code (x, y)}. Used for popped coins (chest/enemy drops).
+     */
+    public Entity createCoinPickup(float x, float y) {
+        float size = DEFAULT_COIN_SIZE * unitScale;
+        AtlasRegion region = originAtlas.findRegion(COIN_REGION_NAMES[0]);
+        float scale = size / region.getRegionWidth();
+        return buildCoin(x - size / 2f, y - size / 2f, size, size, scale);
+    }
+
+    /**
+     * Builds an animated coin pickup entity from the {@code Coin_01..06} atlas regions (never the
+     * Tiled tile sprite), uniformly min-fitted to **half** the given {@code width} x {@code height}
+     * marker rect and centered on it, so the round coin never distorts and a 128px tile marker
+     * yields a 64px coin. {@code (x, y)} is the rect's bottom-left corner, matching every other
+     * object-layer spawn. The spin animation is driven by the generic {@code AnimationSystem}.
+     */
+    public Entity createCoinPickup(float x, float y, float width, float height) {
+        AtlasRegion region = originAtlas.findRegion(COIN_REGION_NAMES[0]);
+        float scale = Math.min(width, height) / region.getRegionWidth() / 2f;
+        return buildCoin(x, y, width, height, scale);
+    }
+
+    /**
+     * Shared coin-entity builder: places a square {@code scale * regionWidth} coin centered inside
+     * the {@code width} x {@code height} rect starting at {@code (x, y)} (bottom-left).
+     */
+    private Entity buildCoin(float x, float y, float width, float height, float scale) {
+        Animation<TextureRegion> animation = createCoinAnimation();
+        AtlasRegion region = originAtlas.findRegion(COIN_REGION_NAMES[0]);
+
+        float scaledWidth = region.getRegionWidth() * scale;
+        float scaledHeight = region.getRegionHeight() * scale;
+
+        Entity entity = new Entity();
+
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(x + (width - scaledWidth) / 2f, y + (height - scaledHeight) / 2f);
+        transform.scale.set(scale, scale);
+        transform.z = DECOR_Z;
+        entity.add(transform);
+
+        TextureComponent textureComponent = new TextureComponent();
+        textureComponent.region = region;
+        entity.add(textureComponent);
+
+        CollisionComponent collisionComponent = new CollisionComponent();
+        collisionComponent.bounds.setSize(scaledWidth, scaledHeight);
+        entity.add(collisionComponent);
+
+        AnimationComponent animComp = new AnimationComponent();
+        animComp.animations.put(IDLE, animation);
+        animComp.currentState = IDLE;
+        entity.add(animComp);
+
+        entity.add(new CoinPickupComponent());
+
+        return entity;
+    }
+
+    /** Builds the coin spin animation from the {@code Coin_01..06} atlas regions. */
+    private Animation<TextureRegion> createCoinAnimation() {
+        Array<AtlasRegion> regions = new Array<>();
+        for (String name : COIN_REGION_NAMES) {
+            AtlasRegion region = originAtlas.findRegion(name);
+            if (region != null) {
+                regions.add(region);
+            }
+        }
+        if (regions.size == 0) {
+            for (AtlasRegion region : originAtlas.getRegions()) {
+                if (region.name.startsWith(COIN_REGION_NAMES[0].substring(0, 5))) {
+                    regions.add(region);
+                    break;
+                }
+            }
+        }
+        return new Animation<>(COIN_FRAME_DURATION, regions, LOOP);
     }
 
     /**

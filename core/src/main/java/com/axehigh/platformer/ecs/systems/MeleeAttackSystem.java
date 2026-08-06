@@ -1,5 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
+import com.axehigh.platformer.assets.SpriteConstants;
 import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.ChestComponent;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
@@ -16,13 +17,14 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
+import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
 import static com.axehigh.platformer.assets.SpriteConstants.PLAYER_ATTACK_REACH;
 import static com.axehigh.platformer.assets.SpriteConstants.PLAYER_MAX_ATTACK_REACH;
 import static com.axehigh.platformer.ecs.components.Mappers.ANIMATION;
@@ -141,7 +143,8 @@ public class MeleeAttackSystem extends IteratingSystem {
                         chest.opened = true;
                         chest.disappearTimer.start(CHEST_DISAPPEAR_DELAY);
                         TextureComponent texture = TEXTURE.get(hitChest);
-                        texture.region = new TextureRegion(assetManager.get("gfx/old/chest_open.png", Texture.class));
+                        texture.region = assetManager.get(ORIGIN_GAME_GFX, TextureAtlas.class)
+                            .findRegion(SpriteConstants.CHEST_OPEN_REGION);
                         CollisionComponent chestCollision = COLLISION.get(hitChest);
                         if (engine != null && chestCollision != null) {
                             ParticleHelper.spawnSmallSmoke(engine,

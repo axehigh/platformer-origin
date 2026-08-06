@@ -26,6 +26,11 @@ public class SpriteConstants {
     public static final float[] PLAYER_ATTACK_REACH = {0f, 12f, 16f, 24f, 0f};
     public static final float PLAYER_MAX_ATTACK_REACH = max(PLAYER_ATTACK_REACH);
 
+    //Chest atlas regions (gfx/origin-game.atlas): closed sprite on spawn, swapped to the
+    //matching open sprite when a chest is melee-struck (see MeleeAttackSystem).
+    public static final String CHEST_CLOSED_REGION = "Chest_01_Locked";
+    public static final String CHEST_OPEN_REGION = "Chest_01_Unlocked";
+
     //Enemy Collision Box (base units, scaled by ENEMY_SCALE)
 
     public static float EnemyWalkerScale = 0.3f;

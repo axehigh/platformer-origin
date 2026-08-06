@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="16" height="12" tilewidth="128" tileheight="128" infinite="0" nextlayerid="7" nextobjectid="15">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="16" height="12" tilewidth="128" tileheight="128" infinite="0" nextlayerid="7" nextobjectid="16">
  <tileset firstgid="1" source="cave_tileset.tsx"/>
  <tileset firstgid="49" source="dungeon_tiles.tsx"/>
  <tileset firstgid="106" source="enemy.tsx"/>
+ <tileset firstgid="113" source="items.tsx"/>
  <layer id="1" name="background" width="16" height="12">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -52,9 +53,9 @@
 </data>
  </layer>
  <objectgroup id="3" name="objects">
-  <object id="3" name="playerStart" type="playerStart" x="128" y="768" width="128" height="128"/>
+  <object id="3" name="playerStart" type="playerStart" x="128" y="896" width="128" height="128"/>
   <object id="4" name="torchLeft" type="torch" x="0" y="384" width="128" height="128"/>
-  <object id="6" name="exitGate" type="exitGate" x="1792" y="512" width="140" height="152">
+  <object id="6" name="exitGate" type="exitGate" x="1792" y="480" width="140" height="152">
    <properties>
     <property name="nextLevel" value="maps/level1/level_1_demo_2.tmx"/>
    </properties>
@@ -76,6 +77,7 @@
   <object id="12" gid="110" x="1664" y="1024" width="128" height="128"/>
   <object id="13" gid="108" x="1152" y="384" width="128" height="128"/>
   <object id="14" name="torchLeft" type="torch" x="1920" y="384" width="128" height="128"/>
+  <object id="15" gid="125" x="1056" y="384" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="6" name="enemies"/>
  <objectgroup id="4" name="Rooms" locked="1">

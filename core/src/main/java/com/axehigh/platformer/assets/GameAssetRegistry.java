@@ -30,13 +30,11 @@ public final class GameAssetRegistry {
         //TODO This will be outdated after the atlas'es have been loaded.
         assetManager.load("gfx/old/player.png", Texture.class);
         assetManager.load("gfx/old/coin.png", Texture.class);
-        assetManager.load("gfx/old/chest.png", Texture.class);
         assetManager.load("gfx/old/torch.png", Texture.class);
         assetManager.load("gfx/old/exit_gate.png", Texture.class);
         assetManager.load("gfx/old/heart.png", Texture.class);
         assetManager.load("gfx/old/bullet.png", Texture.class);
         assetManager.load("gfx/old/dagger.png", Texture.class);
-        assetManager.load("gfx/old/chest_open.png", Texture.class);
         assetManager.load("gfx/old/platform.png", Texture.class);
     }
 

@@ -119,8 +119,8 @@ Two ways to place a marker:
 | `type` | Spawns | Custom properties | Notes |
 |---|---|---|---|
 | `playerStart` | The player | — | Exactly **one** per map, usually in the first room. Rectangle position = spawn point. |
-| `coin` | Coin pickup | — | Tile objects from `items.tsx` auto-animate when the tile has a Tiled animation (use the animated coin tile for spin). |
-| `chest` | Chest (opens on touch, drops coins) | — | `items.tsx` tileset. |
+| `coin` | Coin pickup | — | Collectible objects are **never** drawn from the Tiled tile sprite — the spawned entity always renders its own `Coin_01..06` atlas spin animation, regardless of the marker source. So you can place coins as plain rectangles OR stamp any `items.tsx` coin tile (static or animated); the on-screen result is identical. The coin is uniformly min-fitted to **half** the marker rect (128x128 tile objects → a 64px coin). |
+| `chest` | Chest (opens on touch, drops coins) | — | Built from the `gfx/origin-game.atlas` `Chest_01_Locked`/`Chest_01_Unlocked` regions (128x128 → one map tile), never from a Tiled tile sprite. Any `items.tsx` chest tile just marks the spot. |
 | `torch` | Decorative torch | — | Flickers visually. |
 | `dagger` | Dagger pickup | — | Collectible item. |
 | `exitGate` | Exit gate / level transition (trigger only, no sprite) | `nextLevel` (string, required to make it functional) | The gate spawns a **logic-only** entity: a collision box (sized from the object rectangle) + optional level transition. **No gate art is drawn** — paint the door's decoration yourself in the `background`/`decoration`/`collision` layers. With `nextLevel` it's a real transition; without it, purely decorative (e.g. a final-level dead end). |
