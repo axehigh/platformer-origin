@@ -18,6 +18,9 @@ public final class LevelCatalog {
         LEVELS.add(new LevelDefinition("lvl1_generated1", "Long 1", "maps/level1/generated_room.tmx"));
         LEVELS.add(new LevelDefinition("lvl1_generated2", "Single 1", "maps/level1/generated_single_room.tmx"));
         LEVELS.add(new LevelDefinition("lvl1_generated3", "Single 2", "maps/level1/generated_single_room2.tmx"));
+        LEVELS.add(new LevelDefinition("lvl1_generated4", "Single Secret Inside", "maps/level1/generated_single_secret_inside.tmx"));
+        LEVELS.add(new LevelDefinition("lvl1_demo_secret", "Level 1 demo secret", "maps/level1/level_1_demo_secret.tmx"));
+        LEVELS.add(new LevelDefinition("lvl4_demo", "Level 4 demo", "maps/level1/level_4_demo.tmx"));
     }
 
     private LevelCatalog() {

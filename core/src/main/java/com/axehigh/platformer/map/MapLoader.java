@@ -19,6 +19,8 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.ObjectMap;
+import com.badlogic.gdx.utils.ObjectSet;
 
 /**
  * Loads a .tmx map and extracts the static collision boundary set (from the "collision" tile
@@ -30,6 +32,7 @@ public class MapLoader implements Disposable {
     private static final String OBJECTS_LAYER = "objects";
     private static final String ENEMIES_LAYER = "enemies";
     private static final String ROOMS_LAYER = "Rooms";
+    private static final String SECRET_HIDE_LAYER = "secret_hide";
     private static final String TYPE_PLAYER_START = "playerStart";
     /** Optional per-room property choosing the camera mode: "flip" or "scroll" (default: infer by size). */
     private static final String PROPERTY_CAMERA = "camera";
@@ -41,6 +44,8 @@ public class MapLoader implements Disposable {
     private static final String PROPERTY_HAZARD = "hazard";
     /** Tile property marking a solid breakable wall tile that opens a secret room when melee-struck. */
     private static final String PROPERTY_SECRET = "secret";
+    /** Tile/object property naming the {@code Rooms}-layer rectangle (and thus the secret room) a secret wall guards or an object is deferred for. */
+    private static final String PROPERTY_SECRET_ROOM = "secretRoom";
 
     private final TiledMap map;
     private final Array<Rectangle> collisionRects = new Array<>();
@@ -52,8 +57,13 @@ public class MapLoader implements Disposable {
     private final float tileHeight;
 
     public MapLoader(String tmxPath) {
+        this(new TmxMapLoader().load(tmxPath), tmxPath);
+    }
+
+    /** Package-private constructor with a pre-built map, so headless tests can exercise the parsing without a .tmx file. */
+    MapLoader(TiledMap map, String tmxPath) {
+        this.map = map;
         this.tmxPath = tmxPath;
-        map = new TmxMapLoader().load(tmxPath);
         
         // Get tile size from properties or from first tile layer
         tileWidth = map.getProperties().get("tilewidth", 16, Integer.class);
@@ -196,6 +206,129 @@ public class MapLoader implements Disposable {
     public TiledMapTileLayer getCollisionLayer() {
         MapLayer layer = map.getLayers().get(COLLISION_LAYER);
         return layer instanceof TiledMapTileLayer ? (TiledMapTileLayer) layer : null;
+    }
+
+    /**
+     * The {@code secret_hide} tile layer (the visual veil painted over secret-room footprints so the
+     * cavity reads as solid rock), or {@code null} when the map has none. Reveal blanks its cells.
+     */
+    public TiledMapTileLayer getSecretHideLayer() {
+        MapLayer layer = map.getLayers().get(SECRET_HIDE_LAYER);
+        return layer instanceof TiledMapTileLayer ? (TiledMapTileLayer) layer : null;
+    }
+
+    /**
+     * Discovers every secret room of the map: the unique {@code secretRoom} values found on
+     * secret-wall tiles and on deferred object/enemy markers. Each {@link SecretRoom} groups the
+     * collision-layer wall rects guarding it, the {@code secret_hide} veil cells overlapping its
+     * {@code Rooms}-layer rect, and the object/enemy markers that carry its name — which are
+     * **partitioned out** of the main {@code objects}/{@code enemies} layers here, so
+     * {@code EntityFactory.spawnObjects} only ever sees non-secret markers and the deferred ones
+     * stay unspawned until {@code SecretRoomRevealer.reveal(...)} spawns them. Call before spawning
+     * on a fresh {@code MapLoader} (both {@code GameScreen.show()} and {@code LevelManager} do).
+     */
+    public Array<SecretRoom> getSecretRooms() {
+        Array<SecretRoom> rooms = new Array<>();
+        TiledMapTileLayer hideLayer = getSecretHideLayer();
+        ObjectSet<String> names = new ObjectSet<>();
+        ObjectMap<Rectangle, String> wallRooms = new ObjectMap<>();
+
+        TiledMapTileLayer collisionLayer = getCollisionLayer();
+        if (collisionLayer != null) {
+            for (int y = 0; y < collisionLayer.getHeight(); y++) {
+                for (int x = 0; x < collisionLayer.getWidth(); x++) {
+                    TiledMapTileLayer.Cell cell = collisionLayer.getCell(x, y);
+                    if (cell == null || cell.getTile() == null) {
+                        continue;
+                    }
+                    String roomName = cell.getTile().getProperties().get(PROPERTY_SECRET_ROOM, String.class);
+                    if (roomName == null) {
+                        continue;
+                    }
+                    names.add(roomName);
+                    wallRooms.put(new Rectangle(x * tileWidth, y * tileHeight, tileWidth, tileHeight), roomName);
+                }
+            }
+        }
+
+        ObjectMap<String, MapObjects> deferredByRoom = new ObjectMap<>();
+        partitionSecretObjects(map.getLayers().get(OBJECTS_LAYER), names, deferredByRoom);
+        partitionSecretObjects(map.getLayers().get(ENEMIES_LAYER), names, deferredByRoom);
+
+        for (String name : names) {
+            SecretRoom room = new SecretRoom(name, findRoomRect(name));
+            for (ObjectMap.Entry<Rectangle, String> entry : wallRooms) {
+                if (name.equals(entry.value)) {
+                    room.walls.add(entry.key);
+                }
+            }
+            MapObjects deferred = deferredByRoom.get(name);
+            if (deferred != null) {
+                for (MapObject object : deferred) {
+                    room.deferredObjects.add(object);
+                }
+            }
+            if (hideLayer != null && room.room != null) {
+                collectVeilCells(hideLayer, room.room, room.veilCells);
+            }
+            rooms.add(room);
+        }
+        return rooms;
+    }
+
+    /** Moves every marker carrying a {@code secretRoom} property out of the layer into a per-room bucket. */
+    private void partitionSecretObjects(MapLayer layer, ObjectSet<String> names, ObjectMap<String, MapObjects> deferredByRoom) {
+        if (layer == null) {
+            return;
+        }
+        MapObjects objects = layer.getObjects();
+        for (int i = objects.getCount() - 1; i >= 0; i--) {
+            MapObject object = objects.get(i);
+            String roomName = object.getProperties().get(PROPERTY_SECRET_ROOM, String.class);
+            if (roomName == null) {
+                continue;
+            }
+            names.add(roomName);
+            MapObjects bucket = deferredByRoom.get(roomName);
+            if (bucket == null) {
+                bucket = new MapObjects();
+                deferredByRoom.put(roomName, bucket);
+            }
+            bucket.add(object);
+            objects.remove(i);
+        }
+    }
+
+    /** The {@code Rooms}-layer rectangle whose object name matches, or null when absent. */
+    private Room findRoomRect(String name) {
+        MapLayer layer = map.getLayers().get(ROOMS_LAYER);
+        if (layer == null) {
+            return null;
+        }
+        for (MapObject object : layer.getObjects()) {
+            if (name.equals(object.getName()) && object instanceof RectangleMapObject) {
+                Rectangle rect = ((RectangleMapObject) object).getRectangle();
+                return new Room(rect.x, rect.y, rect.width, rect.height);
+            }
+        }
+        return null;
+    }
+
+    /** Collects the world rects of every non-empty {@code secret_hide} cell overlapping the room rect. */
+    private void collectVeilCells(TiledMapTileLayer layer, Rectangle roomRect, Array<Rectangle> out) {
+        int minX = (int) (roomRect.x / layer.getTileWidth());
+        int maxX = (int) ((roomRect.x + roomRect.width - 1) / layer.getTileWidth());
+        int minY = (int) (roomRect.y / layer.getTileHeight());
+        int maxY = (int) ((roomRect.y + roomRect.height - 1) / layer.getTileHeight());
+        for (int y = minY; y <= maxY; y++) {
+            for (int x = minX; x <= maxX; x++) {
+                TiledMapTileLayer.Cell cell = layer.getCell(x, y);
+                if (cell == null || cell.getTile() == null) {
+                    continue;
+                }
+                out.add(new Rectangle(x * layer.getTileWidth(), y * layer.getTileHeight(), layer.getTileWidth(), layer.getTileHeight()));
+            }
+        }
     }
 
     public float getTileWidth() {

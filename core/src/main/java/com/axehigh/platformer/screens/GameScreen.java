@@ -123,6 +123,10 @@ public class GameScreen extends BaseScreen {
         RoomState roomState = new RoomState();
         roomState.rooms.addAll(mapLoader.getRooms());
 
+        SecretRoomRevealer secretRoomRevealer = new SecretRoomRevealer(engine, entityFactory, roomState);
+        secretRoomRevealer.setRooms(mapLoader.getSecretRooms());
+        secretRoomRevealer.setHideLayer(mapLoader.getSecretHideLayer());
+
         camera.position.set(viewport.getWorldWidth() / 2f, viewport.getWorldHeight() / 2f, 0f);
 
         PlayerInputSystem playerInputSystem = new PlayerInputSystem(assetManager, PRIORITY_INPUT);
@@ -159,7 +163,7 @@ public class GameScreen extends BaseScreen {
         engine.addSystem(sfxSystem);
 
         MeleeAttackSystem meleeSystem = new MeleeAttackSystem(assetManager, mapLoader.getSecretRects(),
-            mapLoader.getCollisionRects(), mapLoader.getCollisionLayer(), sfxSystem, PRIORITY_MELEE);
+            mapLoader.getCollisionRects(), mapLoader.getCollisionLayer(), sfxSystem, secretRoomRevealer, PRIORITY_MELEE);
         meleeSystem.setUnitScale(scale);
         engine.addSystem(meleeSystem);
 
@@ -184,7 +188,7 @@ public class GameScreen extends BaseScreen {
         debugRenderSystem = new DebugRenderSystem(camera, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), roomState, PRIORITY_DEBUG_RENDER);
         engine.addSystem(debugRenderSystem);
 
-        levelManager = new LevelManager(engine, entityFactory, viewport, tiledMapRenderSystem, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), mapLoader.getSecretRects(), roomState, mapLoader);
+        levelManager = new LevelManager(engine, entityFactory, viewport, tiledMapRenderSystem, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), mapLoader.getSecretRects(), roomState, secretRoomRevealer, mapLoader);
 
         LevelExitSystem exitSystem = new LevelExitSystem(levelManager, PRIORITY_LEVEL_EXIT);
         exitSystem.setUnitScale(scale);

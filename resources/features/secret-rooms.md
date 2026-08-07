@@ -1,6 +1,8 @@
 # Feature Plan: Secret Rooms with Breakable Walls
 
-Status: Implemented — code, headless tests, and a demo secret room (`secretRoom1` in `assets/maps/level1/generated_room.tmx`: a 5-tile alcove in room 1's bottom-west corner, cols 31–35, whose east wall at col 36 is the `secret=true` tile the player breaks from the main room) are in. Pending: in-game verification on desktop.
+Status: Implemented — code, headless tests (149 passing, 21 suites), and a demo hidden secret room (`secret_room` in `assets/maps/level1/generated_room.tmx`: the full 30-tile room right of room 2, cols 90–119, whose west boundary wall at col 89 has two body-height rows 14–15 as the breakable `secret_wall` tile the player strikes from the last normal room) are in. Pending: in-game verification on desktop.
+
+> Design evolution: the original plan below hid the room with solid wall + room-locked camera (the room was visible the moment the wall broke, and its loot spawned from level start). The implemented version goes further — see `resources/docs-ai/map-design-for-tiled.md` §3.5 and `gameplay.md` §2.Z: a **`secret_hide` tile layer** veils the whole room footprint with identical rock until reveal, the room's loot/enemy markers carry a `secretRoom="<room name>"` object property so they are **deferred** (partitioned out of the spawn layers, spawned once on reveal by `SecretRoomRevealer`), and the breakable wall tile carries a matching `secretRoom` tile property naming the `Rooms` rect it protects.
 Approved decisions: sealed-room hiding, per-swing tile break, gap reveal, smoke + SFX feedback.
 
 ## Concept

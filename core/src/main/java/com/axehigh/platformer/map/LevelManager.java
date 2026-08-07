@@ -52,6 +52,7 @@ public class LevelManager implements Disposable {
     private final Array<Rectangle> hazardRects;
     private final Array<Rectangle> secretRects;
     private final RoomState roomState;
+    private final SecretRoomRevealer secretRoomRevealer;
 
     private MapLoader mapLoader;
 
@@ -59,7 +60,7 @@ public class LevelManager implements Disposable {
                          TiledMapRenderSystem tiledMapRenderSystem, Array<Rectangle> collisionRects,
                          Array<Rectangle> oneWayRects, Array<Rectangle> hazardRects,
                          Array<Rectangle> secretRects,
-                         RoomState roomState, MapLoader initialMapLoader) {
+                         RoomState roomState, SecretRoomRevealer secretRoomRevealer, MapLoader initialMapLoader) {
         this.engine = engine;
         this.entityFactory = entityFactory;
         this.viewport = viewport;
@@ -70,6 +71,7 @@ public class LevelManager implements Disposable {
         this.hazardRects = hazardRects;
         this.secretRects = secretRects;
         this.roomState = roomState;
+        this.secretRoomRevealer = secretRoomRevealer;
         this.mapLoader = initialMapLoader;
     }
 
@@ -134,6 +136,9 @@ public class LevelManager implements Disposable {
         hazardRects.addAll(newMapLoader.getHazardRects());
         secretRects.clear();
         secretRects.addAll(newMapLoader.getSecretRects());
+
+        secretRoomRevealer.setRooms(newMapLoader.getSecretRooms());
+        secretRoomRevealer.setHideLayer(newMapLoader.getSecretHideLayer());
 
         roomState.rooms.clear();
         roomState.rooms.addAll(newMapLoader.getRooms());

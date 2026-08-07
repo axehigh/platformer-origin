@@ -9,6 +9,7 @@ import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TextureComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.map.SecretRoomRevealer;
 import com.axehigh.platformer.particles.GlobalParticles;
 import com.axehigh.platformer.particles.ParticleHelper;
 import com.badlogic.ashley.core.Engine;
@@ -66,6 +67,7 @@ public class MeleeAttackSystem extends IteratingSystem {
     private Array<Rectangle> collisionRects;
     private TiledMapTileLayer collisionLayer;
     private SfxSystem sfxSystem;
+    private SecretRoomRevealer secretRoomRevealer;
 
     public MeleeAttackSystem(AssetManager assetManager) {
         this(assetManager, null, null, null, null, 0);
@@ -80,12 +82,20 @@ public class MeleeAttackSystem extends IteratingSystem {
     public MeleeAttackSystem(AssetManager assetManager, Array<Rectangle> secretRects,
                              Array<Rectangle> collisionRects, TiledMapTileLayer collisionLayer,
                              SfxSystem sfxSystem, int priority) {
+        this(assetManager, secretRects, collisionRects, collisionLayer, sfxSystem, null, priority);
+    }
+
+    /** Fully wired constructor plus the {@link SecretRoomRevealer} that opens a secret room when its wall breaks. */
+    public MeleeAttackSystem(AssetManager assetManager, Array<Rectangle> secretRects,
+                             Array<Rectangle> collisionRects, TiledMapTileLayer collisionLayer,
+                             SfxSystem sfxSystem, SecretRoomRevealer secretRoomRevealer, int priority) {
         super(Family.all(PlayerComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
         this.assetManager = assetManager;
         this.secretRects = secretRects;
         this.collisionRects = collisionRects;
         this.collisionLayer = collisionLayer;
         this.sfxSystem = sfxSystem;
+        this.secretRoomRevealer = secretRoomRevealer;
     }
 
     public void setUnitScale(float unitScale) {
@@ -170,7 +180,9 @@ public class MeleeAttackSystem extends IteratingSystem {
      * Breaks at most one secret wall overlapping the strike box: removes the wall rect from both the
      * shared {@code secretRects} and {@code collisionRects} sets (passable next frame), blanks its
      * cell in the collision layer (the tile sprite disappears), spawns the smoke puff at the tile
-     * center, and plays the wall-break SFX. Returns {@code true} when a wall was broken.
+     * center, and plays the wall-break SFX. When the wall tile carries a {@code secretRoom}
+     * property, its secret room is revealed (veil blanked, deferred loot/enemies spawned, crumble
+     * smoke). Returns {@code true} when a wall was broken.
      */
     private boolean breakSecretWall(Rectangle bounds) {
         if (secretRects == null || collisionLayer == null) {
@@ -181,6 +193,7 @@ public class MeleeAttackSystem extends IteratingSystem {
             if (!bounds.overlaps(rect)) {
                 continue;
             }
+            String roomName = secretRoomOf(rect);
             secretRects.removeIndex(i);
             if (collisionRects != null) {
                 collisionRects.removeValue(rect, true);
@@ -192,9 +205,23 @@ public class MeleeAttackSystem extends IteratingSystem {
             if (sfxSystem != null) {
                 sfxSystem.playWallBreak();
             }
+            if (secretRoomRevealer != null && roomName != null) {
+                secretRoomRevealer.reveal(roomName);
+            }
             return true;
         }
         return false;
+    }
+
+    /** The {@code secretRoom} property of the wall's collision-layer cell tile, or null when it guards no room. */
+    private String secretRoomOf(Rectangle rect) {
+        int tileX = (int) (rect.x / collisionLayer.getTileWidth());
+        int tileY = (int) (rect.y / collisionLayer.getTileHeight());
+        TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
+        if (cell == null) {
+            return null;
+        }
+        return cell.getTile().getProperties().get("secretRoom", String.class);
     }
 
     /**

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.2" name="dungeon_tiles" tilewidth="256" tileheight="257" tilecount="52" columns="0">
+<tileset version="1.10" tiledversion="1.11.2" name="dungeon_tiles" tilewidth="256" tileheight="257" tilecount="53" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <properties>
@@ -44,6 +44,9 @@
   <image source="../gfx/tiles/dungeon/bg-crate.png" width="128" height="128"/>
  </tile>
  <tile id="13">
+  <properties>
+   <property name="secret" type="bool" value="true"/>
+  </properties>
   <image source="../gfx/tiles/dungeon/breakable.png" width="128" height="128"/>
  </tile>
  <tile id="14">
@@ -180,5 +183,8 @@
  </tile>
  <tile id="56">
   <image source="../gfx/tiles/caves/bg-barrel.png" width="128" height="128"/>
+ </tile>
+ <tile id="57">
+  <image source="../gfx/tiles/caves/platform-float.png" width="128" height="128"/>
  </tile>
 </tileset>

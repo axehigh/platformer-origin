@@ -148,7 +148,3 @@ premultipliedAlpha: false
 spriteMode: single
 - Image Paths -
 pp_circle3.png
-
-
-
-
