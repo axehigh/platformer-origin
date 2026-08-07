@@ -84,7 +84,7 @@
   <object id="8" name="coin1" type="coin" x="1664" y="512" width="108" height="80"/>
   <object id="15" name="exitGate" type="exitGate" x="3822" y="1904" width="140" height="152">
    <properties>
-    <property name="nextLevel" value="maps/level1/level_1_demo_3.tmx"/>
+    <property name="nextLevel" value="maps/world1/level_10.tmx"/>
    </properties>
   </object>
   <object id="16" name="torchLeft" type="torch" x="3968" y="640" width="128" height="128"/>

@@ -66,7 +66,7 @@ The collision layer is a tile grid. `MapLoader.buildCollisionRects()` walks ever
 
 Room-to-room doorways must be a tile marked **non-solid**. In Tiled:
 
-1.  Open the tileset file (e.g. `assets/maps/level1/cave_tileset.tsx`).
+1.  Open the tileset file (e.g. `assets/maps/world1/cave_tileset.tsx`).
 2.  Select the doorway tile you use for passages.
 3.  Add a **boolean custom property `solid` set to `false`** on that tile.
 
@@ -74,7 +74,7 @@ That single tileset edit makes every map using the tile treat it as a walk-throu
 
 ### §3.2 Hazards (spikes, lava)
 
-A **non-solid** tile that damages the player on contact. Paint it in the `collision` layer; the tile's `hazard = true` property (set on the tileset tile, e.g. `assets/maps/level1/hazards.tsx`) turns it into a damage zone instead of a wall:
+A **non-solid** tile that damages the player on contact. Paint it in the `collision` layer; the tile's `hazard = true` property (set on the tileset tile, e.g. `assets/maps/world1/hazards.tsx`) turns it into a damage zone instead of a wall:
 
 *   On AABB overlap the player loses **1 HP**, gets the usual 0.3s hit-stun + 2s invulnerability grace, and is **not** knocked back (no directional push).
 *   Hazards are fully non-solid — nothing (player, enemies, bullets) is blocked by them. The grace period turns a sustained overlap into one hit per second, not instant shredding.
@@ -83,7 +83,7 @@ A **non-solid** tile that damages the player on contact. Paint it in the `collis
 
 ### §3.3 Drop-through platforms (one-way)
 
-A **drop-through platform for the player, a normal solid tile for everyone else**. Paint it in the `collision` layer; the tile's `oneWay = true` property (set on the tileset tile, e.g. `assets/maps/level1/drop_platform.tsx`) makes it a platform instead of a wall:
+A **drop-through platform for the player, a normal solid tile for everyone else**. Paint it in the `collision` layer; the tile's `oneWay = true` property (set on the tileset tile, e.g. `assets/maps/world1/drop_platform.tsx`) makes it a platform instead of a wall:
 
 *   The player can **land on its top** (it sticks only when the player's feet were at/above the platform's top before the move) and can **jump up through** it from below.
 *   While standing on it, the contextual **`v` button** appears (mobile) or **`S`/`DOWN`** (keyboard) starts a short ~0.25s pass-through window: the player drops straight through the platform, then normal gravity takes over.
@@ -92,13 +92,13 @@ A **drop-through platform for the player, a normal solid tile for everyone else*
 
 ### §3.4 Secret walls (breakable)
 
-A **solid** wall tile that opens a doorway when the player melee-strikes it. Paint it in the `collision` layer; the tile's `secret = true` property (set on the tileset tile, e.g. `assets/maps/level1/secret_wall.tsx`) marks it as breakable:
+A **solid** wall tile that opens a doorway when the player melee-strikes it. Paint it in the `collision` layer; the tile's `secret = true` property (set on the tileset tile, e.g. `assets/maps/world1/secret_wall.tsx`) marks it as breakable:
 
 *   The tile is **fully solid** (blocks the player, enemies, and bullets exactly like a regular wall) — breaking it is what opens the route. It is *not* a passage: an unbroken secret wall has no effect on movement until struck.
 *   **One melee swing breaks at most one** secret tile whose rect overlaps the strike hitbox (reach-dependent; see `gameplay.md` §2.Z). On break, the tile's sprite disappears (its collision-layer cell is blanked), its rect is removed from the collision set, a smoke puff spawns at the tile center, and a wall-break SFX plays — the doorway is walkable the very next frame.
 *   **Design the room behind it:** carve the alcove/room into the `collision` layer (solid walls on the other sides), drop a `Rooms` rectangle over it (put it *before* the enclosing room in the layer — see §6), and place pickups/enemies inside via the `objects`/`enemies` layers. Two proven shapes, both produced by `generate_tmx.py`:
-    *   **Appended full-screen room:** see the `secret_room` example in `assets/maps/level1/generated_room.tmx` — the full 30-tile room right of room 2 (cols 90–119); its west boundary wall at col 89 has the two body-height rows 14–15 replaced with the breakable `secret_wall` tile the player strikes from the last normal room.
-    *   **Chamber carved inside a room (`--inside-secret`):** see `assets/maps/level1/generated_single_secret_inside.tmx` — a 6×8-tile box flush against the room's left wall and sitting on the floor. Its **front** (right) wall carries the breakable guard on the two passage rows (rows 14–15, col 5); the roof/floor/left wall are the room's own. The chamber is hollow so the player can stand inside, and the `secret_hide` veil covers its footprint **except** the guard cells, so the crack stays visible and strikeable before reveal. Its `Rooms` rect is emitted before the enclosing room so the camera flips onto the chamber while the player is inside.
+    *   **Appended full-screen room:** see the `secret_room` example in `assets/maps/world1/level_05.tmx` — the full 30-tile room right of room 2 (cols 90–119); its west boundary wall at col 89 has the two body-height rows 14–15 replaced with the breakable `secret_wall` tile the player strikes from the last normal room.
+    *   **Chamber carved inside a room (`--inside-secret`):** see `assets/maps/world1/level_08.tmx` — a 6×8-tile box flush against the room's left wall and sitting on the floor. Its **front** (right) wall carries the breakable guard on the two passage rows (rows 14–15, col 5); the roof/floor/left wall are the room's own. The chamber is hollow so the player can stand inside, and the `secret_hide` veil covers its footprint **except** the guard cells, so the crack stays visible and strikeable before reveal. Its `Rooms` rect is emitted before the enclosing room so the camera flips onto the chamber while the player is inside.
 *   **Verify with SHIFT+D:** an unbroken secret wall shows as a normal yellow solid rect (it lives in the shared `collisionRects` set); after breaking, the rect is gone and the cell is empty.
 
 ### §3.5 Secret rooms (hidden until the wall breaks)
@@ -155,7 +155,7 @@ All properties are read as `float`/`string`/`boolean` and tolerate being set as 
 | `aiMode` | string | `"patrol"` | Enemy patrol behavior: `"side-to-side"` (or `"sidetoside"`, case-insensitive) → endless walking that turns only on walls/ledges/hazards; anything else/absent → origin-bounded `patrol`. Flyers ignore it (never grounded). See `enemies.md`. |
 | `speed` | float | per-type default (`20`) | (enemy only) Horizontal patrol speed override, world px/s. Applied before the `unitScale` (tile-size) scaling. |
 | `patrolRange` | float | per-type default (`64`) | (enemy only) Patrol-range override, world px. Only used in `PATROL` mode (`SIDE_TO_SIDE` ignores it). Applied before the `unitScale` scaling. |
-| `nextLevel` | string | — | (exitGate only) The next `.tmx` path **relative to the `assets/` folder**, e.g. `maps/level1/level_1_demo_2.tmx`. Cycles to that map on interaction. |
+| `nextLevel` | string | — | (exitGate only) The next `.tmx` path **relative to the `assets/` folder**, e.g. `maps/world1/level_03.tmx`. Cycles to that map on interaction. |
 
 ### Moving-platform properties (the `platform` rectangle)
 
@@ -174,7 +174,7 @@ angle += speed * dt        (each frame)
 | `phase` | float | `0` | Starting angle offset in **radians**. Use different phases on several platforms to desync them. |
 | `axis` | string | — | Convenience shortcut: `"x"` zeroes the vertical axis, `"y"` zeroes the horizontal. If you set `amplitudeX`/`amplitudeY` explicitly, those win. |
 
-**Examples** (from `assets/maps/level1/level_1_demo.tmx`):
+**Examples** (from `assets/maps/world1/level_01.tmx`):
 
 *   Horizontal shuttle: rectangle `type="platform"` + `amplitudeX=80` + `speed=1` → slides 80px left/right of spawn.
 *   Vertical lift: `amplitudeY=80` + `speed=1` → bobs 80px up/down.
@@ -226,13 +226,13 @@ For each axis (X and Y) independently:
 *   Rooms **wider/taller than 30×17 tiles** → dead-zone scroll; give the player room to roam.
 *   Small rooms (smaller than the screen) are fine — the camera centers on them and shows a little of the next area.
 *   Every `Rooms` rectangle should **contain the `playerStart` marker** (and each enemy/platform's spawn), or that entity won't be tied to any room (`roomIndex = -1`, always active).
-*   **Secret rooms:** carve a small room into the `collision` layer, drop a `Rooms` rectangle over it, and place pickups/enemies inside. `RoomState.findRoomIndexContaining(...)` returns the **first** room rectangle containing a point, so put the secret room **above** (before) the enclosing room in the layer for it to win the camera framing (a chamber carved *inside* a room is emitted first for exactly this reason). To make it *hidden until broken* (see §3.5): name the rect (e.g. `secret_room`), paint a `secret_hide` veil over its footprint (leave the guard cells un-veiled for an inside chamber, so the crack is visible), tag the entry-wall tile with `secretRoom="secret_room"`, and tag the interior markers with the same `secretRoom` object property so they spawn on reveal (see `secret_room` in `assets/maps/level1/generated_room.tmx` and the inside chamber in `assets/maps/level1/generated_single_secret_inside.tmx`).
+*   **Secret rooms:** carve a small room into the `collision` layer, drop a `Rooms` rectangle over it, and place pickups/enemies inside. `RoomState.findRoomIndexContaining(...)` returns the **first** room rectangle containing a point, so put the secret room **above** (before) the enclosing room in the layer for it to win the camera framing (a chamber carved *inside* a room is emitted first for exactly this reason). To make it *hidden until broken* (see §3.5): name the rect (e.g. `secret_room`), paint a `secret_hide` veil over its footprint (leave the guard cells un-veiled for an inside chamber, so the crack is visible), tag the entry-wall tile with `secretRoom="secret_room"`, and tag the interior markers with the same `secretRoom` object property so they spawn on reveal (see `secret_room` in `assets/maps/world1/level_05.tmx` and the inside chamber in `assets/maps/world1/level_08.tmx`).
 
 ---
 
 ## 7. Step-by-step: build a new level
 
-1.  **Map setup.** In Tiled: New map, orthogonal, tile size **128×128** (or matching your chain), infinite off, CSV tile format. Add tilesets from `assets/maps/level1/`: `cave_tileset.tsx` for terrain, `drop_platform.tsx` for drop-through platforms, `hazards.tsx` for spikes/lava, `items.tsx` for pickups, `enemy.tsx` for enemies, `secret_wall.tsx` for breakable secret walls.
+1.  **Map setup.** In Tiled: New map, orthogonal, tile size **128×128** (or matching your chain), infinite off, CSV tile format. Add tilesets from `assets/maps/world1/`: `cave_tileset.tsx` for terrain, `drop_platform.tsx` for drop-through platforms, `hazards.tsx` for spikes/lava, `items.tsx` for pickups, `enemy.tsx` for enemies, `secret_wall.tsx` for breakable secret walls.
 2.  **`background` layer.** Paint the decorative backdrop (walls, pillars, windows). Anything goes — it never blocks.
 3.  **`collision` layer.** Paint the solid geometry: floor, walls, platforms. Leave gaps where you want jumps. Use `drop_platform.tsx` tiles for ledges you want to drop through, `hazards.tsx` tiles for spike/lava damage zones (their behavior is baked into the tileset tile properties — see §3.2, §3.3), and `secret_wall.tsx` tiles for breakable secret walls (§3.4). For any room-to-room doorway, use your `solid = false` passage tile (see §3.1). Keep the map's outer border solid. For a hidden secret room: seal the room with solid tiles, and paint its breakable entry wall from a tileset tile carrying `secret=true` + `secretRoom="<rect name>"` (§3.5).
 4.  **`decoration` layer** (optional). Foreground decor that draws on top.
@@ -270,7 +270,7 @@ For each axis (X and Y) independently:
 
 ## 9. Related tooling & docs
 
-*   `.opencode/skills/tmx-map-generator` — generates a standalone prototype `.tmx` (a linear chain of whole-screen 30×17-tile rooms with enemies/items and walk-through doorways, plus a hidden secret room — either appended to the right as a full 30-tile room, or, with `--inside-secret`, carved as a 6×8-tile chamber inside the last room) so you can test a layout without hand-tracing collision CSVs. Run `generate_tmx.py` (from `assets/maps/level1`) with `--rooms N --seed S --out generated_room.tmx`; see the skill's SKILL.md for CLI + conventions. It reads the collision tileset from `level1/dungeon_tiles.tsx`, the item/enemy tilesets from `level1/`, and clones `level1/secret_wall.tsx` inline for the secret room's entry wall; output is standalone (no `LevelCatalog`/exit-gate wiring by design — the exit gate is added by hand).
+*   `.opencode/skills/tmx-map-generator` — generates a standalone prototype `.tmx` (a linear chain of whole-screen 30×17-tile rooms with enemies/items and walk-through doorways, plus a hidden secret room — either appended to the right as a full 30-tile room, or, with `--inside-secret`, carved as a 6×8-tile chamber inside the last room) so you can test a layout without hand-tracing collision CSVs. Run `generate_tmx.py` (from `assets/maps/world1`) with `--rooms N --seed S --out level_05.tmx`; see the skill's SKILL.md for CLI + conventions. It reads the collision tileset from `world1/dungeon_tiles.tsx`, the item/enemy tilesets from `world1/`, and clones `world1/secret_wall.tsx` inline for the secret room's entry wall; output is standalone (no `LevelCatalog`/exit-gate wiring by design — the exit gate is added by hand).
 *   `resources/docs-ai/enemies.md` — enemy catalog, stats, and how to add new types.
 *   `resources/docs-ai/ashley-ecs.md` — the `MapLoader`/`EntityFactory`/`Room`/`RoomState`/`CameraSystem` code shape and priorities.
 *   `resources/docs-ai/gameplay.md` — movement/combat mechanics and how they read map data.

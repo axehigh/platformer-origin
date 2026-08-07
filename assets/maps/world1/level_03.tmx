@@ -79,7 +79,7 @@
   <object id="14" name="enemy1" type="enemy" x="2432.67" y="1295.39" width="68" height="88"/>
   <object id="15" name="exitGate" type="exitGate" x="3822" y="1904" width="140" height="152">
    <properties>
-    <property name="nextLevel" value="maps/level1/level_1_demo_3.tmx"/>
+    <property name="nextLevel" value="maps/world1/level_04.tmx"/>
    </properties>
   </object>
   <object id="16" name="torchLeft" type="torch" x="3968" y="640" width="128" height="128"/>

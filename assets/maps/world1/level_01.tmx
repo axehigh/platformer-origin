@@ -57,7 +57,7 @@
   <object id="4" name="torchLeft" type="torch" x="0" y="640" width="128" height="128"/>
   <object id="6" name="exitGate" type="exitGate" x="1773.36" y="1244.03" width="140" height="152">
    <properties>
-    <property name="nextLevel" value="maps/level1/level_1_demo_2.tmx"/>
+    <property name="nextLevel" value="maps/world1/level_02.tmx"/>
    </properties>
   </object>
   <object id="7" name="Platform" x="911.264" y="648.299" width="174.442" height="114.559">

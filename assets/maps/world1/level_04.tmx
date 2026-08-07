@@ -91,7 +91,7 @@
   <object id="37" gid="52" x="3840" y="1024" width="128" height="128"/>
   <object id="51" name="exitGate" type="exitGate" x="3834" y="1894" width="140" height="152">
    <properties>
-    <property name="nextLevel" value="maps/level1/level_1_demo.tmx"/>
+    <property name="nextLevel" value="maps/world1/level_05.tmx"/>
    </properties>
   </object>
   <object id="52" gid="52" x="1290.55" y="1030.67" width="128" height="128"/>

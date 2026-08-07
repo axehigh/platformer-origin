@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="120" height="17" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="2045">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="120" height="17" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="2046">
  <tileset firstgid="1" source="dungeon_tiles.tsx"/>
  <tileset firstgid="53" source="items.tsx"/>
  <tileset firstgid="71" source="enemy.tsx"/>
@@ -90,12 +90,17 @@
     <property name="secretRoom" value="secret_room"/>
    </properties>
   </object>
-  <object id="13" name="coin_secret_room" gid="65" x="13184" y="2048" width="128" height="128">
-   <properties>
-    <property name="secretRoom" value="secret_room"/>
-   </properties>
-  </object>
- </objectgroup>
+   <object id="13" name="coin_secret_room" gid="65" x="13184" y="2048" width="128" height="128">
+    <properties>
+     <property name="secretRoom" value="secret_room"/>
+    </properties>
+   </object>
+   <object id="2045" name="exitGate" type="exitGate" x="11124" y="1904" width="140" height="152">
+    <properties>
+     <property name="nextLevel" value="maps/world1/level_06.tmx"/>
+    </properties>
+   </object>
+  </objectgroup>
  <objectgroup id="7" name="enemies">
   <object id="2" name="enemy_r0_flyer" type="enemy" x="2688" y="1920" width="128" height="128">
    <properties>
