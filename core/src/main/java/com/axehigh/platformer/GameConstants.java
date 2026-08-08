@@ -63,16 +63,23 @@ public final class GameConstants {
     //UI
 
     //UI Only for touch control
-    public static float UI_Button_Action_Size = 130f;
-    public static float UI_Button_Move_Size = 150f;
-    public static final float UI_Button_Jump_Size = 170f;
-    public static final float UI_Button_Contextual_Size = 95f;
+    public static float UI_Button_Action_Size = 170f;
+    public static float UI_Button_Move_Size = 195f;
+    public static final float UI_Button_Jump_Size = 200f;
+    public static final float UI_Button_Contextual_Size = 135f;
     public static final float UI_BUTTON_ALPHA = 0.4f;
     public static final float UI_BUTTON_ALPHA_SOLID = 0.85f;
     public static final float UI_BUTTON_PRESS_SCALE = 0.95f;
     public static final float UI_BUTTON_SCALE_DURATION = 0.05f;
     public static final float UI_PADDING_TOUCH = 16f;
-    public static final float UI_BOTTOM_PAD = 24f;
+    public static final float UI_BOTTOM_PAD = 10f;
+
+    /**
+     * Invisible hit-area expansion (UI units, 1980x1080 design space) beyond each touch button's
+     * drawn bounds, so the fattened touch target is larger than the visible button without any
+     * visual size increase or reserved-band change (see {@code TouchButton#hit}).
+     */
+    public static final float UI_TOUCH_HIT_PAD = 10f;
 
     /**
      * Height of the bottom touch-control zone, in UI units (1980x1080 design space), kept at a

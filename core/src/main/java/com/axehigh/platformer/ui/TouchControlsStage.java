@@ -14,7 +14,8 @@ import static com.axehigh.platformer.GameConstants.*;
  * row (A, the jump, is largest and rightmost) with the contextual interact/drop buttons inline
  * to their left. All buttons drive the same {@link PlayerInputSystem} handlers used by the
  * keyboard. The whole cluster is sized from {@code UI_CONTROL_BAND_HEIGHT} so the reserved
- * game-viewport band (see {@code OffsetFitViewport}) always clears it.
+ * game-viewport band (see {@code OffsetFitViewport}) always clears it; each button's touch target
+ * is fatter than its visuals via {@code UI_TOUCH_HIT_PAD} (see {@code TouchButton#hit}).
  */
 public class TouchControlsStage extends Stage {
     private final Table root;
@@ -31,6 +32,7 @@ public class TouchControlsStage extends Stage {
         addActor(root);
 
         Table dpad = new Table();
+        dpad.setDebug(true);
         TouchButton leftButton = new TouchButton(skin, "flatLeft", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 new TouchButton.Handler() {
                     @Override
@@ -74,11 +76,11 @@ public class TouchControlsStage extends Stage {
         dropButton.setVisible(false);
 
         Table actions = new Table();
-        actions.add(interactButton).size(UI_Button_Contextual_Size, UI_Button_Contextual_Size).pad(UI_PADDING_TOUCH);
-        actions.add(dropButton).size(UI_Button_Contextual_Size, UI_Button_Contextual_Size).pad(UI_PADDING_TOUCH);
-        actions.add(yButton).size(UI_Button_Action_Size, UI_Button_Action_Size).pad(UI_PADDING_TOUCH);
-        actions.add(bButton).size(UI_Button_Action_Size, UI_Button_Action_Size).pad(UI_PADDING_TOUCH);
-        actions.add(aButton).size(UI_Button_Jump_Size, UI_Button_Jump_Size).pad(UI_PADDING_TOUCH);
+        actions.add(interactButton).size(UI_Button_Contextual_Size, UI_Button_Contextual_Size).padLeft(UI_PADDING_TOUCH).padRight(UI_PADDING_TOUCH);
+        actions.add(dropButton).size(UI_Button_Contextual_Size, UI_Button_Contextual_Size).padLeft(UI_PADDING_TOUCH).padRight(UI_PADDING_TOUCH);
+        actions.add(yButton).size(UI_Button_Action_Size, UI_Button_Action_Size).padLeft(UI_PADDING_TOUCH).padRight(UI_PADDING_TOUCH);
+        actions.add(bButton).size(UI_Button_Action_Size, UI_Button_Action_Size).padLeft(UI_PADDING_TOUCH).padRight(UI_PADDING_TOUCH);
+        actions.add(aButton).size(UI_Button_Jump_Size, UI_Button_Jump_Size).padLeft(UI_PADDING_TOUCH).padRight(UI_PADDING_TOUCH);
 
         root.add(dpad).expandX().left().bottom().pad(UI_BOTTOM_PAD);
         root.add(actions).expandX().right().bottom().pad(UI_BOTTOM_PAD);

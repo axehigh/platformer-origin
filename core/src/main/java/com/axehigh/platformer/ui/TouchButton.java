@@ -1,14 +1,20 @@
 package com.axehigh.platformer.ui;
 
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
+import static com.axehigh.platformer.GameConstants.UI_TOUCH_HIT_PAD;
+
 /**
  * {@link ImageButton} for the mobile touch overlay. Uses the "gameplay" skin style with a per-button
- * drawable, scales down while pressed, and delegates press/release to a {@link Handler}.
+ * drawable, scales down while pressed, and delegates press/release to a {@link Handler}. The hit
+ * area extends {@code UI_TOUCH_HIT_PAD} beyond the drawn bounds so the touch target is fatter than
+ * the visible button, without any visual or reserved-band change.
  */
 public class TouchButton extends ImageButton {
 
@@ -39,5 +45,21 @@ public class TouchButton extends ImageButton {
                 handler.onRelease();
             }
         });
+    }
+
+    /**
+     * Treats the whole button (plus {@code UI_TOUCH_HIT_PAD} on each side) as a hit target, so
+     * taps just outside the drawn button still register.
+     */
+    @Override
+    public Actor hit(float x, float y, boolean touchable) {
+        if (touchable && getTouchable() != Touchable.enabled) {
+            return null;
+        }
+        float pad = UI_TOUCH_HIT_PAD;
+        if (x >= -pad && x <= getWidth() + pad && y >= -pad && y <= getHeight() + pad) {
+            return this;
+        }
+        return null;
     }
 }
