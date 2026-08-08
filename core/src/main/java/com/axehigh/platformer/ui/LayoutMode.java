@@ -1,0 +1,63 @@
+package com.axehigh.platformer.ui;
+
+import com.badlogic.gdx.Application;
+import com.badlogic.gdx.Gdx;
+
+/**
+ * Mobile touch-control layout modes, A/B-testable at runtime via the in-game Pause dialog
+ * ("Mobile Layout" button). Each mode trades on-screen world size against control-overlap:
+ *
+ * <ul>
+ *   <li>{@link #CORNER_OVERLAY} — no reserved band; the world renders at full screen size and the
+ *       controls float, semi-transparent, in the bottom corners / side bars. Biggest world, at the
+ *       cost of the bottom corners of the frame sitting under the buttons.</li>
+ *   <li>{@link #BAND} — a full-width band along the bottom is reserved for the controls and the
+ *       world renders above it (never overlapped), but the world is physically smaller.</li>
+ *   <li>{@link #BAND_ZOOM} — the same reserved band, plus a camera zoom so tiles stay big; the
+ *       zoomed frame no longer fits screen-sized rooms, so flip rooms behave as dead-zone scroll
+ *       rooms on mobile (see {@code CameraSystem}).</li>
+ * </ul>
+ */
+public enum LayoutMode {
+    CORNER_OVERLAY,
+    BAND,
+    BAND_ZOOM;
+
+    /** Cycles to the next mode (wraps around). */
+    public LayoutMode next() {
+        LayoutMode[] values = values();
+        return values[(ordinal() + 1) % values.length];
+    }
+
+    /** True on touch-only platforms (Android/iOS), or any faked non-desktop {@link DeviceClass}. */
+    public static boolean isTouchDevice() {
+        DeviceClass simulated = DeviceClass.simulated();
+        if (simulated != null) {
+            return simulated.isTouch();
+        }
+        Application.ApplicationType type = Gdx.app.getType();
+        return type == Application.ApplicationType.Android || type == Application.ApplicationType.iOS;
+    }
+
+    /**
+     * Shipped default: tall phones (aspect &gt; ~16:10) get the full-screen {@link #CORNER_OVERLAY}
+     * world; tablets (wider than 16:10) get a {@link #BAND} so the controls never cover the floor.
+     * A faked {@link DeviceClass} overrides this with its own per-class default.
+     */
+    public static LayoutMode defaultForDevice() {
+        DeviceClass simulated = DeviceClass.simulated();
+        if (simulated != null) {
+            return simulated.defaultLayout();
+        }
+        if (!isTouchDevice()) {
+            return CORNER_OVERLAY;
+        }
+        float aspect = Gdx.graphics.getWidth() / (float) Gdx.graphics.getHeight();
+        return aspect > 1.7f ? CORNER_OVERLAY : BAND;
+    }
+
+    @Override
+    public String toString() {
+        return name().replace('_', ' ');
+    }
+}

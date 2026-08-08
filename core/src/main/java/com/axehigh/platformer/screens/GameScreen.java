@@ -8,9 +8,12 @@ import com.axehigh.platformer.ecs.systems.*;
 import com.axehigh.platformer.map.*;
 import com.axehigh.platformer.particles.ParticleHelper;
 import com.axehigh.platformer.ui.HudStage;
+import com.axehigh.platformer.ui.DeviceClass;
+import com.axehigh.platformer.ui.LayoutMode;
 import com.axehigh.platformer.ui.TouchControlsStage;
 import com.axehigh.platformer.util.FeatureFlags;
 import com.axehigh.platformer.util.SaveManager;
+import com.axehigh.platformer.viewport.OffsetFitViewport;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.*;
@@ -28,13 +31,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import static com.axehigh.platformer.GameConstants.*;
 import static com.axehigh.platformer.assets.GameAssetRegistry.HERO_ASSET;
 import static com.axehigh.platformer.ecs.components.AnimationComponent.State.*;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
+import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.NORMAL;
 
@@ -70,10 +73,15 @@ public class GameScreen extends BaseScreen {
     private final PooledEngine engine = new PooledEngine();
     private final SpriteBatch batch = new SpriteBatch();
     private final OrthographicCamera camera = new OrthographicCamera();
-    private final Viewport viewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, camera);
+    private final OffsetFitViewport viewport = new OffsetFitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, camera);
 
     private final String levelPath;
     private final SaveData saveData;
+
+    private RoomState roomState;
+    private LayoutMode layoutMode = LayoutMode.CORNER_OVERLAY;
+    private DeviceClass deviceClass = DeviceClass.simulated() != null ? DeviceClass.simulated() : DeviceClass.DESKTOP;
+    private boolean touchControlsEnabled = false;
 
     private TiledMapRenderSystem tiledMapRenderSystem;
     private DebugRenderSystem debugRenderSystem;
@@ -122,6 +130,7 @@ public class GameScreen extends BaseScreen {
 
         RoomState roomState = new RoomState();
         roomState.rooms.addAll(mapLoader.getRooms());
+        this.roomState = roomState;
 
         SecretRoomRevealer secretRoomRevealer = new SecretRoomRevealer(engine, entityFactory, roomState);
         secretRoomRevealer.setRooms(mapLoader.getSecretRooms());
@@ -221,6 +230,9 @@ public class GameScreen extends BaseScreen {
             }
         });
         touchControlsStage = new TouchControlsStage(touchViewport, skin, playerInputSystem);
+        layoutMode = LayoutMode.defaultForDevice();
+        touchControlsEnabled = LayoutMode.isTouchDevice();
+        applyLayoutMode();
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
         inputMultiplexer.addProcessor(new InputAdapter() {
@@ -363,8 +375,48 @@ public class GameScreen extends BaseScreen {
         debugRow.add(touchDebugButton).minWidth(240f);
         dialog.getContentTable().add(debugRow).pad(UI_PADDING).row();
 
+        final TextButton deviceButton = new TextButton(
+            "Device: " + (DeviceClass.isSimulating() ? deviceClass : "Auto"), skin);
+        deviceButton.getLabel().setFontScale(FontScale);
+        deviceButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                AudioManager.get().playClick();
+                deviceClass = deviceClass.next();
+                DeviceClass.setSimulated(deviceClass);
+                layoutMode = deviceClass.defaultLayout();
+                deviceClass.applyWindowSize();
+                applyLayoutMode();
+                CameraSystem.snapToRoom(camera, roomState,
+                    TRANSFORM.get(playerEntity).position.x, TRANSFORM.get(playerEntity).position.y);
+                deviceButton.setText("Device: " + deviceClass);
+            }
+        });
+
+        final TextButton layoutButton = new TextButton("Mobile Layout: " + layoutMode, skin);
+        layoutButton.getLabel().setFontScale(FontScale);
+        layoutButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                AudioManager.get().playClick();
+                layoutMode = layoutMode.next();
+                if (!LayoutMode.isTouchDevice()) {
+                    deviceClass = DeviceClass.PHONE;
+                    DeviceClass.setSimulated(DeviceClass.PHONE);
+                    deviceClass.applyWindowSize();
+                    deviceButton.setText("Device: " + deviceClass);
+                }
+                applyLayoutMode();
+                CameraSystem.snapToRoom(camera, roomState,
+                    TRANSFORM.get(playerEntity).position.x, TRANSFORM.get(playerEntity).position.y);
+                layoutButton.setText("Mobile Layout: " + layoutMode);
+            }
+        });
+
         Table featureRow = new Table();
-        featureRow.add(wallClimbButton).minWidth(240f);
+        featureRow.add(wallClimbButton).minWidth(240f).padRight(UI_PADDING);
+        featureRow.add(deviceButton).minWidth(240f).padRight(UI_PADDING);
+        featureRow.add(layoutButton).minWidth(240f);
         dialog.getContentTable().add(featureRow).pad(UI_PADDING).row();
 
         TextButton exitButton = new TextButton("Exit", skin);
@@ -482,6 +534,7 @@ public class GameScreen extends BaseScreen {
 
     @Override
     public void render(float delta) {
+        applyLayoutMode();
         syncViewports();
 
         super.render(delta);
@@ -498,9 +551,54 @@ public class GameScreen extends BaseScreen {
         hudStage.getViewport().apply();
         hudStage.act(delta);
         hudStage.draw();
-        touchControlsStage.getViewport().apply();
-        touchControlsStage.act(delta);
-        touchControlsStage.draw();
+        if (touchControlsEnabled) {
+            touchControlsStage.getViewport().apply();
+            touchControlsStage.act(delta);
+            touchControlsStage.draw();
+        }
+    }
+
+    /**
+     * Applies the current {@link LayoutMode} to the game viewport (bottom band) and camera (zoom),
+     * gating the touch overlay to touch devices (plus any faked {@link DeviceClass}). Called every
+     * frame so a mid-run mode switch takes effect immediately.
+     */
+    private void applyLayoutMode() {
+        int width = Gdx.graphics.getWidth();
+        int height = Gdx.graphics.getHeight();
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+        touchControlsEnabled = LayoutMode.isTouchDevice();
+        touchControlsStage.setEnabled(touchControlsEnabled);
+
+        if (!touchControlsEnabled) {
+            viewport.setBottomBandPx(0);
+            camera.zoom = 1f;
+        } else {
+            float stageScale = Math.max(width / SCREEN_WIDTH, height / SCREEN_HEIGHT);
+            int bandPx = Math.min(
+                Math.round(UI_CONTROL_BAND_HEIGHT * stageScale),
+                Math.round(height * UI_BAND_SCREEN_FRACTION));
+            switch (layoutMode) {
+                case CORNER_OVERLAY:
+                    viewport.setBottomBandPx(0);
+                    camera.zoom = 1f;
+                    touchControlsStage.setAlpha(UI_BUTTON_ALPHA);
+                    break;
+                case BAND:
+                    viewport.setBottomBandPx(bandPx);
+                    camera.zoom = 1f;
+                    touchControlsStage.setAlpha(UI_BUTTON_ALPHA_SOLID);
+                    break;
+                case BAND_ZOOM:
+                    viewport.setBottomBandPx(bandPx);
+                    camera.zoom = MOBILE_ZOOM;
+                    touchControlsStage.setAlpha(UI_BUTTON_ALPHA_SOLID);
+                    break;
+            }
+        }
+        viewport.update(width, height);
     }
 
     @Override
@@ -509,7 +607,7 @@ public class GameScreen extends BaseScreen {
             return;
         }
         super.resize(width, height);
-        viewport.update(width, height);
+        applyLayoutMode();
         hudStage.getViewport().update(width, height, true);
         touchControlsStage.getViewport().update(width, height, true);
     }

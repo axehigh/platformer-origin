@@ -15,7 +15,8 @@ import static org.junit.Assert.assertEquals;
 /**
  * Headless unit tests for {@code CameraSystem}'s hybrid flip-screen / dead-zone scroll framing,
  * using the same world-scaled viewport the game uses (3840x2176). Covers: flip rooms locked to
- * their center, dead-zone hold/chase/clamp in scroll rooms, the instant room-change snap, the
+ * their center, dead-zone hold/chase/clamp in scroll rooms (at zoom 1 and zoomed in, where the
+ * margin scales to a fraction of the effective view), the instant room-change snap, the
  * {@code SCROLL}-on-small-room centering fallback, the no-room fallback, and the static
  * {@code snapToRoom} start framing.
  */
@@ -128,6 +129,48 @@ public class CameraSystemTest extends SystemTestBase {
 
         assertEquals(3072f, camera.position.x, EPSILON);
         assertEquals(1, roomState.activeRoomIndex);
+    }
+
+    @Test
+    public void zoomedScrollRoomHoldsInsideFractionalDeadZone() {
+        camera.zoom = 0.55f;
+        roomState.rooms.add(new Room(0f, 0f, 4096f, 2176f));
+        Entity player = player(100f, 100f);
+        TransformComponent transform = TRANSFORM.get(player);
+
+        engine.update(DT);
+        assertEquals(1056f, camera.position.x, EPSILON);
+        assertEquals(598.4f, camera.position.y, EPSILON);
+
+        transform.position.x = 1400f;
+        transform.position.y = 700f;
+        engine.update(DT);
+
+        assertEquals(1056f, camera.position.x, EPSILON);
+        assertEquals(598.4f, camera.position.y, EPSILON);
+    }
+
+    @Test
+    public void zoomedScrollRoomChasesPastFractionalMargin() {
+        camera.zoom = 0.55f;
+        roomState.rooms.add(new Room(0f, 0f, 4096f, 2176f));
+        Entity player = player(100f, 100f);
+        TransformComponent transform = TRANSFORM.get(player);
+
+        engine.update(DT);
+        assertEquals(1056f, camera.position.x, EPSILON);
+
+        transform.position.x = 2000f;
+        engine.update(DT);
+
+        assertEquals(1577.6f, camera.position.x, EPSILON);
+        assertEquals(598.4f, camera.position.y, EPSILON);
+
+        transform.position.y = 900f;
+        engine.update(DT);
+
+        assertEquals(1577.6f, camera.position.x, EPSILON);
+        assertEquals(660.64f, camera.position.y, EPSILON);
     }
 
     @Test

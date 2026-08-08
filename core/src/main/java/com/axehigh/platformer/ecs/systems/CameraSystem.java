@@ -21,13 +21,17 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
  * {@link Room.Mode} (defaulting to inference by size): a flip axis (room no bigger than the
  * viewport on that axis) keeps the camera locked to the room's center — static, with the viewport
  * allowed to overshoot the room's edges — and snaps instantly to that center when the player
- * enters the room; a scroll axis (room bigger than the viewport) holds the camera still while the
- * player roams anywhere inside a dead zone (each screen edge inset by {@code
- * GameConstants.CAMERA_SCROLL_MARGIN}) and only scrolls once the player crosses that margin,
+ *  enters the room; a scroll axis (room bigger than the viewport) holds the camera still while the
+ *  player roams anywhere inside a dead zone (each screen edge inset by a margin — the fixed {@code
+ *  GameConstants.CAMERA_SCROLL_MARGIN} at zoom 1, or a fraction of the effective view when zoomed,
+ *  see {@code scrollMargin}) and only scrolls once the player crosses that margin,
  * clamped so the viewport never shows anything past the room's own edges. A map with no "Rooms"
  * layer is treated as a single room covering the whole map (see {@code MapLoader#getRooms()}), so
  * it scrolls exactly like a normal room. Replaces the old fixed VIRTUAL_WIDTH/HEIGHT flip-screen
- * grid entirely.
+ * grid entirely. The camera compares rooms against the *effective* (zoomed) view size
+ * ({@code camera.viewportWidth/Height * camera.zoom}), so a mobile {@code BAND_ZOOM} zoom makes
+ * screen-sized rooms scroll like any bigger-than-frame room — see
+ * {@code com.axehigh.platformer.ui.LayoutMode}.
  */
 public class CameraSystem extends EntitySystem {
     private final OrthographicCamera camera;
@@ -79,12 +83,17 @@ public class CameraSystem extends EntitySystem {
         boolean roomChanged = roomState.activeRoomIndex != lastActiveRoomIndex;
         lastActiveRoomIndex = roomState.activeRoomIndex;
 
+        float viewW = camera.viewportWidth * camera.zoom;
+        float viewH = camera.viewportHeight * camera.zoom;
+        float marginX = scrollMargin(viewW, camera.zoom);
+        float marginY = scrollMargin(viewH, camera.zoom);
+
         float camX = roomChanged
-            ? frameAxis(x, room.x, room.width, camera.viewportWidth, room)
-            : deadZoneAxis(camera.position.x, x, room.x, room.width, camera.viewportWidth, room);
+            ? frameAxis(x, room.x, room.width, viewW, room)
+            : deadZoneAxis(camera.position.x, x, room.x, room.width, viewW, room, marginX);
         float camY = roomChanged
-            ? frameAxis(y, room.y, room.height, camera.viewportHeight, room)
-            : deadZoneAxis(camera.position.y, y, room.y, room.height, camera.viewportHeight, room);
+            ? frameAxis(y, room.y, room.height, viewH, room)
+            : deadZoneAxis(camera.position.y, y, room.y, room.height, viewH, room, marginY);
 
         camera.position.set(camX, camY, 0f);
         camera.update();
@@ -108,12 +117,11 @@ public class CameraSystem extends EntitySystem {
      * simply stay centered on the room.
      */
     private static float deadZoneAxis(float currentCam, float playerPos, float roomMin, float roomSize,
-                                      float viewportSize, Room room) {
+                                      float viewportSize, Room room, float margin) {
         if (!isScrollAxis(room, roomSize, viewportSize)) {
             return roomMin + roomSize / 2f;
         }
         float half = viewportSize / 2f;
-        float margin = GameConstants.CAMERA_SCROLL_MARGIN;
         float cam = currentCam;
         float leftLine = cam - half + margin;
         float rightLine = cam + half - margin;
@@ -123,6 +131,17 @@ public class CameraSystem extends EntitySystem {
             cam = playerPos - half + margin;
         }
         return clampAxis(cam, roomMin, roomSize, viewportSize);
+    }
+
+    /**
+     * The dead-zone margin for an axis: at zoom 1 it is the fixed {@code CAMERA_SCROLL_MARGIN}
+     * (world units); once the camera zooms in (mobile {@code BAND_ZOOM}) it becomes a fraction of
+     * the effective (zoomed) view size so the player keeps tracking well clear of the edges.
+     */
+    private static float scrollMargin(float viewportSize, float zoom) {
+        return zoom < 1f
+            ? viewportSize * GameConstants.MOBILE_SCROLL_MARGIN_FRACTION
+            : GameConstants.CAMERA_SCROLL_MARGIN;
     }
 
     /**
@@ -159,8 +178,11 @@ public class CameraSystem extends EntitySystem {
             ? roomState.rooms.get(roomState.activeRoomIndex)
             : null;
 
-        float camX = room != null ? frameAxis(x, room.x, room.width, camera.viewportWidth, room) : x;
-        float camY = room != null ? frameAxis(y, room.y, room.height, camera.viewportHeight, room) : y;
+        float viewW = camera.viewportWidth * camera.zoom;
+        float viewH = camera.viewportHeight * camera.zoom;
+
+        float camX = room != null ? frameAxis(x, room.x, room.width, viewW, room) : x;
+        float camY = room != null ? frameAxis(y, room.y, room.height, viewH, room) : y;
         camera.position.set(camX, camY, 0f);
         camera.update();
     }

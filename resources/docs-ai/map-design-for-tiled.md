@@ -232,12 +232,14 @@ Draw one **rectangle per room** in the `Rooms` object layer (a `RectangleMapObje
 
 ### Camera behavior (per axis)
 
-For each axis (X and Y) independently:
+For each axis (X and Y) independently (the "viewport size" is always the **effective** size — `camera.viewportWidth/Height × camera.zoom`):
 
-*   **Flip axis** (room size ≤ viewport size on that axis, or forced via `camera="flip"`): camera locks to the room's **center** and **snaps instantly** when the player enters. Classic Castlevania-style screen change. The viewport may overshoot a room smaller than the screen.
-*   **Scroll axis** (room size > viewport size on that axis, or forced via `camera="scroll"`): dead-zone scrolling. The camera holds still while the player roams inside a margin from each screen edge (`GameConstants.CAMERA_SCROLL_MARGIN`), then scrolls only when the player crosses that margin, clamped so the screen never leaves the room.
+*   **Flip axis** (room size ≤ effective viewport size on that axis, or forced via `camera="flip"`): camera locks to the room's **center** and **snaps instantly** when the player enters. Classic Castlevania-style screen change. The viewport may overshoot a room smaller than the screen.
+*   **Scroll axis** (room size > effective viewport size on that axis, or forced via `camera="scroll"`): dead-zone scrolling. The camera holds still while the player roams inside a margin from each screen edge — `GameConstants.CAMERA_SCROLL_MARGIN` at zoom 1, or 30% of the effective (zoomed) view per axis once the camera zooms in (`GameConstants.MOBILE_SCROLL_MARGIN_FRACTION`) — then scrolls only when the player crosses that margin, clamped so the screen never leaves the room.
 *   `camera="flip"` forces static framing even for big rooms; `camera="scroll"` forces scrolling, but a room still smaller than the viewport on an axis always centers (you can't scroll what's smaller than the screen).
 *   **No smooth follow / no lerp.** Transitions are instant snaps. On level start the camera frames the starting room via `CameraSystem.snapToRoom(...)` (flip rooms center, scroll rooms put the player in view) — not the player.
+
+> **Mobile note:** On phones, the game's touch layout can zoom the camera in (`LayoutMode.BAND_ZOOM`, toggled from the Pause dialog). A zoomed camera shows a smaller effective frame, so an otherwise screen-sized 30×17 room becomes *bigger than the frame* and flips to dead-zone scroll on mobile — flip-screen framing is preserved on desktop/tablet. The zoomed dead-zone margin is a 30% fraction of the visible view (`MOBILE_SCROLL_MARGIN_FRACTION`) so the camera starts tracking well before the player reaches a screen edge. This needs **no map change**: rooms stay as authored, the camera just follows on phones. See `com.axehigh.platformer.ui.LayoutMode`.
 
 ### Design tips
 
