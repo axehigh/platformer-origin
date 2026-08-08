@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="16" height="12" tilewidth="128" tileheight="128" infinite="0" nextlayerid="7" nextobjectid="14">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="16" height="12" tilewidth="128" tileheight="128" infinite="0" nextlayerid="7" nextobjectid="21">
  <tileset firstgid="1" source="dungeon_tiles.tsx"/>
  <tileset firstgid="59" source="enemy.tsx"/>
  <layer id="1" name="background" width="16" height="12">
@@ -10,7 +10,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,18,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,18,0,0,0,0,0,0,47,48,0,0,
+0,0,0,0,0,18,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,18,0,29,0,0,0,0,0,0,0,0,
 0,0,0,0,0,18,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,18,0,0,0,0,0,0,0,0,0,0,
@@ -26,7 +26,7 @@
 44,0,0,0,0,26,0,0,0,0,0,0,0,0,0,42,
 42,0,0,0,0,2,0,0,0,0,0,0,0,0,0,42,
 42,0,0,0,0,0,0,0,0,0,0,0,0,0,0,42,
-42,0,0,0,0,0,0,0,0,0,0,42,0,0,0,44,
+42,0,0,0,0,0,0,0,0,0,0,0,0,0,0,44,
 44,0,0,0,0,0,0,0,0,0,0,42,0,0,0,42,
 42,0,0,0,0,0,0,0,0,0,0,44,0,0,0,42,
 42,0,0,0,0,0,0,44,39,39,39,42,0,0,0,42,
@@ -40,7 +40,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,33,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -74,6 +74,21 @@
   </object>
   <object id="12" gid="63" x="1280" y="768" width="128" height="128"/>
   <object id="13" gid="61" x="1536" y="1408" width="128" height="128"/>
+  <object id="14" name="chest1" type="chest" x="1792" y="1280" width="128" height="128"/>
+  <object id="15" name="coin1" type="coin" x="640" y="0" width="128" height="128"/>
+  <object id="16" name="coin2" type="coin" x="896" y="1024" width="128" height="128"/>
+  <object id="17" name="coin3" type="coin" x="256" y="1280" width="128" height="128"/>
+  <object id="18" name="torch2" type="torch" x="1920" y="640" width="128" height="128"/>
+  <object id="19" name="enemy3" type="enemy" x="640" y="1280" width="128" height="128">
+   <properties>
+    <property name="enemyType" value="knight"/>
+   </properties>
+  </object>
+  <object id="20" name="enemy4" type="enemy" x="1152" y="1024" width="128" height="128">
+   <properties>
+    <property name="enemyType" value="shooter"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="6" name="enemies"/>
  <objectgroup id="4" name="Rooms" locked="1">

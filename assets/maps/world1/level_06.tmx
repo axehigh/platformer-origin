@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="17" tilewidth="128" tileheight="128" infinite="0" nextlayerid="8" nextobjectid="517">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="17" tilewidth="128" tileheight="128" infinite="0" nextlayerid="8" nextobjectid="523">
  <tileset firstgid="1" source="dungeon_tiles.tsx"/>
  <tileset firstgid="58" source="items.tsx"/>
  <tileset firstgid="77" source="enemy.tsx"/>
@@ -75,6 +75,11 @@
     <property name="nextLevel" value="maps/world1/level_07.tmx"/>
    </properties>
   </object>
+   <object id="517" name="chest1" type="chest" x="1408" y="1920" width="128" height="128"/>
+   <object id="518" name="coin3" type="coin" x="896" y="1408" width="128" height="128"/>
+   <object id="519" name="coin4" type="coin" x="3456" y="1920" width="128" height="128"/>
+   <object id="520" name="torch1" type="torch" x="0" y="1536" width="128" height="128"/>
+   <object id="521" name="torch2" type="torch" x="3712" y="1536" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="7" name="enemies">
   <object id="2" name="enemy_r0_walker" gid="79" x="2816" y="2048" width="128" height="128"/>
@@ -82,6 +87,11 @@
   <object id="514" name="enemy_r0_walker" gid="79" x="1408" y="1536" width="128" height="128"/>
   <object id="515" name="enemy_r0_walker" gid="79" x="1280" y="2048" width="128" height="128"/>
   <object id="516" name="enemy_r0_walker" gid="79" x="2048" y="1152" width="128" height="128"/>
+   <object id="522" name="enemy6" type="enemy" x="2560" y="1536" width="128" height="128">
+   <properties>
+    <property name="enemyType" value="flyer"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="6" name="Rooms" locked="1">
   <object id="511" name="room0" x="0" y="0" width="3840" height="2176"/>

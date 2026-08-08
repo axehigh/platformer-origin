@@ -140,6 +140,25 @@ Two ways to place a marker:
 | `platform` | Moving platform | `amplitudeX`, `amplitudeY`, `speed`, `phase`, `axis` (see §5) | The object **rectangle size defines both the sprite and collision box**. |
 | (any other) | — | — | Ignored. `background`-type markers etc. won't spawn anything. |
 
+### World 1 — level content inventory
+
+The shipped `maps/world1/level_01..10.tmx` chain. Enemy counts mix `enemyType`s (e.g. `3 enemies (2 walkers, 1 shooter)`); difficulty ramps from the tutorial-sized 16×12 openings (levels 01/02/10) up to the hardest, the loop-back final level 10 (which includes the only `knight` on any map). Content scoping baseline is roughly **2–3 enemies + a chest + 2–4 coins + torches per room**, matching the `generate_tmx.py` density; any future content edits should keep this table accurate.
+
+| Level | Rooms | Enemies | Chests | Coins | Daggers | Torches | Platforms |
+|---|---|---|---|---|---|---|---|
+| `level_01` | 1 (16×12) | 3 (2 walkers, 1 shooter) | 1 | 3 | — | 3 | 2 |
+| `level_02` | 1 (16×12) | 3 (2 walkers, 1 shooter) | 1 | 4 | — | 3 | 2 |
+| `level_03` | 2 (32×17) | 5 walkers | 1 | 1 | 1 | 3 | — |
+| `level_04` | 1 whole-map (32×17) | 3 (2 walkers, 1 shooter) | 6 | 13 | — | 2 | — |
+| `level_05` | 3 + secret (120×17) | 6 (4 walkers, 2 flyers) | 3 (+1 secret) | 1 (+2 secret) | — | — | — |
+| `level_06` | 1 (30×17) | 6 (5 walkers, 1 flyer) | 1 | 4 | — | 2 | — |
+| `level_07` | 1 (30×17) | 3 (2 walkers, 1 flyer) | 1 | 4 | — | 1 | — |
+| `level_08` | 1 + secret chamber (30×17) | 2 shooters | 2 (+1 secret) | 1 (+3 secret) | — | — | 13 |
+| `level_09` | 2 + secret alcove (32×17) | 5 (4 walkers, 1 flyer) | 1 (+1 secret) | 3 (+2 secret) | — | 4 | — |
+| `level_10` | 1 (16×12) | 4 (1 walker, 2 shooters, 1 knight) | 1 | 3 | — | 2 | 2 |
+
+The secret-room counts (marked *secret*) are deferred markers carrying `secretRoom="secret_room"` (§3.5). Levels 01/02/10 place their enemies in the `objects` layer (they have no separate `enemies` layer). Level 08's 13 "platforms" are **static `collision`-layer blocks** (11 solid gid-2 groups + 2 one-way gid-1 tiles) forming a jump/staircase course from the spawn up to the secret-room roof — see the `collision` layer of `assets/maps/world1/level_08.tmx`.
+
 ---
 
 ## 5. Custom properties — the full reference
