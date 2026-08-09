@@ -1,5 +1,5 @@
 ---
-name: libgdx-tiled-maps
+name: libgdx-tiled
 description: Use when writing libGDX Java/Kotlin code involving Tiled maps — TmxMapLoader, TiledMap, TiledMapTileLayer, OrthogonalTiledMapRenderer, object layers, MapProperties, unitScale, or collision extraction from map data. Use when debugging wrong tile positions, missing layers, object coordinate issues, or map not rendering.
 ---
 

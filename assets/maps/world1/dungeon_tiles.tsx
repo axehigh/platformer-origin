@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.2" name="dungeon_tiles" tilewidth="256" tileheight="257" tilecount="53" columns="0">
+<tileset version="1.10" tiledversion="1.12.2" name="dungeon_tiles" tilewidth="256" tileheight="257" tilecount="53" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <properties>
@@ -73,7 +73,7 @@
  <tile id="20">
   <image source="../gfx/tiles/dungeon/crystal-bottom-2.png" width="128" height="128"/>
  </tile>
- <tile id="21">
+ <tile id="21" type="door">
   <image source="../gfx/tiles/dungeon/door.png" width="128" height="256"/>
  </tile>
  <tile id="22">
@@ -175,7 +175,7 @@
  <tile id="52">
   <image source="../gfx/tiles/caves/bridge-4.png" width="128" height="129"/>
  </tile>
- <tile id="53">
+ <tile id="53" type="door">
   <image source="../gfx/tiles/caves/door.png" width="129" height="256"/>
  </tile>
  <tile id="54">

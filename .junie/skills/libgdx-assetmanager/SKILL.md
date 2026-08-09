@@ -1,5 +1,5 @@
 ---
-name: libgdx-asset-manager
+name: libgdx-assetmanager
 description: Use when writing libGDX Java/Kotlin code involving AssetManager — loading assets (Texture, TextureAtlas, Sound, Music, BitmapFont, Skin, Model, TiledMap, ParticleEffect, ShaderProgram, I18NBundle), async loading screens, reference counting, screen transitions, custom loaders, or FreeType font loading via AssetManager. Use when debugging assets not loading, double-dispose crashes, missing textures after Android resume, or loading screen patterns.
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: libgdx-3d-rendering
+name: libgdx-graphics-3d
 description: Use when writing libGDX Java/Kotlin code involving 3D rendering — ModelBatch, ModelInstance, Model loading (G3DJ/G3DB/OBJ), ModelBuilder procedural meshes, Environment and lighting (DirectionalLight/PointLight), PerspectiveCamera, Materials and Attributes (ColorAttribute/TextureAttribute/BlendingAttribute), AnimationController, or camera controllers (CameraInputController/FirstPersonCameraController). Use when debugging black 3D models, missing lighting, wrong camera setup, animation not playing, or model disposal issues.
 ---
 

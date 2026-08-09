@@ -66,7 +66,7 @@ The collision layer is a tile grid. `MapLoader.buildCollisionRects()` walks ever
 
 Room-to-room doorways must be a tile marked **non-solid**. In Tiled:
 
-1.  Open the tileset file (e.g. `assets/maps/world1/cave_tileset.tsx`).
+1.  Open the tileset file (e.g. `assets/maps/world1/dungeon_tiles.tsx`).
 2.  Select the doorway tile you use for passages.
 3.  Add a **boolean custom property `solid` set to `false`** on that tile.
 
@@ -115,6 +115,15 @@ A secret room is **invisible until revealed** — the player must find and strik
 *   The outer edges of the whole map should be solid — there's nothing beyond them.
 *   Align passages: the doorway on one side of a room boundary must line up with the doorway on the neighboring room's matching side, or the connection doesn't actually link. Keep all rooms on a **shared floor baseline** so doorways at the same height line up.
 
+### §3.6 Vertical room links (platform shafts)
+
+Rooms stacked vertically (a grid map, e.g. `world2`) connect through a **platform shaft** instead of a doorway — the engine has no ladders/climb, so the climb is made of drop-through platforms. A shaft is a 2-column channel at interior columns **`col_start+2..col_start+3`** (relative to the room's left wall) carved through both rooms' shared boundary:
+
+*   **Lower room:** the two shaft columns are hollow from the ceiling down to one row above the floor; the floor row itself stays solid. A `oneWay` platform sits on every other row above the floor (for a 24×10 room: platforms at rows `floor−2, −4, −6, −8`). The player hops platform to platform, then jumps through the open ceiling.
+*   **Upper room:** the matching two floor cells at the shaft columns are hollow — a **hatch** — so the player pops up into the room. The same hatch is the hole they fall back down through; the floor around it stays solid.
+*   **Spacing:** 2-row platform steps fit the ~2.5-tile jump physics (`gameplay.md` §1); 2 columns wide makes the shaft read as a visible vertical gap. Keep markers (enemies/items) out of the shaft columns.
+*   `generate_tmx.py` builds shafts automatically for grid layouts (`--grid-cols`/`--grid-rows`, see §9); hand-authored maps carve the same shape straight into the `collision` layer — hollow the two columns, place `oneWay` tiles on alternating rows, and open the two hatch cells in the upper room's floor.
+
 ---
 
 ## 4. The `objects` / `enemies` layers — markers
@@ -158,6 +167,25 @@ The shipped `maps/world1/level_01..10.tmx` chain. Enemy counts mix `enemyType`s 
 | `level_10` | 1 (16×12) | 4 (1 walker, 2 shooters, 1 knight) | 1 | 3 | — | 2 | 2 |
 
 The secret-room counts (marked *secret*) are deferred markers carrying `secretRoom="secret_room"` (§3.5). Levels 01/02/10 place their enemies in the `objects` layer (they have no separate `enemies` layer). Level 08's 13 "platforms" are **static `collision`-layer blocks** (11 solid gid-2 groups + 2 one-way gid-1 tiles) forming a jump/staircase course from the spawn up to the secret-room roof — see the `collision` layer of `assets/maps/world1/level_08.tmx`.
+
+### World 2 — level content inventory (generated)
+
+All of `maps/world2/level_01..10.tmx` are **generated** by `.junie/skills/tmx-map-generator/scripts/generate_tmx.py` (mobile-oriented 24×10-tile rooms, dead-zone scroll on phones, flip on desktop). Each level is a fully-connected grid (every adjacent room pair has a doorway or platform shaft), `playerStart` sits in the bottom-left room, and the `exitGate` (`--exit-next`) stands in the **top-right** room, chaining `level_N → level_N+1` with `level_10` looping back to `level_01` — matching the World 1 convention. Content per level is the generator's random scatter (0–2 enemies + 0–3 items per room, deterministic per `--seed`). Every map also paints a `type="door"` tile (dungeon `door.png`, from `world1/dungeon_tiles.tsx`) on the `decoration` layer on the row **just above the floor** (its bottom edge resting on the `collision` floor surface) beneath the `playerStart` and beneath the `exitGate` (the gate's column, `col_end-2`), so both doors stand on the floor instead of looking like they float or sink into it; the tile image is 2 tiles tall and renders upward from its single cell.
+
+| Level | Map (tiles) | Rooms grid | Exit → |
+|---|---|---|---|
+| `level_01` | 48×20 | 2×2 | `level_02` |
+| `level_02` | 72×10 | 3×1 | `level_03` |
+| `level_03` | 72×20 | 3×2 | `level_04` |
+| `level_04` | 48×20 | 2×2 | `level_05` |
+| `level_05` | 120×20 | 5×2 | `level_06` |
+| `level_06` | 96×40 | 4×4 | `level_07` |
+| `level_07` | 72×10 | 3×1 | `level_08` |
+| `level_08` | 72×20 | 3×2 | `level_09` |
+| `level_09` | 120×20 | 5×2 | `level_10` |
+| `level_10` | 96×40 | 4×4 | `level_01` (loop) |
+
+Regenerating any of these with the generator (seeds `1001`–`1010` respectively) reproduces them byte-identically; changing a seed changes only the enemy/item scatter, not the room grid or exit wiring.
 
 ---
 
@@ -253,7 +281,7 @@ For each axis (X and Y) independently (the "viewport size" is always the **effec
 
 ## 7. Step-by-step: build a new level
 
-1.  **Map setup.** In Tiled: New map, orthogonal, tile size **128×128** (or matching your chain), infinite off, CSV tile format. Add tilesets from `assets/maps/world1/`: `cave_tileset.tsx` for terrain, `drop_platform.tsx` for drop-through platforms, `hazards.tsx` for spikes/lava, `items.tsx` for pickups, `enemy.tsx` for enemies, `secret_wall.tsx` for breakable secret walls.
+1.  **Map setup.** In Tiled: New map, orthogonal, tile size **128×128** (or matching your chain), infinite off, CSV tile format. Add tilesets from `assets/maps/world1/`: `dungeon_tiles.tsx` for terrain (solid walls, one-way platforms, and spike hazards are all tiles with baked-in `oneWay`/`hazard` properties), `items.tsx` for pickups, `enemy.tsx` for enemies, `secret_wall.tsx` for breakable secret walls.
 2.  **`background` layer.** Paint the decorative backdrop (walls, pillars, windows). Anything goes — it never blocks.
 3.  **`collision` layer.** Paint the solid geometry: floor, walls, platforms. Leave gaps where you want jumps. Use `drop_platform.tsx` tiles for ledges you want to drop through, `hazards.tsx` tiles for spike/lava damage zones (their behavior is baked into the tileset tile properties — see §3.2, §3.3), and `secret_wall.tsx` tiles for breakable secret walls (§3.4). For any room-to-room doorway, use your `solid = false` passage tile (see §3.1). Keep the map's outer border solid. For a hidden secret room: seal the room with solid tiles, and paint its breakable entry wall from a tileset tile carrying `secret=true` + `secretRoom="<rect name>"` (§3.5).
 4.  **`decoration` layer** (optional). Foreground decor that draws on top.
@@ -291,7 +319,7 @@ For each axis (X and Y) independently (the "viewport size" is always the **effec
 
 ## 9. Related tooling & docs
 
-*   `.opencode/skills/tmx-map-generator` — generates a standalone prototype `.tmx` (a linear chain of whole-screen 30×17-tile rooms with enemies/items and walk-through doorways, plus a hidden secret room — either appended to the right as a full 30-tile room, or, with `--inside-secret`, carved as a 6×8-tile chamber inside the last room) so you can test a layout without hand-tracing collision CSVs. Run `generate_tmx.py` (from `assets/maps/world1`) with `--rooms N --seed S --out level_05.tmx`; see the skill's SKILL.md for CLI + conventions. It reads the collision tileset from `world1/dungeon_tiles.tsx`, the item/enemy tilesets from `world1/`, and clones `world1/secret_wall.tsx` inline for the secret room's entry wall; output is standalone (no `LevelCatalog`/exit-gate wiring by design — the exit gate is added by hand).
+*   `.opencode/skills/tmx-map-generator` — generates a standalone prototype `.tmx` (a linear chain of rooms with enemies/items and walk-through doorways, plus a hidden secret room — either appended to the right, or, with `--inside-secret`, carved as a 6×8-tile chamber inside the last room) so you can test a layout without hand-tracing collision CSVs. Rooms default to whole-screen 30×17 tiles but are configurable via `--room-width W --room-height H` (e.g. `24 10` for mobile-oriented rooms that dead-zone scroll under the `BAND_ZOOM` camera). `--platforms N` additionally decorates every room with a deterministic, always-jumpable staircase of N floating one-way platforms (2 rows up / 2 cols right per step, a `bg-*` filler tile behind each, and a coin on the top platform) while keeping the flat floor intact — see the skill's SKILL.md. **Grid layouts:** `--grid-cols C --grid-rows R` tiles `C×R` rooms over the map (width × height = `C×W × R×H`), links horizontal neighbours with doorways and vertical neighbours with one-way **platform shafts** (§3.6), and places `playerStart` in the bottom-left room; grid maps use `--no-secret` to omit the secret room (required for multi-row grids). Run `generate_tmx.py` (from `assets/maps/world1`) with `--rooms N --seed S --out level_05.tmx` or `--grid-cols 2 --grid-rows 2 --room-width 24 --room-height 10 --no-secret --seed S --out level_01.tmx`; see the skill's SKILL.md for CLI + conventions. It reads the collision tileset from `world1/dungeon_tiles.tsx`, the item/enemy tilesets from `world1/`, and clones `world1/secret_wall.tsx` inline for the secret room's entry wall; output is standalone (no `LevelCatalog`/exit-gate wiring by design — the exit gate is added by hand).
 *   `resources/docs-ai/enemies.md` — enemy catalog, stats, and how to add new types.
 *   `resources/docs-ai/ashley-ecs.md` — the `MapLoader`/`EntityFactory`/`Room`/`RoomState`/`CameraSystem` code shape and priorities.
 *   `resources/docs-ai/gameplay.md` — movement/combat mechanics and how they read map data.
