@@ -6,7 +6,9 @@
     "extensionsPath": "extensions",
     "folders": [
         ".",
-        "gfx"
+        "gfx",
+        "tileset",
+        "world1"
     ],
     "properties": [
     ],

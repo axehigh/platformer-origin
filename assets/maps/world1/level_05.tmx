@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="120" height="17" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="2049">
- <tileset firstgid="1" source="dungeon_tiles.tsx"/>
- <tileset firstgid="59" source="items.tsx"/>
- <tileset firstgid="78" source="enemy.tsx"/>
+ <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
+ <tileset firstgid="59" source="../tileset/items.tsx"/>
+ <tileset firstgid="78" source="../tileset/enemy.tsx"/>
  <tileset firstgid="85" name="secret_room_wall" tilewidth="128" tileheight="128" tilecount="1" columns="1">
   <tile id="0">
    <properties>

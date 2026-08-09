@@ -15,28 +15,35 @@ output tracks the tilesets instead of hard-coded gids. See
 Stdlib only (argparse, random, os, xml.etree.ElementTree) -- no external deps.
 
 Usage:
-    # run from assets/maps/world1 (CWD matters -- dungeon_tiles.tsx is opened from here)
-    python3 generate_tmx.py --rooms 3 --out generated_room.tmx --seed 42
-    python3 generate_tmx.py --rooms 1 --inside-secret --out generated_room.tmx --seed 42
+    # Run from the assets/maps directory -- the *.tsx tilesets live in assets/maps/tileset/
+    # and are resolved relative to the CWD (--tilesets-dir defaults to "tileset").
+    python3 ../.junie/skills/tmx-map-generator/scripts/generate_tmx.py --rooms 3 \
+        --tilesets-dir tileset --out world_demo/generated_room.tmx --seed 42
+    python3 ../.junie/skills/tmx-map-generator/scripts/generate_tmx.py --rooms 1 --inside-secret \
+        --tilesets-dir tileset --out world_demo/generated_room.tmx --seed 42
     # mobile-oriented rooms: 24 wide x 10 high tiles (scroll under the BAND_ZOOM camera)
-    python3 generate_tmx.py --rooms 2 --room-width 24 --room-height 10 --out generated_room.tmx --seed 42
+    python3 ../.junie/skills/tmx-map-generator/scripts/generate_tmx.py --rooms 2 --room-width 24 \
+        --room-height 10 --tilesets-dir tileset --out world_demo/generated_mobile.tmx --seed 42
     # 2x2 grid of rooms with vertical platform shafts (no secret room):
-    python3 generate_tmx.py --grid-cols 2 --grid-rows 2 --room-width 24 --room-height 10 \
-        --no-secret --out generated_grid.tmx --seed 42
+    python3 ../.junie/skills/tmx-map-generator/scripts/generate_tmx.py --grid-cols 2 --grid-rows 2 \
+        --room-width 24 --room-height 10 --no-secret --tilesets-dir tileset \
+        --out world_demo/generated_grid.tmx --seed 42
     # ...and chain-connected to the next level via an exit gate in the far room:
-    python3 generate_tmx.py --grid-cols 2 --grid-rows 2 --room-width 24 --room-height 10 \
-        --no-secret --exit-next maps/world2/level_02.tmx --out generated_grid.tmx --seed 42
+    python3 ../.junie/skills/tmx-map-generator/scripts/generate_tmx.py --grid-cols 2 --grid-rows 2 \
+        --room-width 24 --room-height 10 --no-secret --tilesets-dir tileset \
+        --exit-next maps/world2/level_02.tmx --out world_demo/generated_grid.tmx --seed 42
     # floating one-way platform staircases in each room (deterministic, always-jumpable):
-    python3 generate_tmx.py --rooms 3 --platforms 3 --out generated_platforming.tmx --seed 42
+    python3 ../.junie/skills/tmx-map-generator/scripts/generate_tmx.py --rooms 3 --platforms 3 \
+        --tilesets-dir tileset --out world_demo/generated_platforming.tmx --seed 42
 
-Or:
+Or (library use; run from assets/maps or pass an absolute tilesets_dir):
     from generate_tmx import generate_map, validate_map
-    generate_map("assets/maps/world1/generated_room.tmx", room_count=3, seed=42)
-    generate_map("assets/maps/world1/generated_room.tmx", room_count=1, seed=42, inside_secret=True)
-    generate_map("assets/maps/world1/generated_room.tmx", room_count=2, seed=42, room_width=24, room_height=10)
-    generate_map("assets/maps/world1/generated_grid.tmx", grid_cols=2, grid_rows=2,
+    generate_map("assets/maps/world_demo/generated_room.tmx", room_count=3, seed=42)
+    generate_map("assets/maps/world_demo/generated_room.tmx", room_count=1, seed=42, inside_secret=True)
+    generate_map("assets/maps/world_demo/generated_room.tmx", room_count=2, seed=42, room_width=24, room_height=10)
+    generate_map("assets/maps/world_demo/generated_grid.tmx", grid_cols=2, grid_rows=2,
                  room_width=24, room_height=10, no_secret=True, seed=42)
-    problems = validate_map("assets/maps/world1/generated_room.tmx")
+    problems = validate_map("assets/maps/world_demo/generated_room.tmx")
 """
 
 import argparse
@@ -64,7 +71,7 @@ CHAMBER_H = 8
 EXIT_GATE_W = 140
 EXIT_GATE_H = 152
 
-COLLISION_TILESET_PATH = "dungeon_tiles.tsx"
+COLLISION_TILESET = "dungeon_tiles.tsx"
 ITEMS_TILESET = "items.tsx"
 ENEMY_TILESET = "enemy.tsx"
 SECRET_WALL_TILESET = "secret_wall.tsx"
@@ -178,7 +185,7 @@ class Layout:
         def load(name):
             return Tileset(os.path.join(tilesets_dir, name))
 
-        self.cave = Tileset(COLLISION_TILESET_PATH)
+        self.cave = Tileset(os.path.join(tilesets_dir, COLLISION_TILESET))
         self.items = load(ITEMS_TILESET)
         self.enemy = load(ENEMY_TILESET)
         self.secret_wall = load(SECRET_WALL_TILESET)
@@ -716,7 +723,7 @@ def _relative_source(out_path, ts_path):
     return rel.replace(os.sep, "/")
 
 
-def generate_map(output_path, room_count=3, seed=None, tilesets_dir="assets/maps/world1", enemy_types=None,
+def generate_map(output_path, room_count=3, seed=None, tilesets_dir="tileset", enemy_types=None,
                  inside_secret=False, room_width=SCREEN_TILE_W, room_height=SCREEN_TILE_H,
                  grid_cols=None, grid_rows=None, no_secret=False, exit_next=None, platforms=0):
     """Builds a chain (default) or grid of whole-screen rooms (room_width x room_height tiles at
@@ -1271,9 +1278,10 @@ def main():
                              "farthest from the player start, pointing at this .tmx path.")
     parser.add_argument("--out", type=str, required=True, help="Output .tmx path.")
     parser.add_argument("--seed", type=int, default=None, help="Random seed for reproducible output.")
-    parser.add_argument("--tilesets-dir", type=str, default="assets/maps/world1",
-                        help="Directory containing items.tsx/enemy.tsx (default: assets/maps/world1); "
-                             "the collision tileset is loaded from dungeon_tiles.tsx in the CWD.")
+    parser.add_argument("--tilesets-dir", type=str, default="tileset",
+                        help="Directory holding the *.tsx tilesets (dungeon_tiles.tsx, items.tsx, "
+                             "enemy.tsx, secret_wall.tsx; default: 'tileset' relative to the CWD -- "
+                             "run from assets/maps).")
     parser.add_argument("--enemy-types", type=str, default=None,
                         help="Comma-separated enemy types to scatter (default: walker,flyer,shooter).")
     parser.add_argument("--inside-secret", action="store_true",

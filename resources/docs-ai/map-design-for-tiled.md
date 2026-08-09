@@ -66,7 +66,7 @@ The collision layer is a tile grid. `MapLoader.buildCollisionRects()` walks ever
 
 Room-to-room doorways must be a tile marked **non-solid**. In Tiled:
 
-1.  Open the tileset file (e.g. `assets/maps/world1/dungeon_tiles.tsx`).
+1.  Open the tileset file (e.g. `assets/maps/tileset/dungeon_tiles.tsx`).
 2.  Select the doorway tile you use for passages.
 3.  Add a **boolean custom property `solid` set to `false`** on that tile.
 
@@ -74,7 +74,7 @@ That single tileset edit makes every map using the tile treat it as a walk-throu
 
 ### §3.2 Hazards (spikes, lava)
 
-A **non-solid** tile that damages the player on contact. Paint it in the `collision` layer; the tile's `hazard = true` property (set on the tileset tile, e.g. `assets/maps/world1/hazards.tsx`) turns it into a damage zone instead of a wall:
+A **non-solid** tile that damages the player on contact. Paint it in the `collision` layer; the tile's `hazard = true` property (set on the tileset tile, e.g. `assets/maps/tileset/hazards.tsx`) turns it into a damage zone instead of a wall:
 
 *   On AABB overlap the player loses **1 HP**, gets the usual 0.3s hit-stun + 2s invulnerability grace, and is **not** knocked back (no directional push).
 *   Hazards are fully non-solid — nothing (player, enemies, bullets) is blocked by them. The grace period turns a sustained overlap into one hit per second, not instant shredding.
@@ -83,7 +83,7 @@ A **non-solid** tile that damages the player on contact. Paint it in the `collis
 
 ### §3.3 Drop-through platforms (one-way)
 
-A **drop-through platform for the player, a normal solid tile for everyone else**. Paint it in the `collision` layer; the tile's `oneWay = true` property (set on the tileset tile, e.g. `assets/maps/world1/drop_platform.tsx`) makes it a platform instead of a wall:
+A **drop-through platform for the player, a normal solid tile for everyone else**. Paint it in the `collision` layer; the tile's `oneWay = true` property (set on the tileset tile, e.g. `assets/maps/tileset/drop_platform.tsx`) makes it a platform instead of a wall:
 
 *   The player can **land on its top** (it sticks only when the player's feet were at/above the platform's top before the move) and can **jump up through** it from below.
 *   While standing on it, the contextual **`v` button** appears (mobile) or **`S`/`DOWN`** (keyboard) starts a short ~0.25s pass-through window: the player drops straight through the platform, then normal gravity takes over.
@@ -92,7 +92,7 @@ A **drop-through platform for the player, a normal solid tile for everyone else*
 
 ### §3.4 Secret walls (breakable)
 
-A **solid** wall tile that opens a doorway when the player melee-strikes it. Paint it in the `collision` layer; the tile's `secret = true` property (set on the tileset tile, e.g. `assets/maps/world1/secret_wall.tsx`) marks it as breakable:
+A **solid** wall tile that opens a doorway when the player melee-strikes it. Paint it in the `collision` layer; the tile's `secret = true` property (set on the tileset tile, e.g. `assets/maps/tileset/secret_wall.tsx`) marks it as breakable:
 
 *   The tile is **fully solid** (blocks the player, enemies, and bullets exactly like a regular wall) — breaking it is what opens the route. It is *not* a passage: an unbroken secret wall has no effect on movement until struck.
 *   **One melee swing breaks at most one** secret tile whose rect overlaps the strike hitbox (reach-dependent; see `gameplay.md` §2.Z). On break, the tile's sprite disappears (its collision-layer cell is blanked), its rect is removed from the collision set, a smoke puff spawns at the tile center, and a wall-break SFX plays — the doorway is walkable the very next frame.
@@ -170,7 +170,7 @@ The secret-room counts (marked *secret*) are deferred markers carrying `secretRo
 
 ### World 2 — level content inventory (generated)
 
-All of `maps/world2/level_01..10.tmx` are **generated** by `.junie/skills/tmx-map-generator/scripts/generate_tmx.py` (mobile-oriented 24×10-tile rooms, dead-zone scroll on phones, flip on desktop). Each level is a fully-connected grid (every adjacent room pair has a doorway or platform shaft), `playerStart` sits in the bottom-left room, and the `exitGate` (`--exit-next`) stands in the **top-right** room, chaining `level_N → level_N+1` with `level_10` looping back to `level_01` — matching the World 1 convention. Content per level is the generator's random scatter (0–2 enemies + 0–3 items per room, deterministic per `--seed`). Every map also paints a `type="door"` tile (dungeon `door.png`, from `world1/dungeon_tiles.tsx`) on the `decoration` layer on the row **just above the floor** (its bottom edge resting on the `collision` floor surface) beneath the `playerStart` and beneath the `exitGate` (the gate's column, `col_end-2`), so both doors stand on the floor instead of looking like they float or sink into it; the tile image is 2 tiles tall and renders upward from its single cell.
+All of `maps/world2/level_01..10.tmx` are **generated** by `.junie/skills/tmx-map-generator/scripts/generate_tmx.py` (mobile-oriented 24×10-tile rooms, dead-zone scroll on phones, flip on desktop). Each level is a fully-connected grid (every adjacent room pair has a doorway or platform shaft), `playerStart` sits in the bottom-left room, and the `exitGate` (`--exit-next`) stands in the **top-right** room, chaining `level_N → level_N+1` with `level_10` looping back to `level_01` — matching the World 1 convention. Content per level is the generator's random scatter (0–2 enemies + 0–3 items per room, deterministic per `--seed`). Every map also paints a `type="door"` tile (dungeon `door.png`, from `tileset/dungeon_tiles.tsx`) on the `decoration` layer on the row **just above the floor** (its bottom edge resting on the `collision` floor surface) beneath the `playerStart` and beneath the `exitGate` (the gate's column, `col_end-2`), so both doors stand on the floor instead of looking like they float or sink into it; the tile image is 2 tiles tall and renders upward from its single cell.
 
 | Level | Map (tiles) | Rooms grid | Exit → |
 |---|---|---|---|
@@ -281,7 +281,7 @@ For each axis (X and Y) independently (the "viewport size" is always the **effec
 
 ## 7. Step-by-step: build a new level
 
-1.  **Map setup.** In Tiled: New map, orthogonal, tile size **128×128** (or matching your chain), infinite off, CSV tile format. Add tilesets from `assets/maps/world1/`: `dungeon_tiles.tsx` for terrain (solid walls, one-way platforms, and spike hazards are all tiles with baked-in `oneWay`/`hazard` properties), `items.tsx` for pickups, `enemy.tsx` for enemies, `secret_wall.tsx` for breakable secret walls.
+1.  **Map setup.** In Tiled: New map, orthogonal, tile size **128×128** (or matching your chain), infinite off, CSV tile format. Add tilesets from `assets/maps/tileset/`: `dungeon_tiles.tsx` for terrain (solid walls, one-way platforms, and spike hazards are all tiles with baked-in `oneWay`/`hazard` properties), `items.tsx` for pickups, `enemy.tsx` for enemies, `secret_wall.tsx` for breakable secret walls.
 2.  **`background` layer.** Paint the decorative backdrop (walls, pillars, windows). Anything goes — it never blocks.
 3.  **`collision` layer.** Paint the solid geometry: floor, walls, platforms. Leave gaps where you want jumps. Use `drop_platform.tsx` tiles for ledges you want to drop through, `hazards.tsx` tiles for spike/lava damage zones (their behavior is baked into the tileset tile properties — see §3.2, §3.3), and `secret_wall.tsx` tiles for breakable secret walls (§3.4). For any room-to-room doorway, use your `solid = false` passage tile (see §3.1). Keep the map's outer border solid. For a hidden secret room: seal the room with solid tiles, and paint its breakable entry wall from a tileset tile carrying `secret=true` + `secretRoom="<rect name>"` (§3.5).
 4.  **`decoration` layer** (optional). Foreground decor that draws on top.

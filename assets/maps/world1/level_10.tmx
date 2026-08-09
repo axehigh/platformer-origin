@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="16" height="12" tilewidth="128" tileheight="128" infinite="0" nextlayerid="7" nextobjectid="21">
- <tileset firstgid="1" source="dungeon_tiles.tsx"/>
- <tileset firstgid="59" source="enemy.tsx"/>
+ <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
+ <tileset firstgid="59" source="../tileset/enemy.tsx"/>
  <layer id="1" name="background" width="16" height="12">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

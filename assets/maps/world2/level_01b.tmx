@@ -117,12 +117,7 @@
   <object id="987" gid="80" x="2560" y="384" width="128" height="128"/>
   <object id="988" gid="84" x="2560" y="1664" width="128" height="128"/>
  </objectgroup>
- <objectgroup id="6" name="Rooms" locked="1">
-  <object id="961" name="room0" x="0" y="0" width="3072" height="1280"/>
-  <object id="962" name="room1" x="3072" y="0" width="3072" height="1280"/>
-  <object id="963" name="room2" x="0" y="1280" width="3072" height="1280"/>
-  <object id="964" name="room3" x="3072" y="1280" width="3072" height="1280"/>
- </objectgroup>
+ <objectgroup id="6" name="Rooms"/>
  <layer id="8" name="secret_hide" width="48" height="20">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

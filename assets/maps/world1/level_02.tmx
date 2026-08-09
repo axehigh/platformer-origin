@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="16" height="12" tilewidth="128" tileheight="128" infinite="0" nextlayerid="7" nextobjectid="22">
- <tileset firstgid="1" source="dungeon_tiles.tsx"/>
- <tileset firstgid="58" source="enemy.tsx"/>
- <tileset firstgid="65" source="items.tsx"/>
+ <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
+ <tileset firstgid="58" source="../tileset/enemy.tsx"/>
+ <tileset firstgid="65" source="../tileset/items.tsx"/>
  <layer id="1" name="background" width="16" height="12">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
