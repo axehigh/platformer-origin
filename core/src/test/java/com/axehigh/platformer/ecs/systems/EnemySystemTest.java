@@ -254,6 +254,29 @@ public class EnemySystemTest extends SystemTestBase {
     }
 
     @Test
+    public void unfrozenEnemyDoesNotTurnOnFirstActiveFrame() {
+        collisionRects.add(FLOOR);
+        roomState.activeRoomIndex = 1;
+        Entity entity = enemy(0f, 0f);
+        EnemyComponent enemyComponent = ENEMY.get(entity);
+        enemyComponent.roomIndex = 0;
+        MovementComponent movement = MOVEMENT.get(entity);
+        movement.velocity.x = 20f;
+
+        engine.update(DT);
+        assertTrue(enemyComponent.wasFrozen);
+        assertEquals(0f, movement.velocity.x, EPSILON);
+
+        roomState.activeRoomIndex = 0;
+        engine.update(DT);
+
+        assertFalse(enemyComponent.wasFrozen);
+        assertEquals(1, enemyComponent.direction);
+        assertFalse(enemyComponent.turnPause.isActive());
+        assertEquals(20f, movement.velocity.x, EPSILON);
+    }
+
+    @Test
     public void flyingEnemyBobsVertically() {
         Entity entity = enemy(0f, 0f);
         FlyingEnemyComponent flying = new FlyingEnemyComponent();

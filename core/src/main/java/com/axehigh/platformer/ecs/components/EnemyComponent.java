@@ -67,4 +67,11 @@ public class EnemyComponent implements Component {
      * one (see {@code RoomState.activeRoomIndex}); {@code -1} means it's always active.
      */
     public int roomIndex = -1;
+    /**
+     * Set to {@code true} while this enemy's owning room is inactive (its AI frozen with velocity
+     * zeroed by {@code EnemySystem}); cleared on the first active frame so the just-zeroed velocity
+     * isn't misread as a wall block (which would flip direction + start a turn pause for every
+     * enemy in the room simultaneously on re-entry).
+     */
+    public boolean wasFrozen = false;
 }

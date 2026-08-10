@@ -627,15 +627,26 @@ public class EntityFactory {
         }
         enemyComponent.speed *= unitScale;
         enemyComponent.patrolRange *= unitScale;
+        // Desync the patrol cycle so enemies in the same room don't move/pause in lockstep:
+        // randomize the initial facing (all enemies otherwise spawn walking right) and jitter the
+        // patrol speed ±15%, so each enemy drifts out of phase over time and never re-syncs.
+        enemyComponent.direction = MathUtils.randomBoolean() ? 1 : -1;
+        enemyComponent.speed *= MathUtils.random(0.85f, 1.15f);
 
         if ("flyer".equals(enemyType)) {
             enemyComponent.health = 5f;
             enemyComponent.maxHealth = 5f;
             FlyingEnemyComponent flying = new FlyingEnemyComponent();
             flying.bobAmplitude *= unitScale;
+            // Random bob phase so flyers don't flap in unison (they all start at bobTime = 0).
+            flying.bobTime = MathUtils.random(0f, MathUtils.PI2 / flying.bobFrequency);
             entity.add(flying);
         } else if ("shooter".equals(enemyType)) {
-            entity.add(new EnemyShooterComponent());
+            EnemyShooterComponent shooter = new EnemyShooterComponent();
+            // Stagger the first shot across the interval so shooters don't all fire the same
+            // frame the player enters their room.
+            shooter.shootCooldown.start(MathUtils.random(0f, shooter.shootInterval));
+            entity.add(shooter);
         } else if ("knight".equals(enemyType)) {
             enemyComponent.health = 15f;
             enemyComponent.maxHealth = 15f;

@@ -115,6 +115,7 @@ public class EnemySystem extends IteratingSystem {
 
         boolean roomActive = enemy.roomIndex < 0 || enemy.roomIndex == roomState.activeRoomIndex;
         if (!roomActive) {
+            enemy.wasFrozen = true;
             movement.velocity.x = 0f;
             if (flying != null) {
                 movement.velocity.y = 0f;
@@ -147,9 +148,13 @@ public class EnemySystem extends IteratingSystem {
 
         // Right after a turn pause the velocity is still zeroed from standing still; skip the
         // wall/range checks for exactly one frame so they don't re-trigger a turn (the enemy is
-        // already facing away from whatever made it turn).
+        // already facing away from whatever made it turn). The same applies right after the room
+        // unfreezes this enemy: the freeze zeroed velocity, so the zero must not be misread as a
+        // wall block (which would flip every unfrozen enemy in the room in unison).
         boolean resumedFromTurnPause = wasTurnPaused;
-        boolean blockedByWall = !resumedFromTurnPause && movement.grounded && movement.velocity.x == 0f;
+        boolean resumedFromFreeze = enemy.wasFrozen;
+        enemy.wasFrozen = false;
+        boolean blockedByWall = !resumedFromTurnPause && !resumedFromFreeze && movement.grounded && movement.velocity.x == 0f;
         boolean atLedge = movement.grounded && !hasGroundAhead(transform, collision, enemy.direction);
         boolean atHazard = movement.grounded && hazardAhead(collision, enemy.direction);
 
