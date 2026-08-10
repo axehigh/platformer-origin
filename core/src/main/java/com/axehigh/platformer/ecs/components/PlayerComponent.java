@@ -3,6 +3,8 @@ package com.axehigh.platformer.ecs.components;
 import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.util.Timer;
 import com.badlogic.ashley.core.Component;
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.utils.ObjectSet;
 
 
 public class PlayerComponent implements Component {
@@ -35,8 +37,14 @@ public class PlayerComponent implements Component {
     public Timer meleeCooldown = new Timer();
     /** Counts down while the melee strike hitbox is active; active means the strike is in progress. */
     public Timer meleeAttack = new Timer();
-    /** Ensures a single swing damages at most one enemy hit. */
+    /** True once the current swing has landed at least one hit (enemy damaged, chest opened, secret
+     * wall broken, or wall clank); gates the one-shot secret-wall break / clank effects. */
     public boolean meleeHasHit = false;
+    /** Enemies already damaged by the current swing (cleared at every swing start by
+     * {@code PlayerInputSystem}), so a swing can hit every enemy that comes into reach as the blade
+     * extends but never the same enemy twice — regardless of swing length vs.
+     * {@code EnemyDamageResolver}'s hit-stun grace. */
+    public ObjectSet<Entity> meleeHitEnemies = new ObjectSet<>();
     /** Grace period after being hit by an enemy, during which further enemy contact is ignored. */
     public Timer hitInvulnerability = new Timer();
     /**

@@ -40,12 +40,12 @@ public class DeviceClassTest {
     }
 
     @Test
-    public void phoneSimulationEnablesTouchAndDefaultsToCornerOverlay() {
+    public void phoneSimulationEnablesTouchAndDefaultsToBandZoom() {
         DeviceClass.setSimulated(DeviceClass.PHONE);
 
         assertTrue(DeviceClass.isSimulating());
         assertTrue(LayoutMode.isTouchDevice());
-        assertEquals(LayoutMode.CORNER_OVERLAY, LayoutMode.defaultForDevice());
+        assertEquals(LayoutMode.BAND_ZOOM, LayoutMode.defaultForDevice());
     }
 
     @Test

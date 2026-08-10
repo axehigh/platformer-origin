@@ -46,10 +46,13 @@ import static com.axehigh.platformer.ecs.components.Mappers.TEXTURE;
  * hitbox is only "live" while the sword is actually extended: each frame of the {@code ATTACKING}
  * animation maps to a reach in the sprite's reach table, {@link SpriteConstants#PLAYER_ATTACK_REACH}
  * (0 = windup/recovery frames don't hit at all, so a swing never registers before the blade reaches
- * out or after it pulls back). Damage is applied (or a chest opened / a secret wall broken) at most
- * once per swing via {@code meleeHasHit}, using {@code EnemyDamageResolver} for enemy
- * hit-stun/knockback. The current frame's box is always exposed via {@link #getActiveStrikeBounds()}
- * so {@code DebugRenderSystem} can visualize it under SHIFT+D.
+ * out or after it pulls back). Every overlapping enemy is damaged at most once per swing (tracked in
+ * {@link PlayerComponent#meleeHitEnemies}, reset at every swing start, so a swing can still hit
+ * enemies that only come into reach as the blade extends) and every overlapping unopened chest
+ * opens, using {@code EnemyDamageResolver} for enemy hit-stun/knockback. The one-shot secret-wall
+ * break and wall-clank spark are gated behind {@code meleeHasHit} (at most one per swing). The
+ * current frame's box is always exposed via
+ * {@link #getActiveStrikeBounds()} so {@code DebugRenderSystem} can visualize it under SHIFT+D.
  */
 public class MeleeAttackSystem extends IteratingSystem {
 
@@ -139,33 +142,11 @@ public class MeleeAttackSystem extends IteratingSystem {
         strikeBounds.set(strikeX, collision.worldBounds.y, reach, collision.worldBounds.height);
         activeStrikeBounds = reach > 0f ? strikeBounds : null;
 
-        if (!player.meleeHasHit && reach > 0f) {
-            Entity hitEnemy = findHit(strikeBounds, enemies);
-            if (hitEnemy != null) {
-                EnemyComponent enemy = ENEMY.get(hitEnemy);
-                MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
-                boolean isFlying = FLYING.get(hitEnemy) != null;
-                EnemyDamageResolver.applyHit(hitEnemy, enemy, enemyMovement, player.swordDamage, player.facingDirection, isFlying, unitScale, engine);
-                player.meleeHasHit = true;
-            } else {
-                Entity hitChest = findHit(strikeBounds, chests);
-                if (hitChest != null) {
-                    ChestComponent chest = CHEST.get(hitChest);
-                    if (!chest.opened) {
-                        chest.opened = true;
-                        chest.disappearTimer.start(CHEST_DISAPPEAR_DELAY);
-                        TextureComponent texture = TEXTURE.get(hitChest);
-                        texture.region = assetManager.get(ORIGIN_GAME_GFX, TextureAtlas.class)
-                            .findRegion(SpriteConstants.CHEST_OPEN_REGION);
-                        CollisionComponent chestCollision = COLLISION.get(hitChest);
-                        if (engine != null && chestCollision != null) {
-                            ParticleHelper.spawnSmallSmoke(engine,
-                                chestCollision.worldBounds.x + chestCollision.worldBounds.width / 2f,
-                                chestCollision.worldBounds.y + chestCollision.worldBounds.height / 2f);
-                        }
-                    }
-                    player.meleeHasHit = true;
-                } else if (breakSecretWall(strikeBounds)) {
+        if (reach > 0f) {
+            hitAllEnemies(strikeBounds, player);
+            openAllChests(strikeBounds, player);
+            if (!player.meleeHasHit) {
+                if (breakSecretWall(strikeBounds)) {
                     player.meleeHasHit = true;
                 } else if (spawnWallClankSpark(strikeBounds)) {
                     player.meleeHasHit = true;
@@ -174,6 +155,52 @@ public class MeleeAttackSystem extends IteratingSystem {
         }
 
         player.meleeAttack.update(deltaTime);
+    }
+
+    /** Damages every enemy overlapping {@code bounds} that hasn't already been hit this swing
+     * (tracked in {@link PlayerComponent#meleeHitEnemies}, reset at every swing start) via
+     * {@code EnemyDamageResolver}, so a single swing can hit every enemy in reach. */
+    private void hitAllEnemies(Rectangle bounds, PlayerComponent player) {
+        for (Entity hitEnemy : enemies) {
+            CollisionComponent enemyCollision = COLLISION.get(hitEnemy);
+            if (!bounds.overlaps(enemyCollision.worldBounds) || player.meleeHitEnemies.contains(hitEnemy)) {
+                continue;
+            }
+            EnemyComponent enemy = ENEMY.get(hitEnemy);
+            MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
+            boolean isFlying = FLYING.get(hitEnemy) != null;
+            EnemyDamageResolver.applyHit(hitEnemy, enemy, enemyMovement, player.swordDamage,
+                player.facingDirection, isFlying, unitScale, engine);
+            player.meleeHitEnemies.add(hitEnemy);
+            player.meleeHasHit = true;
+        }
+    }
+
+    /** Opens every unopened chest overlapping {@code bounds} (sprite swap to the open region,
+     * disappear timer, smoke puff). Chests are independent of enemy hits, so one swing can both
+     * damage an enemy and open a chest. */
+    private void openAllChests(Rectangle bounds, PlayerComponent player) {
+        for (Entity hitChest : chests) {
+            CollisionComponent chestCollision = COLLISION.get(hitChest);
+            if (!bounds.overlaps(chestCollision.worldBounds)) {
+                continue;
+            }
+            ChestComponent chest = CHEST.get(hitChest);
+            if (chest.opened) {
+                continue;
+            }
+            chest.opened = true;
+            chest.disappearTimer.start(CHEST_DISAPPEAR_DELAY);
+            TextureComponent texture = TEXTURE.get(hitChest);
+            texture.region = assetManager.get(ORIGIN_GAME_GFX, TextureAtlas.class)
+                .findRegion(SpriteConstants.CHEST_OPEN_REGION);
+            if (engine != null && chestCollision != null) {
+                ParticleHelper.spawnSmallSmoke(engine,
+                    chestCollision.worldBounds.x + chestCollision.worldBounds.width / 2f,
+                    chestCollision.worldBounds.y + chestCollision.worldBounds.height / 2f);
+            }
+            player.meleeHasHit = true;
+        }
     }
 
     /**
@@ -272,15 +299,5 @@ public class MeleeAttackSystem extends IteratingSystem {
             }
         }
         return PLAYER_MAX_ATTACK_REACH;
-    }
-
-    private Entity findHit(Rectangle bounds, ImmutableArray<Entity> targets) {
-        for (Entity target : targets) {
-            CollisionComponent targetCollision = COLLISION.get(target);
-            if (bounds.overlaps(targetCollision.worldBounds)) {
-                return target;
-            }
-        }
-        return null;
     }
 }

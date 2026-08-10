@@ -40,9 +40,9 @@ public enum LayoutMode {
     }
 
     /**
-     * Shipped default: tall phones (aspect &gt; ~16:10) get the full-screen {@link #CORNER_OVERLAY}
-     * world; tablets (wider than 16:10) get a {@link #BAND} so the controls never cover the floor.
-     * A faked {@link DeviceClass} overrides this with its own per-class default.
+     * Shipped default: phones (aspect &gt; ~16:10) get the {@link #BAND_ZOOM} world (control band +
+     * camera zoom so tiles stay big); tablets (wider than 16:10) get a {@link #BAND} so the controls
+     * never cover the floor. A faked {@link DeviceClass} overrides this with its own per-class default.
      */
     public static LayoutMode defaultForDevice() {
         DeviceClass simulated = DeviceClass.simulated();
@@ -53,7 +53,7 @@ public enum LayoutMode {
             return CORNER_OVERLAY;
         }
         float aspect = Gdx.graphics.getWidth() / (float) Gdx.graphics.getHeight();
-        return aspect > 1.7f ? CORNER_OVERLAY : BAND;
+        return aspect > 1.7f ? BAND_ZOOM : BAND;
     }
 
     @Override

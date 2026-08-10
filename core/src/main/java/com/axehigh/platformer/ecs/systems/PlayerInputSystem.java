@@ -190,6 +190,7 @@ public class PlayerInputSystem extends IteratingSystem {
             float attackDuration = findAttackDuration(entity);
             player.meleeAttack.start(attackDuration);
             player.meleeHasHit = false;
+            player.meleeHitEnemies.clear();
             // Cooldown must be at least as long as the animation to allow it to finish
             player.meleeCooldown.start(Math.max(MELEE_COOLDOWN, attackDuration));
         }

@@ -14,7 +14,7 @@ import com.badlogic.gdx.Gdx;
  */
 public enum DeviceClass {
     DESKTOP(1280, 720, LayoutMode.CORNER_OVERLAY),
-    PHONE(2400, 1080, LayoutMode.CORNER_OVERLAY),
+    PHONE(2400, 1080, LayoutMode.BAND_ZOOM),
     TABLET(1600, 1200, LayoutMode.BAND);
 
     private static DeviceClass simulated;

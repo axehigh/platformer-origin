@@ -34,11 +34,13 @@ import static org.mockito.Mockito.when;
 
 /**
  * Headless unit tests for {@code MeleeAttackSystem}: the frame-indexed per-frame reach (windup and
- * recovery frames produce no hitbox), strike-box placement in both facing directions, exactly-one
- * hit per swing, and the unopened/already-opened chest branches. The attack animation is a 5-frame
- * swing at 0.1s/frame, and the swing's elapsed time is controlled directly through
- * {@code PlayerComponent.meleeAttack.start(...)} (start remaining = duration - desired elapsed).
- * The {@code AssetManager} is mocked so the chest-open texture swap runs without a GL context.
+ * recovery frames produce no hitbox), strike-box placement in both facing directions, one hit per
+ * enemy per swing (every enemy in reach is damaged, including ones only reached on later frames,
+ * and later frames do not re-damage), and the unopened/already-opened chest branches (chests open
+ * independently of enemy hits). The attack animation is a 5-frame swing at 0.1s/frame, and the
+ * swing's elapsed time is controlled directly through {@code PlayerComponent.meleeAttack.start(...)}
+ * (start remaining = duration - desired elapsed). The {@code AssetManager} is mocked so the
+ * chest-open texture swap runs without a GL context.
  */
 public class MeleeAttackSystemTest extends SystemTestBase {
 
@@ -185,7 +187,7 @@ public class MeleeAttackSystemTest extends SystemTestBase {
     }
 
     @Test
-    public void oneSwingHitsOnlyOneEnemy() {
+    public void oneSwingHitsAllEnemiesInRange() {
         Entity player = player(0f, 130f, 1);
         Entity first = enemy(16f, 105f);
         Entity second = enemy(20f, 105f);
@@ -194,9 +196,44 @@ public class MeleeAttackSystemTest extends SystemTestBase {
         playerComponent.meleeAttack.start(0.15f);
         engine.update(0f);
 
-        boolean firstHit = ENEMY.get(first).health < 10f;
-        boolean secondHit = ENEMY.get(second).health < 10f;
-        assertEquals(1, (firstHit ? 1 : 0) + (secondHit ? 1 : 0));
+        assertEquals(5f, ENEMY.get(first).health, EPSILON);
+        assertEquals(5f, ENEMY.get(second).health, EPSILON);
+        assertTrue(playerComponent.meleeHasHit);
+    }
+
+    @Test
+    public void enemyReachedOnLaterFrameStillHit() {
+        Entity player = player(0f, 130f, 1);
+        Entity enemy = enemy(46f, 105f);
+        EnemyComponent enemyComponent = ENEMY.get(enemy);
+        PlayerComponent playerComponent = PLAYER.get(player);
+
+        playerComponent.meleeAttack.start(0.35f);
+        engine.update(0f);
+        engine.update(0.1f);
+        assertEquals(10f, enemyComponent.health, EPSILON);
+        engine.update(0.1f);
+        assertEquals(10f, enemyComponent.health, EPSILON);
+
+        engine.update(0.1f);
+        assertEquals(5f, enemyComponent.health, EPSILON);
+        assertTrue(playerComponent.meleeHasHit);
+    }
+
+    @Test
+    public void chestAndEnemyBothHitInOneSwing() {
+        Entity player = player(0f, 130f, 1);
+        Entity chest = chest(16f, 105f, false);
+        Entity enemy = enemy(22f, 105f);
+        ChestComponent chestComponent = CHEST.get(chest);
+        EnemyComponent enemyComponent = ENEMY.get(enemy);
+        PlayerComponent playerComponent = PLAYER.get(player);
+
+        playerComponent.meleeAttack.start(0.25f);
+        engine.update(0f);
+
+        assertTrue(chestComponent.opened);
+        assertEquals(5f, enemyComponent.health, EPSILON);
         assertTrue(playerComponent.meleeHasHit);
     }
 
@@ -217,6 +254,34 @@ public class MeleeAttackSystemTest extends SystemTestBase {
     }
 
     @Test
+    public void chainedSwingNeedsSwingStartResetToRehit() {
+        Entity player = player(0f, 130f, 1);
+        Entity enemy = enemy(16f, 105f);
+        EnemyComponent enemyComponent = ENEMY.get(enemy);
+        PlayerComponent playerComponent = PLAYER.get(player);
+
+        playerComponent.meleeAttack.start(0.15f);
+        engine.update(0f);
+        assertEquals(5f, enemyComponent.health, EPSILON);
+
+        enemyComponent.hitStun.update(0.5f);
+
+        // A re-started swing WITHOUT resetting the per-swing set (what input's swing-start reset
+        // guards against) cannot re-damage, even across swing boundaries
+        playerComponent.meleeAttack.start(0.15f);
+        playerComponent.meleeHasHit = false;
+        engine.update(0f);
+        assertEquals(5f, enemyComponent.health, EPSILON);
+
+        // ...so PlayerInputSystem clears the set at every swing start, letting the next swing land
+        playerComponent.meleeAttack.start(0.15f);
+        playerComponent.meleeHasHit = false;
+        playerComponent.meleeHitEnemies.clear();
+        engine.update(0f);
+        assertEquals(0f, enemyComponent.health, EPSILON);
+    }
+
+    @Test
     public void unopenedChestOpensOnHit() {
         Entity player = player(0f, 130f, 1);
         Entity chest = chest(16f, 105f, false);
@@ -232,9 +297,10 @@ public class MeleeAttackSystemTest extends SystemTestBase {
     }
 
     @Test
-    public void alreadyOpenedChestIsNotReopened() {
+    public void alreadyOpenedChestDoesNotConsumeSwing() {
         Entity player = player(0f, 130f, 1);
         Entity chest = chest(16f, 105f, true);
+        Entity enemy = enemy(24f, 105f);
         ChestComponent chestComponent = CHEST.get(chest);
         PlayerComponent playerComponent = PLAYER.get(player);
 
@@ -243,6 +309,7 @@ public class MeleeAttackSystemTest extends SystemTestBase {
 
         assertTrue(chestComponent.opened);
         assertFalse(chestComponent.disappearTimer.isActive());
+        assertEquals(5f, ENEMY.get(enemy).health, EPSILON);
         assertTrue(playerComponent.meleeHasHit);
     }
 }
