@@ -6,7 +6,7 @@ package com.axehigh.platformer.assets;
 public class SpriteConstants {
 
     //Player Collision Box
-    public static float PlayerScale = .5f; // Knight2.png
+    public static float PlayerScale = .3f; // Knight2.png
     public static float PlayerCollisionWidth = 30f;
     public static float PlayerCollisionHeight = 40f;
     public static float PlayerOffsetRight = -16f;
@@ -23,7 +23,13 @@ public class SpriteConstants {
      * future sprite with a different attack animation gets its own reach without touching
      * {@code MeleeAttackSystem}, which reads the table matching the attacking sprite.</p>
      */
-    public static final float[] PLAYER_ATTACK_REACH = {0f, 12f, 16f, 24f, 0f};
+    public static final float[] PLAYER_ATTACK_REACH = {
+        0f * PlayerScale,
+        24f * PlayerScale,
+        32f * PlayerScale,
+        44f * PlayerScale,
+        0f * PlayerScale
+    };
     public static final float PLAYER_MAX_ATTACK_REACH = max(PLAYER_ATTACK_REACH);
 
     //Chest atlas regions (gfx/origin-game.atlas): closed sprite on spawn, swapped to the

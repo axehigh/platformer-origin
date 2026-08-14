@@ -52,8 +52,8 @@ public final class GameConstants {
     public static final float SCREEN_FADE_TIMER = 0.5f;
 
     //Movement MaxSpeedX/Y
-    public static float MaxSpeedX = 100f;
-    public static float MaxSpeedY = 400f;
+    public static float MaxSpeedX = 60f;
+    public static float MaxSpeedY = 300f;
 
     //Player Stats
     public static int MaxItems = 10;
