@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.2" name="dungeon_tiles" tilewidth="256" tileheight="257" tilecount="53" columns="0">
+<tileset version="1.10" tiledversion="1.12.2" name="dungeon_tiles" tilewidth="256" tileheight="257" tilecount="54" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
- <tile id="0">
+ <tile id="0" type="Ground">
   <properties>
    <property name="oneWay" type="bool" value="true"/>
   </properties>
   <image source="../gfx/tiles/dungeon/01.png" width="128" height="128"/>
  </tile>
- <tile id="1">
+ <tile id="1" type="Ground">
   <image source="../gfx/tiles/dungeon/02.png" width="128" height="128"/>
  </tile>
- <tile id="2">
+ <tile id="2" type="Ground">
   <image source="../gfx/tiles/dungeon/02b.png" width="128" height="128"/>
  </tile>
- <tile id="3">
+ <tile id="3" type="Ground">
   <image source="../gfx/tiles/dungeon/02-broken.png" width="128" height="128"/>
  </tile>
- <tile id="4">
+ <tile id="4" type="Ground">
   <image source="../gfx/tiles/dungeon/02c.png" width="128" height="128"/>
  </tile>
  <tile id="5">
@@ -57,6 +57,10 @@
  </tile>
  <tile id="15">
   <image source="../gfx/tiles/dungeon/bridge-2.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="4">
+   <object id="8" x="0" y="1" width="128" height="33"/>
+   <object id="9" x="27" y="34" width="75" height="92"/>
+  </objectgroup>
  </tile>
  <tile id="16">
   <image source="../gfx/tiles/dungeon/bridge-3.png" width="128" height="128"/>
@@ -73,7 +77,7 @@
  <tile id="20">
   <image source="../gfx/tiles/dungeon/crystal-bottom-2.png" width="128" height="128"/>
  </tile>
- <tile id="21" type="door">
+ <tile id="21" type="Door">
   <image source="../gfx/tiles/dungeon/door.png" width="128" height="256"/>
  </tile>
  <tile id="22">
@@ -121,25 +125,25 @@
  <tile id="38">
   <image source="../gfx/tiles/dungeon/water-surface.png" width="128" height="128"/>
  </tile>
- <tile id="39">
+ <tile id="39" type="Ground">
   <properties>
    <property name="oneWay" type="bool" value="true"/>
   </properties>
   <image source="../gfx/tiles/caves/01.png" width="128" height="128"/>
  </tile>
- <tile id="40">
+ <tile id="40" type="Ground">
   <properties>
    <property name="oneWay" type="bool" value="true"/>
   </properties>
   <image source="../gfx/tiles/caves/01alt.png" width="128" height="128"/>
  </tile>
- <tile id="41">
+ <tile id="41" type="Ground">
   <image source="../gfx/tiles/caves/02.png" width="128" height="128"/>
  </tile>
- <tile id="42">
+ <tile id="42" type="Ground">
   <image source="../gfx/tiles/caves/02alt.png" width="128" height="128"/>
  </tile>
- <tile id="43">
+ <tile id="43" type="Ground">
   <image source="../gfx/tiles/caves/02b-broken.png" width="128" height="128"/>
  </tile>
  <tile id="44">
@@ -175,7 +179,7 @@
  <tile id="52">
   <image source="../gfx/tiles/caves/bridge-4.png" width="128" height="129"/>
  </tile>
- <tile id="53" type="door">
+ <tile id="53" type="Door">
   <image source="../gfx/tiles/caves/door.png" width="129" height="256"/>
  </tile>
  <tile id="54">
@@ -186,5 +190,8 @@
  </tile>
  <tile id="57">
   <image source="../gfx/tiles/caves/platform-float.png" width="128" height="128"/>
+ </tile>
+ <tile id="58">
+  <image source="../gfx/tiles/bg/pillar01.png" width="113" height="256"/>
  </tile>
 </tileset>

@@ -2,7 +2,7 @@
 name: tmx-map-generator
 description: Use when generating a new standalone Tiled .tmx level map for this libgdx platformer (a linear chain — or, with --grid-cols/--grid-rows, a 2D grid — of rooms with doorways, vertical platform shafts, enemies, and items, optionally decorated with floating one-way platform staircases via --platforms N)
   or regenerating one with a different room count/seed. 
-  Rooms default to whole-screen 30x17 tiles but are configurable (e.g. 24 wide x 10 high tiles for mobile-oriented scroll rooms).
+  Rooms default to 24x10 tiles (mobile-oriented scroll rooms) but are configurable (e.g. 30x17 for whole-screen desktop rooms).
   Encodes the project's map conventions (collision/hazard/oneWay properties, Rooms object layer, flipY object Y), 
   reading tile gids live from the external .tsx tilesets instead of hard-coding them. 
   Also use to understand or debug why a generated map fails validation.
@@ -37,21 +37,21 @@ it with the CWD set to `assets/maps`, keep `--tilesets-dir tileset`, and write t
   "C:\skuld\dev_olona\libgdx\platformer-origin\.opencode\skills\tmx-map-generator\scripts\generate_tmx.py" `
   --rooms 3 --seed 42 --tilesets-dir tileset --out world_demo\generated_room.tmx
 
-# single room with the secret chamber carved INSIDE it (map stays 30x17):
+# single room with the secret chamber carved INSIDE it (map stays 24x10):
 & "C:\Users\pt184\AppData\Local\Programs\Python\Python314\python.exe" `
   "C:\skuld\dev_olona\libgdx\platformer-origin\.opencode\skills\tmx-map-generator\scripts\generate_tmx.py" `
   --rooms 1 --inside-secret --seed 42 --tilesets-dir tileset --out world_demo\generated_single_secret_inside.tmx
 
-# mobile-oriented rooms: 24 tiles wide x 10 tiles high (see "Room size" below):
+# 24x10 is the default room size; whole-screen desktop rooms need explicit flags (see "Room size"):
 & "C:\Users\pt184\AppData\Local\Programs\Python\Python314\python.exe" `
   "C:\skuld\dev_olona\libgdx\platformer-origin\.opencode\skills\tmx-map-generator\scripts\generate_tmx.py" `
-  --rooms 2 --room-width 24 --room-height 10 --seed 42 --tilesets-dir tileset --out world_demo\generated_mobile_24x10.tmx
+  --rooms 2 --room-width 30 --room-height 17 --seed 42 --tilesets-dir tileset --out world_demo\generated_desktop.tmx
 
-# world-2: 2x2 grid of 24x10 rooms, vertical platform shafts, no secret room,
-# exit gate chaining into the next level (map = 48x20):
+# world-2: 2x2 grid of 24x10 rooms (now the default size), vertical platform shafts,
+# no secret room, exit gate chaining into the next level (map = 48x20):
 & "C:\Users\pt184\AppData\Local\Programs\Python\Python314\python.exe" `
   "C:\skuld\dev_olona\libgdx\platformer-origin\.opencode\skills\tmx-map-generator\scripts\generate_tmx.py" `
-  --grid-cols 2 --grid-rows 2 --room-width 24 --room-height 10 --no-secret `
+  --grid-cols 2 --grid-rows 2 --no-secret `
   --exit-next maps/world2/level_02.tmx --seed 42 `
   --tilesets-dir tileset --out world2\level_01.tmx
 
@@ -59,15 +59,26 @@ it with the CWD set to `assets/maps`, keep `--tilesets-dir tileset`, and write t
 & "C:\Users\pt184\AppData\Local\Programs\Python\Python314\python.exe" `
   "C:\skuld\dev_olona\libgdx\platformer-origin\.opencode\skills\tmx-map-generator\scripts\generate_tmx.py" `
   --rooms 3 --platforms 3 --seed 42 --tilesets-dir tileset --out world_demo\generated_platforming.tmx
+
+# ASCII-art courses stamped floor-anchored into rooms (see "Templates"):
+& "C:\Users\pt184\AppData\Local\Programs\Python\Python314\python.exe" `
+  "C:\skuld\dev_olona\libgdx\platformer-origin\.opencode\skills\tmx-map-generator\scripts\generate_tmx.py" `
+  --rooms 2 --template staircase,0 --template chasm-bridge,1 --seed 42 `
+  --tilesets-dir tileset --out world_demo\generated_templates.tmx
+
+# ...or auto-scatter N distinct random templates into N distinct rooms that fit:
+& "C:\Users\pt184\AppData\Local\Programs\Python\Python314\python.exe" `
+  "C:\skuld\dev_olona\libgdx\platformer-origin\.opencode\skills\tmx-map-generator\scripts\generate_tmx.py" `
+  --rooms 5 --template-pick 3 --seed 42 --tilesets-dir tileset --out world_demo\generated_templates.tmx
 ```
 
 (run from `C:\skuld\dev_olona\libgdx\platformer-origin\assets\maps` — output lands in
 `world_demo/`, `world1/`, or `world2/`, the map `LevelCatalog` loads as `maps/world_demo/…`,
 `maps/world1/…`, or `maps/world2/level_01.tmx`)
 
-- `--rooms N` — number of rooms in the chain (default 3). Room size defaults to 30×17 tiles ×
-  128px = 3840×2176 (matches `GameConstants` `VIRTUAL_WIDTH/VIRTUAL_HEIGHT` scaled by tile size),
-  unless overridden with `--room-width`/`--room-height`.
+- `--rooms N` — number of rooms in the chain (default 3). Room size defaults to 24×10 tiles ×
+  128px = 3072×1280 (the mobile-oriented default — rooms scroll under the phone's `BAND_ZOOM`
+  camera), unless overridden with `--room-width`/`--room-height`.
 - `--grid-cols C`, `--grid-rows R` — instead of a linear chain, tile a `C`×`R` grid of rooms
   (map = `C×room_width` × `R×room_height` tiles). Horizontal neighbours connect by walk-through
   doorways, vertical neighbours by one-way **platform shafts** (see **Grid layouts** below), and
@@ -85,7 +96,10 @@ it with the CWD set to `assets/maps`, keep `--tilesets-dir tileset`, and write t
   above the floor** beneath the `playerStart` and (with `--exit-next`) beneath the `exitGate`
   (the gate's column, `col_end-2`). The door image is 2 tiles tall and renders upward from the
   cell, so the door's bottom edge rests on the collision floor surface — it stands on the floor
-  instead of looking like it floats or sinks into it.
+  instead of looking like it floats or sinks into it. **Doors are decided first and painted
+  last:** the entrance/exit anchor columns are chosen before any template planning and reserved
+  from templates, and the door decorations are painted after templates stamp, so a door can
+  never be buried by a course or clobbered.
 - `--room-width W`, `--room-height H` — room dimensions in tiles (defaults `30` and `17`). The
   map then spans `room_count × W` tiles wide × `H` tiles tall (plus one extra room when the
   appended secret room is enabled), so the map is always larger than a single room. All the
@@ -109,6 +123,23 @@ it with the CWD set to `assets/maps`, keep `--tilesets-dir tileset`, and write t
 - `--platforms N` — decorate each room with N floating one-way platforms in a deterministic,
   always-jumpable staircase (see **Platforming style** below). Composes with every other flag
   (chains, grids, mobile room sizes, secret rooms). Default 0 = flat floor.
+- `--template NAME[,ROOM[,COL]]` — stamp an ASCII-art course from the template library
+  (`scripts/templates/*.tmpl`, e.g. `staircase`, `platform-hop`, `chasm-bridge`,
+  `high-platform`, `hazard-strip`) into a room, **floor-anchored**: the template's bottom row
+  becomes the room's floor row and must be solid ground, so the room floor stays intact and the
+  map perimeter stays sealed (templates never punch validation holes). `NAME` is a library name
+  (resolved as `templates/NAME.tmpl`) or a direct `.tmpl` path; `ROOM` is the room index
+  (default 0); `COL` is the left-edge column offset inside the room (default the first interior
+  column). Repeatable — stamp several courses, possibly several per room (overlapping stamps
+  warn; later stamps clobber). **Doors first:** templates must fit around the reserved
+  entrance/exit anchor columns and may never wall off a doorway approach corridor — if an
+  explicit placement can't, the generator fails loudly (push the course off the doorway with a
+  `COL` offset, e.g. `--template chasm-bridge,1,3`). Templates stamp **after** floors/platforms
+  but **before** the door decorations. After stamping the generator runs jump-aware design
+  checks (see **Templates** below).
+- `--template-pick N` — auto-scatter: stamp N distinct random library templates into N distinct
+  random rooms that fit, deterministically per `--seed` (defaults to fewer than N if the library
+  or room layout can't fit that many). Each placement is logged.
 - `--inside-secret` — instead of appending a full-screen secret room to the right of the map,
   carve a hidden `CHAMBER_W x CHAMBER_H` (6×8 tile) chamber **inside** the last normal room,
   flush against its left wall and sitting on the floor; the map stays `room_count × room_width`
@@ -132,13 +163,14 @@ Note the CLI example output paths in this doc assume you run from `assets/maps`;
 
 ## Room size
 
-Rooms default to the whole-screen 30×17 tiles (the desktop viewport). For **mobile-oriented**
-maps, generate 24×10-tile rooms (`--room-width 24 --room-height 10`, 3072×1280px): under the
-phone `BAND_ZOOM` camera (`MOBILE_ZOOM = 0.55`, ~2112×1197px effective frame) such a room is
+Rooms **default to 24×10 tiles** (3072×1280px) — the mobile-oriented size. Under the phone
+`BAND_ZOOM` camera (`MOBILE_ZOOM = 0.55`, ~2112×1197px effective frame) such a room is
 **bigger than the frame**, so it uses the dead-zone scroll camera on phones while on desktop
 (zoom 1, frame 3840×2176) it is a small flip room whose viewport overshoots into the neighbour.
-No engine change is needed — `MapLoader`/`CameraSystem` already handle arbitrary room sizes;
-only the room dimensions, doorways, and secret-room/chamber footprints scale.
+For **whole-screen desktop rooms** (pure flip-screen framing, matching the 30×17-tile viewport),
+pass `--room-width 30 --room-height 17` (3840×2176px). No engine change is needed —
+`MapLoader`/`CameraSystem` already handle arbitrary room sizes; only the room dimensions,
+doorways, and secret-room/chamber footprints scale.
 
 ## Grid layouts & vertical platform shafts
 
@@ -153,7 +185,8 @@ tiles (e.g. 2×2 of 24×10 → a 48×20 map). Conventions:
   floor, with a `oneWay` platform every 2 rows (a 24×10 room gets platforms at rows
   `floor−2, −4, −6, −8`; the floor row stays solid). The upper room's matching two floor cells
   at the shaft columns are hollowed into a **hatch** so the player climbs through (and can fall
-  back down). Step spacing of 2 rows fits the ~2.5-tile jump. See
+  back down). Step spacing of 2 rows fits the player's single-jump envelope (2 up / 4 across —
+  see **Player jump envelope** below). See
   `resources/docs-ai/map-design-for-tiled.md` §3.6.
 - **`playerStart`** lands in the bottom-left room (`(grid_rows−1, 0)`).
 - **`--no-secret` is required** for multi-row grids: the appended secret room only makes sense
@@ -205,9 +238,10 @@ tiles (e.g. 2×2 of 24×10 → a 48×20 map). Conventions:
 into a small vertical course above the walkable ground (the floor itself stays intact — no pits
 in v1). Placement is **deterministic, not random**: the first platform sits 2 rows above the
 floor at interior column `col_start+4`, and each next platform steps **2 rows up / 2 columns
-right** — the same spacing as the vertical-shaft platforms (2-row steps fit the ~2.5-tile
-jump), so every platform is reachable by construction and no reachability analysis is needed.
-N is clamped to the room's interior size (a 30×17 room fits up to 7; a 24×10 room up to 3).
+right** — the same spacing as the vertical-shaft platforms (2-row steps fit the single-jump
+envelope, 2 up / 4 across), so every platform is reachable by construction and no reachability
+analysis is needed. N is clamped to the room's interior size (a 24×10 room fits up to 3; a
+30×17 room up to 7).
 
 Each room also gets one **coin** on the *highest* platform (name `coin_platform_r<index>`) and a
 `bg-*` filler tile from `dungeon_tiles.tsx` (`bg-barrel`/`bg-crate`, matched by image basename —
@@ -215,6 +249,75 @@ never hard-coded gids) painted on the `background` layer directly behind each pl
 else changes: the one-way tiles are interior-only, so `validate_map()`'s perimeter/doorway/shaft
 checks are untouched. See `resources/docs-ai/map-design-for-tiled.md` §3.3 for one-way platform
 behavior.
+
+## Player jump envelope (design model — NO engine/code change)
+
+| Metric | Value |
+|---|---|
+| Player footprint | **1 × 1 tile** (design model; the real collision box is smaller: 30×40 px at 1× unitScale) |
+| Single jump — up | **2 tiles** (ledge clearance from feet) |
+| Single jump — across | **4 tiles** |
+| Double jump — up | **3 tiles** total from ground |
+| Double jump — across | **7 tiles** |
+
+- Heights are measured as ledge clearance (how high the feet rise), so a 2-tile jump comfortably
+  clears a 2-tile obstacle for a 1-tile player.
+- Matches the current physics (`PlayerInputSystem`: `JUMP_VELOCITY=220f`,
+  `DOUBLE_JUMP_FACTOR=0.7f`, `maxJumps=2`; `MovementSystem` gravity `-600f`; `MOVE_SPEED=90f`).
+  **No Java change.**
+- Enforced by `generate_tmx.py` (`JUMP_HEIGHT_SINGLE`/`JUMP_HEIGHT_DOUBLE`/
+  `JUMP_DISTANCE_SINGLE`/`JUMP_DISTANCE_DOUBLE`) for the `--platforms` staircases and for every
+  template course (see below). Source of truth for gameplay: `resources/docs-ai/gameplay.md` §2.A.
+
+## Templates (`--template`, `--template-pick`)
+
+ASCII-art courses stamped floor-anchored into rooms, so the generator can author jump-aware
+level design (fun shapes, not just flat floors) while staying inside the jump envelope.
+
+- **Library:** `scripts/templates/*.tmpl` next to the script. `#` lines are comments;
+  `# SYMBOL=type:<T>` / `# SYMBOL=prop:<name>` overrides a symbol for that template. A bare
+  `requires=<tag>` line is reserved for future capability tags (e.g. `wallclimb`), accepted and
+  unused. Unknown symbol = hard error. Whitespace between symbols is ignored (alignment only);
+  use `.` for an explicit air cell.
+- **Legend** (default; resolved live from the tileset at load time, convention-driven like the
+  rest of the generator — retagging a tileset changes what a symbol paints without editing the
+  template):
+  - `G` → solid ground: first fully-solid `type="Ground"` tile (skips `oneWay`/`hazard` variants)
+  - `X` → generic solid wall (first solid tile)
+  - `P` → one-way platform (`oneWay` tile)
+  - `H` → hazard tile
+  - `D` → `type="Door"` tile → painted on the **decoration** layer (stands on the floor)
+  - `.` / space → air
+  - Layer routing: `G/X/P/H` → `collision`; `D` → `decoration`.
+- **Floor-anchored + safe:** the bottom row **must** be solid ground (`G`/`X` only) across the
+  full width — it replaces the room's floor row under the footprint, so the floor stays intact
+  and `validate_map()` can never see a template-caused hole. Cells above the bottom row
+  overwrite (air hollows the base floor). Templates stamp **last** (after floors/platforms).
+- **Fits enforced:** a template must fit the room's interior columns (never the shared
+  walls/ceiling), stay clear of platform-shaft channels and the inside-secret chamber
+  footprint, **never cover the reserved entrance/exit anchor columns** (the `playerStart`
+  column and, with `--exit-next`, the gate's `col_end-3..col_end-2`), and **never wall off a
+  doorway approach corridor** — a template may stamp right up to a doorway, but a solid
+  (`G`/`X`) cell may not cover the doorway's passage rows in the corridor columns, so
+  room-to-room travel always stays possible. Violations → hard error.
+- **Spawn stays clear by construction:** the spawn column is picked after the explicit
+  templates' footprints are known, so `--template staircase,0` can't bury the spawn for some
+  seeds — the entrance auto-avoids explicit player-room templates; only if every usable column
+  is taken does the generator error. `--template-pick` respects the reserved columns when
+  choosing, so it can never collide either.
+- **Jump-aware design checks (warnings, not failures)** — after stamping, per template:
+  - *Support:* every `G`/`X` cell above the bottom row needs a solid cell directly below (or be
+    part of a vertical run down to the base); `P` may float. Floating solid tiles → warning.
+  - *Reachability:* BFS over standable surfaces (column tops of solid runs + each `P` top) from
+    the leftmost lowest surface, using the jump envelope — same-row gaps ≤ 4 cols (single) /
+    ≤ 7 (double); upward rise ≤ 2 rows (single) / ≤ 3 rows (double) within those distances; any
+    downward move allowed; an intermediate solid run taller than the takeoff surface blocks the
+    hop. Unreachable surfaces → warning.
+  - *Overlap:* two template footprints overlapping in the same room → warning (later stamps win).
+- **Starter library** (all jump-valid — see `scripts/templates/`):
+  `staircase.tmpl`, `platform-hop.tmpl` (one-way stepping stones), `chasm-bridge.tmpl`
+  (double-jump-only pillar crossing), `high-platform.tmpl` (double-jump reward ledge),
+  `hazard-strip.tmpl` (spike strip between one-way ledges).
 
 ## Validation
 
@@ -238,7 +341,12 @@ layer must be entirely empty. When `--exit-next` was used, validation additional
 exactly one `exitGate` marker whose `nextLevel` equals the requested path, sitting inside a
 normal room rect, plus **exactly two** door decorations on the `decoration` layer — one on the
 row just above the exit room's floor in the gate's column (`col_end-2`), one anywhere for the
-spawn — and each decoration cell must use a `type="door"` tile gid.
+spawn — and each decoration cell must use a `type="door"` tile gid. On every map (with or
+without `--exit-next`) validation additionally fails on any of: the `playerStart` marker cell
+being a solid collision tile (spawn-in-wall), a door decoration cell backed by a solid collision
+tile (buried door), or a solid tile on a doorway approach corridor's passage rows (blocked
+room-to-room travel) — the generation-time reservations make these impossible, so these checks
+are regression guards.
 
 ## Notes
 

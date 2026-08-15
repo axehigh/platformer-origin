@@ -102,6 +102,12 @@ Empty marker component (`Poolable`), no fields. Tags a bullet entity as enemy-fi
 ## 2. Mechanics & Logic Breakdown
 
 ### A. Double Jump Logic (`PlayerInputSystem` & `MovementSystem`)
+0.  **Jump envelope (design model).** For map/generator design, the player is modeled as a **1×1-tile box** (the real collision box is smaller: 30×40 px at 1× unitScale). Derived from the physics constants below (`JUMP_VELOCITY = 220`, `DOUBLE_JUMP_FACTOR = 0.7`, gravity `-600`, `MOVE_SPEED = 90`), the measured jump envelope is:
+    *   **Single jump — up:** 2 tiles of ledge clearance (feet rise).
+    *   **Single jump — across:** 4 tiles.
+    *   **Double jump — up:** 3 tiles total from ground.
+    *   **Double jump — across:** 7 tiles.
+    Heights are **ledge clearance** (how high the feet rise), so a 2-tile jump comfortably clears a 2-tile obstacle for a 1-tile player. The map generator encodes these as `JUMP_*_*` constants and checks template courses / platform staircases stay within them (`map-design-for-tiled.md` §9).
 1.  **Grounded Reset:** When the physics/collision system detects the player is standing on a solid tile, reset `jumpCount` to `0`.
 2.  **Jump Trigger:** When the Jump button (**A**) is pressed:
     *   If `jumpCount < maxJumps`, allow the jump by setting the upward vertical velocity.

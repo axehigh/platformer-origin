@@ -21,20 +21,28 @@ Usage:
         --tilesets-dir tileset --out world_demo/generated_room.tmx --seed 42
     python3 ../.junie/skills/tmx-map-generator/scripts/generate_tmx.py --rooms 1 --inside-secret \
         --tilesets-dir tileset --out world_demo/generated_room.tmx --seed 42
-    # mobile-oriented rooms: 24 wide x 10 high tiles (scroll under the BAND_ZOOM camera)
-    python3 ../.junie/skills/tmx-map-generator/scripts/generate_tmx.py --rooms 2 --room-width 24 \
-        --room-height 10 --tilesets-dir tileset --out world_demo/generated_mobile.tmx --seed 42
-    # 2x2 grid of rooms with vertical platform shafts (no secret room):
+    # whole-screen desktop rooms (default room size is the mobile-oriented 24x10; see below):
+    python3 ../.junie/skills/tmx-map-generator/scripts/generate_tmx.py --rooms 2 --room-width 30 \
+        --room-height 17 --tilesets-dir tileset --out world_demo/generated_desktop.tmx --seed 42
+    # 2x2 grid of rooms with vertical platform shafts (no secret room; 24x10 is now the default):
     python3 ../.junie/skills/tmx-map-generator/scripts/generate_tmx.py --grid-cols 2 --grid-rows 2 \
-        --room-width 24 --room-height 10 --no-secret --tilesets-dir tileset \
-        --out world_demo/generated_grid.tmx --seed 42
+        --no-secret --tilesets-dir tileset --out world_demo/generated_grid.tmx --seed 42
     # ...and chain-connected to the next level via an exit gate in the far room:
     python3 ../.junie/skills/tmx-map-generator/scripts/generate_tmx.py --grid-cols 2 --grid-rows 2 \
-        --room-width 24 --room-height 10 --no-secret --tilesets-dir tileset \
+        --no-secret --tilesets-dir tileset \
         --exit-next maps/world2/level_02.tmx --out world_demo/generated_grid.tmx --seed 42
     # floating one-way platform staircases in each room (deterministic, always-jumpable):
     python3 ../.junie/skills/tmx-map-generator/scripts/generate_tmx.py --rooms 3 --platforms 3 \
         --tilesets-dir tileset --out world_demo/generated_platforming.tmx --seed 42
+    # ASCII-art courses stamped floor-anchored into rooms (see scripts/templates/*.tmpl).
+    # Templates fit around the entrance/exit anchors and must leave every doorway approach
+    # corridor open, so push a course off a doorway with a col offset when needed:
+    python3 ../.junie/skills/tmx-map-generator/scripts/generate_tmx.py --rooms 2 \
+        --template staircase,0 --template chasm-bridge,1,3 \
+        --tilesets-dir tileset --out world_demo/generated_templates.tmx --seed 42
+    # ...or auto-scatter N distinct random templates into N distinct rooms that fit:
+    python3 ../.junie/skills/tmx-map-generator/scripts/generate_tmx.py --rooms 5 --template-pick 3 \
+        --tilesets-dir tileset --out world_demo/generated_templates.tmx --seed 42
 
 Or (library use; run from assets/maps or pass an absolute tilesets_dir):
     from generate_tmx import generate_map, validate_map
@@ -53,18 +61,30 @@ import re
 import xml.etree.ElementTree as ET
 
 TILE_SIZE = 128
-#: Default whole-screen room size in tiles: 30x17 matches the 30x17-tile viewport (3840x2176px
-#: at 128px tiles). Both are overridable via --room-width/--room-height (e.g. 24x10 tiles for
-#: mobile-oriented rooms that dead-zone scroll under the BAND_ZOOM camera).
-SCREEN_TILE_W = 30
-SCREEN_TILE_H = 17
+#: Default room size in tiles: 24x10 (3072x1280px at 128px tiles) -- mobile-oriented rooms that
+#: dead-zone scroll under the phone's BAND_ZOOM camera (the desktop viewport is still the
+#: whole-screen 30x17 = 3840x2176px). Both are overridable via --room-width/--room-height.
+DEFAULT_ROOM_WIDTH = 24
+DEFAULT_ROOM_HEIGHT = 10
 PASSAGE_HEIGHT_TILES = 2
+
+#: The player's jump envelope, in tiles -- the design model every generated platform, shaft, and
+#: template course must stay within. The player is modeled as a 1x1-tile box; heights are ledge
+#: clearance from the feet (a 2-tile single jump clears a 2-tile obstacle for a 1-tile player).
+#: Derived from the physics in resources/docs-ai/gameplay.md §2.A and PlayerInputSystem
+#: (JUMP_VELOCITY=220f, DOUBLE_JUMP_FACTOR=0.7f, maxJumps=2; MovementSystem gravity=-600f;
+#: MOVE_SPEED=90f) at unitScale 8 (128px tiles) -- these numbers match, so this is a design spec,
+#: not an engine change.
+JUMP_HEIGHT_SINGLE = 2     #: max climbable ledge height with a ground jump
+JUMP_HEIGHT_DOUBLE = 3     #: max climbable ledge height with the double jump (from ground)
+JUMP_DISTANCE_SINGLE = 4   #: max horizontal gap cleared by a ground jump
+JUMP_DISTANCE_DOUBLE = 7   #: max horizontal gap cleared by a double jump
 
 # The hidden secret chamber carved inside a room (`--inside-secret`): a walled box sitting on the
 # room floor, flush against the room's left wall. Footprint is CHAMBER_W x CHAMBER_H tiles; the
 # interior (cavity) is the footprint minus its boundary wall.
 CHAMBER_W = 6
-CHAMBER_H = 8
+CHAMBER_H = 4
 
 # Size of the exit-gate trigger rectangle emitted with --exit-next, matching the hand-authored
 # world-1 gates (~140x152 px) so LevelExitSystem builds a comparable proximity sensor.
@@ -82,6 +102,22 @@ ITEM_TYPES = ["coin", "chest"]
 #: Name shared by the hidden room's Rooms-layer rect, its breakable wall tiles, and its deferred
 #: object/enemy markers (the engine matches on this via the `secretRoom` tile/object property).
 SECRET_ROOM_NAME = "secret_room"
+
+#: Directory holding the ASCII-art `.tmpl` template library (a sibling of this script).
+TEMPLATE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
+
+#: Default template symbol legend: symbol -> resolver key. `type:<T>` picks the first fully-solid
+#: cave tile carrying tileset `type` T ("Ground", "Door"); `prop:<name>` picks the first tile with
+#: boolean property <name> (`solid`/`oneWay`/`hazard`). "." and " " are air (whitespace between
+#: symbols is ignored -- pure alignment). A template overrides a symbol with a `# SYMBOL=resolver`
+#: comment line.
+DEFAULT_TEMPLATE_LEGEND = {
+    "G": "type:Ground",
+    "X": "prop:solid",
+    "P": "prop:oneWay",
+    "H": "prop:hazard",
+    "D": "type:Door",
+}
 
 
 def _to_bool(value):
@@ -151,7 +187,7 @@ class Tileset:
 
 
 class Room:
-    def __init__(self, index, col_start, row_start=0, width=SCREEN_TILE_W, height=SCREEN_TILE_H,
+    def __init__(self, index, col_start, row_start=0, width=DEFAULT_ROOM_WIDTH, height=DEFAULT_ROOM_HEIGHT,
                  grid_col=0, grid_row=0):
         self.index = index
         self.width = width
@@ -180,7 +216,7 @@ class Layout:
     """Resolved gid language + layout, shared between generation and validation."""
 
     def __init__(self, tilesets_dir, room_count, inside_secret=False,
-                 room_width=SCREEN_TILE_W, room_height=SCREEN_TILE_H,
+                 room_width=DEFAULT_ROOM_WIDTH, room_height=DEFAULT_ROOM_HEIGHT,
                  grid_cols=None, grid_rows=None, no_secret=False):
         def load(name):
             return Tileset(os.path.join(tilesets_dir, name))
@@ -284,7 +320,11 @@ class Layout:
 
     @staticmethod
     def _tiles_with_type(ts, tile_type):
-        return [ts.gid(tile_id) for tile_id, props in sorted(ts.tiles.items()) if props["type"] == tile_type]
+        # Case-insensitive match: the tileset tags "Ground"/"Door" are capitalized, while the
+        # generator historically looked for lowercase "door" -- tolerate either casing.
+        target = tile_type.lower()
+        return [ts.gid(tile_id) for tile_id, props in sorted(ts.tiles.items())
+                if (props["type"] or "").lower() == target]
 
     def enemy_marker(self, enemy_type):
         """Returns (gid, width, height) for a tile-object enemy marker, or None when the
@@ -439,10 +479,89 @@ def _build_vertical_links(layout):
     return links
 
 
-def _build_objects(layout, passages, rng, enemy_types, vertical_links, exit_next=None):
+def _shaft_cols_by_room(vertical_links):
+    """Column channels reserved for vertical platform-shaft climbs, keyed by room index."""
+    cols_by_room = {}
+    for upper, lower in vertical_links:
+        cols = {lower.col_start + 2, lower.col_start + 3}
+        cols_by_room.setdefault(upper.index, set()).update(cols)
+        cols_by_room.setdefault(lower.index, set()).update(cols)
+    return cols_by_room
+
+
+def _room_marker_cols(layout, room, vertical_links, template_cols_by_room=None):
+    """Interior columns usable for floor markers (spawn/enemies/items): minus the platform-shaft
+    channels, the inside-secret chamber footprint, and any template footprints already planned."""
+    cols = [c for c in room.interior_cols
+            if c not in _shaft_cols_by_room(vertical_links).get(room.index, ())]
+    if layout.inside_secret and layout.chamber is not None and room.index == len(layout.rooms) - 1:
+        cols = [c for c in cols if c > layout.chamber["front_col"]]
+    if template_cols_by_room:
+        cols = [c for c in cols if c not in template_cols_by_room.get(room.index, ())]
+    return cols
+
+
+def _pick_anchors(layout, rng, vertical_links, exit_next=None, avoid_cols=None):
+    """Choose the fixed entrance/exit anchors BEFORE any template planning: the playerStart
+    column (seeded RNG, clear of shaft/chamber columns and of any explicit template footprint
+    in the player room via avoid_cols) and the deterministic exit-gate column. Returns
+    (spawn_col, door_cells) where door_cells are the decoration-layer (col, row) door
+    placements derived from those anchors. Templates must fit around these columns, never over."""
+    spawn_room = layout.rooms[layout.player_room_index]
+    interior = _room_marker_cols(layout, spawn_room, vertical_links)
+    if avoid_cols:
+        interior = [c for c in interior if c not in avoid_cols]
+    if not interior:
+        raise ValueError(
+            "cannot place the playerStart: every usable interior column of the player room is "
+            "taken by explicit templates -- use a narrower template or a different room")
+    rng.shuffle(interior)
+    spawn_col = interior.pop(0)
+    door_cells = [(spawn_col, spawn_room.floor_row - 1)]
+    if exit_next:
+        exit_room = layout.rooms[layout.grid_cols - 1]
+        door_cells.append((exit_room.col_end - 2, exit_room.floor_row - 1))
+    return spawn_col, door_cells
+
+
+def _doorway_approach_cols(layout):
+    """Interior columns immediately inside each doorway / secret entrance -- the corridors the
+    player walks through to move between rooms. A template may stamp right up to them, but solid
+    cells may never cover their passage rows (enforced per-cell in _template_fits), so
+    room-to-room navigation always stays possible. Vertical platform shafts are reserved
+    separately as whole columns."""
+    cols_by_room = {}
+    for room in layout.rooms:
+        nbr = layout.room_at(room.grid_row, room.grid_col + 1)
+        if nbr is not None:
+            cols_by_room.setdefault(room.index, set()).add(room.col_end - 1)
+            cols_by_room.setdefault(nbr.index, set()).add(nbr.col_start + 1)
+    if not layout.no_secret and not layout.inside_secret:
+        # The last normal room's right wall is the appended secret room's entrance (open gap).
+        last = layout.rooms[-1]
+        cols_by_room.setdefault(last.index, set()).add(last.col_end - 1)
+    return cols_by_room
+
+
+def _reserved_template_cols(layout, spawn_col, exit_next=None):
+    """Interior columns templates may never stamp into (whole-column reservation): the fixed
+    entrance/exit anchors, so the doors are never buried and the spawn never lands inside a wall.
+    Doorway approach corridors are protected separately at fit time (only the passage-row cells
+    must stay open, so templates can still stamp right up to a doorway)."""
+    cols_by_room = {}
+    spawn_room = layout.rooms[layout.player_room_index]
+    cols_by_room.setdefault(spawn_room.index, set()).add(spawn_col)
+    if exit_next:
+        exit_room = layout.rooms[layout.grid_cols - 1]
+        cols_by_room.setdefault(exit_room.index, set()).update(
+            {exit_room.col_end - 3, exit_room.col_end - 2})
+    return cols_by_room
+
+
+def _build_objects(layout, rng, enemy_types, vertical_links, exit_next=None,
+                   spawn_col=None, template_cols_by_room=None):
     objects = []  # (layer, xml string)
     enemies = []
-    door_cells = []  # (col, row) decoration-layer door placements, painted after markers
     next_id = 1
 
     def tile_object(layer, gid, x_tiled, y_tiled, w, h, name=None, properties=None):
@@ -472,28 +591,18 @@ def _build_objects(layout, passages, rng, enemy_types, vertical_links, exit_next
         next_id += 1
         layer.append(xml)
 
-    # Keep enemies/items out of the platform-shaft columns so the climb stays clear.
-    shaft_cols_by_room = {}
-    for upper, lower in vertical_links:
-        cols = {lower.col_start + 2, lower.col_start + 3}
-        shaft_cols_by_room.setdefault(upper.index, set()).update(cols)
-        shaft_cols_by_room.setdefault(lower.index, set()).update(cols)
-
     for room in layout.rooms:
         floor_world_y = (layout.map_rows - room.row_end) * TILE_SIZE
-        interior = [c for c in room.interior_cols if c not in shaft_cols_by_room.get(room.index, ())]
-        if layout.inside_secret and room.index == len(layout.rooms) - 1:
-            # Keep the last room's markers out of the chamber footprint (its front wall and cavity).
-            interior = [c for c in interior if c > layout.chamber["front_col"]]
-        rng.shuffle(interior)
-
+        interior = _room_marker_cols(layout, room, vertical_links, template_cols_by_room)
         if room.index == layout.player_room_index:
-            col = interior.pop(0)
+            if spawn_col in interior:
+                interior.remove(spawn_col)
+            col = spawn_col
             x = col * TILE_SIZE
             rect_object(objects, "playerStart", x, _rect_tiled_y(layout.map_height_px, floor_world_y, TILE_SIZE),
                         TILE_SIZE, TILE_SIZE, name="playerStart")
-            door_cells.append((col, room.floor_row - 1))
 
+        rng.shuffle(interior)
         enemy_count = rng.randint(0, 2)
         for _ in range(min(enemy_count, len(interior))):
             col = interior.pop()
@@ -524,6 +633,7 @@ def _build_objects(layout, passages, rng, enemy_types, vertical_links, exit_next
     # Exit gate (--exit-next): a logic-only level-transition trigger placed in the room farthest
     # from the player start (top-right; rightmost room on a 1-row map), standing on the floor near
     # the room's right wall. Placement is pure geometry (no RNG), so it is deterministic for a seed.
+    # Its column (col_end-2, the door beneath it) is reserved from templates by _pick_anchors.
     if exit_next:
         exit_room = layout.rooms[layout.grid_cols - 1]
         exit_floor_world_y = (layout.map_rows - exit_room.row_end) * TILE_SIZE
@@ -531,15 +641,12 @@ def _build_objects(layout, passages, rng, enemy_types, vertical_links, exit_next
         y_tiled = layout.map_height_px - exit_floor_world_y - EXIT_GATE_H
         rect_object(objects, "exitGate", x, y_tiled, EXIT_GATE_W, EXIT_GATE_H,
                     properties={"nextLevel": exit_next}, name="exitGate")
-        # The gate's left edge sits at col_end*TILE-204, i.e. inside column col_end-2; the door
-        # stands in that column on the row above the room's floor row, below the gate marker.
-        door_cells.append((exit_room.col_end - 2, exit_room.floor_row - 1))
 
     # Secret room/chamber: guaranteed chest + a small random scattering, ALL deferred. Every marker carries
     # the `secretRoom` object property, so MapLoader partitions them out of the normal spawn layers
     # and SecretRoomRevealer spawns them only when the room is revealed. (Skipped for --no-secret maps.)
     if layout.no_secret:
-        return objects, enemies, door_cells
+        return objects, enemies
 
     if layout.inside_secret:
         secret_interior = list(layout.chamber["cavity_cols"])
@@ -579,7 +686,7 @@ def _build_objects(layout, passages, rng, enemy_types, vertical_links, exit_next
                         properties={"enemyType": enemy_type, "secretRoom": SECRET_ROOM_NAME},
                         name=f"enemy_{SECRET_ROOM_NAME}_{enemy_type}")
 
-    return objects, enemies, door_cells
+    return objects, enemies
 
 
 def _apply_platforming(layout, collision_grid, background_grid, objects, platforms):
@@ -642,6 +749,362 @@ def _paint_door_cells(decoration_grid, layout, door_cells):
         if 0 <= col < layout.map_cols and 0 <= row < layout.map_rows:
             decoration_grid[row][col] = gid
     return len(door_cells)
+
+
+def _resolve_template_path(name):
+    """Library names resolve to TEMPLATE_DIR/NAME.tmpl; anything path-like is used as-is (relative
+    to the CWD). Raises ValueError when the file does not exist."""
+    looks_like_path = any(sep in name for sep in ("/", "\\", os.sep)) or name.lower().endswith(".tmpl")
+    if looks_like_path:
+        path = name if os.path.isabs(name) else os.path.join(os.getcwd(), name)
+    else:
+        path = os.path.join(TEMPLATE_DIR, name if name.lower().endswith(".tmpl") else name + ".tmpl")
+    if not os.path.exists(path):
+        raise ValueError(f"template {name!r} not found (looked for {path})")
+    return path
+
+
+def _first_solid_by_type(layout, tile_type):
+    """The first cave tile whose `type` equals tile_type and that is a fully-solid ground tile
+    (not oneWay/hazard), so `G` paints a real floor tile rather than a drop-through platform."""
+    target = tile_type.lower()
+    for tile_id, props in sorted(layout.cave.tiles.items()):
+        if (props["type"] or "").lower() != target:
+            continue
+        if props["hazard"] or props["oneWay"] or not props["solid"]:
+            continue
+        return layout.cave.gid(tile_id)
+    return None
+
+
+class Template:
+    """A floor-anchored ASCII-art shape stamped into a room's collision/decoration layers.
+
+    Symbols resolve to tileset gids at load time via the symbol legend (see DEFAULT_TEMPLATE_LEGEND),
+    so retagging a tileset just changes what a template paints without editing the template. The
+    bottom row is the template's base and MUST be solid ground (`G`/`X` only): it replaces the room's
+    floor row under the footprint, keeping the floor intact and the map perimeter solid (so
+    `validate_map` never sees a template-caused hole). Symbols above the base overwrite cells
+    verbatim -- air hollows the base room's floor. Whitespace between symbols is ignored (pure
+    alignment); use "." for an explicit air cell so solid runs can be drawn contiguously.
+    """
+
+    def __init__(self, path, layout):
+        self.path = path
+        self.name = os.path.splitext(os.path.basename(path))[0]
+        self.legend = dict(DEFAULT_TEMPLATE_LEGEND)
+        self.requires = set()
+        self.rows = []
+        self.width = 0
+        self.height = 0
+        self._parse()
+
+    def _parse(self):
+        with open(self.path, encoding="utf-8") as f:
+            lines = [line.rstrip("\n") for line in f]
+        for line in lines:
+            stripped = line.strip()
+            if not stripped:
+                continue
+            if stripped.startswith("#"):
+                m = re.match(r"^#\s*([A-Za-z])\s*=\s*(type:\S+|prop:\S+)\s*$", stripped)
+                if m:
+                    self.legend[m.group(1)] = m.group(2)
+                continue
+            if stripped.startswith("requires="):
+                # Reserved for future template tags (e.g. requires=wallclimb); accepted, unused.
+                self.requires.update(t.strip() for t in stripped.split("=", 1)[1].split(",") if t.strip())
+                continue
+            # Collapse internal whitespace: spaces between symbols are just alignment; use "." for
+            # an explicit air cell so solid runs can be drawn contiguously.
+            self.rows.append("".join(line.split()))
+        if not self.rows:
+            raise ValueError(f"template {self.path} is empty")
+        self.width = max(len(r) for r in self.rows)
+        self.height = len(self.rows)
+        for row in self.rows:
+            for ch in row:
+                if ch not in self.legend and ch not in (".", " "):
+                    raise ValueError(
+                        f"template {self.path}: unknown symbol {ch!r} "
+                        f"(add a '# {ch}=...' legend line)")
+        # The base row must be solid ground across the full template width so the room floor and the
+        # map perimeter stay intact under the footprint.
+        base = self.rows[-1]
+        for tc in range(self.width):
+            ch = base[tc] if tc < len(base) else " "
+            if ch not in ("G", "X"):
+                raise ValueError(
+                    f"template {self.path}: bottom row must be solid ground (G/X only) "
+                    f"across the full width; found {ch!r} at column {tc}")
+
+    def resolve(self, layout):
+        """Maps each legend symbol to (layer, gid). layer is "collision" or "decoration"."""
+        resolved = {}
+        for symbol, key in self.legend.items():
+            if key.startswith("type:"):
+                tile_type = key.split(":", 1)[1].lower()
+                if tile_type == "door":
+                    gid = layout.door_gids[0] if layout.door_gids else None
+                    layer = "decoration"
+                else:
+                    gid = _first_solid_by_type(layout, tile_type)
+                    layer = "collision"
+            else:
+                prop = key.split(":", 1)[1].lower()
+                layer = "collision"
+                if prop == "oneway":
+                    gid = layout.one_way_gids[0] if layout.one_way_gids else None
+                elif prop == "hazard":
+                    gid = layout.hazard_gids[0] if layout.hazard_gids else None
+                elif prop == "solid":
+                    gid = layout.solid_gids[0] if layout.solid_gids else None
+                else:
+                    raise ValueError(f"template {self.path}: unsupported resolver {key!r}")
+            if gid is None:
+                raise ValueError(
+                    f"template {self.path}: cannot resolve symbol {symbol!r} ({key}) "
+                    f"-- no matching tile in the tilesets")
+            resolved[symbol] = (layer, gid)
+        return resolved
+
+    def cell(self, tc, tr):
+        """The template symbol at (column, row), or ' ' when the row is shorter than the column."""
+        row = self.rows[tr]
+        return row[tc] if tc < len(row) else " "
+
+
+def _forbidden_interior_cols(layout, room, extra_forbidden=None):
+    """Interior columns the generator's own geometry reserves -- platform-shaft channels, the
+    inside-secret chamber footprint, and (via extra_forbidden) the fixed entrance/exit anchors
+    and doorway approach corridors. Templates must not stamp into these."""
+    cols = set()
+    for upper, lower in _build_vertical_links(layout):
+        if upper.index == room.index or lower.index == room.index:
+            cols.update({lower.col_start + 2, lower.col_start + 3})
+    if layout.inside_secret and layout.chamber is not None and room.index == len(layout.rooms) - 1:
+        cols.update(range(layout.chamber["col_start"], layout.chamber["col_start"] + CHAMBER_W))
+    if extra_forbidden:
+        cols.update(extra_forbidden.get(room.index, ()))
+    return cols
+
+
+def _template_fits(layout, room, tpl, col_offset, extra_forbidden=None):
+    """True when the template's floor-anchored footprint fits the room's interior: within the
+    interior columns (never the shared walls/ceiling), within the room height, clear of the
+    reserved shaft/chamber/entrance/exit columns, and clear of every doorway approach corridor:
+    a template may stamp right up to a doorway, but solid cells may never cover the doorway's
+    passage rows in the corridor columns, so room-to-room travel always stays possible."""
+    start_col = room.col_start + 1 + col_offset
+    end_col = start_col + tpl.width - 1
+    if start_col < room.col_start + 1 or end_col > room.col_end - 1:
+        return False
+    # floor_row - tpl.height + 1 is the template's top row; it must stay below the room ceiling
+    # (room.row_start is the perimeter ceiling row, which the template must never touch).
+    if room.floor_row - tpl.height + 1 <= room.row_start:
+        return False
+    forbidden = _forbidden_interior_cols(layout, room, extra_forbidden)
+    if any(col in forbidden for col in range(start_col, end_col + 1)):
+        return False
+    # Doorway approach corridors: the two passage rows just above the base may not be walled off.
+    approach_cols = _doorway_approach_cols(layout).get(room.index, set())
+    if approach_cols:
+        for tc in range(tpl.width):
+            if start_col + tc not in approach_cols:
+                continue
+            for tr in (tpl.height - 2, tpl.height - 3):  # passage rows above the base row
+                if tr >= 0 and tpl.cell(tc, tr) in ("G", "X"):
+                    return False
+    return True
+
+
+def _plan_template_footprints(layout, placements, extra_forbidden=None):
+    """Pure geometry: computes the floor-anchored footprint of every requested template placement
+    and fit-checks it against the room (and the reserved anchor/approach columns) WITHOUT
+    stamping any grids. Returns the list of (tpl, room, start_col, start_row) footprints used by
+    _apply_templates (stamping), _template_warnings (design checks), and the marker scatterers.
+    Raises ValueError on any placement that does not fit."""
+    footprints = []
+    for name, room_index, col_offset in placements:
+        path = _resolve_template_path(name)
+        tpl = Template(path, layout)
+        if not (0 <= room_index < len(layout.rooms)):
+            raise ValueError(
+                f"template {tpl.name}: room index {room_index} out of range (0..{len(layout.rooms) - 1})")
+        room = layout.rooms[room_index]
+        if not _template_fits(layout, room, tpl, col_offset, extra_forbidden):
+            start_col = room.col_start + 1 + col_offset
+            end_col = start_col + tpl.width - 1
+            raise ValueError(
+                f"template {tpl.name}: {tpl.width}x{tpl.height} does not fit room {room_index} "
+                f"at col offset {col_offset} (cols {start_col}..{end_col}, interior cols "
+                f"{room.col_start + 1}..{room.col_end - 1}, height {room.height}) "
+                f"without blocking a doorway approach, entrance, or exit column")
+        start_col = room.col_start + 1 + col_offset
+        start_row = room.floor_row - tpl.height + 1
+        footprints.append((tpl, room, start_col, start_row))
+    return footprints
+
+
+def _footprint_cols(footprints):
+    """Interior columns covered by the planned template footprints, keyed by room index. Floor
+    markers must not spawn on a cell a template is about to overwrite."""
+    cols_by_room = {}
+    for tpl, room, start_col, _ in footprints:
+        cols_by_room.setdefault(room.index, set()).update(range(start_col, start_col + tpl.width))
+    return cols_by_room
+
+
+def _apply_templates(layout, collision_grid, decoration_grid, footprints):
+    """Stamps pre-planned template footprints (see _plan_template_footprints) into the grids.
+    Floor-anchored: the template's bottom row replaces the room's floor row under the footprint;
+    cells above overwrite (air hollows the base room). Returns the footprints unchanged."""
+    for tpl, room, start_col, start_row in footprints:
+        resolved = tpl.resolve(layout)
+        for tr in range(tpl.height):
+            csv_row = start_row + tr
+            for tc in range(tpl.width):
+                ch = tpl.cell(tc, tr)
+                col = start_col + tc
+                if ch in (".", " "):
+                    collision_grid[csv_row][col] = 0
+                    continue
+                layer, gid = resolved[ch]
+                if layer == "decoration":
+                    decoration_grid[csv_row][col] = gid
+                else:
+                    collision_grid[csv_row][col] = gid
+    return footprints
+
+
+def _hop_blocked(tpl, c1, r1, c2, r2):
+    """Heuristic: a solid (G/X) run in a column strictly between two surfaces, taller than the
+    takeoff surface (row index smaller = higher), blocks a straight horizontal/diagonal hop."""
+    if r1 - r2 < 0:
+        return False  # falling to a lower surface is never blocked in this heuristic
+    lo, hi = (c1, c2) if c1 < c2 else (c2, c1)
+    for tc in range(lo + 1, hi):
+        for tr in range(tpl.height):
+            ch = tpl.cell(tc, tr)
+            if ch in ("G", "X") and tr < r1:
+                return True
+    return False
+
+
+def _template_warnings(layout, footprints):
+    """Post-stamp design checks -- warnings only, never failing generation. Every solid ground cell
+    above the base must be supported from below, and every standable surface (solid-run tops and
+    one-way platforms) must be reachable from the room floor within the player's jump envelope. A
+    real playthrough has more nuance (wall-climb, hazards, item placement), so these are heuristics,
+    not a proof of reachability. Overlapping template footprints in the same room are also reported
+    (later stamps win and clobber earlier ones)."""
+    warnings = []
+    for i, (tpl_i, room_i, sci, sri) in enumerate(footprints):
+        for tpl_j, room_j, scj, srj in footprints[:i]:
+            if room_i.index != room_j.index:
+                continue
+            overlap_cols = range(max(sci, scj), min(sci + tpl_i.width, scj + tpl_j.width))
+            overlap_rows = range(max(sri, srj), min(sri + tpl_i.height, srj + tpl_j.height))
+            if len(list(overlap_cols)) > 0 and len(list(overlap_rows)) > 0:
+                warnings.append(
+                    f"{tpl_j.name} and {tpl_i.name} overlap in room {room_i.index} "
+                    f"(cols {max(sci, scj)}..{min(sci + tpl_i.width, scj + tpl_j.width) - 1}) -- "
+                    f"{tpl_i.name} stamps last and clobbers the overlap")
+    for tpl, room, start_col, start_row in footprints:
+        # Support: every G/X cell above the base needs a solid cell directly below it.
+        unsupported = []
+        for tr in range(tpl.height - 2, -1, -1):
+            for tc in range(tpl.width):
+                ch = tpl.cell(tc, tr)
+                if ch not in ("G", "X"):
+                    continue
+                below = tpl.cell(tc, tr + 1)
+                if below not in ("G", "X"):
+                    unsupported.append((tc, tr, ch))
+        if unsupported:
+            spots = ", ".join(f"({tc},{tr}:{ch})" for tc, tr, ch in unsupported[:6])
+            more = f", +{len(unsupported) - 6} more" if len(unsupported) > 6 else ""
+            warnings.append(
+                f"{tpl.name} in room {room.index}: unsupported ground cells {spots}{more} "
+                f"-- floating solid tiles ({unsupported[0][2]} with nothing solid beneath)")
+
+        # Reachability: BFS over standable surfaces from the leftmost base-row surface.
+        surfaces = []
+        for tc in range(tpl.width):
+            top = None
+            for tr in range(tpl.height):
+                if tpl.cell(tc, tr) in ("G", "X"):
+                    top = tr
+            if top is not None:
+                surfaces.append((tc, top))
+            for tr in range(tpl.height):
+                if tpl.cell(tc, tr) == "P":
+                    surfaces.append((tc, tr))
+        if surfaces:
+            base_surfaces = [s for s in surfaces if s[1] == tpl.height - 1]
+            start = sorted(base_surfaces)[0] if base_surfaces else sorted(surfaces)[0]
+            reached = {start}
+            queue = [start]
+            while queue:
+                cur = queue.pop()
+                for nxt in surfaces:
+                    if nxt in reached:
+                        continue
+                    dc = abs(nxt[0] - cur[0])
+                    rise = cur[1] - nxt[1]
+                    if rise > JUMP_HEIGHT_DOUBLE or dc > JUMP_DISTANCE_DOUBLE:
+                        continue
+                    if _hop_blocked(tpl, cur[0], cur[1], nxt[0], nxt[1]):
+                        continue
+                    reached.add(nxt)
+                    queue.append(nxt)
+            unreached = sorted(s for s in surfaces if s not in reached)
+            if unreached:
+                spots = ", ".join(f"({tc},{tr})" for tc, tr in unreached[:6])
+                more = f", +{len(unreached) - 6} more" if len(unreached) > 6 else ""
+                warnings.append(
+                    f"{tpl.name} in room {room.index}: unreachable surfaces {spots}{more} -- "
+                    f"outside the jump envelope (single {JUMP_HEIGHT_SINGLE}-up/{JUMP_DISTANCE_SINGLE}-across, "
+                    f"double {JUMP_HEIGHT_DOUBLE}-up/{JUMP_DISTANCE_DOUBLE}-across) or walled off")
+    return warnings
+
+
+def _pick_template_placements(layout, count, rng, used_rooms=None, extra_forbidden=None):
+    """Picks `count` distinct (template_name, room_index, col) placements that fit -- respecting
+    the reserved anchor/approach columns via extra_forbidden -- each in a distinct room not already
+    in `used_rooms`, deterministically for the given rng. Fewer than `count` when the library or
+    the room layout cannot fit that many."""
+    used_rooms = set(used_rooms or ())
+    if count <= 0 or not os.path.isdir(TEMPLATE_DIR):
+        return []
+    lib = sorted(os.path.splitext(f)[0] for f in os.listdir(TEMPLATE_DIR) if f.lower().endswith(".tmpl"))
+    candidates = []
+    for name in lib:
+        try:
+            path = _resolve_template_path(name)
+            tpl = Template(path, layout)
+        except ValueError:
+            continue
+        for room_index, room in enumerate(layout.rooms):
+            if room_index in used_rooms:
+                continue
+            interior = (room.col_end - 1) - (room.col_start + 1) + 1
+            if tpl.width > interior or tpl.height > room.height:
+                continue
+            for col in range(0, interior - tpl.width + 1):
+                if _template_fits(layout, room, tpl, col, extra_forbidden):
+                    candidates.append((name, room_index, col))
+    rng.shuffle(candidates)
+    picked = []
+    used_rooms = set(used_rooms)
+    for name, room_index, col in candidates:
+        if len(picked) >= count:
+            break
+        if room_index in used_rooms:
+            continue
+        picked.append((name, room_index, col))
+        used_rooms.add(room_index)
+    return picked
 
 
 def _rooms_xml(layout, start_id):
@@ -724,11 +1187,13 @@ def _relative_source(out_path, ts_path):
 
 
 def generate_map(output_path, room_count=3, seed=None, tilesets_dir="tileset", enemy_types=None,
-                 inside_secret=False, room_width=SCREEN_TILE_W, room_height=SCREEN_TILE_H,
-                 grid_cols=None, grid_rows=None, no_secret=False, exit_next=None, platforms=0):
-    """Builds a chain (default) or grid of whole-screen rooms (room_width x room_height tiles at
-    128px; defaults 30x17 matching the viewport), perimeter-sealed except for one walk-through
-    doorway to each horizontal neighbour and a one-way platform shaft to each vertical neighbour,
+                 inside_secret=False, room_width=DEFAULT_ROOM_WIDTH, room_height=DEFAULT_ROOM_HEIGHT,
+                 grid_cols=None, grid_rows=None, no_secret=False, exit_next=None, platforms=0,
+                 templates=None, template_pick=0):
+    """Builds a chain (default) or grid of rooms (room_width x room_height tiles at 128px;
+    defaults 24x10 -- the mobile-oriented default; pass 30x17 for whole-screen desktop rooms),
+    perimeter-sealed except for one walk-through doorway to each horizontal neighbour and a
+    one-way platform shaft to each vertical neighbour,
     scatters a playerStart and a small random count of enemies/items per room, and writes a
     complete .tmx (background/collision/decoration/objects/enemies/Rooms layers).
 
@@ -756,7 +1221,17 @@ def generate_map(output_path, room_count=3, seed=None, tilesets_dir="tileset", e
     platforms floating above the floor (see _apply_platforming): 2-row/2-col steps, the same
     spacing as the vertical-shaft platforms, so every platform is reachable by construction. A
     coin sits on each room's top platform and a bg-* filler tile (bg-barrel/bg-crate) is painted
-    behind each platform on the background layer."""
+    behind each platform on the background layer.
+
+    With templates=<[(name, room, col), ...]> ASCII-art courses from the template library
+    (scripts/templates/*.tmpl) are floor-anchored into named rooms -- bottom row = the room's
+    floor row, must be solid ground -- stamping over the base floor/platforms (they win). Room
+    index and column offset are optional; room defaults to 0, column to the room's first interior
+    column. Template courses must fit the room's interior (hard error otherwise). Auto-scatter
+    with template_pick=N stamps N distinct random library templates into N distinct rooms that
+    fit, deterministically per seed. After stamping, jump-aware design checks
+    (_template_warnings) report unsupported/floating ground and surfaces unreachable within the
+    player's jump envelope (warnings only; see JUMP_*_* constants)."""
     grid_cols = grid_cols if grid_cols is not None else room_count
     grid_rows = grid_rows if grid_rows is not None else 1
     if inside_secret and room_count != 1:
@@ -773,21 +1248,63 @@ def generate_map(output_path, room_count=3, seed=None, tilesets_dir="tileset", e
                     grid_cols, grid_rows, no_secret)
     rng = random.Random(seed)
 
-    out_dir = os.path.dirname(os.path.abspath(output_path))
-    os.makedirs(out_dir, exist_ok=True)
+    templates = templates or []
+    if template_pick > 0 and not os.path.isdir(TEMPLATE_DIR):
+        raise ValueError(f"template_pick={template_pick} but the template library directory does not exist: {TEMPLATE_DIR}")
 
     passages = _build_passages(layout)
     vertical_links = _build_vertical_links(layout)
+
+    # Doors first: the entrance/exit anchors are chosen before any template planning. The spawn
+    # column and the exit-gate columns are reserved so templates fit around them and can never
+    # bury a door, spawn the player in a wall, or block a doorway approach corridor.
+    explicit_placements = []
+    for item in templates:
+        if isinstance(item, str):
+            explicit_placements.append((item, 0, 0))
+        else:
+            name, room_index = item[0], item[1]
+            col = item[2] if len(item) > 2 else 0
+            explicit_placements.append((name, room_index, col))
+
+    # The spawn column must stay clear of any explicit template stamped into the player room, so
+    # pre-plan just those (spawn not reserved yet) and hand their footprint columns to the anchor
+    # picker. Random --template-pick placements are picked afterwards and already respect the
+    # reserved columns via _template_fits, so they can never collide.
+    player_explicit = [p for p in explicit_placements if p[1] == layout.player_room_index]
+    spawn_avoid = set()
+    if player_explicit:
+        spawn_avoid = _footprint_cols(
+            _plan_template_footprints(layout, player_explicit)).get(layout.player_room_index, set())
+
+    spawn_col, door_cells = _pick_anchors(layout, rng, vertical_links, exit_next,
+                                          avoid_cols=spawn_avoid)
+    reserved_cols = _reserved_template_cols(layout, spawn_col, exit_next)
+
+    placements = list(explicit_placements)
+    placements += _pick_template_placements(layout, template_pick, rng,
+                                            used_rooms={p[1] for p in placements},
+                                            extra_forbidden=reserved_cols)
+
+    out_dir = os.path.dirname(os.path.abspath(output_path))
+    os.makedirs(out_dir, exist_ok=True)
+
     collision_grid = _build_collision_grid(layout, passages, vertical_links)
     background_grid = _new_grid(layout.map_cols, layout.map_rows, 0)
     decoration_grid = _new_grid(layout.map_cols, layout.map_rows, 0)
     secret_hide_grid = _build_secret_hide_grid(layout)
 
-    objects, enemies, door_cells = _build_objects(layout, passages, rng, enemy_types or DEFAULT_ENEMY_TYPES,
-                                                  vertical_links, exit_next)
-    painted_doors = _paint_door_cells(decoration_grid, layout, door_cells)
+    # Pure footprint planning before stamping, so the markers can avoid template footprints and
+    # doors can paint last (templates can never clobber or bury them).
+    template_footprints = _plan_template_footprints(layout, placements, extra_forbidden=reserved_cols)
+    objects, enemies = _build_objects(layout, rng, enemy_types or DEFAULT_ENEMY_TYPES, vertical_links,
+                                      exit_next=exit_next, spawn_col=spawn_col,
+                                      template_cols_by_room=_footprint_cols(template_footprints))
     if platforms > 0:
         _apply_platforming(layout, collision_grid, background_grid, objects, platforms)
+    _apply_templates(layout, collision_grid, decoration_grid, template_footprints)
+    painted_doors = _paint_door_cells(decoration_grid, layout, door_cells)
+    template_warnings = _template_warnings(layout, template_footprints)
     rooms_start_id = layout.map_cols * layout.map_rows + 1
     rooms_xml, next_object_id = _rooms_xml(layout, rooms_start_id)
 
@@ -857,6 +1374,14 @@ def generate_map(output_path, room_count=3, seed=None, tilesets_dir="tileset", e
           f"{len(vertical_links)} vertical shafts, "
           f"{len(objects)} object markers, {len(enemies)} enemy markers ({secret_desc}), "
           f"{painted_doors} door decorations.{note}")
+    if template_footprints:
+        names = ", ".join(f"{tpl.name}@room{tpl_index}" for tpl, tpl_room, _, _ in template_footprints
+                          for tpl_index in [tpl_room.index])
+        print(f"  templates stamped: {names}")
+    if template_warnings:
+        print("  template design warnings (not failures):")
+        for w in template_warnings:
+            print(f"    - {w}")
     return output_path
 
 
@@ -1213,6 +1738,13 @@ def validate_map(path, tilesets_dir=None, room_width=None, room_height=None, no_
         if not any(r0[0] <= ox < r0[0] + r0[2] and r0[1] <= oy < r0[1] + r0[3]
                    for r0 in normal_rects):
             problems.append("playerStart not inside any normal room rect")
+        else:
+            spawn_col = ox // TILE_SIZE
+            spawn_row = (height - 1) - oy // TILE_SIZE
+            if not is_open(cell(spawn_col, spawn_row)):
+                problems.append(
+                    f"playerStart at col {spawn_col}, row {spawn_row} is inside a solid collision "
+                    f"tile (spawn-in-wall)")
 
     if exit_next is not None:
         gates = [
@@ -1261,6 +1793,45 @@ def validate_map(path, tilesets_dir=None, room_width=None, room_height=None, no_
                         problems.append(f"door decoration at ({col}, {row}) uses gid "
                                         f"{dgrid[row][col]}, not a type=\"door\" tile")
 
+    # Doors and the spawn must never be buried: every door decoration cell and the playerStart
+    # cell must be open in the collision grid (the generation-time reservations make violations
+    # impossible, so these are regression guards).
+    decoration = next((layer for layer in root.findall("layer")
+                       if layer.get("name") == "decoration"), None)
+    if decoration is not None:
+        dgrid, _, _ = _parse_grid_layer(decoration, width, height)
+        for col, row in ((col, row) for row in range(height) for col in range(width)
+                         if dgrid[row][col] != 0):
+            if not is_open(cell(col, row)):
+                problems.append(f"door decoration at ({col}, {row}) is buried by a solid "
+                                f"collision tile")
+
+    # Room-to-room navigation: every doorway approach corridor must stay open on its passage rows
+    # (the two rows just above the floor), so a stamped course can never wall off a doorway.
+    for gr in range(grid_rows):
+        for gc in range(grid_cols):
+            room = grid_rooms.get((gr, gc))
+            if room is None:
+                continue
+            nbr = grid_rooms.get((gr, gc + 1))
+            if nbr is not None:
+                for pr in room["passage_rows"]:
+                    for appr_col in (room["col_end"] - 1, nbr["col_start"] + 1):
+                        if not is_open(cell(appr_col, pr)):
+                            problems.append(
+                                f"doorway approach col {appr_col}, row {pr} between "
+                                f"{room['name']} and {nbr['name']} is solid -- blocked room-to-room "
+                                f"travel")
+    if secret_rect is not None and not secret_inside and normal_rects:
+        last = normal_rooms[-1][1]
+        last_col_end = (last[0] + last[2]) // TILE_SIZE - 1
+        floor_row = (height - 1) - last[1] // TILE_SIZE
+        for pr in (floor_row - 1, floor_row - 2):
+            if not is_open(cell(last_col_end - 1, pr)):
+                problems.append(
+                    f"secret entrance approach col {last_col_end - 1}, row {pr} is solid -- "
+                    f"blocked secret-room access")
+
     return problems
 
 
@@ -1287,21 +1858,42 @@ def main():
     parser.add_argument("--inside-secret", action="store_true",
                         help="Carve a hidden CHAMBER_W x CHAMBER_H secret chamber inside the last room "
                              "instead of appending a full-screen secret room to the right of the map.")
-    parser.add_argument("--room-width", type=int, default=SCREEN_TILE_W,
-                        help=f"Room width in tiles (default: {SCREEN_TILE_W}, matching the viewport; "
-                             f"e.g. 24 for mobile-oriented rooms).")
-    parser.add_argument("--room-height", type=int, default=SCREEN_TILE_H,
-                        help=f"Room height in tiles (default: {SCREEN_TILE_H}, matching the viewport; "
-                             f"e.g. 10 for mobile-oriented rooms).")
+    parser.add_argument("--room-width", type=int, default=DEFAULT_ROOM_WIDTH,
+                        help=f"Room width in tiles (default: {DEFAULT_ROOM_WIDTH}, the mobile-oriented "
+                             f"default; e.g. 30 for whole-screen desktop rooms).")
+    parser.add_argument("--room-height", type=int, default=DEFAULT_ROOM_HEIGHT,
+                        help=f"Room height in tiles (default: {DEFAULT_ROOM_HEIGHT}, the mobile-oriented "
+                             f"default; e.g. 17 for whole-screen desktop rooms).")
     parser.add_argument("--platforms", type=int, default=0,
                         help="Per room, add this many floating one-way platforms in a deterministic, "
                              "always-jumpable staircase (2 rows up / 2 cols right per step) with a coin "
                              "on the top platform and a bg-* filler tile behind each (default: 0 = flat floor).")
+    parser.add_argument("--template", action="append", default=None, metavar="NAME[,ROOM[,COL]]",
+                        help="Stamp an ASCII-art course from the template library (scripts/templates/*.tmpl) "
+                             "into a room, floor-anchored to the room floor. NAME is a library name or a "
+                             "direct .tmpl path; ROOM is the room index (default 0); COL is the left-edge "
+                             "column offset inside the room (default first interior column). Repeatable.")
+    parser.add_argument("--template-pick", type=int, default=0,
+                        help="Stamp N distinct random library templates into N distinct rooms that fit "
+                             "(deterministic per --seed; defaults to fewer than N if the library/layout "
+                             "cannot fit that many).")
     args = parser.parse_args()
 
     enemy_types = None
     if args.enemy_types:
         enemy_types = [t.strip() for t in args.enemy_types.split(",") if t.strip()]
+
+    templates = []
+    for spec in (args.template or []):
+        parts = [p.strip() for p in spec.split(",")]
+        name = parts[0]
+        if not name:
+            parser.error(f"--template {spec!r}: missing template name")
+        room_index = int(parts[1]) if len(parts) > 1 and parts[1] else 0
+        col = int(parts[2]) if len(parts) > 2 and parts[2] else 0
+        if len(parts) > 3:
+            parser.error(f"--template {spec!r}: expected NAME[,ROOM[,COL]] (got {len(parts)} parts)")
+        templates.append((name, room_index, col))
 
     generate_map(args.out, room_count=args.rooms, seed=args.seed,
                  tilesets_dir=args.tilesets_dir, enemy_types=enemy_types,
@@ -1309,7 +1901,7 @@ def main():
                  room_width=args.room_width, room_height=args.room_height,
                  grid_cols=args.grid_cols, grid_rows=args.grid_rows,
                  no_secret=args.no_secret, exit_next=args.exit_next,
-                 platforms=args.platforms)
+                 platforms=args.platforms, templates=templates, template_pick=args.template_pick)
 
 
 if __name__ == "__main__":

@@ -1,21 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.2" name="bg" tilewidth="256" tileheight="265" tilecount="10" columns="0">
+<tileset version="1.10" tiledversion="1.12.2" name="bg" tilewidth="256" tileheight="265" tilecount="6" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
- <tile id="1">
-  <properties>
-   <property name="solid" type="bool" value="false"/>
-  </properties>
-  <image source="../gfx/tiles/bg/window.png" width="128" height="128"/>
- </tile>
- <tile id="2">
-  <properties>
-   <property name="solid" type="bool" value="false"/>
-  </properties>
-  <image source="../gfx/tiles/bg/chains.png" width="126" height="107"/>
- </tile>
- <tile id="4">
-  <image source="../gfx/tiles/bg/web.png" width="99" height="120"/>
- </tile>
  <tile id="5">
   <image source="../gfx/tiles/bg/chains2.png" width="200" height="170"/>
  </tile>
@@ -30,9 +15,6 @@
  </tile>
  <tile id="9">
   <image source="../gfx/tiles/bg/banner2.png" width="248" height="256"/>
- </tile>
- <tile id="10">
-  <image source="../gfx/tiles/bg/pillar01.png" width="113" height="256"/>
  </tile>
  <tile id="13">
   <image source="../gfx/tiles/bg/banner3.png" width="256" height="256"/>
