@@ -119,7 +119,7 @@ it with the CWD set to `assets/maps`, keep `--tilesets-dir tileset`, and write t
   use it with the invocation above, run from `assets/maps`. (The shared images live in
   `assets/maps/gfx/`; do not point this at the images directory — it must hold the `.tsx`
   files.)
-- `--enemy-types walker,flyer,shooter` — which enemy types may appear.
+- `--enemy-types walker,flyer,shooter,knight` — which enemy types may appear. (Default now includes the 15-HP knight; pass an explicit list to opt out, e.g. `--enemy-types walker,flyer,shooter`.)
 - `--platforms N` — decorate each room with N floating one-way platforms in a deterministic,
   always-jumpable staircase (see **Platforming style** below). Composes with every other flag
   (chains, grids, mobile room sizes, secret rooms). Default 0 = flat floor.

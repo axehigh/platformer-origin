@@ -60,7 +60,7 @@ Override the interpreter with the `PYTHON` env var (e.g.
 | `--template NAME[,ROOM[,COL]]` | — | Stamp a reusable ASCII-art course (`--template-pick N` picks N at random) |
 | `--exit-next path` | — | Exit gate with `nextLevel` property pointing at `path` |
 | `--inside-secret` | off | Carve the secret chamber inside the last room instead of appending a room |
-| `--enemy-types walker,flyer,shooter` | all | Comma-separated enemy types to scatter |
+| `--enemy-types walker,flyer,shooter,knight` | all | Comma-separated enemy types to scatter (default includes the 15-HP knight) |
 | `--seed N` | random | Reproducible output |
 | `--out path` | **required** | Output `.tmx` path (relative to CWD = `assets/maps/`) |
 | `--tilesets-dir dir` | `tileset` | Directory holding the `.tsx` tilesets |

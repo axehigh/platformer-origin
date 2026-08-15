@@ -30,7 +30,7 @@ public class SpriteConstants {
         44f * PlayerScale,
         0f * PlayerScale
     };
-    public static final float PLAYER_MAX_ATTACK_REACH = max(PLAYER_ATTACK_REACH);
+    public static final float PLAYER_MAX_ATTACK_REACH = maxOf(PLAYER_ATTACK_REACH);
 
     //Chest atlas regions (gfx/origin-game.atlas): closed sprite on spawn, swapped to the
     //matching open sprite when a chest is melee-struck (see MeleeAttackSystem).
@@ -39,10 +39,11 @@ public class SpriteConstants {
 
     //Enemy Collision Box (base units, scaled by ENEMY_SCALE)
 
+    public static String EnemyWalkerSprite = "goblin";
     public static float EnemyWalkerScale = 0.3f;
-    public static float EnemyWalkerCollisionWidth = 40f;
-    public static float EnemyWalkerCollisionHeight = 50f;
-    public static float EnemyWalkerOffsetY = 3f;
+    public static float EnemyWalkerCollisionWidth = 80f * EnemyWalkerScale;
+    public static float EnemyWalkerCollisionHeight = 140f * EnemyWalkerScale;
+    public static float EnemyWalkerOffsetY = 0f;
 
     public static float EnemyFlyerScale = 0.3f;
     public static float EnemyFlyerCollisionWidth = 40f;
@@ -54,12 +55,14 @@ public class SpriteConstants {
     public static float EnemyShooterCollisionHeight = 50f;
     public static float EnemyShooterOffsetY = 4f;
 
-    public static float EnemyKnightScale = 0.3f;
-    public static float EnemyKnightCollisionWidth = 60f;
-    public static float EnemyKnightCollisionHeight = 90f;
-    public static float EnemyKnightOffsetY = -10f;
+    public static String EnemyKnightSprite = "goblin";
+    public static float EnemyKnightScale = 0.40f;
+    public static float EnemyKnightCollisionWidth = 80f * EnemyKnightScale;
+    public static float EnemyKnightCollisionHeight = 140 * EnemyKnightScale;
+    public static float EnemyKnightOffsetY = 10f * EnemyKnightScale;
+    ;
 
-    private static float max(float[] values) {
+    private static float maxOf(float[] values) {
         float max = 0f;
         for (float value : values) {
             max = Math.max(max, value);

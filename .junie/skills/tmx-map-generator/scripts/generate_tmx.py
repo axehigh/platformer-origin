@@ -96,7 +96,7 @@ ITEMS_TILESET = "items.tsx"
 ENEMY_TILESET = "enemy.tsx"
 SECRET_WALL_TILESET = "secret_wall.tsx"
 
-DEFAULT_ENEMY_TYPES = ["walker", "flyer", "shooter"]
+DEFAULT_ENEMY_TYPES = ["walker", "flyer", "shooter", "knight"]
 ITEM_TYPES = ["coin", "chest"]
 
 #: Name shared by the hidden room's Rooms-layer rect, its breakable wall tiles, and its deferred
@@ -1854,7 +1854,7 @@ def main():
                              "enemy.tsx, secret_wall.tsx; default: 'tileset' relative to the CWD -- "
                              "run from assets/maps).")
     parser.add_argument("--enemy-types", type=str, default=None,
-                        help="Comma-separated enemy types to scatter (default: walker,flyer,shooter).")
+                        help="Comma-separated enemy types to scatter (default: walker,flyer,shooter,knight).")
     parser.add_argument("--inside-secret", action="store_true",
                         help="Carve a hidden CHAMBER_W x CHAMBER_H secret chamber inside the last room "
                              "instead of appending a full-screen secret room to the right of the map.")

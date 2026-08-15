@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="16" height="12" tilewidth="128" tileheight="128" infinite="0" nextlayerid="7" nextobjectid="29">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="16" height="12" tilewidth="128" tileheight="128" infinite="0" nextlayerid="7" nextobjectid="31">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
- <tileset firstgid="59" source="../tileset/enemy.tsx"/>
- <tileset firstgid="66" source="../tileset/items.tsx"/>
- <tileset firstgid="85" source="../tileset/bg.tsx"/>
+ <tileset firstgid="60" source="../tileset/enemy.tsx"/>
+ <tileset firstgid="67" source="../tileset/items.tsx"/>
+ <tileset firstgid="86" source="../tileset/bg.tsx"/>
  <layer id="1" name="background" width="16" height="12">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -43,10 +43,10 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,88,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,89,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,88,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,89,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,22,0,0,0,0,0,0,0,0,0,0,0,0,22,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -60,24 +60,26 @@
     <property name="nextLevel" value="maps/world1/level_02.tmx"/>
    </properties>
   </object>
-  <object id="12" gid="63" x="1280" y="768" width="128" height="128"/>
-  <object id="13" gid="61" x="1536" y="1408" width="128" height="128"/>
+  <object id="12" gid="64" x="1280" y="768" width="128" height="128"/>
+  <object id="13" gid="62" x="1536" y="1408" width="128" height="128"/>
   <object id="14" name="torchLeft" type="torch" x="1920" y="640" width="128" height="128"/>
   <object id="20" name="enemy3" type="enemy" x="1664" y="1280" width="128" height="128">
    <properties>
     <property name="enemyType" value="walker"/>
    </properties>
   </object>
-  <object id="21" gid="78" x="768" y="1024" width="128" height="128"/>
-  <object id="22" gid="78" x="896" y="1024" width="128" height="128"/>
-  <object id="23" gid="78" x="1024" y="384" width="128" height="128"/>
-  <object id="24" gid="78" x="1152" y="384" width="128" height="128"/>
-  <object id="25" gid="78" x="1280" y="384" width="128" height="128"/>
-  <object id="26" gid="78" x="1536" y="640" width="128" height="128"/>
-  <object id="27" gid="78" x="1152" y="1280" width="128" height="128"/>
-  <object id="28" gid="78" x="1280" y="1280" width="128" height="128"/>
+  <object id="21" gid="79" x="768" y="1024" width="128" height="128"/>
+  <object id="22" gid="79" x="896" y="1024" width="128" height="128"/>
+  <object id="23" gid="79" x="1024" y="384" width="128" height="128"/>
+  <object id="24" gid="79" x="1152" y="384" width="128" height="128"/>
+  <object id="25" gid="79" x="1280" y="384" width="128" height="128"/>
+  <object id="26" gid="79" x="1536" y="640" width="128" height="128"/>
+  <object id="27" gid="79" x="1152" y="1280" width="128" height="128"/>
+  <object id="28" gid="79" x="1280" y="1280" width="128" height="128"/>
  </objectgroup>
- <objectgroup id="6" name="enemies"/>
+ <objectgroup id="6" name="enemies">
+  <object id="30" gid="63" x="896" y="1408" width="256" height="256"/>
+ </objectgroup>
  <objectgroup id="4" name="Rooms" locked="1">
   <object id="2" x="0" y="0" width="2048" height="1539.51"/>
  </objectgroup>

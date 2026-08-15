@@ -551,7 +551,7 @@ public class EntityFactory {
                 enemyScale = unitScale * SpriteConstants.EnemyShooterScale;
                 break;
             case "knight":
-                atlasPrefix = "goblin";
+                atlasPrefix = SpriteConstants.EnemyKnightSprite;
                 walkRegionName = "walk";
                 colWidth = SpriteConstants.EnemyKnightCollisionWidth;
                 colHeight = SpriteConstants.EnemyKnightCollisionHeight;
@@ -559,7 +559,7 @@ public class EntityFactory {
                 enemyScale = unitScale * SpriteConstants.EnemyKnightScale;
                 break;
             default:
-                atlasPrefix = "goblin";
+                atlasPrefix = SpriteConstants.EnemyWalkerSprite;
                 walkRegionName = "walk";
                 colWidth = SpriteConstants.EnemyWalkerCollisionWidth;
                 colHeight = SpriteConstants.EnemyWalkerCollisionHeight;
