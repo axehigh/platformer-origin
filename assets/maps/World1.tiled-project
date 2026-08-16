@@ -7,12 +7,31 @@
     "folders": [
         ".",
         "gfx",
-        "tileset",
-        "world1"
+        "world_template"
     ],
     "properties": [
     ],
     "propertyTypes": [
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 2,
+            "members": [
+            ],
+            "name": "Door",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset",
+                "project"
+            ]
+        },
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
@@ -41,10 +60,10 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 2,
+            "id": 4,
             "members": [
             ],
-            "name": "Door",
+            "name": "Tile",
             "type": "class",
             "useAs": [
                 "property",
@@ -57,6 +76,17 @@
                 "wangset",
                 "project"
             ]
+        },
+        {
+            "id": 3,
+            "name": "TileEnum",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "EXIT",
+                "COIN"
+            ],
+            "valuesAsFlags": false
         }
     ]
 }
