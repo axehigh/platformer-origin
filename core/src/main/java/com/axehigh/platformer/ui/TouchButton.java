@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
 import static com.axehigh.platformer.GameConstants.UI_TOUCH_HIT_PAD;
 
@@ -45,6 +46,16 @@ public class TouchButton extends ImageButton {
                 handler.onRelease();
             }
         });
+    }
+
+    /**
+     * Swaps the button's image drawable (up and down states) at runtime, e.g. to reflect the
+     * currently selected potion type.
+     */
+    public void setDrawable(Drawable drawable) {
+        ImageButtonStyle style = getStyle();
+        style.imageUp = drawable;
+        style.imageDown = drawable;
     }
 
     /**

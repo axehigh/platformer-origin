@@ -3,6 +3,7 @@ package com.axehigh.platformer.ecs.systems;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.LevelExitComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
+import com.axehigh.platformer.ecs.components.PotionType;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.map.LevelCatalog;
 import com.axehigh.platformer.map.LevelDefinition;
@@ -109,6 +110,10 @@ public class LevelExitSystem extends IteratingSystem {
         saveData.sharpEdgePurchased = player.sharpEdgePurchased;
         saveData.daggerBandolierPurchased = player.daggerBandolierPurchased;
         saveData.ironHeartCount = player.ironHeartCount;
+        saveData.healingPotions = player.countPotion(PotionType.HEALING);
+        saveData.strengthPotions = player.countPotion(PotionType.STRENGTH);
+        saveData.speedPotions = player.countPotion(PotionType.SPEED);
+        saveData.invulnerabilityPotions = player.countPotion(PotionType.INVULNERABILITY);
         saveData.completedLevelIds = buildCompletedLevelIds();
         return saveData;
     }

@@ -60,6 +60,26 @@ public final class GameConstants {
     public static int SwordDamage = 5;
     public static int MaxHealth = 3;
 
+    //Potions & buffs
+    /** How many of each potion type the player can hold at once. */
+    public static int POTION_CAP = 5;
+    /** Coins granted instead of a potion pickup when the player is already at {@link #POTION_CAP}. */
+    public static int POTION_OVERFLOW_COINS = 5;
+    /** Hearts restored by one Healing potion (capped at maxHealth). */
+    public static int HEALING_POTION_HEAL = 1;
+    /** Minimum delay between two potion drinks (seconds), preventing consumption spam. */
+    public static float POTION_USE_COOLDOWN = 0.4f;
+    /** Strength buff: extra melee damage while active. */
+    public static int STRENGTH_DAMAGE_BONUS = 3;
+    /** Strength buff duration (seconds). */
+    public static float STRENGTH_BUFF_DURATION = 20f;
+    /** Speed buff: horizontal move-speed multiplier while active. */
+    public static float SPEED_MULTIPLIER = 1.5f;
+    /** Speed buff duration (seconds). */
+    public static float SPEED_BUFF_DURATION = 15f;
+    /** Invulnerability buff duration (seconds). */
+    public static float INVULNERABILITY_DURATION = 10f;
+
     //UI
 
     //UI Only for touch control

@@ -113,6 +113,7 @@ public class EntityFactory {
         player.add(collisionComponent);
 
         player.add(new PlayerComponent());
+        player.add(new BuffComponent());
 
         return player;
     }
@@ -211,6 +212,11 @@ public class EntityFactory {
                     break;
                 case "dagger":
                     engine.addEntity(createDaggerPickup(spawnX, spawnY));
+                    spawned = true;
+                    break;
+                case "potion":
+                    String potionType = getProperty(object, tile, "potionType", "healing");
+                    engine.addEntity(createPotionPickup(spawnX, spawnY, potionType));
                     spawned = true;
                     break;
                 case "enemy":
@@ -686,6 +692,46 @@ public class EntityFactory {
         entity.add(new DaggerPickupComponent());
 
         return entity;
+    }
+
+    private Entity createPotionPickup(float x, float y, String potionType) {
+        PotionType type = parsePotionType(potionType);
+        Texture texture = getTexture(potionIconPath(type));
+
+        Entity entity = new Entity();
+
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(x, y);
+        transform.scale.set(unitScale, unitScale);
+        transform.z = DECOR_Z;
+        entity.add(transform);
+
+        TextureComponent textureComponent = new TextureComponent();
+        textureComponent.region = new TextureRegion(texture);
+        entity.add(textureComponent);
+
+        CollisionComponent collisionComponent = new CollisionComponent();
+        collisionComponent.bounds.setSize(texture.getWidth() * unitScale, texture.getHeight() * unitScale);
+        entity.add(collisionComponent);
+
+        PotionPickupComponent potionPickup = new PotionPickupComponent();
+        potionPickup.type = type;
+        entity.add(potionPickup);
+
+        return entity;
+    }
+
+    /** Parses a {@code potionType} map property, defaulting to {@code HEALING} on unknown values. */
+    private PotionType parsePotionType(String potionType) {
+        try {
+            return PotionType.valueOf(potionType.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return PotionType.HEALING;
+        }
+    }
+
+    private String potionIconPath(PotionType type) {
+        return type.iconPath();
     }
 
     private Texture getTexture(String path) {

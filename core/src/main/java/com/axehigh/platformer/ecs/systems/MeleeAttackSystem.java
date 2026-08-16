@@ -1,7 +1,9 @@
 package com.axehigh.platformer.ecs.systems;
 
+import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.assets.SpriteConstants;
 import com.axehigh.platformer.ecs.components.AnimationComponent;
+import com.axehigh.platformer.ecs.components.BuffComponent;
 import com.axehigh.platformer.ecs.components.ChestComponent;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.EnemyComponent;
@@ -30,6 +32,7 @@ import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
 import static com.axehigh.platformer.assets.SpriteConstants.PLAYER_ATTACK_REACH;
 import static com.axehigh.platformer.assets.SpriteConstants.PLAYER_MAX_ATTACK_REACH;
 import static com.axehigh.platformer.ecs.components.Mappers.ANIMATION;
+import static com.axehigh.platformer.ecs.components.Mappers.BUFF;
 import static com.axehigh.platformer.ecs.components.Mappers.CHEST;
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
@@ -143,7 +146,8 @@ public class MeleeAttackSystem extends IteratingSystem {
         activeStrikeBounds = reach > 0f ? strikeBounds : null;
 
         if (reach > 0f) {
-            hitAllEnemies(strikeBounds, player);
+            int damage = player.swordDamage + (isStrengthBuffActive(entity) ? GameConstants.STRENGTH_DAMAGE_BONUS : 0);
+            hitAllEnemies(strikeBounds, player, damage);
             openAllChests(strikeBounds, player);
             if (!player.meleeHasHit) {
                 if (breakSecretWall(strikeBounds)) {
@@ -157,10 +161,16 @@ public class MeleeAttackSystem extends IteratingSystem {
         player.meleeAttack.update(deltaTime);
     }
 
+    /** True while the player's Strength potion buff is active (no-op without a buff). */
+    private boolean isStrengthBuffActive(Entity entity) {
+        BuffComponent buff = BUFF.get(entity);
+        return buff != null && buff.isStrengthActive();
+    }
+
     /** Damages every enemy overlapping {@code bounds} that hasn't already been hit this swing
      * (tracked in {@link PlayerComponent#meleeHitEnemies}, reset at every swing start) via
      * {@code EnemyDamageResolver}, so a single swing can hit every enemy in reach. */
-    private void hitAllEnemies(Rectangle bounds, PlayerComponent player) {
+    private void hitAllEnemies(Rectangle bounds, PlayerComponent player, int damage) {
         for (Entity hitEnemy : enemies) {
             CollisionComponent enemyCollision = COLLISION.get(hitEnemy);
             if (!bounds.overlaps(enemyCollision.worldBounds) || player.meleeHitEnemies.contains(hitEnemy)) {
@@ -169,7 +179,7 @@ public class MeleeAttackSystem extends IteratingSystem {
             EnemyComponent enemy = ENEMY.get(hitEnemy);
             MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
             boolean isFlying = FLYING.get(hitEnemy) != null;
-            EnemyDamageResolver.applyHit(hitEnemy, enemy, enemyMovement, player.swordDamage,
+            EnemyDamageResolver.applyHit(hitEnemy, enemy, enemyMovement, damage,
                 player.facingDirection, isFlying, unitScale, engine);
             player.meleeHitEnemies.add(hitEnemy);
             player.meleeHasHit = true;

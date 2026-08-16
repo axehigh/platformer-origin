@@ -1,9 +1,11 @@
 package com.axehigh.platformer.ecs.systems;
 
+import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.components.CoinPickupComponent;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.DaggerPickupComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
+import com.axehigh.platformer.ecs.components.PotionPickupComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.particles.GlobalParticles;
 import com.axehigh.platformer.particles.ParticleHelper;
@@ -19,6 +21,7 @@ import static com.axehigh.platformer.ecs.components.Mappers.COIN_PICKUP;
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.DAGGER_PICKUP;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
+import static com.axehigh.platformer.ecs.components.Mappers.POTION_PICKUP;
 import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 
 /**
@@ -41,7 +44,7 @@ public class PickupSystem extends IteratingSystem {
     }
 
     public PickupSystem(SfxSystem sfxSystem, int priority) {
-        super(Family.one(DaggerPickupComponent.class, CoinPickupComponent.class)
+        super(Family.one(DaggerPickupComponent.class, CoinPickupComponent.class, PotionPickupComponent.class)
             .get(), priority);
         this.sfxSystem = sfxSystem;
     }
@@ -73,14 +76,31 @@ public class PickupSystem extends IteratingSystem {
         if (daggerPickup != null) {
             player.items = Math.min(player.maxItems, player.items + daggerPickup.amount);
         } else {
-            CoinPickupComponent coinPickup = COIN_PICKUP.get(pickupEntity);
-            player.coins += coinPickup.amount;
+            PotionPickupComponent potionPickup = POTION_PICKUP.get(pickupEntity);
+            if (potionPickup != null) {
+                pickupPotion(player, potionPickup);
+            } else {
+                CoinPickupComponent coinPickup = COIN_PICKUP.get(pickupEntity);
+                player.coins += coinPickup.amount;
+                if (sfxSystem != null) {
+                    sfxSystem.playCoin();
+                }
+                spawnCoinSpark(pickupCollision);
+            }
+        }
+        getEngine().removeEntity(pickupEntity);
+    }
+
+    /** Adds a potion to the player's held count, converting the pickup to coins when at the cap. */
+    private void pickupPotion(PlayerComponent player, PotionPickupComponent potionPickup) {
+        if (player.countPotion(potionPickup.type) >= GameConstants.POTION_CAP) {
+            player.coins += GameConstants.POTION_OVERFLOW_COINS;
             if (sfxSystem != null) {
                 sfxSystem.playCoin();
             }
-            spawnCoinSpark(pickupCollision);
+            return;
         }
-        getEngine().removeEntity(pickupEntity);
+        player.setPotionCount(potionPickup.type, player.countPotion(potionPickup.type) + potionPickup.amount);
     }
 
     /** One-shot sparkle burst at the picked-up coin; a no-op without a PooledEngine. */

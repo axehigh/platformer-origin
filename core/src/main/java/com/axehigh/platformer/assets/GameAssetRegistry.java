@@ -36,6 +36,12 @@ public final class GameAssetRegistry {
         assetManager.load("gfx/old/bullet.png", Texture.class);
         assetManager.load("gfx/old/dagger.png", Texture.class);
         assetManager.load("gfx/old/platform.png", Texture.class);
+        assetManager.load("gfx/old/potion_healing.png", Texture.class);
+        assetManager.load("gfx/old/potion_strength.png", Texture.class);
+        assetManager.load("gfx/old/potion_speed.png", Texture.class);
+        assetManager.load("gfx/old/potion_invulnerability.png", Texture.class);
+        assetManager.load("gfx/old/potion_swap.png", Texture.class);
+        assetManager.load("gfx/old/inventory_backpack.png", Texture.class);
     }
 
     public static void loadParticles(AssetManager assetManager) {

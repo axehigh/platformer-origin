@@ -4,11 +4,13 @@ import com.axehigh.platformer.assets.GameAssetRegistry;
 import com.axehigh.platformer.audio.AudioManager;
 import com.axehigh.platformer.common.BaseScreen;import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
+import com.axehigh.platformer.ecs.components.PotionType;
 import com.axehigh.platformer.ecs.systems.*;
 import com.axehigh.platformer.map.*;
 import com.axehigh.platformer.particles.ParticleHelper;
 import com.axehigh.platformer.ui.HudStage;
 import com.axehigh.platformer.ui.DeviceClass;
+import com.axehigh.platformer.ui.InventoryBarStage;
 import com.axehigh.platformer.ui.LayoutMode;
 import com.axehigh.platformer.ui.LayoutPrefs;
 import com.axehigh.platformer.ui.TouchControlsStage;
@@ -20,9 +22,11 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
@@ -47,6 +51,7 @@ public class GameScreen extends BaseScreen {
     private static final int PRIORITY_INPUT = 0;
     private static final int PRIORITY_MUSIC = 1;
     private static final int PRIORITY_ENEMY = 4;
+    private static final int PRIORITY_BUFF = 4;
     private static final int PRIORITY_MOVEMENT = 5;
     private static final int PRIORITY_BOUNDS = 6;
     private static final int PRIORITY_MOVING_PLATFORM = 6;
@@ -92,8 +97,10 @@ public class GameScreen extends BaseScreen {
     private Entity playerEntity;
     private HudStage hudStage;
     private TouchControlsStage touchControlsStage;
+    private InventoryBarStage inventoryBarStage;
     private boolean gameOverActive = false;
     private boolean gamePaused = false;
+    private boolean inventoryOpen = false;
     private boolean debugTouchLogging = false;
 
     /** Defaults to the catalog's first level. */
@@ -151,6 +158,8 @@ public class GameScreen extends BaseScreen {
         EnemyShootSystem shootSystem = new EnemyShootSystem(assetManager, roomState, PRIORITY_ENEMY);
         shootSystem.setUnitScale(scale);
         engine.addSystem(shootSystem);
+
+        engine.addSystem(new BuffSystem(PRIORITY_BUFF));
 
         MovementSystem movementSystem = new MovementSystem(mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), PRIORITY_MOVEMENT);
         movementSystem.setUnitScale(scale);
@@ -230,7 +239,11 @@ public class GameScreen extends BaseScreen {
                 togglePause();
             }
         });
-        touchControlsStage = new TouchControlsStage(touchViewport, skin, playerInputSystem);
+        touchControlsStage = new TouchControlsStage(touchViewport, skin, playerInputSystem,
+                new TextureRegionDrawable(new TextureRegion(assetManager.get("gfx/old/inventory_backpack.png", Texture.class))),
+                this::toggleInventory);
+        inventoryBarStage = new InventoryBarStage(new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT), skin, assetManager, playerComponent, playerEntity);
+        inventoryBarStage.setOnTapOutside(this::toggleInventory);
 
         DeviceClass savedDevice = LayoutPrefs.savedDevice();
         if (savedDevice != null) {
@@ -265,13 +278,24 @@ public class GameScreen extends BaseScreen {
             }
         });
         inputMultiplexer.addProcessor(stage);
+        inputMultiplexer.addProcessor(inventoryBarStage);
         inputMultiplexer.addProcessor(touchControlsStage);
         inputMultiplexer.addProcessor(hudStage);
         inputMultiplexer.addProcessor(new InputAdapter() {
             @Override
             public boolean keyDown(int keycode) {
                 if (keycode == Input.Keys.ESCAPE) {
-                    togglePause();
+                    if (inventoryOpen) {
+                        toggleInventory();
+                    } else {
+                        togglePause();
+                    }
+                    return true;
+                }
+                if (keycode == Input.Keys.I) {
+                    if (!gamePaused || inventoryOpen) {
+                        toggleInventory();
+                    }
                     return true;
                 }
                 if (keycode == Input.Keys.Q) {
@@ -297,6 +321,14 @@ public class GameScreen extends BaseScreen {
         if (gamePaused) {
             showPauseDialog();
         }
+    }
+
+    private void toggleInventory() {
+        // Can't open the inventory while the game-over dialog is up or during the death animation.
+        if (gameOverActive || playerComponent.isDead) return;
+        inventoryOpen = !inventoryOpen;
+        inventoryBarStage.setOpen(inventoryOpen);
+        gamePaused = inventoryOpen;
     }
 
     private void showPauseDialog() {
@@ -528,6 +560,10 @@ public class GameScreen extends BaseScreen {
         playerComponent.sharpEdgePurchased = saveData.sharpEdgePurchased;
         playerComponent.daggerBandolierPurchased = saveData.daggerBandolierPurchased;
         playerComponent.ironHeartCount = saveData.ironHeartCount;
+        playerComponent.setPotionCount(PotionType.HEALING, saveData.healingPotions);
+        playerComponent.setPotionCount(PotionType.STRENGTH, saveData.strengthPotions);
+        playerComponent.setPotionCount(PotionType.SPEED, saveData.speedPotions);
+        playerComponent.setPotionCount(PotionType.INVULNERABILITY, saveData.invulnerabilityPotions);
     }
 
     private void attachPlayerAnimations(Entity player) {
@@ -570,6 +606,11 @@ public class GameScreen extends BaseScreen {
             touchControlsStage.getViewport().apply();
             touchControlsStage.act(delta);
             touchControlsStage.draw();
+        }
+        if (inventoryOpen) {
+            inventoryBarStage.getViewport().apply();
+            inventoryBarStage.act(delta);
+            inventoryBarStage.draw();
         }
     }
 
@@ -626,6 +667,7 @@ public class GameScreen extends BaseScreen {
         applyLayoutMode();
         hudStage.getViewport().update(width, height, true);
         touchControlsStage.getViewport().update(width, height, true);
+        inventoryBarStage.getViewport().update(width, height, true);
     }
 
     /**
@@ -653,6 +695,9 @@ public class GameScreen extends BaseScreen {
         }
         if (touchControlsStage.getViewport().getScreenWidth() != width || touchControlsStage.getViewport().getScreenHeight() != height) {
             touchControlsStage.getViewport().update(width, height, true);
+        }
+        if (inventoryBarStage.getViewport().getScreenWidth() != width || inventoryBarStage.getViewport().getScreenHeight() != height) {
+            inventoryBarStage.getViewport().update(width, height, true);
         }
     }
 
@@ -694,6 +739,9 @@ public class GameScreen extends BaseScreen {
         }
         if (touchControlsStage != null) {
             touchControlsStage.dispose();
+        }
+        if (inventoryBarStage != null) {
+            inventoryBarStage.dispose();
         }
 //        if (skin != null) {
 //            skin.dispose();

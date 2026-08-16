@@ -13,6 +13,10 @@ public class SaveData {
     public boolean sharpEdgePurchased;
     public boolean daggerBandolierPurchased;
     public int ironHeartCount;
+    public int healingPotions;
+    public int strengthPotions;
+    public int speedPotions;
+    public int invulnerabilityPotions;
     public Array<String> completedLevelIds = new Array<>();
     public int triesRemaining = 3;
 

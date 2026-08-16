@@ -13,6 +13,18 @@ public class PlayerComponent implements Component {
     public int coins = 0;
     public int items = 0;
     public int maxItems = GameConstants.MaxItems;
+    /** Held Healing potions, capped at {@link GameConstants#POTION_CAP}. */
+    public int healingPotions = 0;
+    /** Held Strength potions, capped at {@link GameConstants#POTION_CAP}. */
+    public int strengthPotions = 0;
+    /** Held Speed potions, capped at {@link GameConstants#POTION_CAP}. */
+    public int speedPotions = 0;
+    /** Held Invulnerability potions, capped at {@link GameConstants#POTION_CAP}. */
+    public int invulnerabilityPotions = 0;
+    /** The potion type the "use potion" action currently targets; cycled by the potion input. */
+    public PotionType selectedPotion = PotionType.HEALING;
+    /** Short window after drinking a potion during which another drink is ignored. */
+    public Timer potionCooldown = new Timer();
     /** Current melee/sword damage per hit; base 5, raised to 8 by the "Sharp Edge" shop upgrade. */
     public int swordDamage = GameConstants.SwordDamage;
     /** One-time flag: true once the "Sharp Edge" upgrade (swordDamage -> 8) has been purchased. */
@@ -87,4 +99,64 @@ public class PlayerComponent implements Component {
     /** Base (resting) scale captured when the pulse started, before the deviation. */
     public float squashBaseX = 1f;
     public float squashBaseY = 1f;
+
+    /** Advances {@link #selectedPotion} to the next potion type in the cycle order. */
+    public void cyclePotion() {
+        PotionType[] types = PotionType.values();
+        selectedPotion = types[(selectedPotion.ordinal() + 1) % types.length];
+    }
+
+    /**
+     * Consumes one potion of the {@link #selectedPotion} type (count decremented, clamped to 0).
+     * Returns {@code false} without consuming when the player holds none of that type.
+     */
+    public boolean consumeSelectedPotion() {
+        return consumePotion(selectedPotion);
+    }
+
+    /**
+     * Consumes one potion of the given type (count decremented, clamped to 0). Returns
+     * {@code false} without consuming when the player holds none of that type.
+     */
+    public boolean consumePotion(PotionType type) {
+        if (countPotion(type) <= 0) {
+            return false;
+        }
+        setPotionCount(type, countPotion(type) - 1);
+        return true;
+    }
+
+    /** Returns how many potions of the given type the player holds. */
+    public int countPotion(PotionType type) {
+        switch (type) {
+            case HEALING:
+                return healingPotions;
+            case STRENGTH:
+                return strengthPotions;
+            case SPEED:
+                return speedPotions;
+            case INVULNERABILITY:
+                return invulnerabilityPotions;
+        }
+        return 0;
+    }
+
+    /** Sets how many potions of the given type the player holds, clamped to {@code 0..POTION_CAP}. */
+    public void setPotionCount(PotionType type, int count) {
+        int clamped = Math.max(0, Math.min(GameConstants.POTION_CAP, count));
+        switch (type) {
+            case HEALING:
+                healingPotions = clamped;
+                break;
+            case STRENGTH:
+                strengthPotions = clamped;
+                break;
+            case SPEED:
+                speedPotions = clamped;
+                break;
+            case INVULNERABILITY:
+                invulnerabilityPotions = clamped;
+                break;
+        }
+    }
 }

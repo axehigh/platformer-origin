@@ -5,24 +5,27 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import static com.axehigh.platformer.GameConstants.*;
 
 /**
  * Mobile touch overlay: bottom-left D-pad (left/right), bottom-right A/B/Y buttons in a single
- * row (A, the jump, is largest and rightmost) with the contextual interact/drop buttons inline
- * to their left. All buttons drive the same {@link PlayerInputSystem} handlers used by the
- * keyboard. The whole cluster is sized from {@code UI_CONTROL_BAND_HEIGHT} so the reserved
- * game-viewport band (see {@code OffsetFitViewport}) always clears it; each button's touch target
- * is fatter than its visuals via {@code UI_TOUCH_HIT_PAD} (see {@code TouchButton#hit}).
+ * row (A, the jump, is largest and rightmost) with the inventory (backpack) and contextual
+ * interact/drop buttons inline to their left. All buttons drive the same {@link PlayerInputSystem}
+ * handlers used by the keyboard (the backpack toggles the pause-the-game potion hotbar via its
+ * {@code onInventoryToggle} callback). The whole cluster is sized from {@code UI_CONTROL_BAND_HEIGHT}
+ * so the reserved game-viewport band (see {@code OffsetFitViewport}) always clears it; each button's
+ * touch target is fatter than its visuals via {@code UI_TOUCH_HIT_PAD} (see {@code TouchButton#hit}).
  */
 public class TouchControlsStage extends Stage {
     private final Table root;
     private final TouchButton interactButton;
     private final TouchButton dropButton;
 
-    public TouchControlsStage(Viewport viewport, Skin skin, PlayerInputSystem inputSystem) {
+    public TouchControlsStage(Viewport viewport, Skin skin, PlayerInputSystem inputSystem,
+                              Drawable inventoryIcon, Runnable onInventoryToggle) {
         super(viewport);
 
         root = new Table();
@@ -32,7 +35,7 @@ public class TouchControlsStage extends Stage {
         addActor(root);
 
         Table dpad = new Table();
-        dpad.setDebug(true);
+        //dpad.setDebug(true);
         TouchButton leftButton = new TouchButton(skin, "flatLeft", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 new TouchButton.Handler() {
                     @Override
@@ -75,7 +78,17 @@ public class TouchControlsStage extends Stage {
                 () -> inputSystem.requestTouchDrop());
         dropButton.setVisible(false);
 
+        TouchButton inventoryButton = new TouchButton(skin, "flatUp", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+                new TouchButton.Handler() {
+                    @Override
+                    public void onPress() {
+                        onInventoryToggle.run();
+                    }
+                });
+        inventoryButton.setDrawable(inventoryIcon);
+
         Table actions = new Table();
+        actions.add(inventoryButton).size(UI_Button_Contextual_Size, UI_Button_Contextual_Size).padLeft(UI_PADDING_TOUCH).padRight(UI_PADDING_TOUCH);
         actions.add(interactButton).size(UI_Button_Contextual_Size, UI_Button_Contextual_Size).padLeft(UI_PADDING_TOUCH).padRight(UI_PADDING_TOUCH);
         actions.add(dropButton).size(UI_Button_Contextual_Size, UI_Button_Contextual_Size).padLeft(UI_PADDING_TOUCH).padRight(UI_PADDING_TOUCH);
         actions.add(yButton).size(UI_Button_Action_Size, UI_Button_Action_Size).padLeft(UI_PADDING_TOUCH).padRight(UI_PADDING_TOUCH);

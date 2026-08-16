@@ -2,6 +2,7 @@ package com.axehigh.platformer.ui;
 
 import com.axehigh.platformer.assets.GameAssetRegistry;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
+import com.axehigh.platformer.ecs.components.PotionType;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -15,15 +16,18 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import static com.axehigh.platformer.assets.GameAssetRegistry.HERO_ASSET;
 
 /**
- * Top HUD overlay: avatar + heart icons (top-left), coin counter (top-center), item tracker +
- * pause button (top-right) — reflecting the live values on {@link PlayerComponent}. The coin/item
- * text uses a dedicated drop-shadowed clone of the skin font so it stays legible against bright
- * background tiles.
+ * Top HUD overlay: avatar + heart icons (top-left), coin counter + selected-potion indicator
+ * (top-center), item tracker + pause button (top-right) — reflecting the live values on
+ * {@link PlayerComponent}. The coin/item/potion text uses a dedicated drop-shadowed clone of the
+ * skin font so it stays legible against bright background tiles.
  */
 public class HudStage extends Stage {
     private static final float HEART_SIZE = 28f;
@@ -33,7 +37,10 @@ public class HudStage extends Stage {
     private final Image[] heartImages;
     private final Label coinLabel;
     private final Label itemLabel;
+    private final Image potionImage;
+    private final Label potionLabel;
     private final TextButton pauseButton;
+    private final ObjectMap<PotionType, TextureRegionDrawable> potionDrawables = new ObjectMap<>();
 
     public HudStage(Viewport viewport, Skin skin, AssetManager assetManager, PlayerComponent playerComponent) {
         super(viewport);
@@ -66,6 +73,16 @@ public class HudStage extends Stage {
         coinLabel = new ShadowLabel("", counterStyle);
         centerGroup.add(coinLabel);
 
+        for (PotionType type : PotionType.values()) {
+            Texture texture = assetManager.get(type.iconPath(), Texture.class);
+            potionDrawables.put(type, new TextureRegionDrawable(new TextureRegion(texture)));
+        }
+        potionImage = new Image(potionDrawables.get(PotionType.HEALING));
+        potionLabel = new ShadowLabel("", counterStyle);
+        centerGroup.row();
+        centerGroup.add(potionImage).size(34f, 34f).padRight(17f).padTop(10f);
+        centerGroup.add(potionLabel).padTop(10f);
+
         Table rightGroup = new Table();
         Image itemIcon = new Image(new TextureRegion(assetManager.get("gfx/old/dagger.png", Texture.class)));
         rightGroup.add(itemIcon).size(66f, 66f).padRight(17f);
@@ -93,6 +110,11 @@ public class HudStage extends Stage {
         }
         coinLabel.setText(String.format("x %04d", playerComponent.coins));
         itemLabel.setText(String.format("x %02d/%02d", playerComponent.items, playerComponent.maxItems));
+        Drawable drawable = potionDrawables.get(playerComponent.selectedPotion);
+        if (drawable != null) {
+            potionImage.setDrawable(drawable);
+        }
+        potionLabel.setText(String.format("x %02d", playerComponent.countPotion(playerComponent.selectedPotion)));
     }
 
     public TextButton getPauseButton() {

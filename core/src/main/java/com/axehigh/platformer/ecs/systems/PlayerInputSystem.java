@@ -1,5 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
+import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.BulletComponent;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
@@ -8,6 +9,7 @@ import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TextureComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.particles.ParticleHelper;
+import com.axehigh.platformer.util.PotionEffects;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -184,6 +186,20 @@ public class PlayerInputSystem extends IteratingSystem {
         player.shootCooldown.update(deltaTime);
         player.meleeCooldown.update(deltaTime);
         player.dropWindow.update(deltaTime);
+        player.potionCooldown.update(deltaTime);
+
+        // Potion cycle/use: unlike movement/attacks, drinking stays available during the brief
+        // hit-stun window (healing mid-fight is a clutch play) and is only blocked while dead.
+        boolean potionCyclePressed = Gdx.input.isKeyJustPressed(Z);
+        if (!player.isDead && potionCyclePressed) {
+            player.cyclePotion();
+        }
+
+        boolean potionUsePressed = Gdx.input.isKeyJustPressed(C);
+        if (!player.isDead && potionUsePressed && player.potionCooldown.isDone() && player.consumeSelectedPotion()) {
+            PotionEffects.apply(entity, player, player.selectedPotion);
+            player.potionCooldown.start(GameConstants.POTION_USE_COOLDOWN);
+        }
 
         boolean meleePressed = Gdx.input.isKeyJustPressed(Input.Keys.J) || Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || touchMeleeRequested;
         if (!locked && meleePressed && player.meleeCooldown.isDone()) {
