@@ -13,6 +13,8 @@ public final class GameAssetRegistry {
     public static final String ORIGIN_UI_JSON = "ui/uiskin.json";
     public static final String ORIGIN_UI_GFX = "ui/uiskin.atlas";
     public static final String PLATFORM_ASSET = "gfx/old/platform.png";
+    public static final String BACKGROUND_FAR = "maps/gfx/background/Background_01.png";
+    public static final String BACKGROUND_NEAR = "maps/gfx/background/Background_02.png";
 
     private GameAssetRegistry() {
     }
@@ -42,6 +44,8 @@ public final class GameAssetRegistry {
         assetManager.load("gfx/old/potion_invulnerability.png", Texture.class);
         assetManager.load("gfx/old/potion_swap.png", Texture.class);
         assetManager.load("gfx/old/inventory_backpack.png", Texture.class);
+        assetManager.load(BACKGROUND_FAR, Texture.class);
+        assetManager.load(BACKGROUND_NEAR, Texture.class);
     }
 
     public static void loadParticles(AssetManager assetManager) {

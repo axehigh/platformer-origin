@@ -39,6 +39,8 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import static com.axehigh.platformer.GameConstants.*;
+import static com.axehigh.platformer.assets.GameAssetRegistry.BACKGROUND_FAR;
+import static com.axehigh.platformer.assets.GameAssetRegistry.BACKGROUND_NEAR;
 import static com.axehigh.platformer.assets.GameAssetRegistry.HERO_ASSET;
 import static com.axehigh.platformer.ecs.components.AnimationComponent.State.*;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
@@ -67,6 +69,7 @@ public class GameScreen extends BaseScreen {
     private static final int PRIORITY_ANIMATION = 10;
     private static final int PRIORITY_SQUASH = 25;
     private static final int PRIORITY_MAP_RENDER = 20;
+    private static final int PRIORITY_BACKGROUND_RENDER = 19;
     private static final int PRIORITY_ENTITY_RENDER = 30;
     private static final int PRIORITY_PARTICLE_RENDER = 35;
     private static final int PRIORITY_LIGHT_RENDER = 36;
@@ -199,6 +202,10 @@ public class GameScreen extends BaseScreen {
         engine.addSystem(new CameraSystem(camera, roomState, PRIORITY_CAMERA));
         engine.addSystem(new AnimationSystem(PRIORITY_ANIMATION));
         engine.addSystem(new SquashSystem(PRIORITY_SQUASH));
+        engine.addSystem(new ParallaxBackgroundSystem(batch, camera,
+            assetManager.get(BACKGROUND_FAR, Texture.class),
+            assetManager.get(BACKGROUND_NEAR, Texture.class),
+            PRIORITY_BACKGROUND_RENDER));
         engine.addSystem(tiledMapRenderSystem);
         engine.addSystem(new RenderSystem(batch, camera, PRIORITY_ENTITY_RENDER));
         engine.addSystem(new ParticleSystem(batch, camera, PRIORITY_PARTICLE_RENDER));

@@ -48,6 +48,13 @@ public final class GameConstants {
      */
     public static final float MOBILE_ZOOM = 0.55f;
 
+    //Parallax background
+    /** Scroll speed of the far background layer ({@code Background_01}) relative to the world:
+     * 0 = glued to the camera (skybox), 1 = world-locked. Kept below the near layer so it recedes. */
+    public static final float PARALLAX_BG_FAR = 0.25f;
+    /** Scroll speed of the near background layer ({@code Background_02}) relative to the world. */
+    public static final float PARALLAX_BG_NEAR = 0.5f;
+
     /** Duration (seconds) of the fade-in/fade-out transition between screens. */
     public static final float SCREEN_FADE_TIMER = 0.5f;
 
