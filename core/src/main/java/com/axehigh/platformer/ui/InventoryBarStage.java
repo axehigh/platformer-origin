@@ -33,8 +33,8 @@ import static com.axehigh.platformer.GameConstants.UI_PADDING_TOUCH;
  * the potion's icon plus the held count. Tapping an enabled slot drinks one potion of that type
  * (healing restores a heart, the buffs start their timed effect). Slots are disabled while the
  * count is zero, while the drink cooldown is active, or for healing when health is full. The bar is
- * drawn on top of the touch controls and opens/closes via {@link #setOpen} — the owning screen is
- * responsible for pausing the engine while it is open.
+ * drawn on top of the touch controls and opens/closes via {@link #setOpen} — the game keeps
+ * running while it is open.
  */
 public class InventoryBarStage extends Stage {
     private static final float SLOT_SIZE = 130f;

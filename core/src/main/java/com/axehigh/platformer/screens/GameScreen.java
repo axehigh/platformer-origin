@@ -328,7 +328,6 @@ public class GameScreen extends BaseScreen {
         if (gameOverActive || playerComponent.isDead) return;
         inventoryOpen = !inventoryOpen;
         inventoryBarStage.setOpen(inventoryOpen);
-        gamePaused = inventoryOpen;
     }
 
     private void showPauseDialog() {
