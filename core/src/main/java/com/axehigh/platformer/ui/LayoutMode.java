@@ -4,8 +4,10 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 
 /**
- * Mobile touch-control layout modes, A/B-testable at runtime via the in-game Pause dialog
- * ("Mobile Layout" button). Each mode trades on-screen world size against control-overlap:
+ * Touch-control layout modes, A/B-testable at runtime via the in-game Pause dialog
+ * ("Mobile Layout" button), with {@link #BAND_ZOOM} as the shipped default for every view —
+ * desktop, mobile, and tablet (see {@link #defaultForDevice()}). Each mode trades on-screen world
+ * size against control-overlap:
  *
  * <ul>
  *   <li>{@link #CORNER_OVERLAY} — no reserved band; the world renders at full screen size and the
@@ -15,7 +17,8 @@ import com.badlogic.gdx.Gdx;
  *       world renders above it (never overlapped), but the world is physically smaller.</li>
  *   <li>{@link #BAND_ZOOM} — the same reserved band, plus a camera zoom so tiles stay big; the
  *       zoomed frame no longer fits screen-sized rooms, so flip rooms behave as dead-zone scroll
- *       rooms on mobile (see {@code CameraSystem}).</li>
+ *       rooms (see {@code CameraSystem}). On non-touch devices the band is skipped and only the
+ *       camera zoom applies.</li>
  * </ul>
  */
 public enum LayoutMode {
@@ -40,20 +43,18 @@ public enum LayoutMode {
     }
 
     /**
-     * Shipped default: phones (aspect &gt; ~16:10) get the {@link #BAND_ZOOM} world (control band +
-     * camera zoom so tiles stay big); tablets (wider than 16:10) get a {@link #BAND} so the controls
-     * never cover the floor. A faked {@link DeviceClass} overrides this with its own per-class default.
+     * Shipped default: every view — desktop, mobile, and tablet — renders with the
+     * {@link #BAND_ZOOM} world (reserved control band + camera zoom so tiles stay big on touch
+     * devices; on non-touch devices the band is skipped and only the zoom applies). A faked
+     * {@link DeviceClass} returns its own per-class default (currently {@link #BAND_ZOOM} for all
+     * classes).
      */
     public static LayoutMode defaultForDevice() {
         DeviceClass simulated = DeviceClass.simulated();
         if (simulated != null) {
             return simulated.defaultLayout();
         }
-        if (!isTouchDevice()) {
-            return CORNER_OVERLAY;
-        }
-        float aspect = Gdx.graphics.getWidth() / (float) Gdx.graphics.getHeight();
-        return aspect > 1.7f ? BAND_ZOOM : BAND;
+        return BAND_ZOOM;
     }
 
     @Override

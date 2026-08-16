@@ -1,5 +1,7 @@
 package com.axehigh.platformer.util;
 
+import com.axehigh.platformer.ui.DeviceClass;
+import com.axehigh.platformer.ui.LayoutMode;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
@@ -9,6 +11,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -94,5 +97,46 @@ public class GamePreferencesTest {
         verify(preferences, org.mockito.Mockito.times(2)).flush();
         assertEquals(25f, gamePreferences.getMusicVolume(), 0.001f);
         assertEquals(40f, gamePreferences.getSfxVolume(), 0.001f);
+    }
+
+    @Test
+    public void deviceClassAndLayoutModeDefaultToNull() {
+        when(preferences.getString("deviceClass", "")).thenReturn("");
+        when(preferences.getString("layoutMode", "")).thenReturn("");
+
+        assertNull(gamePreferences.getDeviceClass());
+        assertNull(gamePreferences.getLayoutMode());
+    }
+
+    @Test
+    public void deviceClassAndLayoutModePersistAndReload() {
+        gamePreferences.setDeviceClass(DeviceClass.PHONE);
+        gamePreferences.setLayoutMode(LayoutMode.BAND_ZOOM);
+
+        verify(preferences).putString("deviceClass", "PHONE");
+        verify(preferences).putString("layoutMode", "BAND_ZOOM");
+        verify(preferences, org.mockito.Mockito.times(2)).flush();
+
+        when(preferences.getString("deviceClass", "")).thenReturn("PHONE");
+        when(preferences.getString("layoutMode", "")).thenReturn("BAND_ZOOM");
+        assertEquals(DeviceClass.PHONE, gamePreferences.getDeviceClass());
+        assertEquals(LayoutMode.BAND_ZOOM, gamePreferences.getLayoutMode());
+    }
+
+    @Test
+    public void clearingDeviceClassStoresAuto() {
+        gamePreferences.setDeviceClass(null);
+
+        verify(preferences).putString("deviceClass", "");
+        verify(preferences).flush();
+        when(preferences.getString("deviceClass", "")).thenReturn("");
+        assertNull(gamePreferences.getDeviceClass());
+    }
+
+    @Test
+    public void unknownPersistedEnumFallsBackToNull() {
+        when(preferences.getString("deviceClass", "")).thenReturn("ATARI");
+
+        assertNull(gamePreferences.getDeviceClass());
     }
 }

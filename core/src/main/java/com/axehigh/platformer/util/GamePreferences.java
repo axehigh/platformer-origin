@@ -1,5 +1,7 @@
 package com.axehigh.platformer.util;
 
+import com.axehigh.platformer.ui.DeviceClass;
+import com.axehigh.platformer.ui.LayoutMode;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 
@@ -13,6 +15,8 @@ public class GamePreferences {
     private static final String KEY_DEBUG_MODE = "debugMode";
     private static final String KEY_WALL_CLIMB_ENABLED = "wallClimbEnabled";
     private static final String KEY_SQUASH_ENABLED = "squashEnabled";
+    private static final String KEY_DEVICE_CLASS = "deviceClass";
+    private static final String KEY_LAYOUT_MODE = "layoutMode";
 
     private static final float DEFAULT_MUSIC_VOLUME = 100f;
     private static final float DEFAULT_SFX_VOLUME = 100f;
@@ -98,6 +102,46 @@ public class GamePreferences {
 
     public void setSquashEnabled(boolean squashEnabled) {
         preferences.putBoolean(KEY_SQUASH_ENABLED, squashEnabled);
+        preferences.flush();
+    }
+
+    /**
+     * The persisted {@link DeviceClass} override, or {@code null} when unset / "Auto" (real
+     * platform detection).
+     */
+    public DeviceClass getDeviceClass() {
+        return enumOrNull(KEY_DEVICE_CLASS, DeviceClass.class);
+    }
+
+    /** Persists the forced {@link DeviceClass}; {@code null} stores "Auto" (real detection). */
+    public void setDeviceClass(DeviceClass deviceClass) {
+        putEnum(KEY_DEVICE_CLASS, deviceClass);
+    }
+
+    /** The persisted {@link LayoutMode}, or {@code null} when unset (fall back to the default). */
+    public LayoutMode getLayoutMode() {
+        return enumOrNull(KEY_LAYOUT_MODE, LayoutMode.class);
+    }
+
+    /** Persists the chosen {@link LayoutMode}; {@code null} stores "unset". */
+    public void setLayoutMode(LayoutMode layoutMode) {
+        putEnum(KEY_LAYOUT_MODE, layoutMode);
+    }
+
+    private <E extends Enum<E>> E enumOrNull(String key, Class<E> enumType) {
+        String name = preferences.getString(key, "");
+        if (name.isEmpty()) {
+            return null;
+        }
+        try {
+            return Enum.valueOf(enumType, name);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private void putEnum(String key, Enum<?> value) {
+        preferences.putString(key, value == null ? "" : value.name());
         preferences.flush();
     }
 }

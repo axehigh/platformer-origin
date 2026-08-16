@@ -10,6 +10,7 @@ import com.axehigh.platformer.particles.ParticleHelper;
 import com.axehigh.platformer.ui.HudStage;
 import com.axehigh.platformer.ui.DeviceClass;
 import com.axehigh.platformer.ui.LayoutMode;
+import com.axehigh.platformer.ui.LayoutPrefs;
 import com.axehigh.platformer.ui.TouchControlsStage;
 import com.axehigh.platformer.util.FeatureFlags;
 import com.axehigh.platformer.util.SaveManager;
@@ -230,9 +231,17 @@ public class GameScreen extends BaseScreen {
             }
         });
         touchControlsStage = new TouchControlsStage(touchViewport, skin, playerInputSystem);
-        layoutMode = LayoutMode.defaultForDevice();
+
+        DeviceClass savedDevice = LayoutPrefs.savedDevice();
+        if (savedDevice != null) {
+            DeviceClass.setSimulated(savedDevice);
+            deviceClass = savedDevice;
+            savedDevice.applyWindowSize();
+        }
+        layoutMode = LayoutPrefs.savedLayout() != null ? LayoutPrefs.savedLayout() : LayoutMode.defaultForDevice();
         touchControlsEnabled = LayoutMode.isTouchDevice();
         applyLayoutMode();
+        CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y);
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
         inputMultiplexer.addProcessor(new InputAdapter() {
@@ -382,14 +391,19 @@ public class GameScreen extends BaseScreen {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
                 AudioManager.get().playClick();
-                deviceClass = deviceClass.next();
+                deviceClass = DeviceClass.nextWithAuto(deviceClass);
                 DeviceClass.setSimulated(deviceClass);
-                layoutMode = deviceClass.defaultLayout();
-                deviceClass.applyWindowSize();
+                if (deviceClass != null) {
+                    layoutMode = deviceClass.defaultLayout();
+                    deviceClass.applyWindowSize();
+                } else {
+                    layoutMode = LayoutMode.defaultForDevice();
+                }
+                LayoutPrefs.save(deviceClass, layoutMode);
                 applyLayoutMode();
                 CameraSystem.snapToRoom(camera, roomState,
                     TRANSFORM.get(playerEntity).position.x, TRANSFORM.get(playerEntity).position.y);
-                deviceButton.setText("Device: " + deviceClass);
+                deviceButton.setText("Device: " + (deviceClass != null ? deviceClass : "Auto"));
             }
         });
 
@@ -406,6 +420,7 @@ public class GameScreen extends BaseScreen {
                     deviceClass.applyWindowSize();
                     deviceButton.setText("Device: " + deviceClass);
                 }
+                LayoutPrefs.save(deviceClass, layoutMode);
                 applyLayoutMode();
                 CameraSystem.snapToRoom(camera, roomState,
                     TRANSFORM.get(playerEntity).position.x, TRANSFORM.get(playerEntity).position.y);
@@ -560,7 +575,9 @@ public class GameScreen extends BaseScreen {
 
     /**
      * Applies the current {@link LayoutMode} to the game viewport (bottom band) and camera (zoom),
-     * gating the touch overlay to touch devices (plus any faked {@link DeviceClass}). Called every
+     * gating the touch overlay to touch devices (plus any faked {@link DeviceClass}). The control
+     * band is reserved only on touch devices, but the {@link LayoutMode#BAND_ZOOM} camera zoom
+     * applies everywhere, so desktop renders the zoomed big-tile view without a band. Called every
      * frame so a mid-run mode switch takes effect immediately.
      */
     private void applyLayoutMode() {
@@ -572,32 +589,31 @@ public class GameScreen extends BaseScreen {
         touchControlsEnabled = LayoutMode.isTouchDevice();
         touchControlsStage.setEnabled(touchControlsEnabled);
 
-        if (!touchControlsEnabled) {
-            viewport.setBottomBandPx(0);
-            camera.zoom = 1f;
-        } else {
+        float zoom = 1f;
+        int bandPx = 0;
+        if (touchControlsEnabled) {
             float stageScale = Math.max(width / SCREEN_WIDTH, height / SCREEN_HEIGHT);
-            int bandPx = Math.min(
+            bandPx = Math.min(
                 Math.round(UI_CONTROL_BAND_HEIGHT * stageScale),
                 Math.round(height * UI_BAND_SCREEN_FRACTION));
             switch (layoutMode) {
                 case CORNER_OVERLAY:
-                    viewport.setBottomBandPx(0);
-                    camera.zoom = 1f;
+                    bandPx = 0;
                     touchControlsStage.setAlpha(UI_BUTTON_ALPHA);
                     break;
                 case BAND:
-                    viewport.setBottomBandPx(bandPx);
-                    camera.zoom = 1f;
                     touchControlsStage.setAlpha(UI_BUTTON_ALPHA_SOLID);
                     break;
                 case BAND_ZOOM:
-                    viewport.setBottomBandPx(bandPx);
-                    camera.zoom = MOBILE_ZOOM;
+                    zoom = MOBILE_ZOOM;
                     touchControlsStage.setAlpha(UI_BUTTON_ALPHA_SOLID);
                     break;
             }
+        } else if (layoutMode == LayoutMode.BAND_ZOOM) {
+            zoom = MOBILE_ZOOM;
         }
+        viewport.setBottomBandPx(bandPx);
+        camera.zoom = zoom;
         viewport.update(width, height);
     }
 

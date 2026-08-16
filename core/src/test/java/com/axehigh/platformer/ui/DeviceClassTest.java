@@ -40,6 +40,11 @@ public class DeviceClassTest {
     }
 
     @Test
+    public void realPlatformDetectionDefaultsToBandZoom() {
+        assertEquals(LayoutMode.BAND_ZOOM, LayoutMode.defaultForDevice());
+    }
+
+    @Test
     public void phoneSimulationEnablesTouchAndDefaultsToBandZoom() {
         DeviceClass.setSimulated(DeviceClass.PHONE);
 
@@ -49,18 +54,19 @@ public class DeviceClassTest {
     }
 
     @Test
-    public void tabletSimulationEnablesTouchAndDefaultsToBand() {
+    public void tabletSimulationEnablesTouchAndDefaultsToBandZoom() {
         DeviceClass.setSimulated(DeviceClass.TABLET);
 
         assertTrue(LayoutMode.isTouchDevice());
-        assertEquals(LayoutMode.BAND, LayoutMode.defaultForDevice());
+        assertEquals(LayoutMode.BAND_ZOOM, LayoutMode.defaultForDevice());
     }
 
     @Test
-    public void desktopSimulationDisablesTouch() {
+    public void desktopSimulationDisablesTouchButDefaultsToBandZoom() {
         DeviceClass.setSimulated(DeviceClass.DESKTOP);
 
         assertFalse(LayoutMode.isTouchDevice());
+        assertEquals(LayoutMode.BAND_ZOOM, LayoutMode.defaultForDevice());
     }
 
     @Test
@@ -75,6 +81,24 @@ public class DeviceClassTest {
         assertEquals(DeviceClass.PHONE, DeviceClass.DESKTOP.next());
         assertEquals(DeviceClass.TABLET, DeviceClass.PHONE.next());
         assertEquals(DeviceClass.DESKTOP, DeviceClass.TABLET.next());
+    }
+
+    @Test
+    public void nextWithAutoCyclesThroughNullForAuto() {
+        assertEquals(DeviceClass.DESKTOP, DeviceClass.nextWithAuto(null));
+        assertEquals(DeviceClass.PHONE, DeviceClass.nextWithAuto(DeviceClass.DESKTOP));
+        assertEquals(DeviceClass.TABLET, DeviceClass.nextWithAuto(DeviceClass.PHONE));
+        assertNull(DeviceClass.nextWithAuto(DeviceClass.TABLET));
+    }
+
+    @Test
+    public void nextWithAutoWrapsBackToAutoAfterTablet() {
+        DeviceClass current = null;
+        current = DeviceClass.nextWithAuto(current);
+        current = DeviceClass.nextWithAuto(current);
+        current = DeviceClass.nextWithAuto(current);
+        current = DeviceClass.nextWithAuto(current);
+        assertNull(current);
     }
 
     @Test

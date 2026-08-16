@@ -29,8 +29,8 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
  * layer is treated as a single room covering the whole map (see {@code MapLoader#getRooms()}), so
  * it scrolls exactly like a normal room. Replaces the old fixed VIRTUAL_WIDTH/HEIGHT flip-screen
  * grid entirely. The camera compares rooms against the *effective* (zoomed) view size
- * ({@code camera.viewportWidth/Height * camera.zoom}), so a mobile {@code BAND_ZOOM} zoom makes
- * screen-sized rooms scroll like any bigger-than-frame room — see
+ * ({@code camera.viewportWidth/Height * camera.zoom}), so the shipped {@code BAND_ZOOM} layout
+ * (default on every platform) makes screen-sized rooms scroll like any bigger-than-frame room — see
  * {@code com.axehigh.platformer.ui.LayoutMode}.
  */
 public class CameraSystem extends EntitySystem {

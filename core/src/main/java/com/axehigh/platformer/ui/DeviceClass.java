@@ -6,16 +6,18 @@ import com.badlogic.gdx.Gdx;
 /**
  * Device classes for previewing mobile layouts on desktop. Each class carries the shipped default
  * {@link LayoutMode} and a representative window shape (used to resize the desktop window so the
- * band height, letterboxing, and aspect heuristic behave exactly like the real device).
+ * band height and letterboxing behave exactly like the real device).
  *
  * <p>A static {@link #simulated()} override lets a developer force a device class from the pause
- * dialog's "Device" button. It defaults to {@code null} (real platform detection) and survives
- * level reloads within a session, mirroring the static-toggle pattern of the collision-debug flag.
+ * dialog's "Device" button. It defaults to {@code null} (real platform detection), survives level
+ * reloads within a session, and is persisted across app restarts via
+ * {@code com.axehigh.platformer.ui.LayoutPrefs} (choosing {@code null}/{@code Auto} in the cycle
+ * clears the saved override and restores real platform detection).
  */
 public enum DeviceClass {
-    DESKTOP(1280, 720, LayoutMode.CORNER_OVERLAY),
+    DESKTOP(1280, 720, LayoutMode.BAND_ZOOM),
     PHONE(2400, 1080, LayoutMode.BAND_ZOOM),
-    TABLET(1600, 1200, LayoutMode.BAND);
+    TABLET(1600, 1200, LayoutMode.BAND_ZOOM);
 
     private static DeviceClass simulated;
 
@@ -68,6 +70,17 @@ public enum DeviceClass {
     public DeviceClass next() {
         DeviceClass[] values = values();
         return values[(ordinal() + 1) % values.length];
+    }
+
+    /**
+     * Cycles to the next class for the pause-dialog "Device" button, treating {@code null} as the
+     * "Auto" (real platform detection) state: {@code null → DESKTOP → PHONE → TABLET → null}.
+     */
+    public static DeviceClass nextWithAuto(DeviceClass current) {
+        if (current == null) {
+            return DESKTOP;
+        }
+        return current == TABLET ? null : current.next();
     }
 
     /** Resizes the desktop window to this class's representative shape (no-op on mobile backends). */
