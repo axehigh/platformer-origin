@@ -54,6 +54,9 @@ public final class GameConstants {
     public static final float PARALLAX_BG_FAR = 0.25f;
     /** Scroll speed of the near background layer ({@code Background_02}) relative to the world. */
     public static final float PARALLAX_BG_NEAR = 0.5f;
+    /** Height of one tile in world units (VIRTUAL_HEIGHT / 17 rows), used to offset parallax
+     *  layers so they don't waste imagery behind the collision ground layer. */
+    public static final float PARALLAX_TILE_HEIGHT = 16f;
 
     /** Duration (seconds) of the fade-in/fade-out transition between screens. */
     public static final float SCREEN_FADE_TIMER = 0.5f;

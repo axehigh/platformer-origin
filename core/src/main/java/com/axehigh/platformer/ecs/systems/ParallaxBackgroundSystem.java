@@ -30,8 +30,9 @@ public class ParallaxBackgroundSystem extends EntitySystem {
         this.camera = camera;
         farTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         nearTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        this.farLayer = new Layer(farTexture, GameConstants.PARALLAX_BG_FAR);
-        this.nearLayer = new Layer(nearTexture, GameConstants.PARALLAX_BG_NEAR);
+        this.farLayer = new Layer(farTexture, GameConstants.PARALLAX_BG_FAR, 0f);
+        this.nearLayer = new Layer(nearTexture, GameConstants.PARALLAX_BG_NEAR,
+                GameConstants.PARALLAX_TILE_HEIGHT);
     }
 
     @Override
@@ -51,25 +52,36 @@ public class ParallaxBackgroundSystem extends EntitySystem {
 
     private void drawLayer(Layer layer, float viewW, float viewH) {
         Texture texture = layer.texture;
-        float bgW = viewW;
-        float bgH = viewH;
-
         float factor = layer.factor;
         float cx = camera.position.x * (1f - factor);
-        float cy = camera.position.y * (1f - factor);
 
         float camLeft = camera.position.x - viewW / 2f;
         float camRight = camera.position.x + viewW / 2f;
         float camBottom = camera.position.y - viewH / 2f;
         float camTop = camera.position.y + viewH / 2f;
 
+        float bgW;
+        float bgH;
+
+        if (layer.yOffset > 0f) {
+            bgW = viewW;
+            bgH = viewW * ((float) texture.getHeight() / texture.getWidth());
+        } else {
+            bgW = viewW;
+            bgH = viewH;
+        }
+
         float x = cx - bgW;
         while (x + bgW < camLeft) x += bgW;
         for (; x < camRight; x += bgW) {
-            float y = cy - bgH;
-            while (y + bgH < camBottom) y += bgH;
-            for (; y < camTop; y += bgH) {
-                batch.draw(texture, x, y, bgW, bgH);
+            if (layer.yOffset > 0f) {
+                float y = camBottom + layer.yOffset - bgH;
+                while (y + bgH < camBottom) y += bgH;
+                for (; y < camTop; y += bgH) {
+                    batch.draw(texture, x, y, bgW, bgH);
+                }
+            } else {
+                batch.draw(texture, x, camBottom, bgW, bgH);
             }
         }
     }
@@ -78,10 +90,12 @@ public class ParallaxBackgroundSystem extends EntitySystem {
     private static final class Layer {
         final Texture texture;
         final float factor;
+        final float yOffset;
 
-        Layer(Texture texture, float factor) {
+        Layer(Texture texture, float factor, float yOffset) {
             this.texture = texture;
             this.factor = factor;
+            this.yOffset = yOffset;
         }
     }
 }
