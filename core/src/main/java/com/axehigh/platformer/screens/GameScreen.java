@@ -96,6 +96,7 @@ public class GameScreen extends BaseScreen {
     private DebugRenderSystem debugRenderSystem;
     private LightRenderSystem lightRenderSystem;
     private LevelManager levelManager;
+    private CameraSystem cameraSystem;
     private PlayerComponent playerComponent;
     private Entity playerEntity;
     private HudStage hudStage;
@@ -199,7 +200,8 @@ public class GameScreen extends BaseScreen {
         enemyContactSystem.setUnitScale(scale);
         engine.addSystem(enemyContactSystem);
         engine.addSystem(new HazardSystem(mapLoader.getHazardRects(), PRIORITY_ENEMY_CONTACT));
-        engine.addSystem(new CameraSystem(camera, roomState, PRIORITY_CAMERA));
+        cameraSystem = new CameraSystem(camera, roomState, PRIORITY_CAMERA);
+        engine.addSystem(cameraSystem);
         engine.addSystem(new AnimationSystem(PRIORITY_ANIMATION));
         engine.addSystem(new SquashSystem(PRIORITY_SQUASH));
         engine.addSystem(new ParallaxBackgroundSystem(batch, camera,
@@ -234,7 +236,8 @@ public class GameScreen extends BaseScreen {
 
         entityFactory.spawnObjects(engine, mapLoader.getObjectLayer(), roomState);
         entityFactory.spawnObjects(engine, mapLoader.getEnemiesLayer(), roomState);
-        CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y);
+        CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y,
+            layoutMode == LayoutMode.BAND_ZOOM);
 
         playerComponent = PLAYER.get(player);
         Viewport hudViewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -261,7 +264,8 @@ public class GameScreen extends BaseScreen {
         layoutMode = LayoutPrefs.savedLayout() != null ? LayoutPrefs.savedLayout() : LayoutMode.defaultForDevice();
         touchControlsEnabled = LayoutMode.isTouchDevice();
         applyLayoutMode();
-        CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y);
+        CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y,
+            layoutMode == LayoutMode.BAND_ZOOM);
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
         inputMultiplexer.addProcessor(new InputAdapter() {
@@ -440,7 +444,8 @@ public class GameScreen extends BaseScreen {
                 LayoutPrefs.save(deviceClass, layoutMode);
                 applyLayoutMode();
                 CameraSystem.snapToRoom(camera, roomState,
-                    TRANSFORM.get(playerEntity).position.x, TRANSFORM.get(playerEntity).position.y);
+                    TRANSFORM.get(playerEntity).position.x, TRANSFORM.get(playerEntity).position.y,
+                    layoutMode == LayoutMode.BAND_ZOOM);
                 deviceButton.setText("Device: " + (deviceClass != null ? deviceClass : "Auto"));
             }
         });
@@ -461,7 +466,8 @@ public class GameScreen extends BaseScreen {
                 LayoutPrefs.save(deviceClass, layoutMode);
                 applyLayoutMode();
                 CameraSystem.snapToRoom(camera, roomState,
-                    TRANSFORM.get(playerEntity).position.x, TRANSFORM.get(playerEntity).position.y);
+                    TRANSFORM.get(playerEntity).position.x, TRANSFORM.get(playerEntity).position.y,
+                    layoutMode == LayoutMode.BAND_ZOOM);
                 layoutButton.setText("Mobile Layout: " + layoutMode);
             }
         });
@@ -628,6 +634,12 @@ public class GameScreen extends BaseScreen {
      * frame so a mid-run mode switch takes effect immediately.
      */
     private void applyLayoutMode() {
+        boolean isBandZoom = layoutMode == LayoutMode.BAND_ZOOM;
+        cameraSystem.setBandZoom(isBandZoom);
+        if (levelManager != null) {
+            levelManager.setBandZoom(isBandZoom);
+        }
+
         int width = Gdx.graphics.getWidth();
         int height = Gdx.graphics.getHeight();
         if (width <= 0 || height <= 0) {

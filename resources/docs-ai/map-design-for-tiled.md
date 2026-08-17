@@ -254,9 +254,7 @@ angle += speed * dt        (each frame)
 ## 6. The `Rooms` layer & camera
 
 Draw one **rectangle per room** in the `Rooms` object layer (a `RectangleMapObject`; plain shape, no special type needed). `MapLoader.getRooms()` turns each into a `Room`, and `CameraSystem` uses whichever room currently contains the player for both **camera framing** and **enemy/platform activation**.
-
-*   **No `Rooms` layer at all** → the game falls back to a single room covering the whole map (the whole map scrolls like one big room). Useful for one-screen test maps, but you lose per-room camera/enemy control.
-*   A `Rooms` layer with no rectangles → no rooms at all (empty), which disables framing; keep at least one rectangle.
+*   **No `Rooms` layer at all**, or a **`Rooms` layer with no rectangles** → the game falls back to a single room covering the whole map (the whole map scrolls like one big room). Useful for one-screen test maps, but you lose per-room camera/enemy control.
 
 ### Camera behavior (per axis)
 

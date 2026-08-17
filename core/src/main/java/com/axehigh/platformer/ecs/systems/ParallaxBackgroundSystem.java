@@ -57,11 +57,20 @@ public class ParallaxBackgroundSystem extends EntitySystem {
         float factor = layer.factor;
         float cx = camera.position.x * (1f - factor);
         float cy = camera.position.y * (1f - factor);
-        float left = cx - viewW / 2f;
-        float bottom = cy - viewH / 2f;
 
-        for (float x = left - bgW; x < left + viewW; x += bgW) {
-            batch.draw(texture, x, bottom, bgW, bgH);
+        float camLeft = camera.position.x - viewW / 2f;
+        float camRight = camera.position.x + viewW / 2f;
+        float camBottom = camera.position.y - viewH / 2f;
+        float camTop = camera.position.y + viewH / 2f;
+
+        float x = cx - bgW;
+        while (x + bgW < camLeft) x += bgW;
+        for (; x < camRight; x += bgW) {
+            float y = cy - bgH;
+            while (y + bgH < camBottom) y += bgH;
+            for (; y < camTop; y += bgH) {
+                batch.draw(texture, x, y, bgW, bgH);
+            }
         }
     }
 

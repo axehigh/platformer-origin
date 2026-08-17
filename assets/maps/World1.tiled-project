@@ -6,8 +6,7 @@
     "extensionsPath": "extensions",
     "folders": [
         ".",
-        "gfx",
-        "world_template"
+        "gfx"
     ],
     "properties": [
     ],

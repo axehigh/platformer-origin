@@ -38,6 +38,7 @@ public class CameraSystem extends EntitySystem {
     private final RoomState roomState;
     private ImmutableArray<Entity> players;
     private int lastActiveRoomIndex = -1;
+    private boolean bandZoom;
 
     public CameraSystem(OrthographicCamera camera, RoomState roomState) {
         this(camera, roomState, 0);
@@ -47,6 +48,16 @@ public class CameraSystem extends EntitySystem {
         super(priority);
         this.camera = camera;
         this.roomState = roomState;
+    }
+
+    /**
+     * When {@code true} (BAND_ZOOM layout), the camera locks to the room's bottom-left corner on
+     * room entry instead of centering, so the viewport's bottom-left aligns with the room's. On
+     * subsequent frames the dead-zone scroll works as usual — small rooms stay fixed, large rooms
+     * scroll to follow the player once they reach the viewport edge.
+     */
+    public void setBandZoom(boolean bandZoom) {
+        this.bandZoom = bandZoom;
     }
 
     @Override
@@ -89,11 +100,11 @@ public class CameraSystem extends EntitySystem {
         float marginY = scrollMargin(viewH, camera.zoom);
 
         float camX = roomChanged
-            ? frameAxis(x, room.x, room.width, viewW, room)
-            : deadZoneAxis(camera.position.x, x, room.x, room.width, viewW, room, marginX);
+            ? frameAxis(x, room.x, room.width, viewW, room, bandZoom)
+            : deadZoneAxis(camera.position.x, x, room.x, room.width, viewW, room, marginX, bandZoom);
         float camY = roomChanged
-            ? frameAxis(y, room.y, room.height, viewH, room)
-            : deadZoneAxis(camera.position.y, y, room.y, room.height, viewH, room, marginY);
+            ? frameAxis(y, room.y, room.height, viewH, room, bandZoom)
+            : deadZoneAxis(camera.position.y, y, room.y, room.height, viewH, room, marginY, bandZoom);
 
         camera.position.set(camX, camY, 0f);
         camera.update();
@@ -102,8 +113,15 @@ public class CameraSystem extends EntitySystem {
     /**
      * Frames the camera for a just-entered room (instant snap / level start) from the player's
      * position: scroll axes clamp so the player stays in view, flip axes center on the room.
+     * In {@code bandZoom} mode, always positions the camera so the viewport's bottom-left aligns
+     * with the room's bottom-left (entire room visible for small rooms, bottom-left portion for
+     * large rooms — subsequent dead-zone scroll takes over on the next frame).
      */
-    private static float frameAxis(float playerPos, float roomMin, float roomSize, float viewportSize, Room room) {
+    private static float frameAxis(float playerPos, float roomMin, float roomSize, float viewportSize,
+                                   Room room, boolean bandZoom) {
+        if (bandZoom) {
+            return roomMin + viewportSize / 2f;
+        }
         if (isScrollAxis(room, roomSize, viewportSize)) {
             return clampAxis(playerPos, roomMin, roomSize, viewportSize);
         }
@@ -114,12 +132,13 @@ public class CameraSystem extends EntitySystem {
      * Dead-zone camera axis: the camera keeps its current position while the player stays within a
      * screen-edge margin, chases only when the player crosses that margin (keeping the player at
      * the margin line), and is clamped so the viewport never crosses the room's edges. Flip axes
-     * simply stay centered on the room.
+     * simply stay centered on the room — except in {@code bandZoom} mode where they hold position
+     * (preserving the bottom-left framing set by {@link #frameAxis}).
      */
     private static float deadZoneAxis(float currentCam, float playerPos, float roomMin, float roomSize,
-                                      float viewportSize, Room room, float margin) {
+                                      float viewportSize, Room room, float margin, boolean bandZoom) {
         if (!isScrollAxis(room, roomSize, viewportSize)) {
-            return roomMin + roomSize / 2f;
+            return bandZoom ? currentCam : roomMin + roomSize / 2f;
         }
         float half = viewportSize / 2f;
         float cam = currentCam;
@@ -166,9 +185,11 @@ public class CameraSystem extends EntitySystem {
      * Updates {@code roomState.activeRoomIndex} (if the given point lies within a known room) and
      * frames {@code camera} for that room: flip axes center on the room, scroll axes clamp the
      * player position within the room's bounds. Static so {@code GameScreen}/{@code LevelManager}
-     * can reuse the exact same placement logic right after a level swap/start.
+     * can reuse the exact same placement logic right after a level swap/start. When {@code bandZoom}
+     * is {@code true}, the camera locks to the room's bottom-left corner instead of centering.
      */
-    public static void snapToRoom(OrthographicCamera camera, RoomState roomState, float x, float y) {
+    public static void snapToRoom(OrthographicCamera camera, RoomState roomState, float x, float y,
+                                  boolean bandZoom) {
         int index = roomState.findRoomIndexContaining(x, y);
         if (index >= 0) {
             roomState.activeRoomIndex = index;
@@ -181,9 +202,14 @@ public class CameraSystem extends EntitySystem {
         float viewW = camera.viewportWidth * camera.zoom;
         float viewH = camera.viewportHeight * camera.zoom;
 
-        float camX = room != null ? frameAxis(x, room.x, room.width, viewW, room) : x;
-        float camY = room != null ? frameAxis(y, room.y, room.height, viewH, room) : y;
+        float camX = room != null ? frameAxis(x, room.x, room.width, viewW, room, bandZoom) : x;
+        float camY = room != null ? frameAxis(y, room.y, room.height, viewH, room, bandZoom) : y;
         camera.position.set(camX, camY, 0f);
         camera.update();
+    }
+
+    /** Convenience overload — defaults to {@code bandZoom = false}. */
+    public static void snapToRoom(OrthographicCamera camera, RoomState roomState, float x, float y) {
+        snapToRoom(camera, roomState, x, y, false);
     }
 }
