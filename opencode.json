@@ -1,4 +1,10 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "skills": { "paths": [".junie/skills"] }
+  "skills": { "paths": [".junie/skills"] },
+  "agent": {
+    "libgdx-developer": { "mode": "subagent", "description": "Implements libGDX game features — ECS systems, components, rendering, map integration, and gameplay mechanics." },
+    "libgdx-explorer": { "mode": "subagent", "description": "Read-only codebase research for this libGDX platformer — finds ECS architecture, system wiring, component usage, map structure, and gameplay patterns without making changes." },
+    "libgdx-planner": { "mode": "subagent", "description": "Plans libGDX game features — interviews user, explores codebase, drafts GitHub issues with ECS-aware acceptance criteria." },
+    "libgdx-tester": { "mode": "subagent", "description": "Writes and runs headless unit tests for Ashley ECS systems using SystemTestBase, JUnit 4, and Mockito." }
+  }
 }

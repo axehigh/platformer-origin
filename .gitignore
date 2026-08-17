@@ -168,5 +168,6 @@ Thumbs.db
 /.opencode/skills
 /.opencode/package.json
 /.opencode/package-lock.json
+/.opencode/agents
 
 /assets/maps/*.tiled-session
