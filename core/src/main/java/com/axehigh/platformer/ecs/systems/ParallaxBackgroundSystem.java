@@ -51,11 +51,8 @@ public class ParallaxBackgroundSystem extends EntitySystem {
 
     private void drawLayer(Layer layer, float viewW, float viewH) {
         Texture texture = layer.texture;
+        float bgW = viewW;
         float bgH = viewH;
-        float bgW = texture.getHeight() > 0 ? texture.getWidth() * bgH / texture.getHeight() : viewW;
-        if (bgW <= 0f) {
-            return;
-        }
 
         float factor = layer.factor;
         float cx = camera.position.x * (1f - factor);
