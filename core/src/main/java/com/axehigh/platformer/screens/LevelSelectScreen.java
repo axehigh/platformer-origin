@@ -132,7 +132,7 @@ public class LevelSelectScreen extends MenuScreen {
         for (int i = 0; i < worldIds.size; i++) {
             final int worldIndex = i;
             final int worldId = worldIds.get(i);
-            TextButton tab = new TextButton("World " + worldId, skin);
+            TextButton tab = new TextButton(LevelCatalog.worldName(worldId), skin);
             tab.getLabel().setFontScale(FontScale);
             tab.addListener(new ChangeListener() {
                 @Override
@@ -233,7 +233,7 @@ public class LevelSelectScreen extends MenuScreen {
                 completed++;
             }
         }
-        return "World " + worldIds.get(currentWorldIndex) + ": Completed " + completed + "/" + levels.size;
+        return LevelCatalog.worldName(worldIds.get(currentWorldIndex)) + ": Completed " + completed + "/" + levels.size;
     }
 
 }

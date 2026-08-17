@@ -55,6 +55,7 @@ public class LevelManager implements Disposable {
     private final SecretRoomRevealer secretRoomRevealer;
 
     private MapLoader mapLoader;
+    private boolean bandZoom;
 
     public LevelManager(PooledEngine engine, EntityFactory entityFactory, Viewport viewport,
                          TiledMapRenderSystem tiledMapRenderSystem, Array<Rectangle> collisionRects,
@@ -73,6 +74,11 @@ public class LevelManager implements Disposable {
         this.roomState = roomState;
         this.secretRoomRevealer = secretRoomRevealer;
         this.mapLoader = initialMapLoader;
+    }
+
+    /** Sets whether the camera should use BAND_ZOOM bottom-left framing on level transitions. */
+    public void setBandZoom(boolean bandZoom) {
+        this.bandZoom = bandZoom;
     }
 
     /** Swaps the active map: repositions the (persisted) player, keeps its stats, respawns objects. */
@@ -195,7 +201,7 @@ public class LevelManager implements Disposable {
             playerComponent.maxAirHeight = 0f;
         }
 
-        CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y);
+        CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y, bandZoom);
     }
 
     /** Returns the .tmx path of the currently active level. */

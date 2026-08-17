@@ -378,6 +378,13 @@ public class MapLoader implements Disposable {
                 rooms.add(new Room(rect.x, rect.y, rect.width, rect.height, parseCameraMode(camera)));
             }
         }
+        if (rooms.size == 0) {
+            float mapWidth = map.getProperties().get("width", 0, Integer.class) * tileWidth;
+            float mapHeight = map.getProperties().get("height", 0, Integer.class) * tileHeight;
+            if (mapWidth > 0 && mapHeight > 0) {
+                rooms.add(new Room(0f, 0f, mapWidth, mapHeight));
+            }
+        }
         return rooms;
     }
 

@@ -5,12 +5,22 @@ import com.badlogic.gdx.utils.IntArray;
 
 /** Static catalog of the game's selectable levels, backed by the existing assets/maps/*.tmx files. */
 public final class LevelCatalog {
+    public static final int WORLD_DEMO = 0;
     public static final int WORLD_1 = 1;
     public static final int WORLD_2 = 2;
 
     private static final Array<LevelDefinition> LEVELS = new Array<>();
 
     static {
+        //demo
+        LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_platforming_24x10", "Platforming 24x10", "maps/world_demo/platforming_24x10.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_platforming_30x17", "Platforming 30x17", "maps/world_demo/platforming_30x17.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_platforming_clamp", "Platforming Clamp", "maps/world_demo/platforming_clamp.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_platforming_grid", "Platforming Grid", "maps/world_demo/platforming_grid.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_platforming_secret", "Platforming Secret", "maps/world_demo/platforming_secret.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_template", "Template Demo", "maps/world_demo/template_demo.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_my_map", "My Map", "maps/world_demo/my_map.tmx"));
+
         //world 1
         LEVELS.add(new LevelDefinition(WORLD_1, "world1_level01", "World 1 - Level 1", "maps/world1/level_01.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_1, "world1_level02", "World 1 - Level 2", "maps/world1/level_02.tmx"));
@@ -64,5 +74,11 @@ public final class LevelCatalog {
             }
         }
         return worlds;
+    }
+
+    /** Human-readable tab label for a world id. */
+    public static String worldName(int worldId) {
+        if (worldId == WORLD_DEMO) return "Demo";
+        return "World " + worldId;
     }
 }
