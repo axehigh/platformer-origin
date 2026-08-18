@@ -7,7 +7,7 @@ import com.axehigh.platformer.ecs.components.PotionType;
 import com.axehigh.platformer.util.PotionEffects;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -27,6 +27,7 @@ import static com.axehigh.platformer.GameConstants.UI_BOTTOM_PAD;
 import static com.axehigh.platformer.GameConstants.UI_BUTTON_PRESS_SCALE;
 import static com.axehigh.platformer.GameConstants.UI_BUTTON_SCALE_DURATION;
 import static com.axehigh.platformer.GameConstants.UI_PADDING_TOUCH;
+import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_UI_GFX;
 
 /**
  * Pause-the-game potion hotbar: a horizontal row of one slot per {@link PotionType}, each showing
@@ -64,10 +65,11 @@ public class InventoryBarStage extends Stage {
         root.setVisible(false);
         addActor(root);
 
+        TextureAtlas uiAtlas = assetManager.get(ORIGIN_UI_GFX, TextureAtlas.class);
         for (PotionType type : PotionType.values()) {
             TouchButton drinkButton = new TouchButton(skin, "flatUp", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                     () -> drink(type));
-            TextureRegionDrawable icon = new TextureRegionDrawable(new TextureRegion(assetManager.get(type.iconPath(), Texture.class)));
+            TextureRegionDrawable icon = new TextureRegionDrawable(uiAtlas.findRegion(type.regionName()));
             icon.setMinWidth(ICON_SIZE);
             icon.setMinHeight(ICON_SIZE);
             drinkButton.setDrawable(icon);
@@ -139,6 +141,7 @@ public class InventoryBarStage extends Stage {
                 || (type == PotionType.HEALING && playerComponent.health >= playerComponent.maxHealth);
             slot.drinkButton.setTouchable(disabled ? Touchable.disabled : Touchable.enabled);
             slot.drinkButton.getColor().a = disabled ? 0.45f : 1f;
+            slot.countLabel.getColor().a = disabled ? 0.45f : 1f;
         }
     }
 

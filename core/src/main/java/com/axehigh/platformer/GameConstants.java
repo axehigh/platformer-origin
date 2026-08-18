@@ -92,6 +92,8 @@ public final class GameConstants {
     public static int HEALING_POTION_HEAL = 1;
     /** Minimum delay between two potion drinks (seconds), preventing consumption spam. */
     public static float POTION_USE_COOLDOWN = 0.4f;
+    /** Debounce window for batching coin-pickup floating messages (seconds). */
+    public static float COIN_MESSAGE_COOLDOWN = 0.3f;
     /** Strength buff: extra melee damage while active. */
     public static int STRENGTH_DAMAGE_BONUS = 3;
     /** Strength buff duration (seconds). */

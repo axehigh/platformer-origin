@@ -20,7 +20,7 @@ sansserif
   index: -1
 button
   rotate: false
-  xy: 1105, 1423
+  xy: 1619, 1802
   size: 81, 46
   orig: 81, 46
   offset: 0, 0
@@ -48,51 +48,86 @@ button_on
   index: -1
 flatAttack
   rotate: false
-  xy: 1619, 1768
+  xy: 1947, 1945
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 flatDown
   rotate: false
-  xy: 1947, 1945
+  xy: 515, 367
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 flatFlame
   rotate: false
-  xy: 515, 367
+  xy: 817, 700
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 flatFly
   rotate: false
-  xy: 817, 700
+  xy: 940, 1123
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 flatLeft
   rotate: false
-  xy: 940, 1123
+  xy: 1, 121
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 flatRight
   rotate: false
-  xy: 1, 121
+  xy: 1235, 1389
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 flatUp
   rotate: false
-  xy: 1105, 1341
+  xy: 1619, 1720
   size: 80, 80
   orig: 80, 80
+  offset: 0, 0
+  index: -1
+bag
+  rotate: false
+  xy: 1105, 1341
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+potion_healing
+  rotate: false
+  xy: 134, 234
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+potion_invulnerability
+  rotate: false
+  xy: 1105, 1307
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+potion_speed
+  rotate: false
+  xy: 1702, 1816
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+potion_strength
+  rotate: false
+  xy: 1947, 1911
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: -1
 rope_big

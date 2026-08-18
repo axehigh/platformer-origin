@@ -25,6 +25,10 @@ public class PlayerComponent implements Component {
     public PotionType selectedPotion = PotionType.HEALING;
     /** Short window after drinking a potion during which another drink is ignored. */
     public Timer potionCooldown = new Timer();
+    /** Debounce window for batching coin-pickup floating messages. */
+    public Timer coinMessageCooldown = new Timer();
+    /** Accumulated coin count waiting to be shown in the next floating message. */
+    public int pendingCoinMessage = 0;
     /** Current melee/sword damage per hit; base 5, raised to 8 by the "Sharp Edge" shop upgrade. */
     public int swordDamage = GameConstants.SwordDamage;
     /** One-time flag: true once the "Sharp Edge" upgrade (swordDamage -> 8) has been purchased. */

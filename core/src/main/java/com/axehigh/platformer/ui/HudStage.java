@@ -22,6 +22,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import static com.axehigh.platformer.assets.GameAssetRegistry.HERO_ASSET;
+import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_UI_GFX;
 
 /**
  * Top HUD overlay: avatar + heart icons (top-left), coin counter + selected-potion indicator
@@ -73,9 +74,10 @@ public class HudStage extends Stage {
         coinLabel = new ShadowLabel("", counterStyle);
         centerGroup.add(coinLabel);
 
+        TextureAtlas uiAtlas = assetManager.get(ORIGIN_UI_GFX, TextureAtlas.class);
         for (PotionType type : PotionType.values()) {
-            Texture texture = assetManager.get(type.iconPath(), Texture.class);
-            potionDrawables.put(type, new TextureRegionDrawable(new TextureRegion(texture)));
+            TextureAtlas.AtlasRegion region = uiAtlas.findRegion(type.regionName());
+            potionDrawables.put(type, new TextureRegionDrawable(region));
         }
         potionImage = new Image(potionDrawables.get(PotionType.HEALING));
         potionLabel = new ShadowLabel("", counterStyle);

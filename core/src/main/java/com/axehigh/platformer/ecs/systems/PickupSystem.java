@@ -62,6 +62,19 @@ public class PickupSystem extends IteratingSystem {
     }
 
     @Override
+    public void update(float deltaTime) {
+        super.update(deltaTime);
+        if (players.size() == 0) {
+            return;
+        }
+        PlayerComponent player = PLAYER.get(players.first());
+        player.coinMessageCooldown.update(deltaTime);
+        if (player.coinMessageCooldown.isDone() && player.pendingCoinMessage > 0) {
+            spawnCoinMessage(player);
+        }
+    }
+
+    @Override
     protected void processEntity(Entity pickupEntity, float deltaTime) {
         if (players.size() == 0) {
             return;
@@ -89,13 +102,27 @@ public class PickupSystem extends IteratingSystem {
                     sfxSystem.playCoin();
                 }
                 spawnCoinSpark(pickupCollision);
-                if (entityFactory != null) {
-                    entityFactory.createFloatingMessage(getEngine(),
-                            "+" + coinPickup.amount, GameConstants.MESSAGE_COLOR_COINS, playerEntity);
-                }
+                queueCoinMessage(player, coinPickup.amount);
             }
         }
         getEngine().removeEntity(pickupEntity);
+    }
+
+    private void queueCoinMessage(PlayerComponent player, int amount) {
+        player.pendingCoinMessage += amount;
+        if (player.coinMessageCooldown.isDone()) {
+            spawnCoinMessage(player);
+        }
+        player.coinMessageCooldown.start(GameConstants.COIN_MESSAGE_COOLDOWN);
+    }
+
+    private void spawnCoinMessage(PlayerComponent player) {
+        if (entityFactory == null || player.pendingCoinMessage <= 0) {
+            return;
+        }
+        entityFactory.createFloatingMessage(getEngine(),
+                "+" + player.pendingCoinMessage, GameConstants.MESSAGE_COLOR_COINS, players.first());
+        player.pendingCoinMessage = 0;
     }
 
     /** Adds a potion to the player's held count, converting the pickup to coins when at the cap. */

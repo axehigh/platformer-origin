@@ -27,18 +27,8 @@ public enum PotionType {
         return description;
     }
 
-    /** Asset path of this potion type's 16x16 icon PNG. */
-    public String iconPath() {
-        switch (this) {
-            case HEALING:
-                return "gfx/old/potion_healing.png";
-            case STRENGTH:
-                return "gfx/old/potion_strength.png";
-            case SPEED:
-                return "gfx/old/potion_speed.png";
-            case INVULNERABILITY:
-                return "gfx/old/potion_invulnerability.png";
-        }
-        return "gfx/old/potion_healing.png";
+    /** Region key shared by {@code origin-game.atlas} (in-game) and {@code uiskin.atlas} (UI). */
+    public String regionName() {
+        return "potion_" + name().toLowerCase();
     }
 }

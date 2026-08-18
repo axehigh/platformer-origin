@@ -722,22 +722,23 @@ public class EntityFactory {
 
     private Entity createPotionPickup(float x, float y, String potionType) {
         PotionType type = parsePotionType(potionType);
-        Texture texture = getTexture(potionIconPath(type));
+        TextureAtlas gameAtlas = assetManager.get(ORIGIN_GAME_GFX, TextureAtlas.class);
+        TextureAtlas.AtlasRegion region = gameAtlas.findRegion(type.regionName());
 
         Entity entity = new Entity();
 
         TransformComponent transform = new TransformComponent();
         transform.position.set(x, y);
-        transform.scale.set(unitScale, unitScale);
+        transform.scale.set(unitScale * 0.5f, unitScale * 0.5f);
         transform.z = DECOR_Z;
         entity.add(transform);
 
         TextureComponent textureComponent = new TextureComponent();
-        textureComponent.region = new TextureRegion(texture);
+        textureComponent.region = region;
         entity.add(textureComponent);
 
         CollisionComponent collisionComponent = new CollisionComponent();
-        collisionComponent.bounds.setSize(texture.getWidth() * unitScale, texture.getHeight() * unitScale);
+        collisionComponent.bounds.setSize(region.getRegionWidth() * unitScale * 0.5f, region.getRegionHeight() * unitScale * 0.5f);
         entity.add(collisionComponent);
 
         PotionPickupComponent potionPickup = new PotionPickupComponent();
@@ -754,10 +755,6 @@ public class EntityFactory {
         } catch (IllegalArgumentException e) {
             return PotionType.HEALING;
         }
-    }
-
-    private String potionIconPath(PotionType type) {
-        return type.iconPath();
     }
 
     private Texture getTexture(String path) {

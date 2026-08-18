@@ -88,10 +88,11 @@ com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 }
 com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
 	default: {
-		vScroll: rope_big
-		vScrollKnob: star
+		corner: potion_strength
 		hScroll: rope_big_horisontal
 		hScrollKnob: star
+		vScroll: rope_big
+		vScrollKnob: star
 	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle: {

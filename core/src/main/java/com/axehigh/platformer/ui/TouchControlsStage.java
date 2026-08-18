@@ -23,6 +23,7 @@ public class TouchControlsStage extends Stage {
     private final Table root;
     private final TouchButton interactButton;
     private final TouchButton dropButton;
+    private final TouchButton inventoryButton;
 
     public TouchControlsStage(Viewport viewport, Skin skin, PlayerInputSystem inputSystem,
                               Drawable inventoryIcon, Runnable onInventoryToggle) {
@@ -78,7 +79,7 @@ public class TouchControlsStage extends Stage {
                 () -> inputSystem.requestTouchDrop());
         dropButton.setVisible(false);
 
-        TouchButton inventoryButton = new TouchButton(skin, "flatUp", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+        inventoryButton = new TouchButton(skin, "flatUp", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 new TouchButton.Handler() {
                     @Override
                     public void onPress() {
@@ -125,5 +126,10 @@ public class TouchControlsStage extends Stage {
     /** Sets the opacity of the whole cluster (per-mode: transparent overlay vs solid band). */
     public void setAlpha(float alpha) {
         root.getColor().a = alpha;
+    }
+
+    /** Fades the inventory (bag) button when the player has no potions. */
+    public void setInventoryAlpha(float alpha) {
+        inventoryButton.getColor().a = alpha;
     }
 }

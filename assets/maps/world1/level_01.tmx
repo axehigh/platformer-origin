@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="16" height="12" tilewidth="128" tileheight="128" infinite="0" nextlayerid="7" nextobjectid="33">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="16" height="12" tilewidth="128" tileheight="128" infinite="0" nextlayerid="7" nextobjectid="33">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
  <tileset firstgid="60" source="../tileset/enemy.tsx"/>
  <tileset firstgid="67" source="../tileset/items.tsx"/>
@@ -76,7 +76,7 @@
   <object id="26" gid="79" x="1536" y="640" width="128" height="128"/>
   <object id="27" gid="79" x="1152" y="1280" width="128" height="128"/>
   <object id="28" gid="79" x="1280" y="1280" width="128" height="128"/>
-  <object id="31" x="640" y="1280" width="128" height="128">
+  <object id="31" name="Potion" x="640" y="1280" width="128" height="128">
    <properties>
     <property name="type" value="potion"/>
    </properties>

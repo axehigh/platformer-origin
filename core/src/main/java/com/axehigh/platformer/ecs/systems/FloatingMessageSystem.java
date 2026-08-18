@@ -36,10 +36,6 @@ public class FloatingMessageSystem extends IteratingSystem {
 
     @Override
     public void update(float deltaTime) {
-        int count = getEntities().size();
-        if (count > 0) {
-            Gdx.app.log("FloatingMsg", "updating " + count + " messages");
-        }
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         super.update(deltaTime);
@@ -53,7 +49,6 @@ public class FloatingMessageSystem extends IteratingSystem {
 
         msg.age += deltaTime;
         if (msg.age >= msg.lifetime) {
-            Gdx.app.log("FloatingMsg", "removing expired: '" + msg.text + "'");
             getEngine().removeEntity(entity);
             return;
         }
@@ -61,7 +56,6 @@ public class FloatingMessageSystem extends IteratingSystem {
         transform.position.y += msg.driftSpeed * deltaTime;
 
         float alpha = 1f - (msg.age / msg.lifetime);
-        Gdx.app.log("FloatingMsg", "draw '" + msg.text + "' at (" + transform.position.x + ", " + transform.position.y + ") alpha=" + alpha);
         font.setColor(msg.color.r, msg.color.g, msg.color.b, alpha);
         font.getData().setScale(msg.fontScale);
         layout.setText(font, msg.text);

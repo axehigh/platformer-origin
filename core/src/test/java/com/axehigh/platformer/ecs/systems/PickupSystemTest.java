@@ -5,6 +5,7 @@ import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.DaggerPickupComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.map.EntityFactory;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import org.junit.Before;
@@ -30,7 +31,7 @@ public class PickupSystemTest extends SystemTestBase {
     @Before
     public void setUp() {
         sfxSystem = mock(SfxSystem.class);
-        system = new PickupSystem(sfxSystem, 0);
+        system = new PickupSystem(sfxSystem, mock(EntityFactory.class), 0);
         engine = newEngine();
         engine.addSystem(system);
     }

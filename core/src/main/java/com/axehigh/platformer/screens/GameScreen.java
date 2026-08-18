@@ -2,7 +2,8 @@ package com.axehigh.platformer.screens;
 
 import com.axehigh.platformer.assets.GameAssetRegistry;
 import com.axehigh.platformer.audio.AudioManager;
-import com.axehigh.platformer.common.BaseScreen;import com.axehigh.platformer.ecs.components.AnimationComponent;
+import com.axehigh.platformer.common.BaseScreen;
+import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.PotionType;
 import com.axehigh.platformer.ecs.systems.*;
@@ -43,13 +44,16 @@ import static com.axehigh.platformer.GameConstants.*;
 import static com.axehigh.platformer.assets.GameAssetRegistry.BACKGROUND_FAR;
 import static com.axehigh.platformer.assets.GameAssetRegistry.BACKGROUND_NEAR;
 import static com.axehigh.platformer.assets.GameAssetRegistry.HERO_ASSET;
+import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_UI_GFX;
 import static com.axehigh.platformer.ecs.components.AnimationComponent.State.*;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
 import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.NORMAL;
 
-/** Owns the Ashley Engine, the fixed-resolution viewport/camera, and drives the game loop. */
+/**
+ * Owns the Ashley Engine, the fixed-resolution viewport/camera, and drives the game loop.
+ */
 public class GameScreen extends BaseScreen {
     private static final int PRIORITY_INPUT = 0;
     private static final int PRIORITY_MUSIC = 1;
@@ -109,7 +113,9 @@ public class GameScreen extends BaseScreen {
     private boolean inventoryOpen = false;
     private boolean debugTouchLogging = false;
 
-    /** Defaults to the catalog's first level. */
+    /**
+     * Defaults to the catalog's first level.
+     */
     public GameScreen(Game game) {
         this(game, LevelCatalog.levels().first().tmxPath);
     }
@@ -120,7 +126,9 @@ public class GameScreen extends BaseScreen {
         this.saveData = null;
     }
 
-    /** Resumes from a save: loads {@code saveData.levelPath} and applies its stats onto the new player. */
+    /**
+     * Resumes from a save: loads {@code saveData.levelPath} and applies its stats onto the new player.
+     */
     public GameScreen(Game game, SaveData saveData) {
         super(game);
         this.levelPath = saveData.levelPath;
@@ -157,7 +165,7 @@ public class GameScreen extends BaseScreen {
         tiledMapRenderSystem = new TiledMapRenderSystem(mapLoader.getMap(), camera, PRIORITY_MAP_RENDER);
         engine.addSystem(playerInputSystem);
 
-        EnemySystem enemySystem =         new EnemySystem(entityFactory, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), roomState, PRIORITY_ENEMY);
+        EnemySystem enemySystem = new EnemySystem(entityFactory, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), roomState, PRIORITY_ENEMY);
         enemySystem.setUnitScale(scale);
         engine.addSystem(enemySystem);
 
@@ -235,25 +243,25 @@ public class GameScreen extends BaseScreen {
         chestSystem.setPlayerEntity(player);
 
         PlayerDamageResolver.setDamageListener(damagedEntity ->
-                entityFactory.createFloatingMessage(engine,
-                        "-1", MESSAGE_COLOR_DAMAGE, damagedEntity));
+            entityFactory.createFloatingMessage(engine,
+                "-1", MESSAGE_COLOR_DAMAGE, damagedEntity));
         PotionEffects.setPotionListener((potionEntity, type) -> {
             switch (type) {
                 case HEALING:
                     entityFactory.createFloatingMessage(engine,
-                            "+1 HP", MESSAGE_COLOR_HEAL, potionEntity);
+                        "+1 HP", MESSAGE_COLOR_HEAL, potionEntity);
                     break;
                 case STRENGTH:
                     entityFactory.createFloatingMessage(engine,
-                            "Strength!", MESSAGE_COLOR_STRENGTH, potionEntity);
+                        "Strength!", MESSAGE_COLOR_STRENGTH, potionEntity);
                     break;
                 case SPEED:
                     entityFactory.createFloatingMessage(engine,
-                            "Speed!", MESSAGE_COLOR_SPEED, potionEntity);
+                        "Speed!", MESSAGE_COLOR_SPEED, potionEntity);
                     break;
                 case INVULNERABILITY:
                     entityFactory.createFloatingMessage(engine,
-                            "Invulnerable!", MESSAGE_COLOR_INVULN, potionEntity);
+                        "Invulnerable!", MESSAGE_COLOR_INVULN, potionEntity);
                     break;
             }
         });
@@ -277,9 +285,13 @@ public class GameScreen extends BaseScreen {
                 togglePause();
             }
         });
+        TextureRegionDrawable bagDrawable = new TextureRegionDrawable(assetManager.get(ORIGIN_UI_GFX, TextureAtlas.class).findRegion("bag"));
+        bagDrawable.setMinWidth(UI_Button_Contextual_Size / 2f);
+        bagDrawable.setMinHeight(UI_Button_Contextual_Size / 2f);
         touchControlsStage = new TouchControlsStage(touchViewport, skin, playerInputSystem,
-                new TextureRegionDrawable(new TextureRegion(assetManager.get("gfx/old/inventory_backpack.png", Texture.class))),
+                bagDrawable,
                 this::toggleInventory);
+
         inventoryBarStage = new InventoryBarStage(new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT), skin, assetManager, playerComponent, playerEntity);
         inventoryBarStage.setOnTapOutside(this::toggleInventory);
 
@@ -638,6 +650,11 @@ public class GameScreen extends BaseScreen {
 
         touchControlsStage.setInteractVisible(playerComponent.nearExit);
         touchControlsStage.setDropVisible(playerComponent.onDropTile);
+        int totalPotions = 0;
+        for (PotionType t : PotionType.values()) {
+            totalPotions += playerComponent.countPotion(t);
+        }
+        touchControlsStage.setInventoryAlpha(totalPotions > 0 ? 1f : 0.4f);
 
         hudStage.getViewport().apply();
         hudStage.act(delta);
