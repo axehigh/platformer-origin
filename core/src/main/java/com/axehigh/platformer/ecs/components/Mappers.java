@@ -25,6 +25,7 @@ public final class Mappers {
     public static final ComponentMapper<MovingPlatformComponent> MOVING_PLATFORM = ComponentMapper.getFor(MovingPlatformComponent.class);
     public static final ComponentMapper<ParticleComponent> PARTICLE = ComponentMapper.getFor(ParticleComponent.class);
     public static final ComponentMapper<LightComponent> LIGHT = ComponentMapper.getFor(LightComponent.class);
+    public static final ComponentMapper<FloatingMessageComponent> FLOATING_MESSAGE = ComponentMapper.getFor(FloatingMessageComponent.class);
 
     private Mappers() {
     }

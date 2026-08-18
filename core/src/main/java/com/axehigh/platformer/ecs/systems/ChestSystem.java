@@ -1,7 +1,9 @@
 package com.axehigh.platformer.ecs.systems;
 
+import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.ChestComponent;
+import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.map.EntityFactory;
 import com.badlogic.ashley.core.Entity;
@@ -25,6 +27,7 @@ public class ChestSystem extends IteratingSystem {
 
     private final EntityFactory entityFactory;
     private float unitScale = 1f;
+    private Entity playerEntity;
 
     public ChestSystem(EntityFactory entityFactory) {
         this(entityFactory, 0);
@@ -37,6 +40,10 @@ public class ChestSystem extends IteratingSystem {
 
     public void setUnitScale(float unitScale) {
         this.unitScale = unitScale;
+    }
+
+    public void setPlayerEntity(Entity playerEntity) {
+        this.playerEntity = playerEntity;
     }
 
     @Override
@@ -62,6 +69,11 @@ public class ChestSystem extends IteratingSystem {
 
         int coinCount = MathUtils.random(MIN_COIN_DROPS, MAX_COIN_DROPS);
         entityFactory.popCoins(getEngine(), centerX, centerY, coinCount, unitScale);
+
+        if (playerEntity != null) {
+            entityFactory.createFloatingMessage(getEngine(),
+                    "+" + coinCount, GameConstants.MESSAGE_COLOR_COINS, playerEntity);
+        }
 
         chest.coinsDropped = true;
     }

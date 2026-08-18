@@ -7,6 +7,7 @@ import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.PotionType;
 import com.axehigh.platformer.ecs.systems.*;
 import com.axehigh.platformer.map.*;
+import com.axehigh.platformer.util.PotionEffects;
 import com.axehigh.platformer.particles.ParticleHelper;
 import com.axehigh.platformer.ui.HudStage;
 import com.axehigh.platformer.ui.DeviceClass;
@@ -71,6 +72,7 @@ public class GameScreen extends BaseScreen {
     private static final int PRIORITY_MAP_RENDER = 20;
     private static final int PRIORITY_BACKGROUND_RENDER = 19;
     private static final int PRIORITY_ENTITY_RENDER = 30;
+    private static final int PRIORITY_FLOATING_MESSAGE = 31;
     private static final int PRIORITY_PARTICLE_RENDER = 35;
     private static final int PRIORITY_LIGHT_RENDER = 36;
     private static final int PRIORITY_DEBUG_RENDER = 40;
@@ -190,7 +192,7 @@ public class GameScreen extends BaseScreen {
         meleeSystem.setUnitScale(scale);
         engine.addSystem(meleeSystem);
 
-        engine.addSystem(new PickupSystem(sfxSystem, PRIORITY_PICKUP));
+        engine.addSystem(new PickupSystem(sfxSystem, entityFactory, PRIORITY_PICKUP));
 
         ChestSystem chestSystem = new ChestSystem(entityFactory, PRIORITY_CHEST);
         chestSystem.setUnitScale(scale);
@@ -210,6 +212,7 @@ public class GameScreen extends BaseScreen {
             PRIORITY_BACKGROUND_RENDER));
         engine.addSystem(tiledMapRenderSystem);
         engine.addSystem(new RenderSystem(batch, camera, PRIORITY_ENTITY_RENDER));
+        engine.addSystem(new FloatingMessageSystem(batch, camera, skin, PRIORITY_FLOATING_MESSAGE));
         engine.addSystem(new ParticleSystem(batch, camera, PRIORITY_PARTICLE_RENDER));
         lightRenderSystem = new LightRenderSystem(batch, camera, PRIORITY_LIGHT_RENDER);
         engine.addSystem(lightRenderSystem);
@@ -229,6 +232,31 @@ public class GameScreen extends BaseScreen {
         playerEntity = player;
         attachPlayerAnimations(player);
         engine.addEntity(player);
+        chestSystem.setPlayerEntity(player);
+
+        PlayerDamageResolver.setDamageListener(damagedEntity ->
+                entityFactory.createFloatingMessage(engine,
+                        "-1", MESSAGE_COLOR_DAMAGE, damagedEntity));
+        PotionEffects.setPotionListener((potionEntity, type) -> {
+            switch (type) {
+                case HEALING:
+                    entityFactory.createFloatingMessage(engine,
+                            "+1 HP", MESSAGE_COLOR_HEAL, potionEntity);
+                    break;
+                case STRENGTH:
+                    entityFactory.createFloatingMessage(engine,
+                            "Strength!", MESSAGE_COLOR_STRENGTH, potionEntity);
+                    break;
+                case SPEED:
+                    entityFactory.createFloatingMessage(engine,
+                            "Speed!", MESSAGE_COLOR_SPEED, potionEntity);
+                    break;
+                case INVULNERABILITY:
+                    entityFactory.createFloatingMessage(engine,
+                            "Invulnerable!", MESSAGE_COLOR_INVULN, potionEntity);
+                    break;
+            }
+        });
 
         if (saveData != null) {
             applySaveData(player, saveData);

@@ -5,6 +5,7 @@ import com.axehigh.platformer.ecs.components.*;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -39,6 +40,8 @@ public class EntityFactory {
     private static final float DEFAULT_PLATFORM_SPEED = 1f;
     /** Default glow halo radius (world units) for a torch light. */
     private static final float DEFAULT_TORCH_LIGHT_RADIUS = 96f;
+    /** Z-layer for floating messages — above entities but below particles/lights. */
+    private static final float FLOATING_MESSAGE_Z = 15f;
     /** Flame offset within the 16x16 torch sprite (sprite-relative, scaled by {@code unitScale}). */
     private static final float TORCH_FLAME_X = 8f;
     private static final float TORCH_FLAME_Y = 13f;
@@ -526,6 +529,29 @@ public class EntityFactory {
             float velocityY = MathUtils.random(MIN_POP_VELOCITY_Y, MAX_POP_VELOCITY_Y) * unitScale;
             engine.addEntity(createPoppedCoinPickup(x, y, velocityX, velocityY));
         }
+    }
+
+    /**
+     * Creates a floating message entity at the player's current position. The message drifts upward
+     * and fades out over its lifetime. Used for damage numbers, coin pickups, and potion effects.
+     */
+    public Entity createFloatingMessage(Engine engine, String text, float[] rgb, Entity playerEntity) {
+        TransformComponent playerTransform = com.axehigh.platformer.ecs.components.Mappers.TRANSFORM.get(playerEntity);
+
+        Entity entity = new Entity();
+
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(playerTransform.position.x, playerTransform.position.y + 24f * unitScale);
+        transform.z = FLOATING_MESSAGE_Z;
+        entity.add(transform);
+
+        FloatingMessageComponent msg = new FloatingMessageComponent();
+        msg.text = text;
+        msg.color.set(rgb[0], rgb[1], rgb[2], 1f);
+        entity.add(msg);
+
+        engine.addEntity(entity);
+        return entity;
     }
 
     /**

@@ -7,6 +7,7 @@ import com.axehigh.platformer.ecs.components.DaggerPickupComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.PotionPickupComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.map.EntityFactory;
 import com.axehigh.platformer.particles.GlobalParticles;
 import com.axehigh.platformer.particles.ParticleHelper;
 import com.badlogic.ashley.core.Engine;
@@ -36,17 +37,19 @@ public class PickupSystem extends IteratingSystem {
     private static final float COIN_SPARK_MAX_LIFETIME = 1.5f;
 
     private final SfxSystem sfxSystem;
+    private final EntityFactory entityFactory;
     private ImmutableArray<Entity> players;
     private PooledEngine engine;
 
     public PickupSystem() {
-        this(null, 0);
+        this(null, null, 0);
     }
 
-    public PickupSystem(SfxSystem sfxSystem, int priority) {
+    public PickupSystem(SfxSystem sfxSystem, EntityFactory entityFactory, int priority) {
         super(Family.one(DaggerPickupComponent.class, CoinPickupComponent.class, PotionPickupComponent.class)
             .get(), priority);
         this.sfxSystem = sfxSystem;
+        this.entityFactory = entityFactory;
     }
 
     @Override
@@ -86,6 +89,10 @@ public class PickupSystem extends IteratingSystem {
                     sfxSystem.playCoin();
                 }
                 spawnCoinSpark(pickupCollision);
+                if (entityFactory != null) {
+                    entityFactory.createFloatingMessage(getEngine(),
+                            "+" + coinPickup.amount, GameConstants.MESSAGE_COLOR_COINS, playerEntity);
+                }
             }
         }
         getEngine().removeEntity(pickupEntity);
@@ -97,6 +104,10 @@ public class PickupSystem extends IteratingSystem {
             player.coins += GameConstants.POTION_OVERFLOW_COINS;
             if (sfxSystem != null) {
                 sfxSystem.playCoin();
+            }
+            if (entityFactory != null) {
+                entityFactory.createFloatingMessage(getEngine(),
+                        "+" + GameConstants.POTION_OVERFLOW_COINS, GameConstants.MESSAGE_COLOR_COINS, players.first());
             }
             return;
         }

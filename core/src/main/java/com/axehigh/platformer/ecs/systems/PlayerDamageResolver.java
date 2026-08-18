@@ -20,7 +20,15 @@ import static com.axehigh.platformer.ecs.components.Mappers.BUFF;
  * grace period. The Invulnerability potion buff also fully blocks damage while active. The animation
  * counterpart of {@code EnemyDamageResolver}.
  */
-final class PlayerDamageResolver {
+public final class PlayerDamageResolver {
+
+    /** Callback interface for damage events — allows GameScreen to spawn floating messages. */
+    public interface DamageListener {
+        void onDamageApplied(Entity playerEntity);
+    }
+
+    private static DamageListener damageListener;
+
     /** Shortest hit-stun window; extended to cover the HURT animation if that is longer. */
     private static final float HIT_STUN_DURATION = 0.3f;
     /** Small horizontal push applied to the player on a surviving hit (world units/second). */
@@ -29,6 +37,10 @@ final class PlayerDamageResolver {
     static final float HIT_INVULNERABILITY_DURATION = 2.0f;
 
     private PlayerDamageResolver() {
+    }
+
+    public static void setDamageListener(DamageListener listener) {
+        damageListener = listener;
     }
 
     /**
@@ -50,6 +62,9 @@ final class PlayerDamageResolver {
         player.health = Math.max(0, player.health - 1);
         movement.velocity.x = KNOCKBACK_SPEED_X * knockbackDirection * unitScale;
         applyStunAndGrace(playerEntity, player);
+        if (damageListener != null) {
+            damageListener.onDamageApplied(playerEntity);
+        }
         return true;
     }
 
@@ -67,6 +82,9 @@ final class PlayerDamageResolver {
 
         player.health = Math.max(0, player.health - 1);
         applyStunAndGrace(playerEntity, player);
+        if (damageListener != null) {
+            damageListener.onDamageApplied(playerEntity);
+        }
         return true;
     }
 

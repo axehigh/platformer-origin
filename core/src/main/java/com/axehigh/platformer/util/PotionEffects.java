@@ -5,12 +5,25 @@ import com.axehigh.platformer.ecs.components.BuffComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.PotionType;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.Gdx;
 
 import static com.axehigh.platformer.ecs.components.Mappers.BUFF;
 
 /** Shared potion-effect application, used by the keyboard quick-drink and the inventory bar. */
 public final class PotionEffects {
+
+    /** Callback interface for potion events — allows GameScreen to spawn floating messages. */
+    public interface PotionListener {
+        void onPotionApplied(Entity playerEntity, PotionType type);
+    }
+
+    private static PotionListener potionListener;
+
     private PotionEffects() {
+    }
+
+    public static void setPotionListener(PotionListener listener) {
+        potionListener = listener;
     }
 
     /**
@@ -20,8 +33,12 @@ public final class PotionEffects {
      * can't benefit from the buff potions.
      */
     public static void apply(Entity playerEntity, PlayerComponent player, PotionType type) {
+        Gdx.app.log("PotionEffects", "apply " + type + ", listener=" + (potionListener != null));
         if (type == PotionType.HEALING) {
             player.health = Math.min(player.maxHealth, player.health + GameConstants.HEALING_POTION_HEAL);
+            if (potionListener != null) {
+                potionListener.onPotionApplied(playerEntity, type);
+            }
             return;
         }
         BuffComponent buff = BUFF.get(playerEntity);
@@ -40,6 +57,9 @@ public final class PotionEffects {
                 break;
             default:
                 break;
+        }
+        if (potionListener != null) {
+            potionListener.onPotionApplied(playerEntity, type);
         }
     }
 }

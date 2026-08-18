@@ -58,6 +58,19 @@ public final class GameConstants {
      *  layers so they don't waste imagery behind the collision ground layer. */
     public static final float PARALLAX_TILE_HEIGHT = 16f;
 
+    /** Maximum overshoot (world units) of an oversized tile beyond its grid cell. A 256px tile
+     *  in a 16px grid protrudes 240px past its cell edge — the renderer must keep the tile's
+     *  cell in the culling range until the visual is fully off-screen. */
+    public static final float TILE_MAX_OVERSHOOT = 240f;
+
+    //Floating message colors
+    public static final float[] MESSAGE_COLOR_DAMAGE = {1f, 0.2f, 0.2f};
+    public static final float[] MESSAGE_COLOR_COINS = {1f, 0.85f, 0f};
+    public static final float[] MESSAGE_COLOR_HEAL = {0.2f, 1f, 0.3f};
+    public static final float[] MESSAGE_COLOR_STRENGTH = {1f, 0.6f, 0f};
+    public static final float[] MESSAGE_COLOR_SPEED = {0f, 0.9f, 1f};
+    public static final float[] MESSAGE_COLOR_INVULN = {1f, 1f, 1f};
+
     /** Duration (seconds) of the fade-in/fade-out transition between screens. */
     public static final float SCREEN_FADE_TIMER = 0.5f;
 
