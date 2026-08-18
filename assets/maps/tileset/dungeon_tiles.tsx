@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.2" name="dungeon_tiles" tilewidth="256" tileheight="257" tilecount="54" columns="0">
+<tileset version="1.10" tiledversion="1.12.2" name="dungeon_tiles" tilewidth="256" tileheight="257" tilecount="56" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0" type="Ground">
   <properties>
@@ -193,5 +193,11 @@
  </tile>
  <tile id="58">
   <image source="../gfx/tiles/bg/pillar01.png" width="113" height="256"/>
+ </tile>
+ <tile id="59">
+  <image source="../gfx/tiles/new.png" width="128" height="128"/>
+ </tile>
+ <tile id="60">
+  <image source="../gfx/tiles/new2.png" width="128" height="128"/>
  </tile>
 </tileset>
