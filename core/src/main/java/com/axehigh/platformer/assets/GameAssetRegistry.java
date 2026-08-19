@@ -29,11 +29,8 @@ public final class GameAssetRegistry {
         assetManager.load(ORIGIN_GAME_GFX, TextureAtlas.class);
         assetManager.load(ORIGIN_UI_GFX, TextureAtlas.class);
 
-        //TODO This will be outdated after the atlas'es have been loaded.
-        assetManager.load("gfx/old/player.png", Texture.class);
         assetManager.load("gfx/old/coin.png", Texture.class);
         assetManager.load("gfx/old/torch.png", Texture.class);
-        assetManager.load("gfx/old/exit_gate.png", Texture.class);
         assetManager.load("gfx/old/heart.png", Texture.class);
         assetManager.load("gfx/old/bullet.png", Texture.class);
         assetManager.load("gfx/old/dagger.png", Texture.class);
