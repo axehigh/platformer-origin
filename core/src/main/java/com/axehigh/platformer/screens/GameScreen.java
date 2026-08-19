@@ -59,6 +59,7 @@ public class GameScreen extends BaseScreen {
     private static final int PRIORITY_MUSIC = 1;
     private static final int PRIORITY_ENEMY = 4;
     private static final int PRIORITY_BUFF = 4;
+    private static final int PRIORITY_TRAP = 4;
     private static final int PRIORITY_MOVEMENT = 5;
     private static final int PRIORITY_BOUNDS = 6;
     private static final int PRIORITY_MOVING_PLATFORM = 6;
@@ -68,6 +69,7 @@ public class GameScreen extends BaseScreen {
     private static final int PRIORITY_PICKUP = 8;
     private static final int PRIORITY_CHEST = 8;
     private static final int PRIORITY_ENEMY_CONTACT = 8;
+    private static final int PRIORITY_TRAP_CONTACT = 8;
     private static final int PRIORITY_LEVEL_EXIT = 8;
     private static final int PRIORITY_PLAYER_DEATH = 8;
     private static final int PRIORITY_CAMERA = 9;
@@ -175,6 +177,9 @@ public class GameScreen extends BaseScreen {
 
         engine.addSystem(new BuffSystem(PRIORITY_BUFF));
 
+        TrapSystem trapSystem = new TrapSystem(mapLoader.getCollisionRects(), roomState, assetManager, PRIORITY_TRAP);
+        engine.addSystem(trapSystem);
+
         MovementSystem movementSystem = new MovementSystem(mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), PRIORITY_MOVEMENT);
         movementSystem.setUnitScale(scale);
         engine.addSystem(movementSystem);
@@ -210,6 +215,8 @@ public class GameScreen extends BaseScreen {
         enemyContactSystem.setUnitScale(scale);
         engine.addSystem(enemyContactSystem);
         engine.addSystem(new HazardSystem(mapLoader.getHazardRects(), PRIORITY_ENEMY_CONTACT));
+        TrapContactSystem trapContactSystem = new TrapContactSystem(roomState, PRIORITY_TRAP_CONTACT);
+        engine.addSystem(trapContactSystem);
         cameraSystem = new CameraSystem(camera, roomState, PRIORITY_CAMERA);
         engine.addSystem(cameraSystem);
         engine.addSystem(new AnimationSystem(PRIORITY_ANIMATION));

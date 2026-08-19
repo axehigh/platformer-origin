@@ -60,6 +60,15 @@ public class SpriteConstants {
     public static float EnemyKnightCollisionWidth = 80f * EnemyKnightScale;
     public static float EnemyKnightCollisionHeight = 140 * EnemyKnightScale;
     public static float EnemyKnightOffsetY = 10f * EnemyKnightScale;
+
+    //Trap scales and collision boxes
+    public static float AcidDropScale = 0.15f;
+    public static float AcidDropCollisionWidth = 8f;
+    public static float AcidDropCollisionHeight = 12f;
+
+    public static float FlameTrapScale = 0.15f;
+    public static float FlameTrapCollisionWidth = 24f;
+    public static float FlameTrapCollisionHeight = 48f;
     ;
 
     private static float maxOf(float[] values) {

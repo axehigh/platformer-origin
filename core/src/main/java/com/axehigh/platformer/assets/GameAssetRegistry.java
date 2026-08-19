@@ -38,6 +38,8 @@ public final class GameAssetRegistry {
         assetManager.load("gfx/old/bullet.png", Texture.class);
         assetManager.load("gfx/old/dagger.png", Texture.class);
         assetManager.load("gfx/old/platform.png", Texture.class);
+        assetManager.load("gfx/acid_drop.png", Texture.class);
+        assetManager.load("gfx/lava_drop.png", Texture.class);
         assetManager.load(BACKGROUND_FAR, Texture.class);
         assetManager.load(BACKGROUND_NEAR, Texture.class);
     }

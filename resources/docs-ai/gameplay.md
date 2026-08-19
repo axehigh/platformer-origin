@@ -364,3 +364,26 @@ A dedicated `DebugRenderSystem` (see `resources/docs-ai/ashley-ecs.md`) draws ev
 
 ### AA. Parallax Scrolling Background (`ParallaxBackgroundSystem`)
 A global two-layer parallax skybox draws **behind** every level's Tiled map — the map's own `background` tile layer (dungeon brick walls, pillars, chains) still renders on top of it unchanged. The far layer (`maps/gfx/background/Background_01.png`, factor `GameConstants.PARALLAX_BG_FAR` = `0.25`) scrolls slower than the near layer (`Background_02.png`, factor `PARALLAX_BG_NEAR` = `0.5`), so the world visibly recedes into the distance. Both textures are scaled to cover the effective (zoomed) view and repeated horizontally; positions derive from the shared camera with `position × (1 − factor)`, so the layers track the hybrid flip/scroll camera (§2.N) automatically — static in flip rooms, drifting slower than the world in scroll rooms. It's a code-side renderer (`ParallaxBackgroundSystem`, priority `19`, just before `TiledMapRenderSystem`), **not** a Tiled image layer: libGDX's map renderer ignores Tiled's `parallax`/`repeat` properties, and the tiles are authored once globally rather than per-map. Pure cosmetic — no gameplay effect, no per-level config, survives level swaps untouched (see `resources/docs-ai/ashley-ecs.md`).
+
+### AB. Traps — Acid/Lava Drops & Flame Hazards (`TrapComponent`, `TrapSystem`, `TrapContactSystem`)
+1. **Overview:** Two trap types placed via Tiled `type="trap"` object-layer markers: **acid/lava drops** (timer-based falling/rising projectiles) and **flame traps** (pulsing animated hazard zones). Both deal 1 damage on contact, are room-aware (freeze in inactive rooms), and use `PlayerDamageResolver.applyHitWithoutKnockback()` for damage resolution (shared invulnerability grace period prevents frame-by-frame shredding).
+2. **Acid/Lava Drop Spawner:** An invisible entity at the Tiled marker position that periodically spawns projectile entities. Properties: `direction` (`up`/`down`/`left`/`right`, default `down`), `interval` (seconds between spawns, default 2.0), `speed` (projectile velocity in u/s, default 200), `damage` (default 1). `direction=down` creates acid dripping from ceiling; `direction=up` creates lava geysers from the floor; `direction=left`/`right` creates side-mounted sprayers.
+3. **Acid/Lava Drop Projectile:** Spawned by the spawner, moves at constant speed in the configured direction (no gravity). Disappears on wall/ceiling/floor contact or after lifetime expiry (5s). Uses `acid_drop.png` (8×12 green teardrop) sprite. Collision box matches the sprite size.
+4. **Flame Trap:** An animated entity that pulses between small and large size on a cycle. Properties: `direction` (`up`/`down`/`left`/`right`, default `down`), `duration` (flame-on seconds, default 2.0), `cooldown` (off seconds, default 1.5), `pulseSpeed` (oscillation speed, default 2.0). Uses `fire1..10` atlas sprites (256×256) with rotation for side-mounted flames. Collision box scales proportionally with the visual animation — anchored at the source point (ceiling for DOWN, floor for UP, walls for LEFT/RIGHT) and extending outward.
+5. **Tiled Object Properties:**
+
+| Property | Type | Default | Used by |
+|----------|------|---------|---------|
+| `trapType` | string | `"acidDrop"` | Both (`"acidDrop"` / `"flame"`) |
+| `direction` | string | `"down"` | Both (`"up"/"down"/"left"/"right"`) |
+| `interval` | float | `2.0` | Acid drop spawner |
+| `speed` | float | `200` | Acid drop projectile |
+| `damage` | int | `1` | Both |
+| `duration` | float | `2.0` | Flame (on-time) |
+| `cooldown` | float | `1.5` | Flame (off-time) |
+| `pulseSpeed` | float | `2.0` | Flame |
+
+6. **Room awareness:** Both trap types check `roomIndex` against `RoomState.activeRoomIndex` each frame. Spawners pause their timers; drops continue moving (they're transient); flames freeze their pulse cycle. Matches existing enemy freeze behavior.
+7. **Level transitions:** Trap entities are removed by `LevelManager.loadLevel(...)`'s "remove every non-player entity" cleanup — no special disposal needed.
+8. **Damage resolution:** Uses `PlayerDamageResolver.applyHitWithoutKnockback()` (same as `HazardSystem`) — 1 HP damage, no knockback, 2-second invulnerability grace period. The `TrapContactSystem` runs at priority 8 alongside `EnemyContactSystem` and `HazardSystem`.
+9. **Debugging:** Trap entity AABBs appear in the SHIFT+D collision debug overlay (lime boxes) like any other `CollisionComponent` entity. Flame traps show dynamically scaling boxes as they pulse.

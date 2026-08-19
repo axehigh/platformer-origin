@@ -233,6 +233,16 @@ public class EntityFactory {
                     engine.addEntity(createPlatform(spawnX, spawnY, objectWidth, objectHeight, tile, object, platformRoomIndex));
                     spawned = true;
                     break;
+                case "trap":
+                    String trapType = getProperty(object, tile, "trapType", "acidDrop");
+                    int trapRoomIndex = roomState.findRoomIndexContaining(centerX, centerY);
+                    if ("flame".equalsIgnoreCase(trapType)) {
+                        engine.addEntity(createFlameTrap(spawnX, spawnY, object, tile, trapRoomIndex));
+                    } else {
+                        engine.addEntity(createAcidDropSpawner(spawnX, spawnY, object, tile, trapRoomIndex));
+                    }
+                    spawned = true;
+                    break;
                 default:
                     // "playerStart" and any unrecognized type: nothing to spawn here.
                     break;
@@ -319,6 +329,113 @@ public class EntityFactory {
         entity.add(platform);
 
         return entity;
+    }
+
+    /**
+     * Builds an acid/lava drop spawner entity. The spawner is invisible (no texture) and sits at
+     * the Tiled marker position, periodically spawning projectile entities that fall/rise in the
+     * configured direction. Properties: {@code direction} (up/down/left/right, default down),
+     * {@code interval} (seconds between spawns, default 2.0), {@code speed} (projectile velocity,
+     * default 200), {@code damage} (default 1).
+     */
+    private Entity createAcidDropSpawner(float x, float y, MapObject object, TiledMapTile tile, int roomIndex) {
+        Entity entity = new Entity();
+
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(x, y);
+        transform.scale.set(unitScale, unitScale);
+        transform.z = DECOR_Z;
+        entity.add(transform);
+
+        CollisionComponent collision = new CollisionComponent();
+        collision.bounds.setSize(4f * unitScale, 4f * unitScale);
+        entity.add(collision);
+
+        TrapComponent trap = new TrapComponent();
+        trap.type = TrapComponent.TrapType.ACID_DROP_SPAWNER;
+        trap.roomIndex = roomIndex;
+        trap.spawnInterval = getFloatProperty(object, tile, "interval", 2.0f);
+        trap.projectileSpeed = getFloatProperty(object, tile, "speed", 200f) * unitScale;
+        trap.damage = getFloatProperty(object, tile, "damage", 1f);
+        trap.spawnTimer.start(trap.spawnInterval);
+
+        String dir = getProperty(object, tile, "direction", "down");
+        trap.spawnDirection = parseDirection(dir);
+        entity.add(trap);
+
+        return entity;
+    }
+
+    /**
+     * Builds a flame trap entity with animated pulsing. The flame grows/shrinks cyclically and
+     * damages the player during the flame-on phase. Properties: {@code direction} (up/down/left/right,
+     * default down), {@code duration} (flame-on seconds, default 2.0), {@code cooldown} (off seconds,
+     * default 1.5), {@code pulseSpeed} (oscillation speed, default 2.0).
+     */
+    private Entity createFlameTrap(float x, float y, MapObject object, TiledMapTile tile, int roomIndex) {
+        TextureAtlas.AtlasRegion region = originAtlas.findRegion("fire1");
+        if (region == null) {
+            region = originAtlas.findRegion("goblin_idle1");
+        }
+
+        float flameScale = unitScale * SpriteConstants.FlameTrapScale;
+
+        Entity entity = new Entity();
+
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(x, y);
+        transform.scale.set(flameScale, flameScale);
+        transform.z = DECOR_Z;
+        String dir = getProperty(object, tile, "direction", "down");
+        TrapComponent.TrapDirection flameDir = parseDirection(dir);
+        if (flameDir == TrapComponent.TrapDirection.LEFT) {
+            transform.rotation = 270f;
+        } else if (flameDir == TrapComponent.TrapDirection.RIGHT) {
+            transform.rotation = 90f;
+        }
+        entity.add(transform);
+
+        TextureComponent texture = new TextureComponent();
+        texture.region = region;
+        entity.add(texture);
+
+        CollisionComponent collision = new CollisionComponent();
+        float colW = SpriteConstants.FlameTrapCollisionWidth * flameScale;
+        float colH = SpriteConstants.FlameTrapCollisionHeight * flameScale;
+        collision.bounds.setSize(colW, colH);
+        entity.add(collision);
+
+        TrapComponent trap = new TrapComponent();
+        trap.type = TrapComponent.TrapType.FLAME;
+        trap.roomIndex = roomIndex;
+        trap.flameDirection = flameDir;
+        trap.flameDuration = getFloatProperty(object, tile, "duration", 2.0f);
+        trap.cooldownDuration = getFloatProperty(object, tile, "cooldown", 1.5f);
+        trap.pulseSpeed = getFloatProperty(object, tile, "pulseSpeed", 2.0f);
+        trap.flameHeight = SpriteConstants.FlameTrapCollisionHeight;
+        trap.flameWidth = SpriteConstants.FlameTrapCollisionWidth;
+        trap.currentScale = trap.minScale;
+        trap.isFlaming = false;
+        trap.cooldownTimer.start(MathUtils.random(0f, trap.cooldownDuration));
+        entity.add(trap);
+
+        AnimationComponent animComp = new AnimationComponent();
+        float frameDuration = 0.1f;
+        animComp.animations.put(IDLE, createEnemyAnimation(frameDuration, "fire", LOOP));
+        animComp.currentState = IDLE;
+        entity.add(animComp);
+
+        return entity;
+    }
+
+    private TrapComponent.TrapDirection parseDirection(String dir) {
+        if (dir == null) return TrapComponent.TrapDirection.DOWN;
+        switch (dir.toLowerCase()) {
+            case "up": return TrapComponent.TrapDirection.UP;
+            case "left": return TrapComponent.TrapDirection.LEFT;
+            case "right": return TrapComponent.TrapDirection.RIGHT;
+            default: return TrapComponent.TrapDirection.DOWN;
+        }
     }
 
     private Entity createDecoration(float x, float y, String texturePath) {
