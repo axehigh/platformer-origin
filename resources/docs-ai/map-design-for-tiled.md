@@ -146,8 +146,115 @@ Two ways to place a marker:
 | `dagger` | Dagger pickup | — | Collectible item. |
 | `exitGate` | Exit gate / level transition (trigger only, no sprite) | `nextLevel` (string, required to make it functional) | The gate spawns a **logic-only** entity: a collision box (sized from the object rectangle) + optional level transition. **No gate art is drawn** — paint the door's decoration yourself in the `background`/`decoration`/`collision` layers. With `nextLevel` it's a real transition; without it, purely decorative (e.g. a final-level dead end). |
 | `enemy` | Enemy | `enemyType` (string, default `"walker"`), `aiMode` (string), `speed` (float), `patrolRange` (float) | Put these on the `enemies` layer (or `objects`). Catalog: `walker` (goblin), `flyer` (mosquito), `shooter` (spider), `knight` (15 HP). See `resources/docs-ai/enemies.md`. |
+| `trap` | Trap | `trapType` (string, default `"acidDrop"`), `direction` (string), `interval` (float), `speed` (float), `damage` (int), `duration` (float), `cooldown` (float), `pulseSpeed` (float) | Place on `objects`/`enemies`. `trapType` = `"acidDrop"` (dripping projectiles) or `"flame"` (pulsing fire). See the traps subsection below. |
 | `platform` | Moving platform | `amplitudeX`, `amplitudeY`, `speed`, `phase`, `axis` (see §5) | The object **rectangle size defines both the sprite and collision box**. |
 | (any other) | — | — | Ignored. `background`-type markers etc. won't spawn anything. |
+
+### Traps — tile hazards & spawned trap entities
+
+Traps come in two flavours: **tile-based hazards** (painted in the `collision` layer) and **spawned trap entities** (placed as `type="trap"` objects on the `objects`/`enemies` layer). Both deal 1 HP damage with no knockback and share the 2-second invulnerability grace period.
+
+#### Tile-based hazards (spikes, lava, stalactites)
+
+These are tiles in the `collision` layer with `hazard = true` on the tileset tile. They're not entities — `HazardSystem` iterates `hazardRects` built by `MapLoader` at level start. See §3.2 for placement rules.
+
+| Tileset | Tile | Image | Damage shape | Notes |
+|---|---|---|---|---|
+| `hazards.tsx` tile 0 | spikes | `hazards/spikes.png` (128×128) | Full tile | Standard floor/ceiling spikes |
+| `hazards.tsx` tile 1 | lava | `hazards/lava.png` (128×128) | Full tile | Lava pool |
+| `dungeon_tiles.tsx` tile 32 | dungeon spikes | `dungeon/spikes.png` (128×128) | Narrow bottom (0,96,128,32) | Wall-mounted spikes — hitbox only the bottom strip |
+| `dungeon_tiles.tsx` tile 50 | stalactite | `caves/bg-stalactite.png` (128×128) | Narrow top (0,0,128,32) | Hanging stalactite — hitbox only the top tip |
+
+All four deal **1 HP**, no knockback, same grace period as every other damage source.
+
+#### Spawned trap entities (`type="trap"`)
+
+Place a rectangle object on the `objects` or `enemies` layer with `type="trap"`. Add a `trapType` property to pick the variant. The rectangle position is the spawn point; size is ignored (collision is defined by the trap code).
+
+**Trap A: Acid/Lava Drop Spawner (`trapType = "acidDrop"`)**
+
+An invisible entity that periodically shoots projectiles in the configured direction. The spawner is invisible — only the projectiles are visible.
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `trapType` | string | `"acidDrop"` | Required. Identifies this as an acid-drop spawner. |
+| `direction` | string | `"down"` | Projectile direction: `"up"` (lava geyser from floor), `"down"` (acid drip from ceiling), `"left"`/`"right"` (side-mounted sprayer). |
+| `interval` | float | `2.0` | Seconds between projectile spawns. |
+| `speed` | float | `200` | Projectile velocity in world-units/s (before unitScale). |
+| `damage` | int | `1` | HP dealt on contact. |
+
+Projectile behaviour: moves at constant speed (no gravity), uses `acid_drop.png` (8×12 px teardrop sprite), disappears on wall/floor/ceiling contact or after 5 s lifetime.
+
+**Trap B: Flame Trap (`trapType = "flame"`)**
+
+An animated flame that pulses between small and large on a timed cycle. The collision box scales with the visual — anchored at the source wall/floor/ceiling and extending outward in the configured direction.
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `trapType` | string | `"flame"` | Required. Identifies this as a flame trap. |
+| `direction` | string | `"down"` | Flame direction: `"down"` (hangs from ceiling), `"up"` (rises from floor), `"left"`/`"right"` (wall-mounted, rotated 270°/90°). |
+| `duration` | float | `2.0` | Seconds the flame is ON (growing from min to max scale). |
+| `cooldown` | float | `1.5` | Seconds the flame is OFF between pulses. |
+| `pulseSpeed` | float | `2.0` | Oscillation speed for the grow/shrink animation. |
+| `damage` | int | `1` | HP dealt on contact. |
+
+Visual: `fire1..10` atlas sprites (256×256), animated across the ON phase. Initial cooldown is randomised (`0` to `cooldown`) so multiple flames in a room don't pulse in sync.
+
+**Planned but not yet coded:** The atlas contains `blade1..7` and `lightning1..9` sprite regions reserved for future blade-trap and lightning-trap types. No `TrapType` enum, no `EntityFactory` code, and no system logic exist for them yet.
+
+#### Trap room awareness
+
+Both spawners and flames check `roomIndex` against `RoomState.activeRoomIndex` each frame. In inactive rooms: spawners pause their timers, drops continue moving (they're transient), flames freeze their pulse cycle. Matches enemy freeze behaviour.
+
+#### Trap debugging
+
+Trap AABBs appear in the SHIFT+D collision debug overlay (lime-coloured boxes) like any `CollisionComponent` entity. Flame traps show dynamically scaling boxes as they pulse.
+
+### §4.5 Effect property (`effect` property)
+
+Tiles on **any tile layer** (background, decoration, collision, etc.) can carry an `effect` property to spawn a runtime effect entity at that tile's position. The tile's own sprite is rendered by the Tiled map renderer — the effect entity carries **no texture**, only the effect component (e.g. `LightComponent`). This means what you paint in Tiled is what renders in-game (true WYSIWYG). The tile layer determines draw order (background = behind player, decoration = in front).
+
+**How it works:**
+1. Stamp a tile with `effect="light"` (or future `"particle"`, `"sound"`) on any tile layer.
+2. At level load, `MapLoader.scanEffectLayers()` iterates every tile layer in the map, reads the `effect` property from each cell, and records world positions.
+3. `EntityFactory.spawnEffects()` creates minimal effect entities at those positions.
+
+**Supported effect types:**
+
+| `effect` value | Component added | Behaviour |
+|---|---|---|
+| `"light"` | `LightComponent` | Flickering glow halo. Light center is read from the tile's **collision-editor shape** (draw a Point in Tiled's Tile Collision Editor on the tile to set the exact flame/glow position — true WYSIWYG). If no shape is drawn, the light defaults to the tile center. Per-tile properties: `lightRadius` (default 96), `lightColor` (RGB hex like `"FF8040"`), `lightFlickerSpeed` (default 6 rad/s). |
+| `"particle"` | *(planned)* | Future: particle emitter at the tile position. |
+| `"sound"` | *(planned)* | Future: positional sound emitter at the tile position. |
+
+**Per-tile properties** (set on the tileset tile, e.g. `items.tsx`):
+
+| Property | Type | Default | Effect |
+|---|---|---|---|
+| `effect` | string | — | Effect type: `"light"`, `"particle"`, `"sound"`. |
+| `lightRadius` | float | `96` | (light only) Halo radius in world units. |
+| `lightColor` | string | warm orange | (light only) RGB hex (`"FF8040"`) or RGBA hex (`"FF8040FF"`). |
+| `lightFlickerSpeed` | float | `6` | (light only) Flicker oscillation speed in rad/s. |
+
+**Pre-wired tiles in `items.tsx`:**
+
+| Tile | `effect` | Image | Notes |
+|---|---|---|---|
+| id 20 | `"light"` | `tiles/bg/torch.png` (128×156) | Wall torch. Default radius 96. Draw a Point in the Tile Collision Editor to position the light center (e.g. at the flame tip). |
+
+**Adding a new effect tile:**
+1. Add a tile to `items.tsx` (or any tileset) with the desired image.
+2. Set `effect="light"` on the tile properties.
+3. Optionally override `lightRadius` / `lightColor` / `lightFlickerSpeed`.
+4. Open the tile in Tiled's **Tile Collision Editor** and draw a Point where the light center should be (e.g. at the flame tip for a torch). The point's coordinates are in tile-local pixel space — the light spawns at that exact world position.
+5. Stamp the tile on any tile layer in Tiled — done.
+
+**Adding a new effect type** (e.g. `"particle"`):
+1. Add a branch in `EntityFactory.spawnEffects()` for the new `effectType`.
+2. Create a `create*Effect()` method that returns an entity with the appropriate component(s).
+3. Update this documentation section.
+
+**Backward compatibility:** The existing `type="torch"` rectangle markers on the `objects` layer still work via the `spawnObjects()` switch. The new tile-property approach is an alternative — torches can be placed either way. Maps can mix both approaches.
 
 ### World 1 — level content inventory
 
@@ -203,6 +310,13 @@ All properties are read as `float`/`string`/`boolean` and tolerate being set as 
 | `speed` | float | per-type default (`20`) | (enemy only) Horizontal patrol speed override, world px/s. Applied before the `unitScale` (tile-size) scaling. |
 | `patrolRange` | float | per-type default (`64`) | (enemy only) Patrol-range override, world px. Only used in `PATROL` mode (`SIDE_TO_SIDE` ignores it). Applied before the `unitScale` scaling. |
 | `nextLevel` | string | — | (exitGate only) The next `.tmx` path **relative to the `assets/` folder**, e.g. `maps/world1/level_03.tmx`. Cycles to that map on interaction. |
+| `trapType` | string | `"acidDrop"` | (trap only) Trap variant: `"acidDrop"` (spawner + projectiles) or `"flame"` (pulsing fire). |
+| `direction` | string | `"down"` | (trap only) Direction the trap fires/extends: `"up"`, `"down"`, `"left"`, `"right"`. |
+| `interval` | float | `2.0` | (acid drop spawner only) Seconds between projectile spawns. |
+| `speed` | float | `200` | (acid drop only) Projectile velocity in world-units/s (before unitScale). |
+| `duration` | float | `2.0` | (flame only) Seconds the flame stays ON. |
+| `cooldown` | float | `1.5` | (flame only) Seconds the flame stays OFF between pulses. |
+| `pulseSpeed` | float | `2.0` | (flame only) Oscillation speed for grow/shrink animation. |
 
 ### Moving-platform properties (the `platform` rectangle)
 
@@ -242,6 +356,10 @@ angle += speed * dt        (each frame)
 | `secret` | boolean | `false` | Set `true` on a **solid** tileset tile to make it a **breakable secret wall**: solid until the player melee-strikes it, then it disappears and opens the way (see §3.4). Ignored on `hazard` and `solid = false` tiles. |
 | `secretRoom` | string | — | On a **secret wall tile**: names the `Rooms` rectangle (matched by **name**) that this wall protects, turning the plain secret wall into a **hidden secret room** entry — breaking the wall reveals the whole room (§3.5). On a **map object marker** (`objects`/`enemies` layers): defers that marker — it is partitioned out of the normal spawn layers and only spawned when its named room is revealed (§3.5). |
 | `type` | string | — | On tileset tiles: lets you paint tile objects that auto-spawn as markers (`coin`, `chest`, `enemy`…). |
+| `effect` | string | — | On **tile layer** tiles: spawns a runtime effect entity at the tile position (see §4.5). Values: `"light"` (flickering glow halo), `"particle"` (planned), `"sound"` (planned). |
+| `lightRadius` | float | `96` | (effect="light" only) Halo radius in world units. |
+| `lightColor` | string | warm orange | (effect="light" only) RGB hex (`"FF8040"`) or RGBA hex (`"FF8040FF"`). |
+| `lightFlickerSpeed` | float | `6` | (effect="light" only) Flicker oscillation speed in rad/s. |
 
 ### Room properties (the `Rooms` layer)
 
@@ -282,12 +400,13 @@ For each axis (X and Y) independently (the "viewport size" is always the **effec
 1.  **Map setup.** In Tiled: New map, orthogonal, tile size **128×128** (or matching your chain), infinite off, CSV tile format. Add tilesets from `assets/maps/tileset/`: `dungeon_tiles.tsx` for terrain (solid walls, one-way platforms, and spike hazards are all tiles with baked-in `oneWay`/`hazard` properties), `items.tsx` for pickups, `enemy.tsx` for enemies, `secret_wall.tsx` for breakable secret walls.
 2.  **`background` layer.** Paint the decorative backdrop (walls, pillars, windows). Anything goes — it never blocks.
 3.  **`collision` layer.** Paint the solid geometry: floor, walls, platforms. Leave gaps where you want jumps. Use `drop_platform.tsx` tiles for ledges you want to drop through, `hazards.tsx` tiles for spike/lava damage zones (their behavior is baked into the tileset tile properties — see §3.2, §3.3), and `secret_wall.tsx` tiles for breakable secret walls (§3.4). For any room-to-room doorway, use your `solid = false` passage tile (see §3.1). Keep the map's outer border solid. For a hidden secret room: seal the room with solid tiles, and paint its breakable entry wall from a tileset tile carrying `secret=true` + `secretRoom="<rect name>"` (§3.5).
-4.  **`decoration` layer** (optional). Foreground decor that draws on top.
+4.  **`decoration` layer** (optional). Foreground decor that draws on top. Stamp tiles with `effect="light"` (e.g. the torch from `items.tsx`) to add flickering glow halos — the tile renders visually, the effect entity adds the light (§4.5).
 5.  **`objects` layer.**
     *   Draw one `playerStart` rectangle where the player should spawn.
     *   Scatter `coin` / `chest` / `dagger` / `torch` markers (either as rectangles with the right `type`, or stamp the pre-typed tiles from `items.tsx`).
     *   Add moving platforms as **rectangle objects** with `type="platform"` and the §5 properties.
     *   Add the `exitGate` at the far end with `nextLevel = maps/<path>/<next>.tmx` (or leave it decorative for a final level). The object rectangle sizes the trigger zone; the gate itself draws no sprite, so paint the door's decoration into the map layers (see §4).
+    *   Add `trap` markers for hazards (acid drops, flames). Place them on the `objects` or `enemies` layer with `type="trap"` and the relevant `trapType`/`direction`/timing properties (see the traps subsection in §4).
 6.  **`enemies` layer.** Place `enemy` markers (stamp from `enemy.tsx` or draw rectangles + `enemyType`). Refer to `enemies.md` for behavior tuning (flyers need patrol range clear of walls, shooters only fire in their own room).
 7.  **`Rooms` layer.** Draw one rectangle per room (see §6). Add `camera="flip"`/`"scroll"` only when you want to override the size-based default. **Name a secret room's rectangle** (e.g. `secret_room`) and match that name in the entry wall's `secretRoom` property and the interior markers' `secretRoom` property (§3.5).
 8.  **`secret_hide` layer** (only for hidden secret rooms). Above every other tile layer, paint rock tiles over the whole secret-room footprint so it looks like solid wall from outside (§3.5). No collision — this layer is purely visual.
@@ -300,7 +419,7 @@ For each axis (X and Y) independently (the "viewport size" is always the **effec
 
 *   **Layer name typo** — layers are matched by exact name (`collision`, `objects`, `enemies`, `Rooms`, `background`, `decoration`, `secret_hide`). A typo = silently ignored layer.
 *   **Doorway is an invisible wall** — the passage tile doesn't have `solid = false`. Fix it on the tileset tile (this affects all maps using that tileset).
-*   **Wrong `type` spelling** — `playerStart`, `coin`, `chest`, `torch`, `dagger`, `exitGate`, `enemy`, `platform` are exact. Anything else spawns nothing.
+*   **Wrong `type` spelling** — `playerStart`, `coin`, `chest`, `torch`, `dagger`, `exitGate`, `enemy`, `trap`, `platform` are exact. Anything else spawns nothing.
 *   **Platform never moves** — it's outside every `Rooms` rectangle and/or has no `amplitudeX/Y` and no `axis`. Give it an amplitude and place it inside a room.
 *   **Platform sprite is huge/stretched** — the platform's collision box and sprite are its rectangle size; keep the rectangle near the tile/asset's aspect ratio.
 *   **Exit gate does nothing** — `nextLevel` is missing (or the path is wrong). Paths are relative to `assets/`.
@@ -308,6 +427,10 @@ For each axis (X and Y) independently (the "viewport size" is always the **effec
 *   **Camera snaps wrong room / player not in view** — `playerStart` isn't inside the intended `Rooms` rectangle, or the rooms don't tile the map.
 *   **Unexpectedly scrolling when you wanted flip** — the room is larger than the screen (30×17 tiles); add `camera="flip"` to force static framing.
 *   **Spikes/lava never hurt a standing player** — the player's collision box is smaller than a tile and its feet sit on the floor, so hazards must be placed where the player's body travels *through* them (see §3.2).
+*   **Acid drops pass through walls** — drops disappear only on collision-layer contact; if the spawner is placed with a clear path through a passage, the drop sails through. Place spawners so their line of fire hits a solid wall/floor/ceiling. Drops also live for 5 s — long enough to cross a room.
+*   **Flame trap too fast/too slow** — `pulseSpeed` controls the grow/shrink animation speed, not the on/off cycle. The on/off rhythm is `duration` (on) + `cooldown` (off). Multiple flames in a room start at random phases; to stagger them, use different `cooldown` values.
+*   **Effect tile does nothing** — `effect="light"` only works on **tile layers** (background, decoration, collision, etc.), not the `objects` layer. If you stamp the tile on `objects`, it spawns nothing via the effect system (though `type="torch"` on objects still works via the old path). `MapLoader.scanEffectLayers()` scans all tile layers.
+*   **Light halo offset wrong** — the light center is read from the tile's collision-editor shape (draw a Point in Tiled's Tile Collision Editor). If no shape is drawn, it defaults to the tile center. Use a Point to precisely position the flame/glow.
 *   **Drop platform behaves like a wall** — the tile doesn't carry `oneWay = true` on the tileset tile; or the platform's collision was authored as a plain solid tile. Also remember one-way platforms are drop-through **only for the player** — enemies and popped items stand on them like solid tiles, and flying enemies fly through them.
 *   **Secret wall doesn't break** — the tile isn't flagged `secret = true` on the tileset tile (a plain solid tile won't break); also remember one swing breaks at most one tile, and the strike hitbox must actually reach the wall (it's a solid block until broken).
 *   **Secret room spawns loot from the start / never reveals** — the interior markers don't carry the `secretRoom` object property (so they spawn normally instead of being deferred), or the entry wall's tile doesn't carry `secretRoom` naming the `Rooms` rect (so breaking it never triggers a reveal). Remember the wall's `secretRoom` is a **tile** property read from the tile itself — `cell.setTile(null)` wipes it, which is why the name can't live on the cell.
@@ -319,5 +442,6 @@ For each axis (X and Y) independently (the "viewport size" is always the **effec
 
 *   `.opencode/skills/tmx-map-generator` — generates a standalone prototype `.tmx` (a linear chain of rooms with enemies/items and walk-through doorways, plus a hidden secret room — either appended to the right, or, with `--inside-secret`, carved as a 6×8-tile chamber inside the last room) so you can test a layout without hand-tracing collision CSVs. Rooms **default to 24×10 tiles** (mobile-oriented, dead-zone scroll under the `BAND_ZOOM` camera); pass `--room-width 30 --room-height 17` for whole-screen desktop rooms. `--platforms N` additionally decorates every room with a deterministic, always-jumpable staircase of N floating one-way platforms (2 rows up / 2 cols right per step — within the player's single-jump envelope of 2 up / 4 across — a `bg-*` filler tile behind each, and a coin on the top platform) while keeping the flat floor intact — see the skill's SKILL.md. **Templates:** `--template NAME[,ROOM[,COL]]` (repeatable) and `--template-pick N` stamp ASCII-art courses from `scripts/templates/*.tmpl` (e.g. `staircase`, `chasm-bridge`, `hazard-strip`) floor-anchored into rooms — the generator then runs jump-aware design checks (supported ground + reachability within the jump envelope, warnings only). **Grid layouts:** `--grid-cols C --grid-rows R` tiles `C×R` rooms over the map (width × height = `C×W × R×H`), links horizontal neighbours with doorways and vertical neighbours with one-way **platform shafts** (§3.6), and places `playerStart` in the bottom-left room; grid maps use `--no-secret` to omit the secret room (required for multi-row grids). Run `generate_tmx.py` (from `assets/maps/world1`) with `--rooms N --seed S --out level_05.tmx` or `--grid-cols 2 --grid-rows 2 --no-secret --seed S --out level_01.tmx`; see the skill's SKILL.md for CLI + conventions. It reads the collision tileset from `world1/dungeon_tiles.tsx`, the item/enemy tilesets from `world1/`, and clones `world1/secret_wall.tsx` inline for the secret room's entry wall; output is standalone (no `LevelCatalog`/exit-gate wiring by design — the exit gate is added by hand).
 *   `resources/docs-ai/enemies.md` — enemy catalog, stats, and how to add new types.
+*   `resources/docs-ai/gameplay.md` §AB — trap design spec (acid drops, flames, damage resolution).
 *   `resources/docs-ai/ashley-ecs.md` — the `MapLoader`/`EntityFactory`/`Room`/`RoomState`/`CameraSystem` code shape and priorities.
 *   `resources/docs-ai/gameplay.md` — movement/combat mechanics and how they read map data.

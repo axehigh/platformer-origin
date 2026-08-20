@@ -8,15 +8,10 @@ import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.PotionType;
 import com.axehigh.platformer.ecs.systems.*;
 import com.axehigh.platformer.map.*;
-import com.axehigh.platformer.util.PotionEffects;
 import com.axehigh.platformer.particles.ParticleHelper;
-import com.axehigh.platformer.ui.HudStage;
-import com.axehigh.platformer.ui.DeviceClass;
-import com.axehigh.platformer.ui.InventoryBarStage;
-import com.axehigh.platformer.ui.LayoutMode;
-import com.axehigh.platformer.ui.LayoutPrefs;
-import com.axehigh.platformer.ui.TouchControlsStage;
+import com.axehigh.platformer.ui.*;
 import com.axehigh.platformer.util.FeatureFlags;
+import com.axehigh.platformer.util.PotionEffects;
 import com.axehigh.platformer.util.SaveManager;
 import com.axehigh.platformer.viewport.OffsetFitViewport;
 import com.badlogic.ashley.core.Entity;
@@ -28,7 +23,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
@@ -41,10 +35,7 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import static com.axehigh.platformer.GameConstants.*;
-import static com.axehigh.platformer.assets.GameAssetRegistry.BACKGROUND_FAR;
-import static com.axehigh.platformer.assets.GameAssetRegistry.BACKGROUND_NEAR;
-import static com.axehigh.platformer.assets.GameAssetRegistry.HERO_ASSET;
-import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_UI_GFX;
+import static com.axehigh.platformer.assets.GameAssetRegistry.*;
 import static com.axehigh.platformer.ecs.components.AnimationComponent.State.*;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
 import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
@@ -279,6 +270,7 @@ public class GameScreen extends BaseScreen {
 
         entityFactory.spawnObjects(engine, mapLoader.getObjectLayer(), roomState);
         entityFactory.spawnObjects(engine, mapLoader.getEnemiesLayer(), roomState);
+        entityFactory.spawnEffects(engine, mapLoader.getEffectSpawns(), roomState);
         CameraSystem.snapToRoom(camera, roomState, playerStart.x, playerStart.y,
             layoutMode == LayoutMode.BAND_ZOOM);
 

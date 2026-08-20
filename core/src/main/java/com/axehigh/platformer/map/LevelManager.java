@@ -6,18 +6,7 @@ import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
-import com.axehigh.platformer.ecs.systems.CameraSystem;
-import com.axehigh.platformer.ecs.systems.ChestSystem;
-import com.axehigh.platformer.ecs.systems.CollisionSystem;
-import com.axehigh.platformer.ecs.systems.EnemyBulletCollisionSystem;
-import com.axehigh.platformer.ecs.systems.EnemyContactSystem;
-import com.axehigh.platformer.ecs.systems.EnemyShootSystem;
-import com.axehigh.platformer.ecs.systems.EnemySystem;
-import com.axehigh.platformer.ecs.systems.LevelExitSystem;
-import com.axehigh.platformer.ecs.systems.MeleeAttackSystem;
-import com.axehigh.platformer.ecs.systems.MovementSystem;
-import com.axehigh.platformer.ecs.systems.MovingPlatformSystem;
-import com.axehigh.platformer.ecs.systems.TiledMapRenderSystem;
+import com.axehigh.platformer.ecs.systems.*;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -27,10 +16,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
-import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
-import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
-import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
  * Owns in-place level transitions: tears down the current map's entities/map data and loads a new
@@ -166,6 +152,7 @@ public class LevelManager implements Disposable {
 
         entityFactory.spawnObjects(engine, mapLoader.getObjectLayer(), roomState);
         entityFactory.spawnObjects(engine, mapLoader.getEnemiesLayer(), roomState);
+        entityFactory.spawnEffects(engine, mapLoader.getEffectSpawns(), roomState);
 
         Vector2 playerStart = mapLoader.findPlayerStart();
         TransformComponent transform = TRANSFORM.get(player);

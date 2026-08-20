@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.2" name="items" tilewidth="128" tileheight="156" tilecount="19" columns="0">
+<tileset version="1.10" tiledversion="1.11.2" name="items" tilewidth="128" tileheight="156" tilecount="19" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="1">
   <image source="../gfx/items/Apple.png" width="128" height="128"/>
@@ -58,12 +58,28 @@
   <image source="../gfx/items/Life.png" width="128" height="128"/>
  </tile>
  <tile id="17">
+  <properties>
+   <property name="effect" value="light"/>
+  </properties>
   <image source="../gfx/items/Light.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="61" y="59">
+    <point/>
+   </object>
+  </objectgroup>
  </tile>
  <tile id="18" type="star">
   <image source="../gfx/items/Star.png" width="128" height="128"/>
  </tile>
- <tile id="19" type="torch">
-  <image source="../gfx/tiles/torch.png" width="128" height="156"/>
+ <tile id="20">
+  <properties>
+   <property name="effect" value="light"/>
+  </properties>
+  <image source="../gfx/tiles/bg/torch.png" width="128" height="156"/>
+  <objectgroup draworder="index" id="2">
+   <object id="3" x="60" y="51">
+    <point/>
+   </object>
+  </objectgroup>
  </tile>
 </tileset>

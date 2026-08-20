@@ -4,10 +4,7 @@ import com.axehigh.platformer.GameConstants;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
-import com.badlogic.gdx.maps.objects.CircleMapObject;
-import com.badlogic.gdx.maps.objects.EllipseMapObject;
-import com.badlogic.gdx.maps.objects.PolygonMapObject;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
+import com.badlogic.gdx.maps.objects.*;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -46,12 +43,15 @@ public class MapLoader implements Disposable {
     private static final String PROPERTY_SECRET = "secret";
     /** Tile/object property naming the {@code Rooms}-layer rectangle (and thus the secret room) a secret wall guards or an object is deferred for. */
     private static final String PROPERTY_SECRET_ROOM = "secretRoom";
+    /** Tile property naming a visual effect to attach at this tile's position (e.g. {@code "light"}, {@code "particle"}, {@code "sound"}). */
+    private static final String PROPERTY_EFFECT = "effect";
 
     private final TiledMap map;
     private final Array<Rectangle> collisionRects = new Array<>();
     private final Array<Rectangle> oneWayRects = new Array<>();
     private final Array<Rectangle> hazardRects = new Array<>();
     private final Array<Rectangle> secretRects = new Array<>();
+    private final Array<EffectSpawn> effectSpawns = new Array<>();
     private final String tmxPath;
     private final float tileWidth;
     private final float tileHeight;
@@ -64,12 +64,13 @@ public class MapLoader implements Disposable {
     MapLoader(TiledMap map, String tmxPath) {
         this.map = map;
         this.tmxPath = tmxPath;
-        
+
         // Get tile size from properties or from first tile layer
         tileWidth = map.getProperties().get("tilewidth", 16, Integer.class);
         tileHeight = map.getProperties().get("tileheight", 16, Integer.class);
 
         buildCollisionRects();
+        scanEffectLayers();
     }
 
     private void buildCollisionRects() {
@@ -107,6 +108,50 @@ public class MapLoader implements Disposable {
                 }
             }
         }
+    }
+
+    /**
+     * Scans the {@code decoration} tile layer for tiles carrying an {@code effect} property
+     * (e.g. {@code "light"}, {@code "particle"}, {@code "sound"}) and records their world positions
+     * so {@code EntityFactory.spawnEffects()} can attach runtime effects (lights, particles, sounds)
+     * at those coordinates. The tile's own sprite is rendered by the Tiled map renderer — no entity
+     * texture is needed.
+     */
+    private void scanEffectLayers() {
+        for (MapLayer rawLayer : map.getLayers()) {
+            if (!(rawLayer instanceof TiledMapTileLayer)) {
+                continue;
+            }
+            TiledMapTileLayer layer = (TiledMapTileLayer) rawLayer;
+            float tw = layer.getTileWidth();
+            float th = layer.getTileHeight();
+            for (int y = 0; y < layer.getHeight(); y++) {
+                for (int x = 0; x < layer.getWidth(); x++) {
+                    TiledMapTileLayer.Cell cell = layer.getCell(x, y);
+                    if (cell == null || cell.getTile() == null) {
+                        continue;
+                    }
+                    TiledMapTile tile = cell.getTile();
+                    String effect = tile.getProperties().get(PROPERTY_EFFECT, String.class);
+                    if (effect == null || effect.isEmpty()) {
+                        continue;
+                    }
+                    EffectSpawn spawn = new EffectSpawn();
+                    spawn.x = x * tw;
+                    spawn.y = y * th;
+                    spawn.effectType = effect;
+                    spawn.tile = tile;
+                    effectSpawns.add(spawn);
+                }
+            }
+        }
+    }
+
+    /** A tile on the decoration layer that carries an {@code effect} property, recording its world position and source tile for property reads. */
+    public static class EffectSpawn {
+        public float x, y;
+        public String effectType;
+        public TiledMapTile tile;
     }
 
     /**
@@ -156,7 +201,7 @@ public class MapLoader implements Disposable {
     }
 
     /** World-local bounding box (bottom-left origin) of one tile collision-editor shape, or null for unsupported shapes. */
-    private Rectangle shapeBounds(MapObject shape) {
+    static Rectangle shapeBounds(MapObject shape) {
         if (shape instanceof RectangleMapObject) {
             return new Rectangle(((RectangleMapObject) shape).getRectangle());
         }
@@ -170,6 +215,10 @@ public class MapLoader implements Disposable {
         if (shape instanceof EllipseMapObject) {
             Ellipse ellipse = ((EllipseMapObject) shape).getEllipse();
             return new Rectangle(ellipse.x, ellipse.y, ellipse.width, ellipse.height);
+        }
+        if (shape instanceof PointMapObject) {
+            com.badlogic.gdx.math.Vector2 pt = ((PointMapObject) shape).getPoint();
+            return new Rectangle(pt.x, pt.y, 0, 0);
         }
         return null;
     }
@@ -200,6 +249,11 @@ public class MapLoader implements Disposable {
     /** Solid breakable secret-wall tiles (collision-layer tiles flagged {@code secret=true}), also present in {@link #getCollisionRects()} until struck. */
     public Array<Rectangle> getSecretRects() {
         return secretRects;
+    }
+
+    /** Decoration-layer tiles carrying an {@code effect} property, for spawning runtime effects (lights, particles, sounds) at their positions. */
+    public Array<EffectSpawn> getEffectSpawns() {
+        return effectSpawns;
     }
 
     /** The {@code collision} tile layer itself (the visual wall layer) so secret-wall cells can be blanked when broken. */

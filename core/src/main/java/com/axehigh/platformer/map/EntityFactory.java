@@ -2,6 +2,7 @@ package com.axehigh.platformer.map;
 
 import com.axehigh.platformer.assets.SpriteConstants;
 import com.axehigh.platformer.ecs.components.*;
+import com.axehigh.platformer.map.MapLoader.EffectSpawn;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.assets.AssetManager;
@@ -21,9 +22,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
-import static com.axehigh.platformer.assets.GameAssetRegistry.HERO_ASSET;
-import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
-import static com.axehigh.platformer.assets.GameAssetRegistry.PLATFORM_ASSET;
+import static com.axehigh.platformer.assets.GameAssetRegistry.*;
 import static com.axehigh.platformer.ecs.components.AnimationComponent.State.*;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.NORMAL;
@@ -253,6 +252,120 @@ public class EntityFactory {
         }
         for (MapObject obj : toRemove) {
             objects.remove(obj);
+        }
+    }
+
+    /**
+     * Spawns runtime effect entities (lights, particles, sounds) at decoration-layer tiles that
+     * carry an {@code effect} property. The tile sprite is rendered by the Tiled map renderer —
+     * these entities carry only the effect component (e.g. {@code LightComponent}), no texture.
+     */
+    public void spawnEffects(Engine engine, Array<EffectSpawn> spawns, RoomState roomState) {
+        for (EffectSpawn spawn : spawns) {
+            switch (spawn.effectType) {
+                case "light":
+                    engine.addEntity(createLightEffect(spawn.x, spawn.y, spawn.tile));
+                    break;
+                case "particle":
+                    // TODO: future — engine.addEntity(createParticleEffect(spawn.x, spawn.y, spawn.tile));
+                    break;
+                case "sound":
+                    // TODO: future — engine.addEntity(createSoundEffect(spawn.x, spawn.y, spawn.tile));
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Creates a light-only effect entity at the given world position. No texture — the tile's
+     * sprite is rendered by the Tiled map renderer. The light center is read from the tile's
+     * collision-editor shape (drawn in Tiled on the tile): the shape's center in tile-local
+     * coordinates becomes the light offset. If no shape is drawn, the light defaults to the
+     * tile center. Per-tile properties {@code lightRadius}, {@code lightColor},
+     * {@code lightFlickerSpeed} override defaults.
+     */
+    private Entity createLightEffect(float x, float y, TiledMapTile tile) {
+        Entity entity = new Entity();
+
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(x, y);
+        transform.scale.set(unitScale, unitScale);
+        transform.z = DECOR_Z;
+        entity.add(transform);
+
+        LightComponent light = new LightComponent();
+        light.radius = getFloatPropertyFromTile(tile, "lightRadius", DEFAULT_TORCH_LIGHT_RADIUS);
+        light.phase = MathUtils.random(MathUtils.PI2);
+
+        // Read light offset from the tile's collision-editor shape center (Tiled WYSIWYG).
+        // Shape coords are in tile-local pixel space (1 world unit = 1 pixel), same as the
+        // decoration-layer renderer — no unitScale multiplication needed.
+        MapObjects shapes = tile.getObjects();
+        if (shapes.getCount() > 0) {
+            MapObject shape = shapes.get(0);
+            Rectangle bounds = MapLoader.shapeBounds(shape);
+            if (bounds != null) {
+                light.offset.set(
+                    bounds.x + bounds.width / 2f,
+                    bounds.y + bounds.height / 2f
+                );
+            } else {
+                light.offset.set(tile.getTextureRegion().getRegionWidth() / 2f,
+                    tile.getTextureRegion().getRegionHeight() / 2f);
+            }
+        } else {
+            // No shape drawn — default to tile center
+            light.offset.set(tile.getTextureRegion().getRegionWidth() / 2f,
+                tile.getTextureRegion().getRegionHeight() / 2f);
+        }
+
+        String colorStr = getStringPropertyFromTile(tile, "lightColor", null);
+        if (colorStr != null) {
+            light.color = parseColor(colorStr, light.color);
+        }
+        float flickerSpeed = getFloatPropertyFromTile(tile, "lightFlickerSpeed", Float.NaN);
+        if (!Float.isNaN(flickerSpeed)) {
+            light.flickerSpeed = flickerSpeed;
+        }
+        entity.add(light);
+
+        return entity;
+    }
+
+    /** Parses a color string like {@code "FF8040"} (RGB hex) or {@code "FF8040FF"} (RGBA hex) into a {@link Color}. */
+    private Color parseColor(String hex, Color fallback) {
+        try {
+            String h = hex.startsWith("#") ? hex.substring(1) : hex;
+            if (h.length() == 6) {
+                int rgb = Integer.parseInt(h, 16);
+                return new Color(((rgb >> 16) & 0xFF) / 255f, ((rgb >> 8) & 0xFF) / 255f, (rgb & 0xFF) / 255f, 1f);
+            }
+            if (h.length() == 8) {
+                int rgba = Integer.parseInt(h, 16);
+                return new Color(((rgba >> 24) & 0xFF) / 255f, ((rgba >> 16) & 0xFF) / 255f, ((rgba >> 8) & 0xFF) / 255f, (rgba & 0xFF) / 255f);
+            }
+        } catch (NumberFormatException ignored) {
+        }
+        return fallback;
+    }
+
+    /** Reads a string property directly from a tile (no map object involved). */
+    private String getStringPropertyFromTile(TiledMapTile tile, String key, String defaultValue) {
+        if (tile == null) return defaultValue;
+        String value = tile.getProperties().get(key, String.class);
+        return value != null ? value : defaultValue;
+    }
+
+    /** Reads a float property directly from a tile, tolerating int/float/string encodings. */
+    private float getFloatPropertyFromTile(TiledMapTile tile, String key, float defaultValue) {
+        if (tile == null) return defaultValue;
+        Object value = tile.getProperties().get(key);
+        if (value == null) return defaultValue;
+        if (value instanceof Number) return ((Number) value).floatValue();
+        try {
+            return Float.parseFloat(String.valueOf(value));
+        } catch (NumberFormatException e) {
+            return defaultValue;
         }
     }
 
