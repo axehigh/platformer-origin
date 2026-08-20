@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.2" name="bg" tilewidth="256" tileheight="386" tilecount="13" columns="0">
+<tileset version="1.10" tiledversion="1.11.2" name="bg" tilewidth="256" tileheight="386" tilecount="16" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="5">
   <image source="../gfx/tiles/bg/chains2.png" width="200" height="170"/>
@@ -39,5 +39,14 @@
  </tile>
  <tile id="26">
   <image source="../gfx/tiles/altar.png" width="128" height="109"/>
+ </tile>
+ <tile id="30">
+  <image source="../gfx/tiles/dungeon/rock.png" width="128" height="128"/>
+ </tile>
+ <tile id="31">
+  <image source="../gfx/tiles/bg/Armor.png" width="256" height="256"/>
+ </tile>
+ <tile id="33">
+  <image source="../gfx/tiles/bg/Portrait.png" width="128" height="128"/>
  </tile>
 </tileset>
