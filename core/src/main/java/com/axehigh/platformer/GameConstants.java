@@ -106,6 +106,10 @@ public final class GameConstants {
     public static float SPEED_BUFF_DURATION = 15f;
     /** Invulnerability buff duration (seconds). */
     public static float INVULNERABILITY_DURATION = 10f;
+    /** Remaining-buff duration under which the buff halo and HUD icon start blinking (seconds). */
+    public static final float BUFF_BLINK_THRESHOLD = 3f;
+    /** Toggle interval of the buff-expiry blink, halo alpha phases and HUD icon visibility (seconds). */
+    public static final float BUFF_BLINK_INTERVAL = 0.2f;
 
     //UI
 

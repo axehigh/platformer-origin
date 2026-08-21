@@ -27,8 +27,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 import static com.axehigh.platformer.GameConstants.*;
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_UI_GFX;
-import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
-import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
  * Owns the Ashley Engine, the fixed-resolution viewport/camera, and drives the game loop.
@@ -131,7 +130,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         playerComponent = PLAYER.get(player);
         Viewport hudViewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT);
         Viewport touchViewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT);
-        hudStage = new HudStage(hudViewport, skin, assetManager, playerComponent);
+        hudStage = new HudStage(hudViewport, skin, assetManager, playerComponent, BUFF.get(player));
         hudStage.getPauseButton().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
