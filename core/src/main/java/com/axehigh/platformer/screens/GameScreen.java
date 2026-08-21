@@ -3,80 +3,39 @@ package com.axehigh.platformer.screens;
 import com.axehigh.platformer.assets.GameAssetRegistry;
 import com.axehigh.platformer.audio.AudioManager;
 import com.axehigh.platformer.common.BaseScreen;
-import com.axehigh.platformer.ecs.components.AnimationComponent;
+import com.axehigh.platformer.ecs.GameSystems;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.PotionType;
-import com.axehigh.platformer.ecs.systems.*;
+import com.axehigh.platformer.ecs.systems.CameraSystem;
 import com.axehigh.platformer.map.*;
 import com.axehigh.platformer.particles.ParticleHelper;
 import com.axehigh.platformer.ui.*;
-import com.axehigh.platformer.util.FeatureFlags;
-import com.axehigh.platformer.util.PotionEffects;
-import com.axehigh.platformer.util.SaveManager;
 import com.axehigh.platformer.viewport.OffsetFitViewport;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import static com.axehigh.platformer.GameConstants.*;
-import static com.axehigh.platformer.assets.GameAssetRegistry.*;
-import static com.axehigh.platformer.ecs.components.AnimationComponent.State.*;
+import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_UI_GFX;
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
 import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
-import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
-import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.NORMAL;
 
 /**
  * Owns the Ashley Engine, the fixed-resolution viewport/camera, and drives the game loop.
+ * System construction lives in {@link GameSystems}, dialogs in {@link PauseDialog} /
+ * {@link GameOverDialog}; this screen stays lifecycle, layout, and input orchestration.
  */
-public class GameScreen extends BaseScreen {
-    private static final int PRIORITY_INPUT = 0;
-    private static final int PRIORITY_MUSIC = 1;
-    private static final int PRIORITY_ENEMY = 4;
-    private static final int PRIORITY_BUFF = 4;
-    private static final int PRIORITY_TRAP = 4;
-    private static final int PRIORITY_MOVEMENT = 5;
-    private static final int PRIORITY_BOUNDS = 6;
-    private static final int PRIORITY_MOVING_PLATFORM = 6;
-    private static final int PRIORITY_COLLISION = 7;
-    private static final int PRIORITY_MELEE = 8;
-    private static final int PRIORITY_SFX = 8;
-    private static final int PRIORITY_PICKUP = 8;
-    private static final int PRIORITY_CHEST = 8;
-    private static final int PRIORITY_ENEMY_CONTACT = 8;
-    private static final int PRIORITY_TRAP_CONTACT = 8;
-    private static final int PRIORITY_LEVEL_EXIT = 8;
-    private static final int PRIORITY_PLAYER_DEATH = 8;
-    private static final int PRIORITY_CAMERA = 9;
-    private static final int PRIORITY_ANIMATION = 10;
-    private static final int PRIORITY_SQUASH = 25;
-    private static final int PRIORITY_MAP_RENDER = 20;
-    private static final int PRIORITY_BACKGROUND_RENDER = 19;
-    private static final int PRIORITY_ENTITY_RENDER = 30;
-    private static final int PRIORITY_FLOATING_MESSAGE = 31;
-    private static final int PRIORITY_PARTICLE_RENDER = 35;
-    private static final int PRIORITY_LIGHT_RENDER = 36;
-    private static final int PRIORITY_DEBUG_RENDER = 40;
-
-    private static final float DIALOG_PANEL_SCALE = 0.7f;
-    private static final float DIALOG_PANEL_MARGIN = 40f;
-
+public class GameScreen extends BaseScreen implements PauseDialog.Listener, GameOverDialog.Listener {
     private final AssetManager assetManager = new AssetManager();
     private final PooledEngine engine = new PooledEngine();
     private final SpriteBatch batch = new SpriteBatch();
@@ -91,11 +50,7 @@ public class GameScreen extends BaseScreen {
     private DeviceClass deviceClass = DeviceClass.simulated() != null ? DeviceClass.simulated() : DeviceClass.DESKTOP;
     private boolean touchControlsEnabled = false;
 
-    private TiledMapRenderSystem tiledMapRenderSystem;
-    private DebugRenderSystem debugRenderSystem;
-    private LightRenderSystem lightRenderSystem;
-    private LevelManager levelManager;
-    private CameraSystem cameraSystem;
+    private GameSystems systems;
     private PlayerComponent playerComponent;
     private Entity playerEntity;
     private HudStage hudStage;
@@ -153,119 +108,18 @@ public class GameScreen extends BaseScreen {
 
         camera.position.set(viewport.getWorldWidth() / 2f, viewport.getWorldHeight() / 2f, 0f);
 
-        PlayerInputSystem playerInputSystem = new PlayerInputSystem(assetManager, PRIORITY_INPUT);
-        playerInputSystem.setUnitScale(scale);
-        tiledMapRenderSystem = new TiledMapRenderSystem(mapLoader.getMap(), camera, PRIORITY_MAP_RENDER);
-        engine.addSystem(playerInputSystem);
-
-        EnemySystem enemySystem = new EnemySystem(entityFactory, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), roomState, PRIORITY_ENEMY);
-        enemySystem.setUnitScale(scale);
-        engine.addSystem(enemySystem);
-
-        EnemyShootSystem shootSystem = new EnemyShootSystem(assetManager, roomState, PRIORITY_ENEMY);
-        shootSystem.setUnitScale(scale);
-        engine.addSystem(shootSystem);
-
-        engine.addSystem(new BuffSystem(PRIORITY_BUFF));
-
-        TrapSystem trapSystem = new TrapSystem(mapLoader.getCollisionRects(), roomState, assetManager, PRIORITY_TRAP);
-        engine.addSystem(trapSystem);
-
-        MovementSystem movementSystem = new MovementSystem(mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), PRIORITY_MOVEMENT);
-        movementSystem.setUnitScale(scale);
-        engine.addSystem(movementSystem);
-
-        CollisionSystem collisionSystem = new CollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION);
-        collisionSystem.setUnitScale(scale);
-        engine.addSystem(collisionSystem);
-
-        EnemyBulletCollisionSystem enemyBulletSystem = new EnemyBulletCollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION);
-        enemyBulletSystem.setUnitScale(scale);
-        engine.addSystem(enemyBulletSystem);
-        engine.addSystem(new CollisionBoundsSystem(PRIORITY_BOUNDS));
-        MovingPlatformSystem movingPlatformSystem = new MovingPlatformSystem(mapLoader.getCollisionRects(), roomState, PRIORITY_MOVING_PLATFORM);
-        movingPlatformSystem.setUnitScale(scale);
-        engine.addSystem(movingPlatformSystem);
-
-        engine.addSystem(new MusicSystem(AudioManager.get(), PRIORITY_MUSIC));
-        SfxSystem sfxSystem = new SfxSystem(AudioManager.get(), PRIORITY_SFX);
-        engine.addSystem(sfxSystem);
-
-        MeleeAttackSystem meleeSystem = new MeleeAttackSystem(assetManager, mapLoader.getSecretRects(),
-            mapLoader.getCollisionRects(), mapLoader.getCollisionLayer(), sfxSystem, secretRoomRevealer, PRIORITY_MELEE);
-        meleeSystem.setUnitScale(scale);
-        engine.addSystem(meleeSystem);
-
-        engine.addSystem(new PickupSystem(sfxSystem, entityFactory, PRIORITY_PICKUP));
-
-        ChestSystem chestSystem = new ChestSystem(entityFactory, PRIORITY_CHEST);
-        chestSystem.setUnitScale(scale);
-        engine.addSystem(chestSystem);
-
-        EnemyContactSystem enemyContactSystem = new EnemyContactSystem(PRIORITY_ENEMY_CONTACT);
-        enemyContactSystem.setUnitScale(scale);
-        engine.addSystem(enemyContactSystem);
-        engine.addSystem(new HazardSystem(mapLoader.getHazardRects(), PRIORITY_ENEMY_CONTACT));
-        TrapContactSystem trapContactSystem = new TrapContactSystem(roomState, PRIORITY_TRAP_CONTACT);
-        engine.addSystem(trapContactSystem);
-        cameraSystem = new CameraSystem(camera, roomState, PRIORITY_CAMERA);
-        engine.addSystem(cameraSystem);
-        engine.addSystem(new AnimationSystem(PRIORITY_ANIMATION));
-        engine.addSystem(new SquashSystem(PRIORITY_SQUASH));
-        engine.addSystem(new ParallaxBackgroundSystem(batch, camera,
-            assetManager.get(BACKGROUND_FAR, Texture.class),
-            assetManager.get(BACKGROUND_NEAR, Texture.class),
-            PRIORITY_BACKGROUND_RENDER));
-        engine.addSystem(tiledMapRenderSystem);
-        engine.addSystem(new RenderSystem(batch, camera, PRIORITY_ENTITY_RENDER));
-        engine.addSystem(new FloatingMessageSystem(batch, camera, skin, PRIORITY_FLOATING_MESSAGE));
-        engine.addSystem(new ParticleSystem(batch, camera, PRIORITY_PARTICLE_RENDER));
-        lightRenderSystem = new LightRenderSystem(batch, camera, PRIORITY_LIGHT_RENDER);
-        engine.addSystem(lightRenderSystem);
-        debugRenderSystem = new DebugRenderSystem(camera, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), roomState, PRIORITY_DEBUG_RENDER);
-        engine.addSystem(debugRenderSystem);
-
-        levelManager = new LevelManager(engine, entityFactory, viewport, tiledMapRenderSystem, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), mapLoader.getSecretRects(), roomState, secretRoomRevealer, mapLoader);
-
-        LevelExitSystem exitSystem = new LevelExitSystem(levelManager, PRIORITY_LEVEL_EXIT);
-        exitSystem.setUnitScale(scale);
-        engine.addSystem(exitSystem);
-
-        engine.addSystem(new PlayerDeathSystem(this::onPlayerDeath, PRIORITY_PLAYER_DEATH));
+        systems = new GameSystems(engine, batch, camera, skin, assetManager, mapLoader, roomState,
+            secretRoomRevealer, entityFactory, viewport, scale, this::onPlayerDeath);
 
         Vector2 playerStart = mapLoader.findPlayerStart();
         Entity player = entityFactory.createPlayer(playerStart.x, playerStart.y);
         playerEntity = player;
-        attachPlayerAnimations(player);
         engine.addEntity(player);
-        chestSystem.setPlayerEntity(player);
-
-        PlayerDamageResolver.setDamageListener(damagedEntity ->
-            entityFactory.createFloatingMessage(engine,
-                "-1", MESSAGE_COLOR_DAMAGE, damagedEntity));
-        PotionEffects.setPotionListener((potionEntity, type) -> {
-            switch (type) {
-                case HEALING:
-                    entityFactory.createFloatingMessage(engine,
-                        "+1 HP", MESSAGE_COLOR_HEAL, potionEntity);
-                    break;
-                case STRENGTH:
-                    entityFactory.createFloatingMessage(engine,
-                        "Strength!", MESSAGE_COLOR_STRENGTH, potionEntity);
-                    break;
-                case SPEED:
-                    entityFactory.createFloatingMessage(engine,
-                        "Speed!", MESSAGE_COLOR_SPEED, potionEntity);
-                    break;
-                case INVULNERABILITY:
-                    entityFactory.createFloatingMessage(engine,
-                        "Invulnerable!", MESSAGE_COLOR_INVULN, potionEntity);
-                    break;
-            }
-        });
+        systems.chestSystem.setPlayerEntity(player);
+        entityFactory.installFeedbackListeners(engine);
 
         if (saveData != null) {
-            applySaveData(player, saveData);
+            saveData.applyTo(PLAYER.get(player));
         }
 
         entityFactory.spawnObjects(engine, mapLoader.getObjectLayer(), roomState);
@@ -280,14 +134,14 @@ public class GameScreen extends BaseScreen {
         hudStage = new HudStage(hudViewport, skin, assetManager, playerComponent);
         hudStage.getPauseButton().addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 togglePause();
             }
         });
         TextureRegionDrawable bagDrawable = new TextureRegionDrawable(assetManager.get(ORIGIN_UI_GFX, TextureAtlas.class).findRegion("bag"));
         bagDrawable.setMinWidth(UI_Button_Contextual_Size / 2f);
         bagDrawable.setMinHeight(UI_Button_Contextual_Size / 2f);
-        touchControlsStage = new TouchControlsStage(touchViewport, skin, playerInputSystem,
+        touchControlsStage = new TouchControlsStage(touchViewport, skin, systems.playerInputSystem,
                 bagDrawable,
                 this::toggleInventory);
 
@@ -381,257 +235,15 @@ public class GameScreen extends BaseScreen {
     }
 
     private void showPauseDialog() {
-        Dialog dialog = new Dialog("Paused", skin) {
-            @Override
-            protected void result(Object object) {
-                gamePaused = false;
-            }
-        };
-        dialog.getTitleLabel().setFontScale(FontScale);
-        dialog.getContentTable().defaults().pad(UI_PADDING);
-        dialog.getButtonTable().defaults().pad(UI_PADDING);
-
-        TextButton resumeButton = new TextButton("Resume", skin);
-        resumeButton.getLabel().setFontScale(FontScale);
-        resumeButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                AudioManager.get().playClick();
-                dialog.hide();
-                gamePaused = false;
-            }
-        });
-        dialog.button(resumeButton);
-
-        final TextButton musicButton = new TextButton("Music: " + (AudioManager.get().isMusicEnabled() ? "ON" : "OFF"), skin);
-        musicButton.getLabel().setFontScale(FontScale);
-        musicButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                AudioManager.get().playClick();
-                AudioManager.get().setMusicEnabled(!AudioManager.get().isMusicEnabled());
-                musicButton.setText("Music: " + (AudioManager.get().isMusicEnabled() ? "ON" : "OFF"));
-            }
-        });
-        dialog.getContentTable().add(musicButton).minWidth(240f).pad(UI_PADDING).row();
-
-        final TextButton sfxButton = new TextButton("Sound Effects: " + (AudioManager.get().isSfxEnabled() ? "ON" : "OFF"), skin);
-        sfxButton.getLabel().setFontScale(FontScale);
-        sfxButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                AudioManager.get().playClick();
-                AudioManager.get().setSfxEnabled(!AudioManager.get().isSfxEnabled());
-                sfxButton.setText("Sound Effects: " + (AudioManager.get().isSfxEnabled() ? "ON" : "OFF"));
-            }
-        });
-        dialog.getContentTable().add(sfxButton).minWidth(240f).pad(UI_PADDING).row();
-
-        final TextButton collisionDebugButton = new TextButton("Collision Debug: " + (DebugRenderSystem.isDebugEnabled() ? "ON" : "OFF"), skin);
-        collisionDebugButton.getLabel().setFontScale(FontScale);
-        collisionDebugButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                AudioManager.get().playClick();
-                DebugRenderSystem.setDebugEnabled(!DebugRenderSystem.isDebugEnabled());
-                collisionDebugButton.setText("Collision Debug: " + (DebugRenderSystem.isDebugEnabled() ? "ON" : "OFF"));
-            }
-        });
-
-        final TextButton touchDebugButton = new TextButton("Touch Debug: " + (debugTouchLogging ? "ON" : "OFF"), skin);
-        touchDebugButton.getLabel().setFontScale(FontScale);
-        touchDebugButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                AudioManager.get().playClick();
-                debugTouchLogging = !debugTouchLogging;
-                touchDebugButton.setText("Touch Debug: " + (debugTouchLogging ? "ON" : "OFF"));
-            }
-        });
-
-        final TextButton wallClimbButton = new TextButton("Wall Climb: " + (FeatureFlags.isWallClimbingEnabled() ? "ON" : "OFF"), skin);
-        wallClimbButton.getLabel().setFontScale(FontScale);
-        wallClimbButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                AudioManager.get().playClick();
-                FeatureFlags.setWallClimbingEnabled(!FeatureFlags.isWallClimbingEnabled());
-                wallClimbButton.setText("Wall Climb: " + (FeatureFlags.isWallClimbingEnabled() ? "ON" : "OFF"));
-            }
-        });
-
-        Table debugRow = new Table();
-        debugRow.add(collisionDebugButton).minWidth(240f).padRight(UI_PADDING);
-        debugRow.add(touchDebugButton).minWidth(240f);
-        dialog.getContentTable().add(debugRow).pad(UI_PADDING).row();
-
-        final TextButton deviceButton = new TextButton(
-            "Device: " + (DeviceClass.isSimulating() ? deviceClass : "Auto"), skin);
-        deviceButton.getLabel().setFontScale(FontScale);
-        deviceButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                AudioManager.get().playClick();
-                deviceClass = DeviceClass.nextWithAuto(deviceClass);
-                DeviceClass.setSimulated(deviceClass);
-                if (deviceClass != null) {
-                    layoutMode = deviceClass.defaultLayout();
-                    deviceClass.applyWindowSize();
-                } else {
-                    layoutMode = LayoutMode.defaultForDevice();
-                }
-                LayoutPrefs.save(deviceClass, layoutMode);
-                applyLayoutMode();
-                CameraSystem.snapToRoom(camera, roomState,
-                    TRANSFORM.get(playerEntity).position.x, TRANSFORM.get(playerEntity).position.y,
-                    layoutMode == LayoutMode.BAND_ZOOM);
-                deviceButton.setText("Device: " + (deviceClass != null ? deviceClass : "Auto"));
-            }
-        });
-
-        final TextButton layoutButton = new TextButton("Mobile Layout: " + layoutMode, skin);
-        layoutButton.getLabel().setFontScale(FontScale);
-        layoutButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                AudioManager.get().playClick();
-                layoutMode = layoutMode.next();
-                if (!LayoutMode.isTouchDevice()) {
-                    deviceClass = DeviceClass.PHONE;
-                    DeviceClass.setSimulated(DeviceClass.PHONE);
-                    deviceClass.applyWindowSize();
-                    deviceButton.setText("Device: " + deviceClass);
-                }
-                LayoutPrefs.save(deviceClass, layoutMode);
-                applyLayoutMode();
-                CameraSystem.snapToRoom(camera, roomState,
-                    TRANSFORM.get(playerEntity).position.x, TRANSFORM.get(playerEntity).position.y,
-                    layoutMode == LayoutMode.BAND_ZOOM);
-                layoutButton.setText("Mobile Layout: " + layoutMode);
-            }
-        });
-
-        Table featureRow = new Table();
-        featureRow.add(wallClimbButton).minWidth(240f).padRight(UI_PADDING);
-        featureRow.add(deviceButton).minWidth(240f).padRight(UI_PADDING);
-        featureRow.add(layoutButton).minWidth(240f);
-        dialog.getContentTable().add(featureRow).pad(UI_PADDING).row();
-
-        TextButton exitButton = new TextButton("Exit", skin);
-        exitButton.getLabel().setFontScale(FontScale);
-        exitButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                AudioManager.get().playClick();
-                changeScreen(new MainMenuScreen(game));
-            }
-        });
-
-        dialog.button(exitButton);
-
+        PauseDialog dialog = new PauseDialog(skin, this);
         dialog.show(stage);
-        fitDialogToPanel(dialog);
+        DialogPanelFitter.fitToPanel(skin, stage, dialog);
     }
 
     private void showGameOverDialog() {
-        SaveData currentSave = SaveManager.hasSave() ? SaveManager.load() : new SaveData();
-
-        Dialog dialog = new Dialog("Game Over", skin) {
-            @Override
-            protected void result(Object object) {
-            }
-        };
-        dialog.getTitleLabel().setFontScale(FontScale);
-        Label deathLabel = new Label("You died!", skin);
-        deathLabel.setFontScale(FontScale);
-        dialog.text(deathLabel);
-
-        if (currentSave.triesRemaining > 0) {
-            TextButton continueButton = new TextButton("Continue (uses 1 try)", skin);
-            continueButton.getLabel().setFontScale(FontScale);
-            continueButton.addListener(new ChangeListener() {
-                @Override
-                public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                    AudioManager.get().playClick();
-                    currentSave.triesRemaining--;
-                    SaveManager.save(currentSave);
-                    levelManager.loadLevel(levelManager.getCurrentLevelPath(), playerEntity);
-                    playerComponent.health = playerComponent.maxHealth;
-                    playerComponent.isDead = false;
-                    dialog.hide();
-                    gameOverActive = false;
-                }
-            });
-            dialog.button(continueButton);
-        }
-
-        TextButton exitButton = new TextButton("Exit to Main Menu", skin);
-        exitButton.getLabel().setFontScale(FontScale);
-        exitButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                AudioManager.get().playClick();
-                changeScreen(new MainMenuScreen(game));
-            }
-        });
-        dialog.button(exitButton);
-
+        GameOverDialog dialog = new GameOverDialog(skin, this);
         dialog.show(stage);
-        sizeDialogToPanel(dialog);
-    }
-
-    private void sizeDialogToPanel(Dialog dialog) {
-        TextureRegionDrawable panel = (TextureRegionDrawable) skin.getDrawable("table");
-        float width = panel.getRegion().getRegionWidth() * DIALOG_PANEL_SCALE;
-        float height = panel.getRegion().getRegionHeight() * DIALOG_PANEL_SCALE;
-        dialog.setSize(width, height);
-        dialog.setPosition(Math.round((stage.getWidth() - width) / 2f), Math.round((stage.getHeight() - height) / 2f));
-    }
-
-    private void fitDialogToPanel(Dialog dialog) {
-        TextureRegionDrawable panel = (TextureRegionDrawable) skin.getDrawable("table");
-        float panelW = panel.getRegion().getRegionWidth();
-        float panelH = panel.getRegion().getRegionHeight();
-        float scale = Math.max(dialog.getPrefWidth() / panelW, (dialog.getPrefHeight() + DIALOG_PANEL_MARGIN) / panelH);
-        float maxScale = Math.min((stage.getWidth() * 0.95f) / panelW, (stage.getHeight() * 0.95f) / panelH);
-        scale = Math.min(scale, maxScale);
-        float width = panelW * scale;
-        float height = panelH * scale;
-        dialog.setSize(width, height);
-        dialog.setPosition(Math.round((stage.getWidth() - width) / 2f), Math.round((stage.getHeight() - height) / 2f));
-    }
-
-    private void applySaveData(Entity player, SaveData saveData) {
-        PlayerComponent playerComponent = PLAYER.get(player);
-        playerComponent.health = saveData.health;
-        playerComponent.maxHealth = saveData.maxHealth;
-        playerComponent.coins = saveData.coins;
-        playerComponent.items = saveData.items;
-        playerComponent.swordDamage = saveData.swordDamage;
-        playerComponent.sharpEdgePurchased = saveData.sharpEdgePurchased;
-        playerComponent.daggerBandolierPurchased = saveData.daggerBandolierPurchased;
-        playerComponent.ironHeartCount = saveData.ironHeartCount;
-        playerComponent.setPotionCount(PotionType.HEALING, saveData.healingPotions);
-        playerComponent.setPotionCount(PotionType.STRENGTH, saveData.strengthPotions);
-        playerComponent.setPotionCount(PotionType.SPEED, saveData.speedPotions);
-        playerComponent.setPotionCount(PotionType.INVULNERABILITY, saveData.invulnerabilityPotions);
-    }
-
-    private void attachPlayerAnimations(Entity player) {
-        TextureAtlas heroAtlas = assetManager.get(HERO_ASSET, TextureAtlas.class);
-
-        AnimationComponent animationComponent = new AnimationComponent();
-        animationComponent.animations.put(IDLE, new Animation<>(0.15f, heroAtlas.findRegions("idle"), LOOP));
-        animationComponent.animations.put(WALKING, new Animation<>(0.1f, heroAtlas.findRegions("walk"), LOOP));
-        animationComponent.animations.put(RUNNING, new Animation<>(0.1f, heroAtlas.findRegions("run"), LOOP));
-        animationComponent.animations.put(JUMPING, new Animation<>(0.1f, heroAtlas.findRegions("jump"), NORMAL));
-        animationComponent.animations.put(DOUBLE_JUMPING, new Animation<>(0.1f, heroAtlas.findRegions("high_jump"), NORMAL));
-        animationComponent.animations.put(WALL_CLIMBING, new Animation<>(0.1f, heroAtlas.findRegions("climb"), LOOP));
-        animationComponent.animations.put(ATTACKING, new Animation<>(0.066f, heroAtlas.findRegions("attack"), NORMAL));
-        animationComponent.animations.put(DEATH, new Animation<>(0.1f, heroAtlas.findRegions("death"), NORMAL));
-        animationComponent.animations.put(HURT, new Animation<>(0.1f, heroAtlas.findRegions("hurt"), NORMAL));
-
-        player.add(animationComponent);
+        DialogPanelFitter.sizeToPanel(skin, stage, dialog);
     }
 
     @Override
@@ -678,11 +290,12 @@ public class GameScreen extends BaseScreen {
      * frame so a mid-run mode switch takes effect immediately.
      */
     private void applyLayoutMode() {
-        boolean isBandZoom = layoutMode == LayoutMode.BAND_ZOOM;
-        cameraSystem.setBandZoom(isBandZoom);
-        if (levelManager != null) {
-            levelManager.setBandZoom(isBandZoom);
+        if (systems == null) {
+            return;
         }
+        boolean isBandZoom = layoutMode == LayoutMode.BAND_ZOOM;
+        systems.cameraSystem.setBandZoom(isBandZoom);
+        systems.levelManager.setBandZoom(isBandZoom);
 
         int width = Gdx.graphics.getWidth();
         int height = Gdx.graphics.getHeight();
@@ -777,6 +390,82 @@ public class GameScreen extends BaseScreen {
                 + " hit=" + (hit != null ? hit.getClass().getSimpleName() : "none"));
     }
 
+    // --- PauseDialog.Listener ---
+
+    @Override
+    public void onResume() {
+        gamePaused = false;
+    }
+
+    @Override
+    public boolean isTouchDebugOn() {
+        return debugTouchLogging;
+    }
+
+    @Override
+    public void setTouchDebugOn(boolean on) {
+        debugTouchLogging = on;
+    }
+
+    @Override
+    public String deviceLabel() {
+        return deviceClass != null ? String.valueOf(deviceClass) : "Auto";
+    }
+
+    @Override
+    public void cycleDevice() {
+        deviceClass = DeviceClass.nextWithAuto(deviceClass);
+        DeviceClass.setSimulated(deviceClass);
+        if (deviceClass != null) {
+            layoutMode = deviceClass.defaultLayout();
+            deviceClass.applyWindowSize();
+        } else {
+            layoutMode = LayoutMode.defaultForDevice();
+        }
+        LayoutPrefs.save(deviceClass, layoutMode);
+        applyLayoutMode();
+        snapCameraToPlayerRoom();
+    }
+
+    @Override
+    public String layoutLabel() {
+        return layoutMode.name();
+    }
+
+    @Override
+    public void cycleLayout() {
+        layoutMode = layoutMode.next();
+        if (!LayoutMode.isTouchDevice()) {
+            deviceClass = DeviceClass.PHONE;
+            DeviceClass.setSimulated(DeviceClass.PHONE);
+            deviceClass.applyWindowSize();
+        }
+        LayoutPrefs.save(deviceClass, layoutMode);
+        applyLayoutMode();
+        snapCameraToPlayerRoom();
+    }
+
+    // --- GameOverDialog.Listener ---
+
+    @Override
+    public void onContinue() {
+        systems.levelManager.loadLevel(systems.levelManager.getCurrentLevelPath(), playerEntity);
+        playerComponent.health = playerComponent.maxHealth;
+        playerComponent.isDead = false;
+        gameOverActive = false;
+    }
+
+    @Override
+    public void onExit() {
+        changeScreen(new MainMenuScreen(game));
+    }
+
+    private void snapCameraToPlayerRoom() {
+        CameraSystem.snapToRoom(camera, roomState,
+            TRANSFORM.get(playerEntity).position.x, TRANSFORM.get(playerEntity).position.y,
+            layoutMode == LayoutMode.BAND_ZOOM);
+    }
+
     @Override
     public void dispose() {
         super.dispose();
@@ -784,17 +473,11 @@ public class GameScreen extends BaseScreen {
         ParticleHelper.dispose();
         batch.dispose();
         assetManager.dispose();
-        if (tiledMapRenderSystem != null) {
-            tiledMapRenderSystem.dispose();
-        }
-        if (debugRenderSystem != null) {
-            debugRenderSystem.dispose();
-        }
-        if (lightRenderSystem != null) {
-            lightRenderSystem.dispose();
-        }
-        if (levelManager != null) {
-            levelManager.dispose();
+        if (systems != null) {
+            systems.tiledMapRenderSystem.dispose();
+            systems.debugRenderSystem.dispose();
+            systems.lightRenderSystem.dispose();
+            systems.levelManager.dispose();
         }
         if (hudStage != null) {
             hudStage.dispose();
@@ -805,8 +488,5 @@ public class GameScreen extends BaseScreen {
         if (inventoryBarStage != null) {
             inventoryBarStage.dispose();
         }
-//        if (skin != null) {
-//            skin.dispose();
-//        }
     }
 }

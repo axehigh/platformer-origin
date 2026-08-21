@@ -3,7 +3,6 @@ package com.axehigh.platformer.ecs.systems;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.LevelExitComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.components.PotionType;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.map.LevelCatalog;
 import com.axehigh.platformer.map.LevelDefinition;
@@ -18,10 +17,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
-import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
-import static com.axehigh.platformer.ecs.components.Mappers.LEVEL_EXIT;
-import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
-import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
  * Drives the exit-gate proximity/interact flow: mirrors {@code EnemyContactSystem}'s
@@ -100,20 +96,8 @@ public class LevelExitSystem extends IteratingSystem {
     }
 
     private SaveData buildSaveData(PlayerComponent player, String nextLevelPath) {
-        SaveData saveData = new SaveData();
+        SaveData saveData = SaveData.of(player);
         saveData.levelPath = nextLevelPath;
-        saveData.health = player.health;
-        saveData.maxHealth = player.maxHealth;
-        saveData.coins = player.coins;
-        saveData.items = player.items;
-        saveData.swordDamage = player.swordDamage;
-        saveData.sharpEdgePurchased = player.sharpEdgePurchased;
-        saveData.daggerBandolierPurchased = player.daggerBandolierPurchased;
-        saveData.ironHeartCount = player.ironHeartCount;
-        saveData.healingPotions = player.countPotion(PotionType.HEALING);
-        saveData.strengthPotions = player.countPotion(PotionType.STRENGTH);
-        saveData.speedPotions = player.countPotion(PotionType.SPEED);
-        saveData.invulnerabilityPotions = player.countPotion(PotionType.INVULNERABILITY);
         saveData.completedLevelIds = buildCompletedLevelIds();
         return saveData;
     }
