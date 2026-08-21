@@ -80,7 +80,7 @@ public final class GameConstants {
 
     //Player Stats
     public static int MaxItems = 10;
-    public static int SwordDamage = 5;
+    public static int BaseDamage = 5;
     public static int MaxHealth = 3;
 
     //Enemy Stats

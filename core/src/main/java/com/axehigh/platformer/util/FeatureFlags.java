@@ -14,6 +14,7 @@ import com.badlogic.gdx.Gdx;
 public final class FeatureFlags {
     private static boolean wallClimbingEnabled = GamePreferences.DEFAULT_WALL_CLIMB_ENABLED;
     private static boolean squashEnabled = GamePreferences.DEFAULT_SQUASH_ENABLED;
+    private static boolean selectLevelEnabled = GamePreferences.DEFAULT_SELECT_LEVEL_ENABLED;
     private static boolean initialized = false;
 
     private FeatureFlags() {
@@ -27,6 +28,7 @@ public final class FeatureFlags {
         GamePreferences preferences = new GamePreferences();
         wallClimbingEnabled = preferences.isWallClimbingEnabled();
         squashEnabled = preferences.isSquashEnabled();
+        selectLevelEnabled = preferences.isSelectLevelEnabled();
     }
 
     /** Whether wall-climb (wall-slide gravity + wall-jump latch) is enabled. Defaults to {@code true}. */
@@ -60,12 +62,30 @@ public final class FeatureFlags {
     }
 
     /**
+     * Whether the main menu shows its Select Level entry. Defaults to {@code true}.
+     */
+    public static boolean isSelectLevelEnabled() {
+        ensureInitialized();
+        return selectLevelEnabled;
+    }
+
+    /** Shows/hides the main menu's Select Level entry for the whole session and persists the choice. */
+    public static void setSelectLevelEnabled(boolean enabled) {
+        selectLevelEnabled = enabled;
+        initialized = true;
+        if (Gdx.app != null) {
+            new GamePreferences().setSelectLevelEnabled(enabled);
+        }
+    }
+
+    /**
      * Restores the pristine pre-init state. Test support (same package): headless tests must call
      * this before/after exercising the static so no state bleeds across test methods.
      */
     static void resetForTests() {
         wallClimbingEnabled = GamePreferences.DEFAULT_WALL_CLIMB_ENABLED;
         squashEnabled = GamePreferences.DEFAULT_SQUASH_ENABLED;
+        selectLevelEnabled = GamePreferences.DEFAULT_SELECT_LEVEL_ENABLED;
         initialized = false;
     }
 }

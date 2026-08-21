@@ -3,6 +3,7 @@ package com.axehigh.platformer.ui;
 import com.axehigh.platformer.audio.AudioManager;
 import com.axehigh.platformer.ecs.systems.DebugRenderSystem;
 import com.axehigh.platformer.util.FeatureFlags;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -17,12 +18,19 @@ import static com.axehigh.platformer.GameConstants.FontScale;
 import static com.axehigh.platformer.GameConstants.UI_PADDING;
 
 /**
- * In-game pause menu: audio toggles, debug toggles, device/layout simulation, and exit.
- * Global toggles (music, SFX, collision debug, wall climb) are flipped directly; state owned
- * by the screen (pause flag, touch-debug logging, device/layout switching) is reached through
- * {@link Listener}.
+ * In-game pause menu, split into a Gameplay tab (audio toggles, wall-climb feature flag) and a
+ * Debug tab (collision/touch debug toggles, device/layout simulation). Resume and Exit stay
+ * outside the tabs so they're reachable from either. Global toggles (music, SFX, collision debug,
+ * wall climb) are flipped directly; state owned by the screen (pause flag, touch-debug logging,
+ * device/layout switching) is reached through {@link Listener}.
  */
 public class PauseDialog extends Dialog {
+
+    /** Which content page the tab header shows. */
+    private enum Tab {
+        GAMEPLAY,
+        DEBUG
+    }
 
     /** Callbacks into the owning screen for state the dialog must read or mutate. */
     public interface Listener {
@@ -49,10 +57,17 @@ public class PauseDialog extends Dialog {
     }
 
     private static final float BUTTON_MIN_WIDTH = 240f;
+    private static final Color TAB_ACTIVE_COLOR = Color.GOLD;
+    private static final Color TAB_INACTIVE_COLOR = Color.WHITE;
 
     private final Listener listener;
-    private final TextButton deviceButton;
-    private final TextButton layoutButton;
+    private final Table gameplayContent = new Table();
+    private final Table debugContent = new Table();
+    private final Table tabContent = new Table();
+    private final TextButton gameplayTabButton;
+    private final TextButton debugTabButton;
+    private TextButton deviceButton;
+    private TextButton layoutButton;
 
     public PauseDialog(Skin skin, Listener listener) {
         super("Paused", skin);
@@ -64,57 +79,19 @@ public class PauseDialog extends Dialog {
 
         button(actionButton("Resume", this::hideAndResume));
 
-        getContentTable().add(toggleButton("Music: ",
-            AudioManager.get()::isMusicEnabled,
-            enabled -> AudioManager.get().setMusicEnabled(enabled))).minWidth(BUTTON_MIN_WIDTH).pad(UI_PADDING).row();
+        buildGameplayTab();
+        buildDebugTab();
 
-        getContentTable().add(toggleButton("Sound Effects: ",
-            AudioManager.get()::isSfxEnabled,
-            enabled -> AudioManager.get().setSfxEnabled(enabled))).minWidth(BUTTON_MIN_WIDTH).pad(UI_PADDING).row();
+        gameplayTabButton = tabButton("Gameplay", Tab.GAMEPLAY);
+        debugTabButton = tabButton("Debug", Tab.DEBUG);
+        Table tabHeader = new Table();
+        tabHeader.add(gameplayTabButton).minWidth(BUTTON_MIN_WIDTH).padRight(UI_PADDING);
+        tabHeader.add(debugTabButton).minWidth(BUTTON_MIN_WIDTH);
+        getContentTable().add(tabHeader).row();
 
-        TextButton collisionDebugButton = toggleButton("Collision Debug: ",
-            DebugRenderSystem::isDebugEnabled,
-            DebugRenderSystem::setDebugEnabled);
-        TextButton touchDebugButton = toggleButton("Touch Debug: ",
-            listener::isTouchDebugOn,
-            listener::setTouchDebugOn);
+        getContentTable().add(tabContent).row();
 
-        Table debugRow = new Table();
-        debugRow.add(collisionDebugButton).minWidth(BUTTON_MIN_WIDTH).padRight(UI_PADDING);
-        debugRow.add(touchDebugButton).minWidth(BUTTON_MIN_WIDTH);
-        getContentTable().add(debugRow).pad(UI_PADDING).row();
-
-        TextButton wallClimbButton = toggleButton("Wall Climb: ",
-            FeatureFlags::isWallClimbingEnabled,
-            FeatureFlags::setWallClimbingEnabled);
-
-        deviceButton = new TextButton("Device: " + listener.deviceLabel(), skin);
-        deviceButton.getLabel().setFontScale(FontScale);
-        deviceButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                AudioManager.get().playClick();
-                listener.cycleDevice();
-                refreshDeviceLayoutLabels();
-            }
-        });
-
-        layoutButton = new TextButton("Mobile Layout: " + listener.layoutLabel(), skin);
-        layoutButton.getLabel().setFontScale(FontScale);
-        layoutButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                AudioManager.get().playClick();
-                listener.cycleLayout();
-                refreshDeviceLayoutLabels();
-            }
-        });
-
-        Table featureRow = new Table();
-        featureRow.add(wallClimbButton).minWidth(BUTTON_MIN_WIDTH).padRight(UI_PADDING);
-        featureRow.add(deviceButton).minWidth(BUTTON_MIN_WIDTH).padRight(UI_PADDING);
-        featureRow.add(layoutButton).minWidth(BUTTON_MIN_WIDTH);
-        getContentTable().add(featureRow).pad(UI_PADDING).row();
+        selectTab(Tab.GAMEPLAY);
 
         button(actionButton("Exit", listener::onExit));
     }
@@ -129,6 +106,77 @@ public class PauseDialog extends Dialog {
     private void hideAndResume() {
         hide();
         listener.onResume();
+    }
+
+    private void buildGameplayTab() {
+        gameplayContent.defaults().pad(UI_PADDING);
+        gameplayContent.add(toggleButton("Music: ",
+            AudioManager.get()::isMusicEnabled,
+            enabled -> AudioManager.get().setMusicEnabled(enabled))).minWidth(BUTTON_MIN_WIDTH).row();
+
+        gameplayContent.add(toggleButton("Sound Effects: ",
+            AudioManager.get()::isSfxEnabled,
+            enabled -> AudioManager.get().setSfxEnabled(enabled))).minWidth(BUTTON_MIN_WIDTH).row();
+
+        gameplayContent.add(toggleButton("Wall Climb: ",
+            FeatureFlags::isWallClimbingEnabled,
+            FeatureFlags::setWallClimbingEnabled)).minWidth(BUTTON_MIN_WIDTH).row();
+    }
+
+    private void buildDebugTab() {
+        debugContent.defaults().pad(UI_PADDING);
+
+        TextButton collisionDebugButton = toggleButton("Collision Debug: ",
+            DebugRenderSystem::isDebugEnabled,
+            DebugRenderSystem::setDebugEnabled);
+        TextButton touchDebugButton = toggleButton("Touch Debug: ",
+            listener::isTouchDebugOn,
+            listener::setTouchDebugOn);
+
+        Table debugRow = new Table();
+        debugRow.defaults().pad(UI_PADDING);
+        debugRow.add(collisionDebugButton).minWidth(BUTTON_MIN_WIDTH);
+        debugRow.add(touchDebugButton).minWidth(BUTTON_MIN_WIDTH);
+        debugContent.add(debugRow).row();
+
+        deviceButton = new TextButton("Device: " + listener.deviceLabel(), getSkin());
+        deviceButton.getLabel().setFontScale(FontScale);
+        deviceButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                AudioManager.get().playClick();
+                listener.cycleDevice();
+                refreshDeviceLayoutLabels();
+            }
+        });
+
+        layoutButton = new TextButton("Mobile Layout: " + listener.layoutLabel(), getSkin());
+        layoutButton.getLabel().setFontScale(FontScale);
+        layoutButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                AudioManager.get().playClick();
+                listener.cycleLayout();
+                refreshDeviceLayoutLabels();
+            }
+        });
+
+        Table simulationRow = new Table();
+        simulationRow.defaults().pad(UI_PADDING);
+        simulationRow.add(deviceButton).minWidth(BUTTON_MIN_WIDTH);
+        simulationRow.add(layoutButton).minWidth(BUTTON_MIN_WIDTH);
+        debugContent.add(simulationRow).row();
+    }
+
+    private TextButton tabButton(String label, Tab tab) {
+        return actionButton(label, () -> selectTab(tab));
+    }
+
+    private void selectTab(Tab tab) {
+        tabContent.clearChildren();
+        tabContent.add(tab == Tab.GAMEPLAY ? gameplayContent : debugContent);
+        gameplayTabButton.getLabel().setColor(tab == Tab.GAMEPLAY ? TAB_ACTIVE_COLOR : TAB_INACTIVE_COLOR);
+        debugTabButton.getLabel().setColor(tab == Tab.DEBUG ? TAB_ACTIVE_COLOR : TAB_INACTIVE_COLOR);
     }
 
     private void refreshDeviceLayoutLabels() {

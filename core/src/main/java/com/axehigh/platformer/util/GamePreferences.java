@@ -15,6 +15,7 @@ public class GamePreferences {
     private static final String KEY_DEBUG_MODE = "debugMode";
     private static final String KEY_WALL_CLIMB_ENABLED = "wallClimbEnabled";
     private static final String KEY_SQUASH_ENABLED = "squashEnabled";
+    private static final String KEY_SELECT_LEVEL_ENABLED = "selectLevelEnabled";
     private static final String KEY_DEVICE_CLASS = "deviceClass";
     private static final String KEY_LAYOUT_MODE = "layoutMode";
 
@@ -27,6 +28,8 @@ public class GamePreferences {
     static final boolean DEFAULT_WALL_CLIMB_ENABLED = true;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
     static final boolean DEFAULT_SQUASH_ENABLED = false;
+    /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
+    static final boolean DEFAULT_SELECT_LEVEL_ENABLED = true;
 
     private final Preferences preferences;
 
@@ -102,6 +105,19 @@ public class GamePreferences {
 
     public void setSquashEnabled(boolean squashEnabled) {
         preferences.putBoolean(KEY_SQUASH_ENABLED, squashEnabled);
+        preferences.flush();
+    }
+
+    /**
+     * Whether the main menu shows the Select Level entry. A developer feature flag (default
+     * {@code true}); see {@code FeatureFlags}.
+     */
+    public boolean isSelectLevelEnabled() {
+        return preferences.getBoolean(KEY_SELECT_LEVEL_ENABLED, DEFAULT_SELECT_LEVEL_ENABLED);
+    }
+
+    public void setSelectLevelEnabled(boolean selectLevelEnabled) {
+        preferences.putBoolean(KEY_SELECT_LEVEL_ENABLED, selectLevelEnabled);
         preferences.flush();
     }
 

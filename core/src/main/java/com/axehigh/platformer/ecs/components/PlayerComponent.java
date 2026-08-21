@@ -30,7 +30,7 @@ public class PlayerComponent implements Component {
     /** Accumulated coin count waiting to be shown in the next floating message. */
     public int pendingCoinMessage = 0;
     /** Current melee/sword damage per hit; base 5, raised to 8 by the "Sharp Edge" shop upgrade. */
-    public int swordDamage = GameConstants.SwordDamage;
+    public int swordDamage = GameConstants.BaseDamage;
     /** One-time flag: true once the "Sharp Edge" upgrade (swordDamage -> 8) has been purchased. */
     public boolean sharpEdgePurchased = false;
     /** One-time flag: true once the "Dagger Bandolier" upgrade (maxItems -> 60) has been purchased. */
@@ -70,7 +70,7 @@ public class PlayerComponent implements Component {
      * runs past it is communicated by blinking the sprite instead.
      */
     public Timer hurtTimer = new Timer();
-    
+
     /** Flag to track death status. */
     public boolean isDead = false;
 
