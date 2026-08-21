@@ -12,7 +12,6 @@ public final class GameAssetRegistry {
     public static final String ORIGIN_GAME_GFX = "gfx/origin-game.atlas";
     public static final String ORIGIN_UI_JSON = "ui/uiskin.json";
     public static final String ORIGIN_UI_GFX = "ui/uiskin.atlas";
-    public static final String PLATFORM_ASSET = "gfx/old/platform.png";
     public static final String BACKGROUND_FAR = "maps/gfx/background/Background_01.png";
     public static final String BACKGROUND_NEAR = "maps/gfx/background/Background_02.png";
 
@@ -34,7 +33,6 @@ public final class GameAssetRegistry {
         assetManager.load("gfx/old/heart.png", Texture.class);
         assetManager.load("gfx/old/bullet.png", Texture.class);
         assetManager.load("gfx/old/dagger.png", Texture.class);
-        assetManager.load("gfx/old/platform.png", Texture.class);
         assetManager.load("gfx/acid_drop.png", Texture.class);
         assetManager.load("gfx/lava_drop.png", Texture.class);
         assetManager.load(BACKGROUND_FAR, Texture.class);

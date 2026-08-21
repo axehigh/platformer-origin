@@ -9,7 +9,6 @@ import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
 
-import static com.axehigh.platformer.assets.GameAssetRegistry.PLATFORM_ASSET;
 import static com.axehigh.platformer.ecs.components.AnimationComponent.State.IDLE;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
 
@@ -38,7 +37,8 @@ class TrapFactory {
      * while its owning room is active.
      */
     public Entity createPlatform(float x, float y, float width, float height, TiledMapTile tile, MapObject object, int roomIndex) {
-        TextureRegion region = tile != null ? tile.getTextureRegion() : new TextureRegion(context.getTexture(PLATFORM_ASSET));
+        TextureRegion region = tile != null ? tile.getTextureRegion()
+                : context.originAtlas.findRegion(SpriteConstants.CHEST_OPEN_REGION);
 
         Entity entity = new Entity();
 

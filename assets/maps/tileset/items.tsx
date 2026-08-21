@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.2" name="items" tilewidth="128" tileheight="156" tilecount="19" columns="0">
+<tileset version="1.10" tiledversion="1.12.2" name="items" tilewidth="128" tileheight="156" tilecount="23" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="1">
   <image source="../gfx/items/Apple.png" width="128" height="128"/>
@@ -81,5 +81,33 @@
     <point/>
    </object>
   </objectgroup>
+ </tile>
+ <tile id="25">
+  <properties>
+   <property name="potionType" value="Speed"/>
+   <property name="type" value="potion"/>
+  </properties>
+  <image source="../gfx/tiles/items/fish.png" width="53" height="22"/>
+ </tile>
+ <tile id="26">
+  <properties>
+   <property name="potionType" value="Healing"/>
+   <property name="type" value="potion"/>
+  </properties>
+  <image source="../gfx/tiles/items/heart.png" width="101" height="101"/>
+ </tile>
+ <tile id="27">
+  <properties>
+   <property name="potionType" value="Strength"/>
+   <property name="type" value="potion"/>
+  </properties>
+  <image source="../gfx/tiles/items/meat.png" width="101" height="101"/>
+ </tile>
+ <tile id="28">
+  <properties>
+   <property name="potionType" value="Invulnerability"/>
+   <property name="type" value="potion"/>
+  </properties>
+  <image source="../gfx/tiles/items/orange.png" width="100" height="100"/>
  </tile>
 </tileset>

@@ -322,7 +322,7 @@ A dedicated `DebugRenderSystem` (see `resources/docs-ai/ashley-ecs.md`) draws ev
 4. **Volume & toggles:** The Preferences screen exposes Music/SFX ON-OFF checkboxes plus the Music/SFX volume sliders; the pause menu exposes the same ON-OFF toggles. All writes go through `AudioManager` so they apply live (music volume/pause immediately, SFX guard on the next play) and persist across restarts.
 
 ### V. Moving Platforms (`EntityFactory`, `MovingPlatformComponent`, `MovingPlatformSystem`)
-1. **Map authoring:** A moving platform is a rectangle (or tile) in the **"objects"** object layer with `type="platform"`. The object rectangle defines both the sprite footprint and the collision box; a plain rectangle without a tile falls back to the placeholder art `gfx/old/platform.png`, stretched to the rectangle's size. Custom properties:
+1. **Map authoring:** A moving platform is a rectangle (or tile) in the **"objects"** object layer with `type="platform"`. The object rectangle defines both the sprite footprint and the collision box; a plain rectangle without a tile falls back to the atlas `Chest_01_Unlocked` region (`SpriteConstants.CHEST_OPEN_REGION`, same origin-game.atlas art as the chest's open state), stretched to the rectangle's size. Custom properties:
     *   `amplitudeX` / `amplitudeY` — travel distance in world units per axis around the object's spawn rectangle (default `0`, i.e. a static platform).
     *   `axis` — convenience: `"x"` (amplitudeY forced 0), `"y"` (amplitudeX forced 0), `"both"`/absent (use the amplitude properties as given).
     *   `speed` — oscillation angular frequency in **radians per second** (default `1`; ≈ full back-and-forth cycle every 6.3s at amplitude 1).
