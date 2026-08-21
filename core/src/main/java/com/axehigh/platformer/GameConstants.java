@@ -83,6 +83,8 @@ public final class GameConstants {
     public static int SwordDamage = 5;
     public static int MaxHealth = 3;
 
+    //Enemy Stats
+    public static int EnemyBaseHealth = 5;
     //Potions & buffs
     /** How many of each potion type the player can hold at once. */
     public static int POTION_CAP = 5;

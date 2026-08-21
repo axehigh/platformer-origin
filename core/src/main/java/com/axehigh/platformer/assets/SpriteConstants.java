@@ -45,11 +45,13 @@ public class SpriteConstants {
     public static float EnemyWalkerCollisionHeight = 140f * EnemyWalkerScale;
     public static float EnemyWalkerOffsetY = 0f;
 
+    public static String EnemyFlyerSprite = "mosquito";
     public static float EnemyFlyerScale = 0.3f;
     public static float EnemyFlyerCollisionWidth = 40f;
     public static float EnemyFlyerCollisionHeight = 40f;
     public static float EnemyFlyerOffsetY = 0f;
 
+    public static String EnemyShooterSprite = "spider";
     public static float EnemyShooterScale = 0.3f;
     public static float EnemyShooterCollisionWidth = 50f;
     public static float EnemyShooterCollisionHeight = 50f;
