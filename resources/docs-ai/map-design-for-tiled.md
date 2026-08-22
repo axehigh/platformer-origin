@@ -23,10 +23,10 @@ Levels are chained together as **separate `.tmx` files**: the exit gate in one m
 ### Units, scale, and coordinates (important)
 
 *   **1 world unit == 1 pixel** as drawn in Tiled. The world's Y axis points **up** in-game; Tiled draws Y **down**. The loader flips object/tile Y coordinates automatically, so just design normally in Tiled — never hand-edit raw Y values in the `.tmx` XML.
-*   The game was built for a fixed virtual resolution of `480×272` "16px-world-units", scaled by `unitScale = tileWidth / 16f` (`GameConstants.VIRTUAL_WIDTH/HEIGHT`). **All current maps use 128×128 tiles**, so:
+*   The game was built for a base virtual resolution of `480×272` "16px-world-units", scaled by `unitScale = tileWidth / 16f` (`GameConstants.VIRTUAL_WIDTH/HEIGHT`). The world **height** is fixed at `VIRTUAL_HEIGHT × unitScale`, but the world **width expands with the screen's aspect ratio** (`OffsetFitViewport`) so wide screens show more world instead of black bars: floored at the classic `480/272` ratio and capped at `GameConstants.MAX_WORLD_ASPECT` (≈21:9) only for physically ultra-wide screens. **All current maps use 128×128 tiles**, so:
     *   `unitScale = 128 / 16 = 8`.
-    *   One on-screen frame = `VIRTUAL_WIDTH * 8 = 3840` world px wide × `VIRTUAL_HEIGHT * 8 = 2176` px tall = **exactly 30 tiles × 17 tiles**.
-    *   Design rooms around whole screens (multiples of 30×17 tiles) for clean flip-screen framing.
+    *   One on-screen frame = at least `480 * 8 = 3840` world px tall-frame width × `VIRTUAL_HEIGHT * 8 = 2176` px tall = **30 tiles × 17 tiles minimum**, wider on wider screens (a 16:9 desktop shows ≈30.2 tiles; a banded phone in landscape shows proportionally more).
+    *   Design rooms around whole screens (multiples of 30×17 tiles) for clean flip-screen framing; rooms narrower than the widest target screens will simply show a sliver of the neighbors, and the camera's per-room `camera="flip"` property can pin framing where that matters.
 *   Mixing tile sizes across a level chain works (scale is recalculated per map), but keep every map in a chain the **same tile size** to avoid jarring resizes.
 *   Object/room rectangles are placed and sized in **world px** (the same numbers you see in Tiled), not in tiles.
 

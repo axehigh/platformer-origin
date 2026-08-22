@@ -48,6 +48,18 @@ public final class GameConstants {
      */
     public static final float MOBILE_ZOOM = 0.55f;
 
+    /**
+     * Hard cap for the horizontal world expansion applied by {@code OffsetFitViewport}: the game
+     * world widens with the screen's aspect ratio (eliminating the left/right black bars on phones
+     * and desktop), but only screens <em>physically</em> wider than this width/height limit (~21:9)
+     * are clamped to it — they keep a mild pillarbox so an ultra-wide monitor never reveals more
+     * world than a narrower device. The touch-control band is ignored for this decision (it shrinks
+     * available height and would otherwise cost tall phones extra side bars). The world height
+     * always stays at {@code VIRTUAL_HEIGHT} (&times; tile scale); narrower-than-16:9 screens clamp
+     * back up to the classic {@code VIRTUAL_WIDTH}/{@code VIRTUAL_HEIGHT} ratio instead.
+     */
+    public static final float MAX_WORLD_ASPECT = 21f / 9f;
+
     //Parallax background
     /** Scroll speed of the far background layer ({@code Background_01}) relative to the world:
      * 0 = glued to the camera (skybox), 1 = world-locked. Kept below the near layer so it recedes. */

@@ -3,19 +3,22 @@ package com.axehigh.platformer.screens;
 import com.axehigh.platformer.audio.AudioManager;
 import com.axehigh.platformer.map.LevelCatalog;
 import com.axehigh.platformer.map.SaveData;
+import com.axehigh.platformer.ui.MenuEffects;
 import com.axehigh.platformer.util.FeatureFlags;
 import com.axehigh.platformer.util.SaveManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Scaling;
 
-import static com.axehigh.platformer.GameConstants.UI_PADDING;
+import static com.axehigh.platformer.GameConstants.*;
 
 /**
  * Main menu over a full-bleed {@code startup-menu.jpg} backdrop (uniform cover scaling, edges
@@ -25,7 +28,11 @@ import static com.axehigh.platformer.GameConstants.UI_PADDING;
  */
 public class MainMenuScreen extends MenuScreen {
 
+    private static final int EMBER_COUNT = 18;
+
     private final Texture backgroundTexture;
+    private final MenuEffects menuEffects = new MenuEffects();
+    private Image backgroundImage;
 
     public MainMenuScreen(Game game) {
         super(game);
@@ -38,6 +45,8 @@ public class MainMenuScreen extends MenuScreen {
         AudioManager.get().playMenuMusic();
 
         addBackground();
+        menuEffects.applyKenBurns(stage, backgroundImage);
+        menuEffects.addEmbers(stage, EMBER_COUNT);
 
         Table content = new Table();
         content.setFillParent(true);
@@ -46,7 +55,7 @@ public class MainMenuScreen extends MenuScreen {
         Table titleTable = new Table();
         titleTable.setFillParent(true);
         titleTable.top();
-        titleTable.add(createMenuTitle("Origin")).padTop(3 * UI_PADDING).row();
+        titleTable.add(menuEffects.createGlowBehind(createMenuTitle("Origin"))).padTop(3 * UI_PADDING).row();
         stage.addActor(titleTable);
 
         TextButton preferencesButton = createMenuButton("Preferences", () -> changeScreen(new PreferencesScreen(game)));
@@ -84,15 +93,18 @@ public class MainMenuScreen extends MenuScreen {
             .padBottom(2 * UI_PADDING).row();
 
         stage.addActor(bottomCenter);
+
+        Array<Vector2> sparkPositions = new Array<>();
+        sparkPositions.add(new Vector2(180f, SCREEN_HEIGHT * 0.45f));
+        sparkPositions.add(new Vector2(SCREEN_WIDTH - 180f, SCREEN_HEIGHT * 0.45f));
+        menuEffects.addSparkBursts(stage, sparkPositions);
     }
 
-    /** Adds the full-screen cover-scaled backdrop as the bottom-most actor. */
+    /** Builds the full-screen cover-scaled backdrop; Ken Burns + embers layer above it in show(). */
     private void addBackground() {
-        Image background = new Image(backgroundTexture);
-        background.setScaling(Scaling.fill);
-        background.setFillParent(true);
-        background.setTouchable(Touchable.disabled);
-        stage.addActor(background);
+        backgroundImage = new Image(backgroundTexture);
+        backgroundImage.setScaling(Scaling.fill);
+        backgroundImage.setTouchable(Touchable.disabled);
     }
 
     private void newGame() {
@@ -111,8 +123,15 @@ public class MainMenuScreen extends MenuScreen {
     }
 
     @Override
+    public void resize(int width, int height) {
+        super.resize(width, height);
+        menuEffects.resize(stage.getWidth(), stage.getHeight());
+    }
+
+    @Override
     public void dispose() {
         super.dispose();
         backgroundTexture.dispose();
+        menuEffects.dispose();
     }
 }
