@@ -26,13 +26,11 @@ public class PreferencesScreen extends MenuScreen {
         GamePreferences preferences = new GamePreferences();
         AudioManager audio = AudioManager.get();
 
-        addMenuPanel();
-
         Table content = new Table();
         content.setFillParent(true);
         stage.addActor(content);
 
-        content.add(createMenuTitle("Preferences")).colspan(2).padBottom(12f).row();
+        content.add(menuEffects.createGlowBehind(createMenuTitle("Preferences"))).colspan(2).padBottom(12f).row();
 
         CheckBox musicCheckBox = new CheckBox(" Music", skin);
         musicCheckBox.getLabel().setFontScale(GameConstants.FontScale);

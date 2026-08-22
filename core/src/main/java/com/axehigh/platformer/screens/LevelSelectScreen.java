@@ -10,12 +10,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton.ImageTextButtonStyle;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntArray;
@@ -31,7 +27,7 @@ import static com.axehigh.platformer.GameConstants.FontScale;
 public class LevelSelectScreen extends MenuScreen {
 
     private static final int COLUMNS = 3;
-    private static final float BUTTON_WIDTH = 430f;
+    private static final float BUTTON_WIDTH = 230f;
     private static final float BUTTON_HEIGHT = 90f;
     private static final float GRID_WIDTH = 1350f;
     private static final float GRID_HEIGHT = 620f;
@@ -61,13 +57,11 @@ public class LevelSelectScreen extends MenuScreen {
 
         completedLevelIds = SaveManager.hasSave() ? SaveManager.load().completedLevelIds : new Array<>();
 
-        addMenuPanel();
-
         Table content = new Table();
         content.setFillParent(true);
         stage.addActor(content);
 
-        content.add(createMenuTitle("Select Level")).padBottom(4f).row();
+        content.add(menuEffects.createGlowBehind(createMenuTitle("Select Level"))).padBottom(4f).row();
 
         content.add(createWorldTabs()).padBottom(8f).row();
 
