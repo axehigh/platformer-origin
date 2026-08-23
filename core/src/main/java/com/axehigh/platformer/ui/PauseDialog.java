@@ -5,24 +5,20 @@ import com.axehigh.platformer.ecs.systems.DebugRenderSystem;
 import com.axehigh.platformer.util.FeatureFlags;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static com.axehigh.platformer.GameConstants.FontScale;
-import static com.axehigh.platformer.GameConstants.UI_PADDING;
 
 /**
  * In-game pause menu, split into a Gameplay tab (audio toggles, wall-climb feature flag) and a
  * Debug tab (collision/touch debug toggles, device/layout simulation). Resume and Exit stay
- * outside the tabs so they're reachable from either. Global toggles (music, SFX, collision debug,
- * wall climb) are flipped directly; state owned by the screen (pause flag, touch-debug logging,
- * device/layout switching) is reached through {@link Listener}.
+ * outside the tabs side-by-side so they're reachable from either. Checkbox toggles flip settings
+ * directly; state owned by the screen (pause flag, touch-debug logging, device/layout switching)
+ * is reached through {@link Listener}.
  */
 public class PauseDialog extends Dialog {
 
@@ -56,7 +52,11 @@ public class PauseDialog extends Dialog {
         void onExit();
     }
 
-    private static final float BUTTON_MIN_WIDTH = 240f;
+    private static final float TAB_BUTTON_MIN_WIDTH = 130f;
+    private static final float ACTION_BUTTON_MIN_WIDTH = 110f;
+    private static final float SIMULATION_BUTTON_MIN_WIDTH = 130f;
+    private static final float CONTENT_PAD = 8f;
+    private static final float ELEMENT_PAD = 5f;
     private static final Color TAB_ACTIVE_COLOR = Color.GOLD;
     private static final Color TAB_INACTIVE_COLOR = Color.WHITE;
 
@@ -74,10 +74,8 @@ public class PauseDialog extends Dialog {
         this.listener = listener;
 
         getTitleLabel().setFontScale(FontScale);
-        getContentTable().defaults().pad(UI_PADDING);
-        getButtonTable().defaults().pad(UI_PADDING);
-
-        button(actionButton("Resume", this::hideAndResume));
+        getContentTable().defaults().pad(CONTENT_PAD);
+        getButtonTable().defaults().pad(CONTENT_PAD);
 
         buildGameplayTab();
         buildDebugTab();
@@ -85,14 +83,16 @@ public class PauseDialog extends Dialog {
         gameplayTabButton = tabButton("Gameplay", Tab.GAMEPLAY);
         debugTabButton = tabButton("Debug", Tab.DEBUG);
         Table tabHeader = new Table();
-        tabHeader.add(gameplayTabButton).minWidth(BUTTON_MIN_WIDTH).padRight(UI_PADDING);
-        tabHeader.add(debugTabButton).minWidth(BUTTON_MIN_WIDTH);
+        tabHeader.add(gameplayTabButton).minWidth(TAB_BUTTON_MIN_WIDTH).padRight(ELEMENT_PAD);
+        tabHeader.add(debugTabButton).minWidth(TAB_BUTTON_MIN_WIDTH);
         getContentTable().add(tabHeader).row();
 
         getContentTable().add(tabContent).row();
 
         selectTab(Tab.GAMEPLAY);
 
+        getButtonTable().defaults().pad(ELEMENT_PAD).minWidth(ACTION_BUTTON_MIN_WIDTH);
+        button(actionButton("Resume", this::hideAndResume));
         button(actionButton("Exit", listener::onExit));
     }
 
@@ -109,35 +109,35 @@ public class PauseDialog extends Dialog {
     }
 
     private void buildGameplayTab() {
-        gameplayContent.defaults().pad(UI_PADDING);
-        gameplayContent.add(toggleButton("Music: ",
+        gameplayContent.defaults().pad(ELEMENT_PAD).left();
+        gameplayContent.add(toggleCheckBox("Music",
             AudioManager.get()::isMusicEnabled,
-            enabled -> AudioManager.get().setMusicEnabled(enabled))).minWidth(BUTTON_MIN_WIDTH).row();
+            AudioManager.get()::setMusicEnabled)).row();
 
-        gameplayContent.add(toggleButton("Sound Effects: ",
+        gameplayContent.add(toggleCheckBox("Sound Effects",
             AudioManager.get()::isSfxEnabled,
-            enabled -> AudioManager.get().setSfxEnabled(enabled))).minWidth(BUTTON_MIN_WIDTH).row();
+            AudioManager.get()::setSfxEnabled)).row();
 
-        gameplayContent.add(toggleButton("Wall Climb: ",
+        gameplayContent.add(toggleCheckBox("Wall Climb",
             FeatureFlags::isWallClimbingEnabled,
-            FeatureFlags::setWallClimbingEnabled)).minWidth(BUTTON_MIN_WIDTH).row();
+            FeatureFlags::setWallClimbingEnabled)).row();
     }
 
     private void buildDebugTab() {
-        debugContent.defaults().pad(UI_PADDING);
+        debugContent.defaults().pad(ELEMENT_PAD);
 
-        TextButton collisionDebugButton = toggleButton("Collision Debug: ",
+        CheckBox collisionDebugBox = toggleCheckBox("Collision Debug",
             DebugRenderSystem::isDebugEnabled,
             DebugRenderSystem::setDebugEnabled);
-        TextButton touchDebugButton = toggleButton("Touch Debug: ",
+        CheckBox touchDebugBox = toggleCheckBox("Touch Debug",
             listener::isTouchDebugOn,
             listener::setTouchDebugOn);
 
         Table debugRow = new Table();
-        debugRow.defaults().pad(UI_PADDING);
-        debugRow.add(collisionDebugButton).minWidth(BUTTON_MIN_WIDTH);
-        debugRow.add(touchDebugButton).minWidth(BUTTON_MIN_WIDTH);
-        debugContent.add(debugRow).row();
+        debugRow.defaults().pad(ELEMENT_PAD);
+        debugRow.add(collisionDebugBox).left();
+        debugRow.add(touchDebugBox).left();
+        debugContent.add(debugRow).left().row();
 
         deviceButton = new TextButton("Device: " + listener.deviceLabel(), getSkin());
         deviceButton.getLabel().setFontScale(FontScale);
@@ -150,7 +150,7 @@ public class PauseDialog extends Dialog {
             }
         });
 
-        layoutButton = new TextButton("Mobile Layout: " + listener.layoutLabel(), getSkin());
+        layoutButton = new TextButton("Mobile: " + listener.layoutLabel(), getSkin());
         layoutButton.getLabel().setFontScale(FontScale);
         layoutButton.addListener(new ChangeListener() {
             @Override
@@ -162,9 +162,9 @@ public class PauseDialog extends Dialog {
         });
 
         Table simulationRow = new Table();
-        simulationRow.defaults().pad(UI_PADDING);
-        simulationRow.add(deviceButton).minWidth(BUTTON_MIN_WIDTH);
-        simulationRow.add(layoutButton).minWidth(BUTTON_MIN_WIDTH);
+        simulationRow.defaults().pad(ELEMENT_PAD);
+        simulationRow.add(deviceButton).minWidth(SIMULATION_BUTTON_MIN_WIDTH);
+        simulationRow.add(layoutButton).minWidth(SIMULATION_BUTTON_MIN_WIDTH);
         debugContent.add(simulationRow).row();
     }
 
@@ -181,7 +181,7 @@ public class PauseDialog extends Dialog {
 
     private void refreshDeviceLayoutLabels() {
         deviceButton.setText("Device: " + listener.deviceLabel());
-        layoutButton.setText("Mobile Layout: " + listener.layoutLabel());
+        layoutButton.setText("Mobile: " + listener.layoutLabel());
     }
 
     private TextButton actionButton(String text, Runnable onClick) {
@@ -197,21 +197,17 @@ public class PauseDialog extends Dialog {
         return button;
     }
 
-    private TextButton toggleButton(String prefix, Supplier<Boolean> getter, Consumer<Boolean> setter) {
-        TextButton button = new TextButton(prefix + onOff(getter), getSkin());
-        button.getLabel().setFontScale(FontScale);
-        button.addListener(new ChangeListener() {
+    private CheckBox toggleCheckBox(String labelText, Supplier<Boolean> getter, Consumer<Boolean> setter) {
+        CheckBox checkBox = new CheckBox(" " + labelText, getSkin());
+        checkBox.getLabel().setFontScale(FontScale);
+        checkBox.setChecked(getter.get());
+        checkBox.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 AudioManager.get().playClick();
-                setter.accept(!getter.get());
-                button.setText(prefix + onOff(getter));
+                setter.accept(checkBox.isChecked());
             }
         });
-        return button;
-    }
-
-    private static String onOff(Supplier<Boolean> getter) {
-        return getter.get() ? "ON" : "OFF";
+        return checkBox;
     }
 }

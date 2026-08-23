@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="48" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="494">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="48" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="496">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
  <tileset firstgid="63" source="../tileset/items.tsx"/>
  <tileset firstgid="92" source="../tileset/enemy.tsx"/>
@@ -28,7 +28,7 @@
 2,0,0,0,0,0,1,0,0,0,0,0,2,2,2,2,2,2,2,0,0,0,0,2,2,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
-2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2147483770,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
 </data>
  </layer>
@@ -73,6 +73,16 @@
   <object id="491" gid="89" x="2304" y="1152" width="101" height="101"/>
   <object id="492" gid="90" x="2560" y="1152" width="101" height="101"/>
   <object id="493" gid="91" x="2816" y="1152" width="100" height="100"/>
+  <object id="494" name="acid" type="trap" x="384" y="640" width="128" height="128">
+   <properties>
+    <property name="damage" type="int" value="1"/>
+    <property name="direction" value="down"/>
+    <property name="interval" type="float" value="2"/>
+    <property name="speed" type="int" value="200"/>
+    <property name="trapType" value="acidDrop"/>
+   </properties>
+  </object>
+  <object id="495" gid="23" x="384" y="768" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="7" name="enemies">
   <object id="2" name="enemy_r1_shooter" gid="96" x="5504" y="1152" width="128" height="128"/>
