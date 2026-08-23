@@ -1,9 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.LevelExitComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.map.LevelCatalog;
 import com.axehigh.platformer.map.LevelDefinition;
 import com.axehigh.platformer.map.LevelManager;
@@ -14,6 +11,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
@@ -25,11 +23,18 @@ import static com.axehigh.platformer.ecs.components.Mappers.*;
  * for every {@code LevelExitComponent} gate checks the player's bounds against a sensor rectangle
  * inflated a few units beyond the gate's own {@code CollisionComponent} bounds (so it feels like
  * walking up to a door rather than requiring pixel-perfect overlap). On overlap sets
- * {@code nearExit = true}; if the player also pressed interact that same frame, hands off to
+ * {@code nearExit = true} and fades in an amber {@code LightComponent} (animating alpha and radius
+ * over {@code FADE_DURATION}) on the gate entity so it glows via {@code LightRenderSystem}. When
+ * the player moves out of proximity, the light smoothly fades out and is removed once it reaches
+ * zero. If the player also pressed interact that same frame, hands off to
  * {@code LevelManager.loadLevel(...)} to perform the actual level transition.
  */
 public class LevelExitSystem extends IteratingSystem {
     private static final float SENSOR_PADDING = 6f;
+    private static final float DOOR_LIGHT_RADIUS = 24f;
+    private static final float DOOR_LIGHT_BASE_ALPHA = 0.5f;
+    private static final float FADE_DURATION = 0.3f;
+    private static final Color DOOR_LIGHT_COLOR = new Color(1f, 0.85f, 0.5f, 0.5f);
 
     private final LevelManager levelManager;
     private final Rectangle sensorBounds = new Rectangle();
@@ -66,30 +71,57 @@ public class LevelExitSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity gateEntity, float deltaTime) {
-        if (players.size() == 0) {
-            return;
-        }
-        Entity playerEntity = players.first();
-        PlayerComponent player = PLAYER.get(playerEntity);
-        CollisionComponent playerCollision = COLLISION.get(playerEntity);
-
+        LevelExitComponent levelExit = LEVEL_EXIT.get(gateEntity);
         CollisionComponent gateCollision = COLLISION.get(gateEntity);
-        float padding = SENSOR_PADDING * unitScale;
-        sensorBounds.set(
-            gateCollision.worldBounds.x - padding,
-            gateCollision.worldBounds.y - padding,
-            gateCollision.worldBounds.width + padding * 2f,
-            gateCollision.worldBounds.height + padding * 2f);
 
-        if (!playerCollision.worldBounds.overlaps(sensorBounds)) {
-            return;
+        boolean inProximity = false;
+        Entity playerEntity = null;
+        PlayerComponent player = null;
+
+        if (players.size() > 0) {
+            playerEntity = players.first();
+            player = PLAYER.get(playerEntity);
+            CollisionComponent playerCollision = COLLISION.get(playerEntity);
+
+            float padding = SENSOR_PADDING * unitScale;
+            sensorBounds.set(
+                gateCollision.worldBounds.x - padding,
+                gateCollision.worldBounds.y - padding,
+                gateCollision.worldBounds.width + padding * 2f,
+                gateCollision.worldBounds.height + padding * 2f);
+
+            if (playerCollision.worldBounds.overlaps(sensorBounds)) {
+                inProximity = true;
+                player.nearExit = true;
+            }
         }
 
-        player.nearExit = true;
+        if (inProximity) {
+            levelExit.fadeProgress = Math.min(1f, levelExit.fadeProgress + (FADE_DURATION > 0f ? deltaTime / FADE_DURATION : 1f));
+        } else {
+            levelExit.fadeProgress = Math.max(0f, levelExit.fadeProgress - (FADE_DURATION > 0f ? deltaTime / FADE_DURATION : 1f));
+        }
 
-        if (player.interactPressed) {
+        if (levelExit.fadeProgress > 0f) {
+            LightComponent light = LIGHT.get(gateEntity);
+            if (light == null) {
+                light = new LightComponent();
+                gateEntity.add(light);
+            }
+            light.color.set(DOOR_LIGHT_COLOR);
+            light.baseAlpha = DOOR_LIGHT_BASE_ALPHA * levelExit.fadeProgress;
+            light.radius = DOOR_LIGHT_RADIUS * unitScale * levelExit.fadeProgress;
+            light.offset.set(
+                gateCollision.bounds.x + gateCollision.bounds.width / 2f,
+                gateCollision.bounds.y + gateCollision.bounds.height / 2f);
+        } else {
+            if (LIGHT.has(gateEntity)) {
+                gateEntity.remove(LightComponent.class);
+            }
+        }
+
+        if (inProximity && player != null && player.interactPressed) {
             player.interactPressed = false;
-            LevelExitComponent levelExit = LEVEL_EXIT.get(gateEntity);
             SaveManager.save(buildSaveData(player, levelExit.nextLevelPath));
             levelManager.loadLevel(levelExit.nextLevelPath, playerEntity);
         }

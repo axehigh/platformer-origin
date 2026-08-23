@@ -11,4 +11,6 @@ import com.badlogic.ashley.core.Component;
 public class LevelExitComponent implements Component {
     /** Target .tmx asset path (e.g. "maps/demo_room.tmx"), read from the object's `nextLevel` property. */
     public String nextLevelPath = "";
+    /** Normalized fade progress [0, 1] driving the door's proximity glow fade-in and fade-out. */
+    public float fadeProgress = 0f;
 }
