@@ -20,11 +20,11 @@ Usage:
 Exit code 0 = all pass, 1 = errors found.
 """
 
-import sys
 import os
+import sys
 import xml.etree.ElementTree as ET
-from pathlib import Path
 from dataclasses import dataclass, field
+from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # Constants — mirrors MapLoader.java / EntityFactory.java
@@ -113,6 +113,41 @@ def _parse_csv_data(layer_elem):
             if gid > 0:
                 gids.add(gid)
     return gids
+
+
+def _build_collision_grid(layer_elem):
+    """Return a {(col, row): gid} dict for every non-zero tile in a tile layer."""
+    data_el = layer_elem.find("data")
+    if data_el is None or data_el.get("encoding") != "csv":
+        return {}
+    layer_width = int(layer_elem.get("width", "0"))
+    if layer_width == 0:
+        return {}
+    csv = data_el.text.strip().replace("\n", "").replace("\r", "")
+    grid = {}
+    tokens = [t.strip() for t in csv.split(",") if t.strip()]
+    for i, token in enumerate(tokens):
+        gid = int(token)
+        if gid > 0:
+            col = i % layer_width
+            row = i // layer_width
+            grid[(col, row)] = gid
+    return grid
+
+
+def _is_gid_solid(gid, tilesets, tsx_tile_props):
+    """Return True if the given tile GID is a solid collision tile.
+
+    A tile is solid if it exists on the collision layer and its
+    tileset properties do NOT explicitly set solid=false.
+    """
+    if gid <= 0:
+        return False
+    source, local_id = _gid_to_tileset_source(gid, tilesets)
+    if source is None:
+        return True  # unresolvable tile on collision layer — assume solid
+    props = tsx_tile_props.get(source, {}).get(local_id, {})
+    return props.get("solid", "true").lower() != "false"
 
 
 def _gid_to_tileset_source(gid, tilesets):
@@ -281,6 +316,8 @@ def validate_map(tmx_path: str) -> MapReport:
     # -- Objects validation --
     objects_layer = obj_layers.get("objects")
     player_start_count = 0
+    player_start_x = 0.0
+    player_start_y = 0.0
     has_exit_gate = False
     room_names = set()
 
@@ -351,6 +388,8 @@ def validate_map(tmx_path: str) -> MapReport:
             # -- playerStart --
             if obj_type == "playerStart":
                 player_start_count += 1
+                player_start_x = float(obj.get("x", 0))
+                player_start_y = float(obj.get("y", 0))
 
             # -- exitGate --
             elif obj_type == "exitGate":
@@ -408,6 +447,36 @@ def validate_map(tmx_path: str) -> MapReport:
         report.error("No playerStart object found in objects layer")
     elif player_start_count > 1:
         report.error(f"Expected exactly 1 playerStart, found {player_start_count}")
+
+    # -- playerStart spawn safety --
+    if player_start_count == 1 and collision_layer is not None:
+        spawn_col = int(player_start_x / tilewidth)
+        spawn_row = int(player_start_y / tileheight)
+        collision_grid = _build_collision_grid(collision_layer)
+
+        # Check: spawn must not be inside a solid collision tile
+        spawn_gid = collision_grid.get((spawn_col, spawn_row), 0)
+        if _is_gid_solid(spawn_gid, tilesets, tsx_tile_props):
+            report.error(
+                f"playerStart at ({player_start_x}, {player_start_y}) "
+                f"[col {spawn_col}, row {spawn_row}] is inside a solid collision tile "
+                f"— player will spawn embedded in geometry",
+                location="objects"
+            )
+
+        # Check: there must be a solid floor within 20 tiles below the spawn
+        has_floor = False
+        for scan_row in range(spawn_row + 1, min(spawn_row + 21, int(collision_layer.get("height", "0")))):
+            gid = collision_grid.get((spawn_col, scan_row), 0)
+            if _is_gid_solid(gid, tilesets, tsx_tile_props):
+                has_floor = True
+                break
+        if not has_floor:
+            report.warn(
+                f"No collision floor found within 20 tiles below playerStart "
+                f"— player may fall indefinitely",
+                location="objects"
+            )
 
     # -- exitGate check --
     if not has_exit_gate:

@@ -58,6 +58,7 @@ import argparse
 import os
 import random
 import re
+import sys
 import xml.etree.ElementTree as ET
 
 TILE_SIZE = 128
@@ -1352,8 +1353,10 @@ def generate_map(output_path, room_count=3, seed=None, tilesets_dir="tileset", e
 
     with open(output_path, "w", newline="\n") as f:
         f.write(tmx)
-    problems = validate_map(output_path, tilesets_dir, room_width, room_height, no_secret=no_secret,
-                            exit_next=exit_next)
+    problems, warnings = validate_map(output_path, tilesets_dir, room_width, room_height,
+                                      no_secret=no_secret, exit_next=exit_next)
+    for w in warnings:
+        print(f"  [warn] {w}", file=sys.stderr)
     if problems:
         raise RuntimeError("Generated map failed validation:\n" + "\n".join(problems))
 
@@ -1406,8 +1409,9 @@ def _parse_collision_grid(root):
 
 def validate_map(path, tilesets_dir=None, room_width=None, room_height=None, no_secret=False,
                  exit_next=None):
-    """Returns a list of problems found (perimeter holes, CSV shape mismatches, unaligned
-    doorways, markers outside rooms); empty list means the map is safe to load.
+    """Returns ``(problems, warnings)`` where each is a list of strings.  An empty *problems*
+    list means the map is safe to load; *warnings* are non-fatal notes (e.g. auto-fixed spawn
+    positions) printed to stderr by the caller.
 
     room_width/room_height (tiles) describe the generated rooms; when omitted they are inferred
     from the map: the first normal room rect's size, falling back to the whole map size.
@@ -1420,13 +1424,14 @@ def validate_map(path, tilesets_dir=None, room_width=None, room_height=None, no_
     property equal to exit_next and sitting inside a normal room rect, plus exactly two door
     decorations on the decoration layer (one beneath the playerStart, one beneath the gate)."""
     problems = []
+    warnings = []
     root = ET.parse(path).getroot()
     grid, width, height = _parse_collision_grid(root)
     if grid is None:
-        return ["Missing 'collision' layer"]
+        return ["Missing 'collision' layer"], []
     if len(grid) != height:
         problems.append(f"collision layer has {len(grid)} rows, expected {height}")
-        return problems
+        return problems, warnings
     for i, row in enumerate(grid):
         if len(row) != width:
             problems.append(f"collision row {i} has {len(row)} cols, expected {width}")
@@ -1742,9 +1747,32 @@ def validate_map(path, tilesets_dir=None, room_width=None, room_height=None, no_
             spawn_col = ox // TILE_SIZE
             spawn_row = (height - 1) - oy // TILE_SIZE
             if not is_open(cell(spawn_col, spawn_row)):
-                problems.append(
-                    f"playerStart at col {spawn_col}, row {spawn_row} is inside a solid collision "
-                    f"tile (spawn-in-wall)")
+                # --- Auto-fix: walk upward until we find an open cell with ground below ---
+                old_row = spawn_row
+                fixed = False
+                for candidate_row in range(spawn_row - 1, -1, -1):
+                    if is_open(cell(spawn_col, candidate_row)):
+                        # Verify there's a solid collision tile directly below (ground).
+                        ground_row = candidate_row + 1
+                        if is_open(cell(spawn_col, ground_row)):
+                            continue  # no floor here, keep scanning upward
+                        # Found a safe position: open air with solid ground.
+                        spawn_row = candidate_row
+                        fixed = True
+                        break
+                if fixed:
+                    warnings.append(
+                        f"playerStart was inside a solid tile at row {old_row}; "
+                        f"auto-moved to row {spawn_row}")
+                    # Rewrite the playerStart object Y so downstream code sees the
+                    # corrected position without re-parsing.
+                    new_oy = (height - 1 - spawn_row) * TILE_SIZE
+                    player_starts[0].set("y", str(new_oy))
+                else:
+                    problems.append(
+                        f"playerStart at col {spawn_col}, row {old_row} is inside a solid "
+                        f"tile and no safe open position with ground found above "
+                        f"(spawn-in-wall)")
 
     if exit_next is not None:
         gates = [
@@ -1832,7 +1860,7 @@ def validate_map(path, tilesets_dir=None, room_width=None, room_height=None, no_
                     f"secret entrance approach col {last_col_end - 1}, row {pr} is solid -- "
                     f"blocked secret-room access")
 
-    return problems
+    return problems, warnings
 
 
 def main():

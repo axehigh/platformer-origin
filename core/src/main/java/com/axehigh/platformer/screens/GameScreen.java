@@ -1,6 +1,7 @@
 package com.axehigh.platformer.screens;
 
 import com.axehigh.platformer.assets.GameAssetRegistry;
+import com.axehigh.platformer.assets.SpriteConstants;
 import com.axehigh.platformer.audio.AudioManager;
 import com.axehigh.platformer.common.BaseScreen;
 import com.axehigh.platformer.ecs.GameSystems;
@@ -10,6 +11,7 @@ import com.axehigh.platformer.ecs.systems.CameraSystem;
 import com.axehigh.platformer.map.*;
 import com.axehigh.platformer.particles.ParticleHelper;
 import com.axehigh.platformer.ui.*;
+import com.axehigh.platformer.util.SpawnSafety;
 import com.axehigh.platformer.viewport.OffsetFitViewport;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
@@ -110,7 +112,11 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         systems = new GameSystems(engine, batch, camera, skin, assetManager, mapLoader, roomState,
             secretRoomRevealer, entityFactory, viewport, scale, this::onPlayerDeath);
 
-        Vector2 playerStart = mapLoader.findPlayerStart();
+        Vector2 playerStart = SpawnSafety.findSafeSpawn(
+            mapLoader.findPlayerStart(),
+            mapLoader.getCollisionRects(),
+            SpriteConstants.PlayerCollisionWidth * scale * SpriteConstants.PlayerScale,
+            SpriteConstants.PlayerCollisionHeight * scale * SpriteConstants.PlayerScale);
         Entity player = entityFactory.createPlayer(playerStart.x, playerStart.y);
         playerEntity = player;
         engine.addEntity(player);

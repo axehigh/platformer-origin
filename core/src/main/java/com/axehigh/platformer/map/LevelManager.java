@@ -7,6 +7,7 @@ import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.ecs.systems.*;
+import com.axehigh.platformer.util.SpawnSafety;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -154,7 +155,11 @@ public class LevelManager implements Disposable {
         entityFactory.spawnObjects(engine, mapLoader.getEnemiesLayer(), roomState);
         entityFactory.spawnEffects(engine, mapLoader.getEffectSpawns(), roomState);
 
-        Vector2 playerStart = mapLoader.findPlayerStart();
+        Vector2 playerStart = SpawnSafety.findSafeSpawn(
+            mapLoader.findPlayerStart(),
+            collisionRects,
+            SpriteConstants.PlayerCollisionWidth * newScale * SpriteConstants.PlayerScale,
+            SpriteConstants.PlayerCollisionHeight * newScale * SpriteConstants.PlayerScale);
         TransformComponent transform = TRANSFORM.get(player);
         transform.position.set(playerStart.x, playerStart.y);
         float playerFinalScale = newScale * SpriteConstants.PlayerScale;

@@ -259,6 +259,24 @@ A dedicated `DebugRenderSystem` (see `resources/docs-ai/ashley-ecs.md`) draws ev
 8.  **Cross-session persistence:** Passing through any exit gate autosaves a `SaveData` snapshot (level path, core stats, `completedLevelIds`, `triesRemaining`) via `SaveManager`/libGDX `Preferences`, so `MainMenuScreen`'s Continue button can resume the run across app restarts — see `resources/docs-ai/main-menu-screens.md`-equivalent plan notes and §2.P for the tries counter specifically.
 9.  **Debug overlay survives transitions:** `DebugRenderSystem`'s SHIFT+D toggle state is untouched by a level swap, since the system itself is never removed/recreated — only its `collisionRects`/`RoomState.rooms` references are refilled in place by `LevelManager`.
 
+### MA. Spawn Safety (`SpawnSafety`)
+When a level starts (or a mid-game level swap occurs), the engine validates the player's spawn position against the map's solid collision geometry before the player entity is created or repositioned. This prevents the player from spawning inside walls or below floors.
+
+**How it works:**
+1. The raw spawn position is read from the Tiled map's `playerStart` object.
+2. `SpawnSafety.findSafeSpawn()` checks the position against all solid collision rects:
+   - If the player's collision AABB overlaps a solid rect, the player is pushed outward (upward preferred) with a 1-pixel epsilon buffer.
+   - If no overlap exists, a vertical probe scans downward to find the nearest floor; the player's feet are snapped to that floor's top surface.
+   - If no floor is found below, the position is left as-is (mid-air spawns are intentional).
+3. The adjusted position is used as the player's transform position.
+
+**Where it's enforced:**
+- Engine runtime: `SpawnSafety` utility called from `GameScreen.show()` and `LevelManager.loadLevel()`.
+- Map generator: auto-nudges unsafe spawns upward at generation time with a warning.
+- Map validator: rejects maps with spawn positions inside solid tiles.
+
+**Callsites:** `GameScreen.java`, `LevelManager.java`, `SpawnSafety.java`
+
 ### N. Room-Based Camera & Entity Management (`CameraSystem`, `RoomState`, `EnemySystem`, `EnemyShootSystem`)
 1.  **"Rooms" object layer:** Any map may define an object layer literally named `Rooms`, containing one or more rectangle objects (no `type`/properties needed) — each one is a distinct room zone of whatever size the level designer wants (does not have to match the fixed `VIRTUAL_WIDTH`/`VIRTUAL_HEIGHT` viewport). `MapLoader.getRooms()` parses these into an `Array<Room>` — each a `Rectangle` plus a `Room.Mode` camera-mode override. An optional per-room `camera` custom property (`"flip"` or `"scroll"`) forces that room's camera mode; absent, the mode is **inferred from size** (§2.N.3). A map with **no** "Rooms" layer at all, or with an empty "Rooms" layer (layer present but no rectangle objects), is treated as a **single room covering the whole map** (`MapLoader` synthesizes it from the map's width/height × tile size), so room-less maps still get camera framing and enemy activation across their entire area.
 2.  **`RoomState` (shared, live state):** A single `RoomState` instance (created once in `GameScreen.show()`, same sharing pattern as `collisionRects`) holds `rooms` (the current level's parsed `Array<Room>`) and `activeRoomIndex` (which one currently contains the player, `-1` if none). It's passed to `CameraSystem`, `EnemySystem`, `EnemyShootSystem`, `DebugRenderSystem`, `EntityFactory.spawnObjects(...)`, and `LevelManager`, which refills `rooms` in place on every level transition (§2.M.5) — no system ever needs re-wiring across a level swap.
