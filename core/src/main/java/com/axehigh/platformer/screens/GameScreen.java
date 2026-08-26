@@ -120,7 +120,6 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         Entity player = entityFactory.createPlayer(playerStart.x, playerStart.y);
         playerEntity = player;
         engine.addEntity(player);
-        systems.chestSystem.setPlayerEntity(player);
         entityFactory.installFeedbackListeners(engine);
 
         if (saveData != null) {

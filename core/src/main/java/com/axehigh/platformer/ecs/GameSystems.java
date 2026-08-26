@@ -91,6 +91,7 @@ public class GameSystems {
         enemyBulletSystem.setUnitScale(unitScale);
         engine.addSystem(enemyBulletSystem);
         engine.addSystem(new CollisionBoundsSystem(PRIORITY_BOUNDS));
+        engine.addSystem(new DespawnSystem(PRIORITY_BOUNDS, mapLoader));
         MovingPlatformSystem movingPlatformSystem = new MovingPlatformSystem(mapLoader.getCollisionRects(), roomState, PRIORITY_MOVING_PLATFORM);
         movingPlatformSystem.setUnitScale(unitScale);
         engine.addSystem(movingPlatformSystem);
@@ -108,6 +109,7 @@ public class GameSystems {
 
         chestSystem = new ChestSystem(entityFactory, PRIORITY_CHEST);
         chestSystem.setUnitScale(unitScale);
+        chestSystem.setCollisionRects(mapLoader.getCollisionRects());
         engine.addSystem(chestSystem);
 
         EnemyContactSystem enemyContactSystem = new EnemyContactSystem(PRIORITY_ENEMY_CONTACT);

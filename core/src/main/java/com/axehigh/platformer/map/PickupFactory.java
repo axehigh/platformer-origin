@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
 import static com.axehigh.platformer.ecs.components.AnimationComponent.State.IDLE;
@@ -21,7 +22,7 @@ class PickupFactory {
     /** Popped-coin launch velocity ranges (world units/s, scaled by {@code unitScale} on use). */
     private static final float MIN_POP_VELOCITY_Y = 80f;
     private static final float MAX_POP_VELOCITY_Y = 140f;
-    private static final float MAX_POP_VELOCITY_X = 40f;
+    private static final float MAX_POP_VELOCITY_X = 12f;
     /** Per-frame duration of the coin spin animation (matches the 100ms Tiled animation). */
     private static final float COIN_FRAME_DURATION = 0.1f;
     /** Atlas region names of the coin spin frames, in playback order. */
@@ -146,6 +147,38 @@ class PickupFactory {
             float velocityX = MathUtils.random(-MAX_POP_VELOCITY_X, MAX_POP_VELOCITY_X) * unitScale;
             float velocityY = MathUtils.random(MIN_POP_VELOCITY_Y, MAX_POP_VELOCITY_Y) * unitScale;
             engine.addEntity(createPoppedCoinPickup(x, y, velocityX, velocityY));
+        }
+    }
+
+    /**
+     * Collision-aware variant of {@link #popCoins(Engine, float, float, int, float)}. If the
+     * requested spawn position overlaps a static collision rect, the coin is nudged upward until
+     * it sits just above the obstacle. Horizontal velocity is clamped to at most
+     * {@code 2 tiles per frame} (at 60 fps) to prevent tunneling through thin walls.
+     */
+    public void popCoins(Engine engine, float x, float y, int count, float unitScale, Array<Rectangle> collisionRects) {
+        float coinSize = DEFAULT_COIN_SIZE * unitScale;
+
+        for (int i = 0; i < count; i++) {
+            float velocityX = MathUtils.random(-MAX_POP_VELOCITY_X, MAX_POP_VELOCITY_X) * unitScale;
+            float velocityY = MathUtils.random(MIN_POP_VELOCITY_Y, MAX_POP_VELOCITY_Y) * unitScale;
+
+            float spawnX = x;
+            float spawnY = y;
+
+            // If spawn overlaps a collision rect, push upward to the nearest open space
+            if (collisionRects != null) {
+                Rectangle testRect = new Rectangle(spawnX - coinSize / 2f, spawnY - coinSize / 2f, coinSize, coinSize);
+                for (Rectangle rect : collisionRects) {
+                    if (testRect.overlaps(rect)) {
+                        spawnY = rect.y + rect.height + coinSize / 2f + 1f;
+                        testRect.setY(spawnY - coinSize / 2f);
+                        break;
+                    }
+                }
+            }
+
+            engine.addEntity(createPoppedCoinPickup(spawnX, spawnY, velocityX, velocityY));
         }
     }
 

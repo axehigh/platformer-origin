@@ -1,16 +1,7 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.assets.SpriteConstants;
-import com.axehigh.platformer.ecs.components.AnimationComponent;
-import com.axehigh.platformer.ecs.components.BuffComponent;
-import com.axehigh.platformer.ecs.components.ChestComponent;
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.EnemyComponent;
-import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.components.TextureComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.map.SecretRoomRevealer;
 import com.axehigh.platformer.particles.GlobalParticles;
 import com.axehigh.platformer.particles.ParticleHelper;
@@ -31,15 +22,7 @@ import com.badlogic.gdx.utils.Array;
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
 import static com.axehigh.platformer.assets.SpriteConstants.PLAYER_ATTACK_REACH;
 import static com.axehigh.platformer.assets.SpriteConstants.PLAYER_MAX_ATTACK_REACH;
-import static com.axehigh.platformer.ecs.components.Mappers.ANIMATION;
-import static com.axehigh.platformer.ecs.components.Mappers.BUFF;
-import static com.axehigh.platformer.ecs.components.Mappers.CHEST;
-import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
-import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
-import static com.axehigh.platformer.ecs.components.Mappers.FLYING;
-import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
-import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
-import static com.axehigh.platformer.ecs.components.Mappers.TEXTURE;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
  * Resolves the close-combat strike attack: while the player's {@code meleeAttack} timer is active,
@@ -146,7 +129,7 @@ public class MeleeAttackSystem extends IteratingSystem {
         activeStrikeBounds = reach > 0f ? strikeBounds : null;
 
         if (reach > 0f) {
-            int damage = player.swordDamage + (isStrengthBuffActive(entity) ? GameConstants.STRENGTH_DAMAGE_BONUS : 0);
+            int damage = player.swordDamage * (isStrengthBuffActive(entity) ? 2 : 1);
             hitAllEnemies(strikeBounds, player, damage);
             openAllChests(strikeBounds, player);
             if (!player.meleeHasHit) {

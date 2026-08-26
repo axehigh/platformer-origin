@@ -1,19 +1,17 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.GameConstants;
-import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.ChestComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
+import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.map.EntityFactory;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 
-import static com.axehigh.platformer.ecs.components.Mappers.CHEST;
-import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
-import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
  * Owns the opened-chest coin-pop: once an opened chest's timer reaches 0 (and it hasn't already
@@ -26,8 +24,8 @@ public class ChestSystem extends IteratingSystem {
     private static final int MAX_COIN_DROPS = 6;
 
     private final EntityFactory entityFactory;
+    private Array<Rectangle> collisionRects;
     private float unitScale = 1f;
-    private Entity playerEntity;
 
     public ChestSystem(EntityFactory entityFactory) {
         this(entityFactory, 0);
@@ -42,8 +40,8 @@ public class ChestSystem extends IteratingSystem {
         this.unitScale = unitScale;
     }
 
-    public void setPlayerEntity(Entity playerEntity) {
-        this.playerEntity = playerEntity;
+    public void setCollisionRects(Array<Rectangle> collisionRects) {
+        this.collisionRects = collisionRects;
     }
 
     @Override
@@ -68,12 +66,7 @@ public class ChestSystem extends IteratingSystem {
         }
 
         int coinCount = MathUtils.random(MIN_COIN_DROPS, MAX_COIN_DROPS);
-        entityFactory.popCoins(getEngine(), centerX, centerY, coinCount, unitScale);
-
-        if (playerEntity != null) {
-            entityFactory.createFloatingMessage(getEngine(),
-                    "+" + coinCount, GameConstants.MESSAGE_COLOR_COINS, playerEntity);
-        }
+        entityFactory.popCoins(getEngine(), centerX, centerY, coinCount, unitScale, collisionRects);
 
         chest.coinsDropped = true;
     }

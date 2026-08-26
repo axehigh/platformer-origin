@@ -1,11 +1,7 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.EnemyComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.ecs.components.EnemyComponent.AiMode;
-import com.axehigh.platformer.ecs.components.FlyingEnemyComponent;
-import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.map.EntityFactory;
 import com.axehigh.platformer.map.RoomState;
 import com.badlogic.ashley.core.Entity;
@@ -15,11 +11,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
-import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
-import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
-import static com.axehigh.platformer.ecs.components.Mappers.FLYING;
-import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
-import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
  * Drives enemy patrol movement. In {@link AiMode#PATROL} (the default) the enemy walks back and
@@ -197,7 +189,7 @@ public class EnemySystem extends IteratingSystem {
             centerX = collision.worldBounds.x + collision.worldBounds.width / 2f;
             centerY = collision.worldBounds.y + collision.worldBounds.height / 2f;
         }
-        entityFactory.popCoins(getEngine(), centerX, centerY, coinCount, unitScale);
+        entityFactory.popCoins(getEngine(), centerX, centerY, coinCount, unitScale, collisionRects);
     }
 
     /** Flips the enemy's travel direction and starts the brief stand-still pause at the turnaround. */

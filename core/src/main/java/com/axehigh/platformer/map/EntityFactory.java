@@ -82,6 +82,11 @@ public class EntityFactory {
         pickupFactory.popCoins(engine, x, y, count, unitScale);
     }
 
+    /** Spawns {@code count} popped coin pickups, avoiding spawn inside collision rects. */
+    public void popCoins(Engine engine, float x, float y, int count, float unitScale, Array<Rectangle> collisionRects) {
+        pickupFactory.popCoins(engine, x, y, count, unitScale, collisionRects);
+    }
+
     /**
      * Spawns decorative entities (coin, chest, torch, exit gate, enemy) found in the object layer.
      * {@code roomState} is used to assign each spawned enemy to whichever Room rectangle contains

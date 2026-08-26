@@ -108,8 +108,8 @@ public final class GameConstants {
     public static float POTION_USE_COOLDOWN = 0.4f;
     /** Debounce window for batching coin-pickup floating messages (seconds). */
     public static float COIN_MESSAGE_COOLDOWN = 0.3f;
-    /** Strength buff: extra melee damage while active. */
-    public static int STRENGTH_DAMAGE_BONUS = 3;
+    /** Strength buff multiplier: doubles base sword damage while active. */
+    public static int STRENGTH_DAMAGE_MULTIPLIER = 2;
     /** Strength buff duration (seconds). */
     public static float STRENGTH_BUFF_DURATION = 20f;
     /** Speed buff: horizontal move-speed multiplier while active. */

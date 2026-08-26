@@ -12,7 +12,7 @@ import com.badlogic.ashley.core.Component;
  * by {@code MeleeAttackSystem} / {@code PlayerDamageResolver}.
  */
 public class BuffComponent implements Component {
-    /** Strength buff: adds {@link GameConstants#STRENGTH_DAMAGE_BONUS} melee damage while active. */
+    /** Strength buff: doubles base melee damage while active. */
     public final Timer strength = new Timer();
     /** Speed buff: multiplies horizontal move speed while active. */
     public final Timer speed = new Timer();
