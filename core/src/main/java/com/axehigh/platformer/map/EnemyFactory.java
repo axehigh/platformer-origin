@@ -115,6 +115,26 @@ class EnemyFactory {
         }
         entity.add(enemyComponent);
 
+        // Read attack type from Tiled marker property (default: "melee" for non-shooters, null for shooters)
+        String attackTypeStr = TileProps.getProperty(object, tile, "attackType", null);
+        if (attackTypeStr == null) {
+            if (type != EnemyType.SHOOTER) {
+                attackTypeStr = "melee";
+            }
+        }
+        if ("melee".equalsIgnoreCase(attackTypeStr)) {
+            EnemyAttackComponent attack = new EnemyAttackComponent();
+            attack.attackType = EnemyAttackComponent.AttackType.MELEE;
+            float intervalOverride = TileProps.getFloatProperty(object, tile, "attackInterval", Float.NaN);
+            if (!Float.isNaN(intervalOverride)) attack.attackInterval = intervalOverride;
+            float rangeOverride = TileProps.getFloatProperty(object, tile, "meleeRange", Float.NaN);
+            if (!Float.isNaN(rangeOverride)) attack.meleeRange = rangeOverride;
+            float windUpOverride = TileProps.getFloatProperty(object, tile, "windUpDuration", Float.NaN);
+            if (!Float.isNaN(windUpOverride)) attack.windUpDuration = windUpOverride;
+            attack.attackCooldown.start(MathUtils.random(0f, attack.attackInterval));
+            entity.add(attack);
+        }
+
         return entity;
     }
 

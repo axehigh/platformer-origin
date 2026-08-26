@@ -15,6 +15,7 @@ public final class Mappers {
     public static final ComponentMapper<EnemyComponent> ENEMY = ComponentMapper.getFor(EnemyComponent.class);
     public static final ComponentMapper<FlyingEnemyComponent> FLYING = ComponentMapper.getFor(FlyingEnemyComponent.class);
     public static final ComponentMapper<EnemyShooterComponent> ENEMY_SHOOTER = ComponentMapper.getFor(EnemyShooterComponent.class);
+    public static final ComponentMapper<EnemyAttackComponent> ENEMY_ATTACK = ComponentMapper.getFor(EnemyAttackComponent.class);
     public static final ComponentMapper<DaggerPickupComponent> DAGGER_PICKUP = ComponentMapper.getFor(DaggerPickupComponent.class);
     public static final ComponentMapper<CoinPickupComponent> COIN_PICKUP = ComponentMapper.getFor(CoinPickupComponent.class);
     public static final ComponentMapper<PotionPickupComponent> POTION_PICKUP = ComponentMapper.getFor(PotionPickupComponent.class);

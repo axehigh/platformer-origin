@@ -115,6 +115,10 @@ public class GameSystems {
         EnemyContactSystem enemyContactSystem = new EnemyContactSystem(PRIORITY_ENEMY_CONTACT);
         enemyContactSystem.setUnitScale(unitScale);
         engine.addSystem(enemyContactSystem);
+
+        EnemyAttackSystem enemyAttackSystem = new EnemyAttackSystem(PRIORITY_ENEMY_CONTACT);
+        enemyAttackSystem.setUnitScale(unitScale);
+        engine.addSystem(enemyAttackSystem);
         engine.addSystem(new HazardSystem(mapLoader.getHazardRects(), PRIORITY_ENEMY_CONTACT));
         TrapContactSystem trapContactSystem = new TrapContactSystem(roomState, PRIORITY_TRAP_CONTACT);
         engine.addSystem(trapContactSystem);

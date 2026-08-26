@@ -1,23 +1,13 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.AnimationComponent;
-import com.axehigh.platformer.ecs.components.EnemyComponent;
-import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.components.TextureComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-import static com.axehigh.platformer.ecs.components.Mappers.ANIMATION;
-import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
-import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
-import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
-import static com.axehigh.platformer.ecs.components.Mappers.TEXTURE;
-import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /** Advances the current animation state timer and updates the visible TextureRegion. */
 public class AnimationSystem extends IteratingSystem {
@@ -48,7 +38,7 @@ public class AnimationSystem extends IteratingSystem {
             }
         } else if (ENEMY.has(entity) && MOVEMENT.has(entity)) {
             EnemyComponent enemy = ENEMY.get(entity);
-            animationComponent.currentState = resolveEnemyState(enemy, MOVEMENT.get(entity));
+            animationComponent.currentState = resolveEnemyState(entity, enemy, MOVEMENT.get(entity));
 
             TransformComponent transform = TRANSFORM.get(entity);
             if (transform != null) {
@@ -115,7 +105,7 @@ public class AnimationSystem extends IteratingSystem {
         return AnimationComponent.State.IDLE;
     }
 
-    private AnimationComponent.State resolveEnemyState(EnemyComponent enemy, MovementComponent movement) {
+    private AnimationComponent.State resolveEnemyState(Entity entity, EnemyComponent enemy, MovementComponent movement) {
         if (enemy.isDead) {
             return AnimationComponent.State.DEATH;
         }
@@ -124,6 +114,10 @@ public class AnimationSystem extends IteratingSystem {
         }
         if (enemy.postHitIdle.isActive()) {
             return AnimationComponent.State.IDLE;
+        }
+        EnemyAttackComponent attack = ENEMY_ATTACK.get(entity);
+        if (attack != null && attack.isAttacking) {
+            return AnimationComponent.State.ATTACKING;
         }
         if (Math.abs(movement.velocity.x) > 0.01f) {
             return AnimationComponent.State.WALKING;
