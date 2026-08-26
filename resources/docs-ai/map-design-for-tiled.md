@@ -141,7 +141,7 @@ Two ways to place a marker:
 |---|---|---|---|
 | `playerStart` | The player | — | Exactly **one** per map, usually in the first room. Rectangle position = spawn point. |
 | `coin` | Coin pickup | — | Collectible objects are **never** drawn from the Tiled tile sprite — the spawned entity always renders its own `Coin_01..06` atlas spin animation, regardless of the marker source. So you can place coins as plain rectangles OR stamp any `items.tsx` coin tile (static or animated); the on-screen result is identical. Every coin renders at **half a map tile** (`DEFAULT_COIN_SIZE * unitScale`, i.e. 64px on a 128px-tile map) **centered on the marker rect — the marker's drawn size is ignored** (it's a pure placement guide), so map coins and chest/enemy-dropped coins are always the same size. |
-| `chest` | Chest (opens on touch, drops coins) | — | Built from the `gfx/origin-game.atlas` `Chest_01_Locked`/`Chest_01_Unlocked` regions (128x128 → one map tile), never from a Tiled tile sprite. Any `items.tsx` chest tile just marks the spot. |
+| `chest` | Chest (opens on melee strike) | `potionType` (string, optional) | Built from the `gfx/origin-game.atlas` `Chest_01_Locked`/`Chest_01_Unlocked` regions (128x128 → one map tile), never from a Tiled tile sprite. Any `items.tsx` chest tile just marks the spot. Without `potionType`, the chest drops 2–6 coins. With `potionType` set (e.g. `healing`, `strength`, `speed`, `invulnerability`), it drops a single potion of that type instead of coins. |
 | `torch` | Decorative torch | — | Flickers visually. |
 | `dagger` | Dagger pickup | — | Collectible item. |
 | `exitGate` | Exit gate / level transition (trigger only, no sprite) | `nextLevel` (string, required to make it functional) | The gate spawns a **logic-only** entity: a collision box (sized from the object rectangle) + optional level transition. **No gate art is drawn** — paint the door's decoration yourself in the `background`/`decoration`/`collision` layers. With `nextLevel` it's a real transition; without it, purely decorative (e.g. a final-level dead end). |
@@ -317,6 +317,7 @@ All properties are read as `float`/`string`/`boolean` and tolerate being set as 
 | `duration` | float | `2.0` | (flame only) Seconds the flame stays ON. |
 | `cooldown` | float | `1.5` | (flame only) Seconds the flame stays OFF between pulses. |
 | `pulseSpeed` | float | `2.0` | (flame only) Oscillation speed for grow/shrink animation. |
+| `potionType` | string | — | (chest only) If set, the chest drops a potion of this type instead of coins. Valid values: `healing`, `strength`, `speed`, `invulnerability`. Omit for a standard coin chest. |
 
 ### Moving-platform properties (the `platform` rectangle)
 

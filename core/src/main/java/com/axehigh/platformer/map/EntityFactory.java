@@ -87,6 +87,11 @@ public class EntityFactory {
         pickupFactory.popCoins(engine, x, y, count, unitScale, collisionRects);
     }
 
+    /** Builds a potion pickup entity at the given position. */
+    public Entity createPotionPickup(float x, float y, String potionType) {
+        return pickupFactory.createPotionPickup(x, y, potionType);
+    }
+
     /**
      * Spawns decorative entities (coin, chest, torch, exit gate, enemy) found in the object layer.
      * {@code roomState} is used to assign each spawned enemy to whichever Room rectangle contains
@@ -141,7 +146,8 @@ public class EntityFactory {
                     spawned = true;
                     break;
                 case "chest":
-                    engine.addEntity(createChest(spawnX, spawnY));
+                    String chestPotionType = TileProps.getProperty(object, tile, "potionType", null);
+                    engine.addEntity(createChest(spawnX, spawnY, chestPotionType));
                     spawned = true;
                     break;
                 case "torch":
@@ -344,8 +350,10 @@ public class EntityFactory {
      * Builds a chest entity from the {@code Chest_01_Locked} atlas region (never the Tiled tile
      * sprite). The region is tile-sized (128px), so it renders 1:1 at one map tile; the open
      * variant is swapped in by {@code MeleeAttackSystem} when the chest is struck.
+     *
+     * @param potionType if non-null, the chest drops a potion of this type instead of coins
      */
-    private Entity createChest(float x, float y) {
+    private Entity createChest(float x, float y, String potionType) {
         AtlasRegion region = context.originAtlas.findRegion(SpriteConstants.CHEST_CLOSED_REGION);
 
         Entity entity = new Entity();
@@ -364,7 +372,15 @@ public class EntityFactory {
         collisionComponent.bounds.setSize(region.getRegionWidth(), region.getRegionHeight());
         entity.add(collisionComponent);
 
-        entity.add(new ChestComponent());
+        ChestComponent chest = new ChestComponent();
+        if (potionType != null) {
+            try {
+                chest.potionType = PotionType.valueOf(potionType.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Unknown potion type — fall back to coin chest
+            }
+        }
+        entity.add(chest);
 
         return entity;
     }

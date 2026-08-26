@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Map Design for Tiled — Level Authoring Guide</title>
+<style>
+:root {
+  --bg: #1a1a2e;
+  --surface: #16213e;
+  --border: #0f3460;
+  --text: #e0e0e0;
+  --text-muted: #a0a0b0;
+  --accent: #e94560;
+  --accent2: #533483;
+  --link: #5dade2;
+  --code-bg: #0d1b2a;
+  --table-header: #0f3460;
+  --table-row-alt: rgba(15,52,96,0.25);
+  --warning-bg: #3d2b00;
+  --warning-border: #e9a100;
+  --tip-bg: #003d2b;
+  --tip-border: #00e9a1;
+  --info-bg: #002b3d;
+  --info-border: #00a1e9;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.7; padding: 0;
+}
+.layout { display: flex; max-width: 1400px; margin: 0 auto; }
+nav.toc {
+  position: sticky; top: 0; height: 100vh; width: 280px; min-width: 280px;
+  overflow-y: auto; padding: 24px 16px; background: var(--surface);
+  border-right: 1px solid var(--border); font-size: 0.82rem;
+}
+nav.toc h2 {
+  font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--accent); margin-bottom: 12px;
+}
+nav.toc ul { list-style: none; padding: 0; }
+nav.toc li { margin-bottom: 4px; }
+nav.toc a {
+  color: var(--text-muted); text-decoration: none; display: block;
+  padding: 3px 8px; border-radius: 4px; transition: all 0.15s;
+}
+nav.toc a:hover { color: var(--text); background: rgba(233,69,96,0.1); }
+nav.toc .indent { padding-left: 20px; }
+nav.toc .indent2 { padding-left: 36px; }
+main { flex: 1; min-width: 0; padding: 40px 56px; max-width: 900px; }
+h1 {
+  font-size: 2rem; color: var(--accent); margin-bottom: 8px;
+  border-bottom: 2px solid var(--accent); padding-bottom: 12px;
+}
+h2 {
+  font-size: 1.5rem; color: var(--accent); margin-top: 48px; margin-bottom: 16px;
+  border-bottom: 1px solid var(--border); padding-bottom: 8px;
+}
+h3 { font-size: 1.15rem; color: #c0c0d0; margin-top: 32px; margin-bottom: 12px; }
+h4 { font-size: 1rem; color: #a0a0c0; margin-top: 24px; margin-bottom: 8px; }
+p { margin-bottom: 14px; }
+a { color: var(--link); }
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  background: var(--code-bg); padding: 2px 6px; border-radius: 3px;
+  font-size: 0.88em; color: #f0c674;
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px;
+  padding: 16px 20px; overflow-x: auto; margin: 16px 0; font-size: 0.85rem; line-height: 1.5;
+}
+pre code { background: none; padding: 0; color: var(--text); }
+strong { color: #fff; }
+em { color: var(--text-muted); font-style: italic; }
+ul, ol { margin: 8px 0 16px 24px; }
+li { margin-bottom: 4px; }
+hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+blockquote {
+  border-left: 3px solid var(--accent); background: var(--warning-bg);
+  padding: 12px 16px; margin: 16px 0; border-radius: 0 6px 6px 0; font-size: 0.92em;
+}
+blockquote p { margin-bottom: 0; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 0.9rem; }
+thead th {
+  background: var(--table-header); color: #fff; font-weight: 600;
+  text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--accent); white-space: nowrap;
+}
+tbody td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tbody tr:nth-child(even) { background: var(--table-row-alt); }
+tbody tr:hover { background: rgba(233,69,96,0.08); }
+@media print {
+  nav.toc { display: none; }
+  main { padding: 20px; max-width: 100%; }
+  body { background: #fff; color: #111; }
+  table { border: 1px solid #ccc; }
+  thead th { background: #eee; color: #111; }
+}
+@media (max-width: 900px) {
+  nav.toc { display: none; }
+  main { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc">
+  <h2>Contents</h2>
+  <ul>
+<li><a href="#1-the-big-picture">1. The big picture</a></li>
+<li><a href="#units-scale-and-coordinates-important" class="indent">Units, scale & coordinates</a></li>
+<li><a href="#2-layers">2. Layers</a></li>
+<li><a href="#3-the-collision-layer-the-tile-language">3. The collision layer</a></li>
+<li><a href="#3-1-the-passage-rule" class="indent">3.1 Passage rule</a></li>
+<li><a href="#3-2-hazards-spikes-lava" class="indent">3.2 Hazards</a></li>
+<li><a href="#3-3-drop-through-platforms-one-way" class="indent">3.3 Drop-through platforms</a></li>
+<li><a href="#3-4-secret-walls-breakable" class="indent">3.4 Secret walls</a></li>
+<li><a href="#3-5-secret-rooms-hidden-until-the-wall-breaks" class="indent">3.5 Secret rooms</a></li>
+<li><a href="#3-6-vertical-room-links-platform-shafts" class="indent">3.6 Vertical room links</a></li>
+<li><a href="#4-the-objects-enemies-layers-markers">4. Objects / Enemies layers</a></li>
+<li><a href="#marker-type-reference" class="indent">Marker type reference</a></li>
+<li><a href="#traps-tile-hazards-spawned-trap-entities" class="indent">Traps</a></li>
+<li><a href="#4-5-effect-property-effect-property" class="indent">4.5 Effect property</a></li>
+<li><a href="#5-custom-properties-the-full-reference">5. Custom properties reference</a></li>
+<li><a href="#6-the-rooms-layer-camera">6. Rooms layer & camera</a></li>
+<li><a href="#7-step-by-step-build-a-new-level">7. Step-by-step: new level</a></li>
+<li><a href="#8-common-pitfalls-checklist-when-something-feels-wrong">8. Common pitfalls</a></li>
+<li><a href="#9-related-tooling-docs">9. Related tooling & docs</a></li>
+  </ul>
+</nav>
+<main>
+<h1 id="map-design-for-tiled-level-authoring-guide">Map Design for Tiled — Level Authoring Guide</h1>
+<p>This document is the <strong>single source of truth for level/map design</strong>: how a <code>.tmx</code> map is read by the game, what layers and custom properties exist, what each one means, and a step-by-step recipe for building a playable level. It's written so you can put the game down for three months, come back, and still remember how to design a level without re-reading the source.</p>
+<p>It complements — but does not replace — <code>resources/docs-ai/ashley-ecs.md</code> (ECS shape: <code>MapLoader</code>, <code>EntityFactory</code>, <code>Room</code>, <code>RoomState</code>) and <code>resources/docs-ai/gameplay.md</code>; the <code>resources/docs-ai/enemies.md</code> catalog covers enemy placement in detail. <code>resources/docs-ai/ashley-ecs.md</code> covers what the parsing classes do in code.</p>
+<blockquote>
+<p><strong>Maintenance rule:</strong> Any change to map parsing — layer names, object marker types, custom properties, tileset tile properties, room/camera semantics — MUST update this file in the same change (see <code>AGENTS.md</code>). If the change alters <code>MapLoader</code>/<code>EntityFactory</code>/<code>Room</code>/<code>CameraSystem</code> shape, also update <code>ashley-ecs.md</code>; if it changes what a player sees, update <code>gameplay.md</code>.</p>
+</blockquote>
+<hr />
+<h2 id="1-the-big-picture">1. The big picture</h2>
+<p>A level is a single <code>.tmx</code> file (Tiled 1.11+). At level start the game:</p>
+<ol>
+<li>Loads the <code>.tmx</code> with <code>TmxMapLoader</code> (inside <code>MapLoader</code>).</li>
+<li>Reads the <strong><code>collision</code> tile layer</strong> → the static solid AABBs used for all physics (<code>collisionRects</code>).</li>
+<li>Reads the <strong><code>Rooms</code> object layer</strong> → the camera-framing/enemy-activation zones (<code>RoomState.rooms</code>).</li>
+<li>Reads the <strong><code>objects</code></strong> and <strong><code>enemies</code></strong> object layers → <code>EntityFactory</code> spawns pickups, chests, torches, the exit gate, enemies, and moving platforms.</li>
+<li>Reads the <strong><code>playerStart</code></strong> marker → where the player spawns.</li>
+</ol>
+<p>Levels are chained together as <strong>separate <code>.tmx</code> files</strong>: the exit gate in one map points at the next map's path (see <code>nextLevel</code> below). Each playable level must also be registered in <code>core/.../map/LevelCatalog.java</code> (it's what the level-select screen reads).</p>
+<h3 id="units-scale-and-coordinates-important">Units, scale, and coordinates (important)</h3>
+<ul>
+<li><strong>1 world unit == 1 pixel</strong> as drawn in Tiled. The world's Y axis points <strong>up</strong> in-game; Tiled draws Y <strong>down</strong>. The loader flips object/tile Y coordinates automatically, so just design normally in Tiled — never hand-edit raw Y values in the <code>.tmx</code> XML.</li>
+<li>The game was built for a base virtual resolution of <code>480×272</code> &quot;16px-world-units&quot;, scaled by <code>unitScale = tileWidth / 16f</code> (<code>GameConstants.VIRTUAL_WIDTH/HEIGHT</code>). The world <strong>height</strong> is fixed at <code>VIRTUAL_HEIGHT × unitScale</code>, but the world <strong>width expands with the screen's aspect ratio</strong> (<code>OffsetFitViewport</code>) so wide screens show more world instead of black bars: floored at the classic <code>480/272</code> ratio and capped at <code>GameConstants.MAX_WORLD_ASPECT</code> (≈21:9) only for physically ultra-wide screens. <strong>All current maps use 128×128 tiles</strong>, so:<ul>
+<li><code>unitScale = 128 / 16 = 8</code>.</li>
+<li>One on-screen frame = at least <code>480 * 8 = 3840</code> world px tall-frame width × <code>VIRTUAL_HEIGHT * 8 = 2176</code> px tall = <strong>30 tiles × 17 tiles minimum</strong>, wider on wider screens (a 16:9 desktop shows ≈30.2 tiles; a banded phone in landscape shows proportionally more).</li>
+<li>Design rooms around whole screens (multiples of 30×17 tiles) for clean flip-screen framing; rooms narrower than the widest target screens will simply show a sliver of the neighbors, and the camera's per-room <code>camera=&quot;flip&quot;</code> property can pin framing where that matters.</li>
+</ul>
+</li>
+<li>Mixing tile sizes across a level chain works (scale is recalculated per map), but keep every map in a chain the <strong>same tile size</strong> to avoid jarring resizes.</li>
+<li>Object/room rectangles are placed and sized in <strong>world px</strong> (the same numbers you see in Tiled), not in tiles.</li>
+</ul>
+<hr />
+<h2 id="2-layers">2. Layers</h2>
+<p>Layer <strong>names matter — they are read by string</strong>. Get them exactly right or the game silently ignores them. Tiled draws tile layers in order; the game renders <code>background</code> first, then <code>collision</code> (yes, the solid tiles are visible), then <code>decoration</code> on top.</p>
+<p>| Layer | Kind | Purpose | Required? |
+|---|---|---|---|
+| <code>background</code> | Tile layer | Decorative backdrop (brick, pillars, windows…). Never affects collision. | yes (can be empty) |
+| <code>collision</code> | Tile layer | Solid/blocking geometry. Every painted tile is solid unless the tile opts out (see §3). | yes |
+| <code>decoration</code> | Tile layer | Foreground decor drawn above the collision tiles. Never affects collision. | optional |
+| <code>objects</code> | Object layer | Player start, pickups, chests, torches, exit gate, moving platforms (see §4). | yes |
+| <code>enemies</code> | Object layer | Enemy markers (see §4). Separate layer keeps enemies easy to find. | optional |
+| <code>Rooms</code> | Object layer | Plain rectangles defining camera zones (see §6). | optional (see §6) |
+| <code>secret_hide</code> | Tile layer | Rock veil painted over a secret room's footprint to hide its existence until the secret wall is broken (see §3.5). Must render above every other tile layer. | optional |</p>
+<p>Only <strong>tile</strong> layers render visually; object layers are never drawn, they only spawn entities. The exit gate is the one exception worth knowing: its <code>exitGate</code> object spawns a <strong>logic-only trigger</strong> (no sprite — the gate's decoration is painted by you in the <code>background</code>/<code>decoration</code>/<code>collision</code> layers), so a gate needs real map art to be visible.</p>
+<hr />
+<h2 id="3-the-collision-layer-the-tile-language">3. The <code>collision</code> layer — the tile language</h2>
+<p>The collision layer is a tile grid. <code>MapLoader.buildCollisionRects()</code> walks every cell and classifies it:</p>
+<ul>
+<li><strong>Empty cell</strong> (<code>0</code>) → free space (a platforming gap).</li>
+<li><strong>Painted tile</strong> → one of the kinds below, decided by that tile's boolean custom properties (see the full table in §5). Precedence, first match wins:<ol>
+<li><code>hazard = true</code> → <strong>non-solid hazard</strong> AABB (spikes/lava; damages the player on touch — see §3.2).</li>
+<li><code>solid = false</code> → free space (passage doorways).</li>
+<li><code>oneWay = true</code> → <strong>drop-through platform</strong> AABB (player top-only; fully solid for enemies/popped items; flyers pass through — see §3.3).</li>
+<li>anything else → <strong>solid wall</strong> (blocks everything).</li>
+<li>A solid wall tile <strong>additionally</strong> marked <code>secret = true</code> is a <strong>breakable secret wall</strong> — solid exactly like a regular wall until the player melee-strikes it (see §3.4).</li>
+</ol>
+</li>
+</ul>
+<h3 id="3-1-the-passage-rule">§3.1 The passage rule</h3>
+<p>Room-to-room doorways must be a tile marked <strong>non-solid</strong>. In Tiled:</p>
+<ol>
+<li>Open the tileset file (e.g. <code>assets/maps/tileset/dungeon_tiles.tsx</code>).</li>
+<li>Select the doorway tile you use for passages.</li>
+<li>Add a <strong>boolean custom property <code>solid</code> set to <code>false</code></strong> on that tile.</li>
+</ol>
+<p>That single tileset edit makes every map using the tile treat it as a walk-through doorway. (This is the only way to connect two rooms — the walls between rooms are otherwise solid.) If you forget it, the doorway is an invisible wall and the player can't progress.</p>
+<h3 id="3-2-hazards-spikes-lava">§3.2 Hazards (spikes, lava)</h3>
+<p>A <strong>non-solid</strong> tile that damages the player on contact. Paint it in the <code>collision</code> layer; the tile's <code>hazard = true</code> property (set on the tileset tile, e.g. <code>assets/maps/tileset/hazards.tsx</code>) turns it into a damage zone instead of a wall:</p>
+<ul>
+<li>On AABB overlap the player loses <strong>1 HP</strong>, gets the usual 0.3s hit-stun + 2s invulnerability grace, and is <strong>not</strong> knocked back (no directional push).</li>
+<li>Hazards are fully non-solid — nothing (player, enemies, bullets) is blocked by them. The grace period turns a sustained overlap into one hit per second, not instant shredding.</li>
+<li><strong>Smaller damage zone:</strong> by default the danger box is the full tile. To shrink it, open the hazard tile in Tiled's <strong>Tile Collision Editor</strong> and draw a shape (rectangle or polygon) around the actual spikes/lava art — <code>MapLoader</code> then emits one world-space hazard box per shape instead of the full tile (a tile with no shapes, or a flipped cell, still gets the full tile). Verify with the SHIFT+D hazard overlay (red).</li>
+<li><strong>Placement gotcha:</strong> the player's collision box is <em>smaller than a tile</em> (30×40 px vs a 128×128 tile — the design model is a 1×1-tile box, see <code>gameplay.md</code> §2.A) and its feet sit on the floor surface, so a hazard painted in the row directly on top of a floor tile sits at/below the player's feet and a standing player won't overlap it. Hazards damage reliably when the player's body travels <strong>through</strong> them (jump over a spike barrier, fall into a lava pool, walk a spike row you must jump). Put solid ground under a pit of lava/spikes so a falling player lands on it.</li>
+</ul>
+<h3 id="3-3-drop-through-platforms-one-way">§3.3 Drop-through platforms (one-way)</h3>
+<p>A <strong>drop-through platform for the player, a normal solid tile for everyone else</strong>. Paint it in the <code>collision</code> layer; the tile's <code>oneWay = true</code> property (set on the tileset tile, e.g. <code>assets/maps/tileset/drop_platform.tsx</code>) makes it a platform instead of a wall:</p>
+<ul>
+<li>The player can <strong>land on its top</strong> (it sticks only when the player's feet were at/above the platform's top before the move) and can <strong>jump up through</strong> it from below.</li>
+<li>While standing on it, the contextual <strong><code>v</code> button</strong> appears (mobile) or <strong><code>S</code>/<code>DOWN</code></strong> (keyboard) starts a short ~0.25s pass-through window: the player drops straight through the platform, then normal gravity takes over.</li>
+<li><strong>Enemies and popped items treat it as a fully-solid tile (all four sides)</strong> — they land on top, are blocked by its sides/underside, and ground enemies patrol along it exactly like a regular floor. <strong>Flying enemies pass through it entirely.</strong></li>
+<li>Player bullets still fly through (they're excluded from <code>MovementSystem</code> entirely, and <code>CollisionSystem</code> only resolves them against <code>collisionRects</code>).</li>
+</ul>
+<h3 id="3-4-secret-walls-breakable">§3.4 Secret walls (breakable)</h3>
+<p>A <strong>solid</strong> wall tile that opens a doorway when the player melee-strikes it. Paint it in the <code>collision</code> layer; the tile's <code>secret = true</code> property (set on the tileset tile, e.g. <code>assets/maps/tileset/secret_wall.tsx</code>) marks it as breakable:</p>
+<ul>
+<li>The tile is <strong>fully solid</strong> (blocks the player, enemies, and bullets exactly like a regular wall) — breaking it is what opens the route. It is <em>not</em> a passage: an unbroken secret wall has no effect on movement until struck.</li>
+<li><strong>One melee swing breaks at most one</strong> secret tile whose rect overlaps the strike hitbox (reach-dependent; see <code>gameplay.md</code> §2.Z). On break, the tile's sprite disappears (its collision-layer cell is blanked), its rect is removed from the collision set, a smoke puff spawns at the tile center, and a wall-break SFX plays — the doorway is walkable the very next frame.</li>
+<li><strong>Design the room behind it:</strong> carve the alcove/room into the <code>collision</code> layer (solid walls on the other sides), drop a <code>Rooms</code> rectangle over it (put it <em>before</em> the enclosing room in the layer — see §6), and place pickups/enemies inside via the <code>objects</code>/<code>enemies</code> layers. Two proven shapes, both produced by <code>generate_tmx.py</code>:<ul>
+<li><strong>Appended full-screen room:</strong> see the <code>secret_room</code> example in <code>assets/maps/world1/level_05.tmx</code> — the full 30-tile room right of room 2 (cols 90–119); its west boundary wall at col 89 has the two body-height rows 14–15 replaced with the breakable <code>secret_wall</code> tile the player strikes from the last normal room.</li>
+<li><strong>Chamber carved inside a room (<code>--inside-secret</code>):</strong> see <code>assets/maps/world1/level_08.tmx</code> — a 6×8-tile box flush against the room's left wall and sitting on the floor. Its <strong>front</strong> (right) wall carries the breakable guard on the two passage rows (rows 14–15, col 5); the roof/floor/left wall are the room's own. The chamber is hollow so the player can stand inside, and the <code>secret_hide</code> veil covers its footprint <strong>except</strong> the guard cells, so the crack stays visible and strikeable before reveal. Its <code>Rooms</code> rect is emitted before the enclosing room so the camera flips onto the chamber while the player is inside.</li>
+</ul>
+</li>
+<li><strong>Verify with SHIFT+D:</strong> an unbroken secret wall shows as a normal yellow solid rect (it lives in the shared <code>collisionRects</code> set); after breaking, the rect is gone and the cell is empty.</li>
+</ul>
+<h3 id="3-5-secret-rooms-hidden-until-the-wall-breaks">§3.5 Secret rooms (hidden until the wall breaks)</h3>
+<p>A secret room is <strong>invisible until revealed</strong> — the player must find and strike its hidden wall to see it at all. Three parts:</p>
+<ul>
+<li><strong><code>secret_hide</code> tile layer:</strong> paint rock tiles (visually identical to the surrounding walls) over the entire secret-room footprint, in the <code>secret_hide</code> layer (top of the layer stack, so it covers the room). The veil is <strong>purely visual</strong> — it has no collision (never add it to the <code>collision</code> layer). On reveal, every veil cell over the room is blanked.</li>
+<li><strong>The secret wall carries the room name:</strong> the breakable <code>secret=true</code> wall tiles declare an extra <code>secretRoom = &quot;&lt;room name&gt;&quot;</code> property naming the <code>Rooms</code> rectangle they protect. Because Tiled can't attach properties to raw cells, <code>generate_tmx.py</code> clones the base <code>secret_wall.tsx</code> tile once per map into an inline tileset (e.g. <code>secret_room_wall</code>) whose tile carries both <code>secret=true</code> and <code>secretRoom=&quot;secret_room&quot;</code>. (Hand-authored maps: just add <code>secretRoom</code> to your tileset tile.) The room name is read from the <strong>tile's own property</strong> — cell-level properties are lost the moment the cell's tile is blanked.</li>
+<li><strong>Deferred markers:</strong> the room's loot/enemy objects carry a <code>secretRoom = &quot;&lt;room name&gt;&quot;</code> <strong>object</strong> property too. <code>MapLoader.getSecretRooms()</code> partitions those markers <strong>out</strong> of the normal <code>objects</code>/<code>enemies</code> spawn layers into the room's deferred set, so nothing spawns until reveal. On reveal (<code>SecretRoomRevealer.reveal(roomName)</code> — triggered when the <code>secretRoom</code>-tagged wall breaks), the veil cells blank, the deferred markers spawn exactly once (idempotent per room), and a smoke puff appears at each veil cell. Collision is unaffected throughout: it stays solely in the <code>collision</code> layer (single source of truth).</li>
+</ul>
+<h3 id="perimeter-layout-rules-of-thumb">Perimeter / layout rules of thumb</h3>
+<ul>
+<li>Every room needs solid <strong>floor</strong>, <strong>ceiling</strong>, <strong>left wall</strong>, <strong>right wall</strong> — except for the passage tile(s) on each room boundary.</li>
+<li>The outer edges of the whole map should be solid — there's nothing beyond them.</li>
+<li>Align passages: the doorway on one side of a room boundary must line up with the doorway on the neighboring room's matching side, or the connection doesn't actually link. Keep all rooms on a <strong>shared floor baseline</strong> so doorways at the same height line up.</li>
+</ul>
+<h3 id="3-6-vertical-room-links-platform-shafts">§3.6 Vertical room links (platform shafts)</h3>
+<p>Rooms stacked vertically (a grid map, e.g. <code>world2</code>) connect through a <strong>platform shaft</strong> instead of a doorway — the engine has no ladders/climb, so the climb is made of drop-through platforms. A shaft is a 2-column channel at interior columns <strong><code>col_start+2..col_start+3</code></strong> (relative to the room's left wall) carved through both rooms' shared boundary:</p>
+<ul>
+<li><strong>Lower room:</strong> the two shaft columns are hollow from the ceiling down to one row above the floor; the floor row itself stays solid. A <code>oneWay</code> platform sits on every other row above the floor (for a 24×10 room: platforms at rows <code>floor−2, −4, −6, −8</code>). The player hops platform to platform, then jumps through the open ceiling.</li>
+<li><strong>Upper room:</strong> the matching two floor cells at the shaft columns are hollow — a <strong>hatch</strong> — so the player pops up into the room. The same hatch is the hole they fall back down through; the floor around it stays solid.</li>
+<li><strong>Spacing:</strong> 2-row platform steps fit the player's single-jump envelope (2 up / 4 across — see <code>gameplay.md</code> §2.A); 2 columns wide makes the shaft read as a visible vertical gap. Keep markers (enemies/items) out of the shaft columns.</li>
+<li><code>generate_tmx.py</code> builds shafts automatically for grid layouts (<code>--grid-cols</code>/<code>--grid-rows</code>, see §9); hand-authored maps carve the same shape straight into the <code>collision</code> layer — hollow the two columns, place <code>oneWay</code> tiles on alternating rows, and open the two hatch cells in the upper room's floor.</li>
+</ul>
+<hr />
+<h2 id="4-the-objects-enemies-layers-markers">4. The <code>objects</code> / <code>enemies</code> layers — markers</h2>
+<p>Both layers hold <strong>map objects</strong> (rectangles and/or tile objects). Each object is identified by its <strong><code>type</code></strong>, which the game reads from (in order): the object's own <code>type</code>/<code>Type</code> field, a custom property named <code>type</code>, or the <strong>placed tile's</strong> <code>type</code> property (for tile objects). Unknown/unhandled types are ignored.</p>
+<p>Two ways to place a marker:</p>
+<ul>
+<li><strong>Rectangle object</strong> — draw a rectangle, then set its Type (e.g. <code>playerStart</code>) in the object properties. Size matters for <code>platform</code> (it defines the sprite + collision box); for everything else the rectangle is just a spawn point (position = its bottom-left in game coords).</li>
+<li><strong>Tile object</strong> — draw a tile from a tileset that already carries a <code>type</code> property. The <code>items.tsx</code> and <code>enemy.tsx</code> tilesets are pre-wired this way (e.g. the <code>coin</code> tiles, the <code>chest</code> tile, the animated <code>coin</code> tile, and the <code>enemy</code> tiles), so you can just paint the object with the stamp tool.</li>
+</ul>
+<h3 id="marker-type-reference">Marker type reference</h3>
+<p>| <code>type</code> | Spawns | Custom properties | Notes |
+|---|---|---|---|
+| <code>playerStart</code> | The player | — | Exactly <strong>one</strong> per map, usually in the first room. Rectangle position = spawn point. |
+| <code>coin</code> | Coin pickup | — | Collectible objects are <strong>never</strong> drawn from the Tiled tile sprite — the spawned entity always renders its own <code>Coin_01..06</code> atlas spin animation, regardless of the marker source. So you can place coins as plain rectangles OR stamp any <code>items.tsx</code> coin tile (static or animated); the on-screen result is identical. Every coin renders at <strong>half a map tile</strong> (<code>DEFAULT_COIN_SIZE * unitScale</code>, i.e. 64px on a 128px-tile map) <strong>centered on the marker rect — the marker's drawn size is ignored</strong> (it's a pure placement guide), so map coins and chest/enemy-dropped coins are always the same size. |
+| <code>chest</code> | Chest (opens on melee strike) | <code>potionType</code> (string, optional) | Built from the <code>gfx/origin-game.atlas</code> <code>Chest_01_Locked</code>/<code>Chest_01_Unlocked</code> regions (128x128 → one map tile), never from a Tiled tile sprite. Any <code>items.tsx</code> chest tile just marks the spot. Without <code>potionType</code>, the chest drops 2–6 coins. With <code>potionType</code> set (e.g. <code>healing</code>, <code>strength</code>, <code>speed</code>, <code>invulnerability</code>), it drops a single potion of that type instead of coins. |
+| <code>torch</code> | Decorative torch | — | Flickers visually. |
+| <code>dagger</code> | Dagger pickup | — | Collectible item. |
+| <code>exitGate</code> | Exit gate / level transition (trigger only, no sprite) | <code>nextLevel</code> (string, required to make it functional) | The gate spawns a <strong>logic-only</strong> entity: a collision box (sized from the object rectangle) + optional level transition. <strong>No gate art is drawn</strong> — paint the door's decoration yourself in the <code>background</code>/<code>decoration</code>/<code>collision</code> layers. With <code>nextLevel</code> it's a real transition; without it, purely decorative (e.g. a final-level dead end). |
+| <code>enemy</code> | Enemy | <code>enemyType</code> (string, default <code>&quot;walker&quot;</code>), <code>aiMode</code> (string), <code>speed</code> (float), <code>patrolRange</code> (float) | Put these on the <code>enemies</code> layer (or <code>objects</code>). Catalog: <code>walker</code> (goblin), <code>flyer</code> (mosquito), <code>shooter</code> (spider), <code>knight</code> (15 HP). See <code>resources/docs-ai/enemies.md</code>. |
+| <code>trap</code> | Trap | <code>trapType</code> (string, default <code>&quot;acidDrop&quot;</code>), <code>direction</code> (string), <code>interval</code> (float), <code>speed</code> (float), <code>damage</code> (int), <code>duration</code> (float), <code>cooldown</code> (float), <code>pulseSpeed</code> (float) | Place on <code>objects</code>/<code>enemies</code>. <code>trapType</code> = <code>&quot;acidDrop&quot;</code> (dripping projectiles) or <code>&quot;flame&quot;</code> (pulsing fire). See the traps subsection below. |
+| <code>platform</code> | Moving platform | <code>amplitudeX</code>, <code>amplitudeY</code>, <code>speed</code>, <code>phase</code>, <code>axis</code> (see §5) | The object <strong>rectangle size defines both the sprite and collision box</strong>. |
+| (any other) | — | — | Ignored. <code>background</code>-type markers etc. won't spawn anything. |</p>
+<h3 id="traps-tile-hazards-spawned-trap-entities">Traps — tile hazards &amp; spawned trap entities</h3>
+<p>Traps come in two flavours: <strong>tile-based hazards</strong> (painted in the <code>collision</code> layer) and <strong>spawned trap entities</strong> (placed as <code>type=&quot;trap&quot;</code> objects on the <code>objects</code>/<code>enemies</code> layer). Both deal 1 HP damage with no knockback and share the 2-second invulnerability grace period.</p>
+<h4 id="tile-based-hazards-spikes-lava-stalactites">Tile-based hazards (spikes, lava, stalactites)</h4>
+<p>These are tiles in the <code>collision</code> layer with <code>hazard = true</code> on the tileset tile. They're not entities — <code>HazardSystem</code> iterates <code>hazardRects</code> built by <code>MapLoader</code> at level start. See §3.2 for placement rules.</p>
+<p>| Tileset | Tile | Image | Damage shape | Notes |
+|---|---|---|---|---|
+| <code>hazards.tsx</code> tile 0 | spikes | <code>hazards/spikes.png</code> (128×128) | Full tile | Standard floor/ceiling spikes |
+| <code>hazards.tsx</code> tile 1 | lava | <code>hazards/lava.png</code> (128×128) | Full tile | Lava pool |
+| <code>dungeon_tiles.tsx</code> tile 32 | dungeon spikes | <code>dungeon/spikes.png</code> (128×128) | Narrow bottom (0,96,128,32) | Wall-mounted spikes — hitbox only the bottom strip |
+| <code>dungeon_tiles.tsx</code> tile 50 | stalactite | <code>caves/bg-stalactite.png</code> (128×128) | Narrow top (0,0,128,32) | Hanging stalactite — hitbox only the top tip |</p>
+<p>All four deal <strong>1 HP</strong>, no knockback, same grace period as every other damage source.</p>
+<h4 id="spawned-trap-entities-type-trap">Spawned trap entities (<code>type=&quot;trap&quot;</code>)</h4>
+<p>Place a rectangle object on the <code>objects</code> or <code>enemies</code> layer with <code>type=&quot;trap&quot;</code>. Add a <code>trapType</code> property to pick the variant. The rectangle position is the spawn point; size is ignored (collision is defined by the trap code).</p>
+<p><strong>Trap A: Acid/Lava Drop Spawner (<code>trapType = &quot;acidDrop&quot;</code>)</strong></p>
+<p>An invisible entity that periodically shoots projectiles in the configured direction. The spawner is invisible — only the projectiles are visible.</p>
+<p>| Property | Type | Default | Description |
+|---|---|---|---|
+| <code>trapType</code> | string | <code>&quot;acidDrop&quot;</code> | Required. Identifies this as an acid-drop spawner. |
+| <code>direction</code> | string | <code>&quot;down&quot;</code> | Projectile direction: <code>&quot;up&quot;</code> (lava geyser from floor), <code>&quot;down&quot;</code> (acid drip from ceiling), <code>&quot;left&quot;</code>/<code>&quot;right&quot;</code> (side-mounted sprayer). |
+| <code>interval</code> | float | <code>2.0</code> | Seconds between projectile spawns. |
+| <code>speed</code> | float | <code>200</code> | Projectile velocity in world-units/s (before unitScale). |
+| <code>damage</code> | int | <code>1</code> | HP dealt on contact. |</p>
+<p>Projectile behaviour: moves at constant speed (no gravity), uses <code>acid_drop.png</code> (8×12 px teardrop sprite), disappears on wall/floor/ceiling contact or after 5 s lifetime.</p>
+<p><strong>Trap B: Flame Trap (<code>trapType = &quot;flame&quot;</code>)</strong></p>
+<p>An animated flame that pulses between small and large on a timed cycle. The collision box scales with the visual — anchored at the source wall/floor/ceiling and extending outward in the configured direction.</p>
+<p>| Property | Type | Default | Description |
+|---|---|---|---|
+| <code>trapType</code> | string | <code>&quot;flame&quot;</code> | Required. Identifies this as a flame trap. |
+| <code>direction</code> | string | <code>&quot;down&quot;</code> | Flame direction: <code>&quot;down&quot;</code> (hangs from ceiling), <code>&quot;up&quot;</code> (rises from floor), <code>&quot;left&quot;</code>/<code>&quot;right&quot;</code> (wall-mounted, rotated 270°/90°). |
+| <code>duration</code> | float | <code>2.0</code> | Seconds the flame is ON (growing from min to max scale). |
+| <code>cooldown</code> | float | <code>1.5</code> | Seconds the flame is OFF between pulses. |
+| <code>pulseSpeed</code> | float | <code>2.0</code> | Oscillation speed for the grow/shrink animation. |
+| <code>damage</code> | int | <code>1</code> | HP dealt on contact. |</p>
+<p>Visual: <code>fire1..10</code> atlas sprites (256×256), animated across the ON phase. Initial cooldown is randomised (<code>0</code> to <code>cooldown</code>) so multiple flames in a room don't pulse in sync.</p>
+<p><strong>Planned but not yet coded:</strong> The atlas contains <code>blade1..7</code> and <code>lightning1..9</code> sprite regions reserved for future blade-trap and lightning-trap types. No <code>TrapType</code> enum, no <code>EntityFactory</code> code, and no system logic exist for them yet.</p>
+<h4 id="trap-room-awareness">Trap room awareness</h4>
+<p>Both spawners and flames check <code>roomIndex</code> against <code>RoomState.activeRoomIndex</code> each frame. In inactive rooms: spawners pause their timers, drops continue moving (they're transient), flames freeze their pulse cycle. Matches enemy freeze behaviour.</p>
+<h4 id="trap-debugging">Trap debugging</h4>
+<p>Trap AABBs appear in the SHIFT+D collision debug overlay (lime-coloured boxes) like any <code>CollisionComponent</code> entity. Flame traps show dynamically scaling boxes as they pulse.</p>
+<h3 id="4-5-effect-property-effect-property">§4.5 Effect property (<code>effect</code> property)</h3>
+<p>Tiles on <strong>any tile layer</strong> (background, decoration, collision, etc.) can carry an <code>effect</code> property to spawn a runtime effect entity at that tile's position. The tile's own sprite is rendered by the Tiled map renderer — the effect entity carries <strong>no texture</strong>, only the effect component (e.g. <code>LightComponent</code>). This means what you paint in Tiled is what renders in-game (true WYSIWYG). The tile layer determines draw order (background = behind player, decoration = in front).</p>
+<p><strong>How it works:</strong></p>
+<ol>
+<li>Stamp a tile with <code>effect=&quot;light&quot;</code> (or future <code>&quot;particle&quot;</code>, <code>&quot;sound&quot;</code>) on any tile layer.</li>
+<li>At level load, <code>MapLoader.scanEffectLayers()</code> iterates every tile layer in the map, reads the <code>effect</code> property from each cell, and records world positions.</li>
+<li><code>EntityFactory.spawnEffects()</code> creates minimal effect entities at those positions.</li>
+</ol>
+<p><strong>Supported effect types:</strong></p>
+<p>| <code>effect</code> value | Component added | Behaviour |
+|---|---|---|
+| <code>&quot;light&quot;</code> | <code>LightComponent</code> | Flickering glow halo. Light center is read from the tile's <strong>collision-editor shape</strong> (draw a Point in Tiled's Tile Collision Editor on the tile to set the exact flame/glow position — true WYSIWYG). If no shape is drawn, the light defaults to the tile center. Per-tile properties: <code>lightRadius</code> (default 96), <code>lightColor</code> (RGB hex like <code>&quot;FF8040&quot;</code>), <code>lightFlickerSpeed</code> (default 6 rad/s). |
+| <code>&quot;particle&quot;</code> | <em>(planned)</em> | Future: particle emitter at the tile position. |
+| <code>&quot;sound&quot;</code> | <em>(planned)</em> | Future: positional sound emitter at the tile position. |</p>
+<p><strong>Per-tile properties</strong> (set on the tileset tile, e.g. <code>items.tsx</code>):</p>
+<p>| Property | Type | Default | Effect |
+|---|---|---|---|
+| <code>effect</code> | string | — | Effect type: <code>&quot;light&quot;</code>, <code>&quot;particle&quot;</code>, <code>&quot;sound&quot;</code>. |
+| <code>lightRadius</code> | float | <code>96</code> | (light only) Halo radius in world units. |
+| <code>lightColor</code> | string | warm orange | (light only) RGB hex (<code>&quot;FF8040&quot;</code>) or RGBA hex (<code>&quot;FF8040FF&quot;</code>). |
+| <code>lightFlickerSpeed</code> | float | <code>6</code> | (light only) Flicker oscillation speed in rad/s. |</p>
+<p><strong>Pre-wired tiles in <code>items.tsx</code>:</strong></p>
+<p>| Tile | <code>effect</code> | Image | Notes |
+|---|---|---|---|
+| id 20 | <code>&quot;light&quot;</code> | <code>tiles/bg/torch.png</code> (128×156) | Wall torch. Default radius 96. Draw a Point in the Tile Collision Editor to position the light center (e.g. at the flame tip). |</p>
+<p><strong>Adding a new effect tile:</strong></p>
+<ol>
+<li>Add a tile to <code>items.tsx</code> (or any tileset) with the desired image.</li>
+<li>Set <code>effect=&quot;light&quot;</code> on the tile properties.</li>
+<li>Optionally override <code>lightRadius</code> / <code>lightColor</code> / <code>lightFlickerSpeed</code>.</li>
+<li>Open the tile in Tiled's <strong>Tile Collision Editor</strong> and draw a Point where the light center should be (e.g. at the flame tip for a torch). The point's coordinates are in tile-local pixel space — the light spawns at that exact world position.</li>
+<li>Stamp the tile on any tile layer in Tiled — done.</li>
+</ol>
+<p><strong>Adding a new effect type</strong> (e.g. <code>&quot;particle&quot;</code>):</p>
+<ol>
+<li>Add a branch in <code>EntityFactory.spawnEffects()</code> for the new <code>effectType</code>.</li>
+<li>Create a <code>create*Effect()</code> method that returns an entity with the appropriate component(s).</li>
+<li>Update this documentation section.</li>
+</ol>
+<p><strong>Backward compatibility:</strong> The existing <code>type=&quot;torch&quot;</code> rectangle markers on the <code>objects</code> layer still work via the <code>spawnObjects()</code> switch. The new tile-property approach is an alternative — torches can be placed either way. Maps can mix both approaches.</p>
+<h3 id="world-1-level-content-inventory">World 1 — level content inventory</h3>
+<p>The shipped <code>maps/world1/level_01..10.tmx</code> chain. Enemy counts mix <code>enemyType</code>s (e.g. <code>3 enemies (2 walkers, 1 shooter)</code>); difficulty ramps from the tutorial-sized 16×12 openings (levels 01/02/10) up to the hardest, the loop-back final level 10 (which includes the only <code>knight</code> on any map). Content scoping baseline is roughly <strong>2–3 enemies + a chest + 2–4 coins + torches per room</strong>, matching the <code>generate_tmx.py</code> density; any future content edits should keep this table accurate.</p>
+<p>| Level | Rooms | Enemies | Chests | Coins | Daggers | Torches | Platforms |
+|---|---|---|---|---|---|---|---|
+| <code>level_01</code> | 1 (16×12) | 3 (2 walkers, 1 shooter) | 1 | 3 | — | 3 | 2 |
+| <code>level_02</code> | 1 (16×12) | 3 (2 walkers, 1 shooter) | 1 | 4 | — | 3 | 2 |
+| <code>level_03</code> | 2 (32×17) | 5 walkers | 1 | 1 | 1 | 3 | — |
+| <code>level_04</code> | 1 whole-map (32×17) | 3 (2 walkers, 1 shooter) | 6 | 13 | — | 2 | — |
+| <code>level_05</code> | 3 + secret (120×17) | 6 (4 walkers, 2 flyers) | 3 (+1 secret) | 1 (+2 secret) | — | — | — |
+| <code>level_06</code> | 1 (30×17) | 6 (5 walkers, 1 flyer) | 1 | 4 | — | 2 | — |
+| <code>level_07</code> | 1 (30×17) | 3 (2 walkers, 1 flyer) | 1 | 4 | — | 1 | — |
+| <code>level_08</code> | 1 + secret chamber (30×17) | 2 shooters | 2 (+1 secret) | 1 (+3 secret) | — | — | 13 |
+| <code>level_09</code> | 2 + secret alcove (32×17) | 5 (4 walkers, 1 flyer) | 1 (+1 secret) | 3 (+2 secret) | — | 4 | — |
+| <code>level_10</code> | 1 (16×12) | 4 (1 walker, 2 shooters, 1 knight) | 1 | 3 | — | 2 | 2 |</p>
+<p>The secret-room counts (marked <em>secret</em>) are deferred markers carrying <code>secretRoom=&quot;secret_room&quot;</code> (§3.5). Levels 01/02/10 place their enemies in the <code>objects</code> layer (they have no separate <code>enemies</code> layer). Level 08's 13 &quot;platforms&quot; are <strong>static <code>collision</code>-layer blocks</strong> (11 solid gid-2 groups + 2 one-way gid-1 tiles) forming a jump/staircase course from the spawn up to the secret-room roof — see the <code>collision</code> layer of <code>assets/maps/world1/level_08.tmx</code>.</p>
+<h3 id="world-2-level-content-inventory-generated">World 2 — level content inventory (generated)</h3>
+<p>All of <code>maps/world2/level_01..10.tmx</code> are <strong>generated</strong> by <code>.junie/skills/tmx-map-generator/scripts/generate_tmx.py</code> (mobile-oriented 24×10-tile rooms, dead-zone scroll on phones, flip on desktop). Each level is a fully-connected grid (every adjacent room pair has a doorway or platform shaft), <code>playerStart</code> sits in the bottom-left room, and the <code>exitGate</code> (<code>--exit-next</code>) stands in the <strong>top-right</strong> room, chaining <code>level_N → level_N+1</code> with <code>level_10</code> looping back to <code>level_01</code> — matching the World 1 convention. Content per level is the generator's random scatter (0–2 enemies + 0–3 items per room, deterministic per <code>--seed</code>). Every map also paints a <code>type=&quot;door&quot;</code> tile (dungeon <code>door.png</code>, from <code>tileset/dungeon_tiles.tsx</code>) on the <code>decoration</code> layer on the row <strong>just above the floor</strong> (its bottom edge resting on the <code>collision</code> floor surface) beneath the <code>playerStart</code> and beneath the <code>exitGate</code> (the gate's column, <code>col_end-2</code>), so both doors stand on the floor instead of looking like they float or sink into it; the tile image is 2 tiles tall and renders upward from its single cell.</p>
+<p>| Level | Map (tiles) | Rooms grid | Exit → |
+|---|---|---|---|
+| <code>level_01</code> | 48×20 | 2×2 | <code>level_02</code> |
+| <code>level_02</code> | 72×10 | 3×1 | <code>level_03</code> |
+| <code>level_03</code> | 72×20 | 3×2 | <code>level_04</code> |
+| <code>level_04</code> | 48×20 | 2×2 | <code>level_05</code> |
+| <code>level_05</code> | 120×20 | 5×2 | <code>level_06</code> |
+| <code>level_06</code> | 96×40 | 4×4 | <code>level_07</code> |
+| <code>level_07</code> | 72×10 | 3×1 | <code>level_08</code> |
+| <code>level_08</code> | 72×20 | 3×2 | <code>level_09</code> |
+| <code>level_09</code> | 120×20 | 5×2 | <code>level_10</code> |
+| <code>level_10</code> | 96×40 | 4×4 | <code>level_01</code> (loop) |</p>
+<p>Regenerating any of these with the generator (seeds <code>1001</code>–<code>1010</code> respectively) reproduces them byte-identically; changing a seed changes only the enemy/item scatter, not the room grid or exit wiring.</p>
+<hr />
+<h2 id="5-custom-properties-the-full-reference">5. Custom properties — the full reference</h2>
+<p>All properties are read as <code>float</code>/<code>string</code>/<code>boolean</code> and tolerate being set as either int or string in Tiled. Units are <strong>world px</strong> unless noted.</p>
+<h3 id="object-tile-properties-markers">Object/tile properties (markers)</h3>
+<p>| Property | Type | Default | Meaning |
+|---|---|---|---|
+| <code>type</code> | string | — | The marker discriminator (<code>playerStart</code>, <code>coin</code>, <code>chest</code>, <code>torch</code>, <code>dagger</code>, <code>exitGate</code>, <code>enemy</code>, <code>platform</code>). |
+| <code>enemyType</code> | string | <code>&quot;walker&quot;</code> | Picks the enemy variant: <code>walker</code> / <code>flyer</code> / <code>shooter</code> / <code>knight</code>. See <code>enemies.md</code>. |
+| <code>aiMode</code> | string | <code>&quot;patrol&quot;</code> | Enemy patrol behavior: <code>&quot;side-to-side&quot;</code> (or <code>&quot;sidetoside&quot;</code>, case-insensitive) → endless walking that turns only on walls/ledges/hazards; anything else/absent → origin-bounded <code>patrol</code>. Flyers ignore it (never grounded). See <code>enemies.md</code>. |
+| <code>speed</code> | float | per-type default (<code>20</code>) | (enemy only) Horizontal patrol speed override, world px/s. Applied before the <code>unitScale</code> (tile-size) scaling. |
+| <code>patrolRange</code> | float | per-type default (<code>64</code>) | (enemy only) Patrol-range override, world px. Only used in <code>PATROL</code> mode (<code>SIDE_TO_SIDE</code> ignores it). Applied before the <code>unitScale</code> scaling. |
+| <code>nextLevel</code> | string | — | (exitGate only) The next <code>.tmx</code> path <strong>relative to the <code>assets/</code> folder</strong>, e.g. <code>maps/world1/level_03.tmx</code>. Cycles to that map on interaction. |
+| <code>trapType</code> | string | <code>&quot;acidDrop&quot;</code> | (trap only) Trap variant: <code>&quot;acidDrop&quot;</code> (spawner + projectiles) or <code>&quot;flame&quot;</code> (pulsing fire). |
+| <code>direction</code> | string | <code>&quot;down&quot;</code> | (trap only) Direction the trap fires/extends: <code>&quot;up&quot;</code>, <code>&quot;down&quot;</code>, <code>&quot;left&quot;</code>, <code>&quot;right&quot;</code>. |
+| <code>interval</code> | float | <code>2.0</code> | (acid drop spawner only) Seconds between projectile spawns. |
+| <code>speed</code> | float | <code>200</code> | (acid drop only) Projectile velocity in world-units/s (before unitScale). |
+| <code>duration</code> | float | <code>2.0</code> | (flame only) Seconds the flame stays ON. |
+| <code>cooldown</code> | float | <code>1.5</code> | (flame only) Seconds the flame stays OFF between pulses. |
+| <code>pulseSpeed</code> | float | <code>2.0</code> | (flame only) Oscillation speed for grow/shrink animation. |
+| <code>potionType</code> | string | — | (chest only) If set, the chest drops a potion of this type instead of coins. Valid values: <code>healing</code>, <code>strength</code>, <code>speed</code>, <code>invulnerability</code>. Omit for a standard coin chest. |</p>
+<h3 id="moving-platform-properties-the-platform-rectangle">Moving-platform properties (the <code>platform</code> rectangle)</h3>
+<p>A platform oscillates around its spawn position with a sine wave:</p>
+<pre><code>pos = base + amplitude * sin(angle + phase)
+angle += speed * dt        (each frame)
+</code></pre>
+<p>| Property | Type | Default | Meaning |
+|---|---|---|---|
+| <code>amplitudeX</code> | float | <code>0</code> | How far (world px) the platform travels <strong>horizontally</strong> away from its spawn, each side. Peak-to-peak travel is 2× this. |
+| <code>amplitudeY</code> | float | <code>0</code> | Same, but <strong>vertically</strong> (up and down). |
+| <code>speed</code> | float | <code>1</code> | Oscillation speed in <strong>radians per second</strong>. <code>2π</code> (≈6.28) = one full up-down cycle per second; <code>1</code> is slow; <code>π</code> (≈3.14) is a ~2s cycle. |
+| <code>phase</code> | float | <code>0</code> | Starting angle offset in <strong>radians</strong>. Use different phases on several platforms to desync them. |
+| <code>axis</code> | string | — | Convenience shortcut: <code>&quot;x&quot;</code> zeroes the vertical axis, <code>&quot;y&quot;</code> zeroes the horizontal. If you set <code>amplitudeX</code>/<code>amplitudeY</code> explicitly, those win. |</p>
+<p><strong>Examples</strong> (from <code>assets/maps/world1/level_01.tmx</code>):</p>
+<ul>
+<li>Horizontal shuttle: rectangle <code>type=&quot;platform&quot;</code> + <code>amplitudeX=80</code> + <code>speed=1</code> → slides 80px left/right of spawn.</li>
+<li>Vertical lift: <code>amplitudeY=80</code> + <code>speed=1</code> → bobs 80px up/down.</li>
+</ul>
+<p><strong>Gotchas:</strong></p>
+<ul>
+<li>A platform with no <code>amplitude</code>/<code>axis</code> is a static block (still lands on it, still collides).</li>
+<li>The platform only <strong>moves</strong> while its owning room is the active one (<code>RoomState.activeRoomIndex</code>); it freezes when you're in another room. The player can still stand on a frozen platform.</li>
+<li>Place the platform rectangle <em>inside</em> a <code>Rooms</code> rectangle so it's tied to that room.</li>
+</ul>
+<h3 id="tile-properties-collision-tilesets">Tile properties (collision / tilesets)</h3>
+<p>| Property | Type | Default | Meaning |
+|---|---|---|---|
+| <code>solid</code> | boolean | <code>true</code> | Set <code>false</code> on a tileset tile to make that tile <strong>non-blocking</strong> even in the <code>collision</code> layer (the passage-doorway use case, §3.1). |
+| <code>oneWay</code> | boolean | <code>false</code> | Set <code>true</code> on a tileset tile to make it a <strong>drop-through platform</strong>: the player gets top-only solidity (jump up through; drop with the <code>v</code> button / <code>S</code> / <code>DOWN</code>), while enemies and popped items treat it as a fully-solid tile (all four sides) and flying enemies pass through (see §3.3). Ignored when the tile is <code>hazard</code>. |
+| <code>hazard</code> | boolean | <code>false</code> | Set <code>true</code> on a tileset tile to make it a <strong>non-solid hazard</strong> (spikes/lava): 1 HP on touch, no knockback, invulnerability grace (see §3.2). Wins over <code>solid</code>/<code>oneWay</code>. |
+| <code>secret</code> | boolean | <code>false</code> | Set <code>true</code> on a <strong>solid</strong> tileset tile to make it a <strong>breakable secret wall</strong>: solid until the player melee-strikes it, then it disappears and opens the way (see §3.4). Ignored on <code>hazard</code> and <code>solid = false</code> tiles. |
+| <code>secretRoom</code> | string | — | On a <strong>secret wall tile</strong>: names the <code>Rooms</code> rectangle (matched by <strong>name</strong>) that this wall protects, turning the plain secret wall into a <strong>hidden secret room</strong> entry — breaking the wall reveals the whole room (§3.5). On a <strong>map object marker</strong> (<code>objects</code>/<code>enemies</code> layers): defers that marker — it is partitioned out of the normal spawn layers and only spawned when its named room is revealed (§3.5). |
+| <code>type</code> | string | — | On tileset tiles: lets you paint tile objects that auto-spawn as markers (<code>coin</code>, <code>chest</code>, <code>enemy</code>…). |
+| <code>effect</code> | string | — | On <strong>tile layer</strong> tiles: spawns a runtime effect entity at the tile position (see §4.5). Values: <code>&quot;light&quot;</code> (flickering glow halo), <code>&quot;particle&quot;</code> (planned), <code>&quot;sound&quot;</code> (planned). |
+| <code>lightRadius</code> | float | <code>96</code> | (effect=&quot;light&quot; only) Halo radius in world units. |
+| <code>lightColor</code> | string | warm orange | (effect=&quot;light&quot; only) RGB hex (<code>&quot;FF8040&quot;</code>) or RGBA hex (<code>&quot;FF8040FF&quot;</code>). |
+| <code>lightFlickerSpeed</code> | float | <code>6</code> | (effect=&quot;light&quot; only) Flicker oscillation speed in rad/s. |</p>
+<h3 id="room-properties-the-rooms-layer">Room properties (the <code>Rooms</code> layer)</h3>
+<p>| Property | Type | Default | Meaning |
+|---|---|---|---|
+| <code>camera</code> | string | <code>auto</code> | Camera mode for that room: <code>flip</code> (always static, center-framed), <code>scroll</code> (always dead-zone scroll), or omit for <code>auto</code> (infer from size — see §6). |</p>
+<hr />
+<h2 id="6-the-rooms-layer-camera">6. The <code>Rooms</code> layer &amp; camera</h2>
+<p>Draw one <strong>rectangle per room</strong> in the <code>Rooms</code> object layer (a <code>RectangleMapObject</code>; plain shape, no special type needed). <code>MapLoader.getRooms()</code> turns each into a <code>Room</code>, and <code>CameraSystem</code> uses whichever room currently contains the player for both <strong>camera framing</strong> and <strong>enemy/platform activation</strong>.</p>
+<ul>
+<li><strong>No <code>Rooms</code> layer at all</strong>, or a <strong><code>Rooms</code> layer with no rectangles</strong> → the game falls back to a single room covering the whole map (the whole map scrolls like one big room). Useful for one-screen test maps, but you lose per-room camera/enemy control.</li>
+</ul>
+<h3 id="camera-behavior-per-axis">Camera behavior (per axis)</h3>
+<p>For each axis (X and Y) independently (the &quot;viewport size&quot; is always the <strong>effective</strong> size — <code>camera.viewportWidth/Height × camera.zoom</code>):</p>
+<ul>
+<li><strong>Flip axis</strong> (room size ≤ effective viewport size on that axis, or forced via <code>camera=&quot;flip&quot;</code>): camera locks to the room's <strong>center</strong> and <strong>snaps instantly</strong> when the player enters. Classic Castlevania-style screen change. The viewport may overshoot a room smaller than the screen.</li>
+<li><strong>Scroll axis</strong> (room size &gt; effective viewport size on that axis, or forced via <code>camera=&quot;scroll&quot;</code>): dead-zone scrolling. The camera holds still while the player roams inside a margin from each screen edge — <code>GameConstants.CAMERA_SCROLL_MARGIN</code> at zoom 1, or 30% of the effective (zoomed) view per axis once the camera zooms in (<code>GameConstants.MOBILE_SCROLL_MARGIN_FRACTION</code>) — then scrolls only when the player crosses that margin, clamped so the screen never leaves the room.</li>
+<li><code>camera=&quot;flip&quot;</code> forces static framing even for big rooms; <code>camera=&quot;scroll&quot;</code> forces scrolling, but a room still smaller than the viewport on an axis always centers (you can't scroll what's smaller than the screen).</li>
+<li><strong>No smooth follow / no lerp.</strong> Transitions are instant snaps. On level start the camera frames the starting room via <code>CameraSystem.snapToRoom(...)</code> (flip rooms center, scroll rooms put the player in view) — not the player.</li>
+</ul>
+<blockquote>
+<p><strong>Zoom note:</strong> The game's default layout zooms the camera in everywhere — <code>LayoutMode.BAND_ZOOM</code> is the shipped default for desktop, mobile, and tablet (toggled from the Pause dialog, plus the faked <code>DeviceClass</code> previews; see <code>com.axehigh.platformer.ui.LayoutMode</code>). A zoomed camera shows a smaller effective frame, so an otherwise screen-sized 30×17 room becomes <em>bigger than the frame</em> and flips to dead-zone scroll on every platform — flip-screen framing is only preserved if a room is authored smaller than the effective (zoomed) view or forced via the room's <code>camera=&quot;flip&quot;</code> property. The zoomed dead-zone margin is a 30% fraction of the visible view (<code>MOBILE_SCROLL_MARGIN_FRACTION</code>) so the camera starts tracking well before the player reaches a screen edge. This needs <strong>no map change</strong>: rooms stay as authored, the camera just follows.</p>
+</blockquote>
+<h3 id="design-tips">Design tips</h3>
+<ul>
+<li>Screen-sized rooms: make a room <strong>exactly 30×17 tiles</strong> (3840×2176 px at 128px tiles) → pure flip-screen, no scrolling.</li>
+<li>Rooms <strong>wider/taller than 30×17 tiles</strong> → dead-zone scroll; give the player room to roam.</li>
+<li>Small rooms (smaller than the screen) are fine — the camera centers on them and shows a little of the next area.</li>
+<li>Every <code>Rooms</code> rectangle should <strong>contain the <code>playerStart</code> marker</strong> (and each enemy/platform's spawn), or that entity won't be tied to any room (<code>roomIndex = -1</code>, always active).</li>
+<li><strong>Secret rooms:</strong> carve a small room into the <code>collision</code> layer, drop a <code>Rooms</code> rectangle over it, and place pickups/enemies inside. <code>RoomState.findRoomIndexContaining(...)</code> returns the <strong>first</strong> room rectangle containing a point, so put the secret room <strong>above</strong> (before) the enclosing room in the layer for it to win the camera framing (a chamber carved <em>inside</em> a room is emitted first for exactly this reason). To make it <em>hidden until broken</em> (see §3.5): name the rect (e.g. <code>secret_room</code>), paint a <code>secret_hide</code> veil over its footprint (leave the guard cells un-veiled for an inside chamber, so the crack is visible), tag the entry-wall tile with <code>secretRoom=&quot;secret_room&quot;</code>, and tag the interior markers with the same <code>secretRoom</code> object property so they spawn on reveal (see <code>secret_room</code> in <code>assets/maps/world1/level_05.tmx</code> and the inside chamber in <code>assets/maps/world1/level_08.tmx</code>).</li>
+</ul>
+<hr />
+<h2 id="7-step-by-step-build-a-new-level">7. Step-by-step: build a new level</h2>
+<ol>
+<li><strong>Map setup.</strong> In Tiled: New map, orthogonal, tile size <strong>128×128</strong> (or matching your chain), infinite off, CSV tile format. Add tilesets from <code>assets/maps/tileset/</code>: <code>dungeon_tiles.tsx</code> for terrain (solid walls, one-way platforms, and spike hazards are all tiles with baked-in <code>oneWay</code>/<code>hazard</code> properties), <code>items.tsx</code> for pickups, <code>enemy.tsx</code> for enemies, <code>secret_wall.tsx</code> for breakable secret walls.</li>
+<li><strong><code>background</code> layer.</strong> Paint the decorative backdrop (walls, pillars, windows). Anything goes — it never blocks.</li>
+<li><strong><code>collision</code> layer.</strong> Paint the solid geometry: floor, walls, platforms. Leave gaps where you want jumps. Use <code>drop_platform.tsx</code> tiles for ledges you want to drop through, <code>hazards.tsx</code> tiles for spike/lava damage zones (their behavior is baked into the tileset tile properties — see §3.2, §3.3), and <code>secret_wall.tsx</code> tiles for breakable secret walls (§3.4). For any room-to-room doorway, use your <code>solid = false</code> passage tile (see §3.1). Keep the map's outer border solid. For a hidden secret room: seal the room with solid tiles, and paint its breakable entry wall from a tileset tile carrying <code>secret=true</code> + <code>secretRoom=&quot;&lt;rect name&gt;&quot;</code> (§3.5).</li>
+<li><strong><code>decoration</code> layer</strong> (optional). Foreground decor that draws on top. Stamp tiles with <code>effect=&quot;light&quot;</code> (e.g. the torch from <code>items.tsx</code>) to add flickering glow halos — the tile renders visually, the effect entity adds the light (§4.5).</li>
+<li><strong><code>objects</code> layer.</strong><ul>
+<li>Draw one <code>playerStart</code> rectangle where the player should spawn.</li>
+<li>Scatter <code>coin</code> / <code>chest</code> / <code>dagger</code> / <code>torch</code> markers (either as rectangles with the right <code>type</code>, or stamp the pre-typed tiles from <code>items.tsx</code>).</li>
+<li>Add moving platforms as <strong>rectangle objects</strong> with <code>type=&quot;platform&quot;</code> and the §5 properties.</li>
+<li>Add the <code>exitGate</code> at the far end with <code>nextLevel = maps/&lt;path&gt;/&lt;next&gt;.tmx</code> (or leave it decorative for a final level). The object rectangle sizes the trigger zone; the gate itself draws no sprite, so paint the door's decoration into the map layers (see §4).</li>
+<li>Add <code>trap</code> markers for hazards (acid drops, flames). Place them on the <code>objects</code> or <code>enemies</code> layer with <code>type=&quot;trap&quot;</code> and the relevant <code>trapType</code>/<code>direction</code>/timing properties (see the traps subsection in §4).</li>
+</ul>
+</li>
+<li><strong><code>enemies</code> layer.</strong> Place <code>enemy</code> markers (stamp from <code>enemy.tsx</code> or draw rectangles + <code>enemyType</code>). Refer to <code>enemies.md</code> for behavior tuning (flyers need patrol range clear of walls, shooters only fire in their own room).</li>
+<li><strong><code>Rooms</code> layer.</strong> Draw one rectangle per room (see §6). Add <code>camera=&quot;flip&quot;</code>/<code>&quot;scroll&quot;</code> only when you want to override the size-based default. <strong>Name a secret room's rectangle</strong> (e.g. <code>secret_room</code>) and match that name in the entry wall's <code>secretRoom</code> property and the interior markers' <code>secretRoom</code> property (§3.5).</li>
+<li><strong><code>secret_hide</code> layer</strong> (only for hidden secret rooms). Above every other tile layer, paint rock tiles over the whole secret-room footprint so it looks like solid wall from outside (§3.5). No collision — this layer is purely visual.</li>
+<li><strong>Register the level.</strong> Add <code>LEVELS.add(new LevelDefinition(&quot;my_key&quot;, &quot;My Level Name&quot;, &quot;maps/my_level.tmx&quot;))</code> in <code>core/.../map/LevelCatalog.java</code>.</li>
+<li><strong>Test.</strong> Run the desktop build. Turn on collision debug (SHIFT+D, or the Pause dialog) to verify the collision AABBs and room rects look right.</li>
+</ol>
+<hr />
+<h2 id="8-common-pitfalls-checklist-when-something-feels-wrong">8. Common pitfalls (checklist when something feels wrong)</h2>
+<ul>
+<li><strong>Layer name typo</strong> — layers are matched by exact name (<code>collision</code>, <code>objects</code>, <code>enemies</code>, <code>Rooms</code>, <code>background</code>, <code>decoration</code>, <code>secret_hide</code>). A typo = silently ignored layer.</li>
+<li><strong>Doorway is an invisible wall</strong> — the passage tile doesn't have <code>solid = false</code>. Fix it on the tileset tile (this affects all maps using that tileset).</li>
+<li><strong>Wrong <code>type</code> spelling</strong> — <code>playerStart</code>, <code>coin</code>, <code>chest</code>, <code>torch</code>, <code>dagger</code>, <code>exitGate</code>, <code>enemy</code>, <code>trap</code>, <code>platform</code> are exact. Anything else spawns nothing.</li>
+<li><strong>Platform never moves</strong> — it's outside every <code>Rooms</code> rectangle and/or has no <code>amplitudeX/Y</code> and no <code>axis</code>. Give it an amplitude and place it inside a room.</li>
+<li><strong>Platform sprite is huge/stretched</strong> — the platform's collision box and sprite are its rectangle size; keep the rectangle near the tile/asset's aspect ratio.</li>
+<li><strong>Exit gate does nothing</strong> — <code>nextLevel</code> is missing (or the path is wrong). Paths are relative to <code>assets/</code>.</li>
+<li><strong>Enemy behaves oddly</strong> — check <code>enemyType</code> spelling; flyers will fly into walls if <code>patrolRange</code> isn't clear of walls (they have no automatic wall avoidance — see <code>enemies.md</code>).</li>
+<li><strong>Camera snaps wrong room / player not in view</strong> — <code>playerStart</code> isn't inside the intended <code>Rooms</code> rectangle, or the rooms don't tile the map.</li>
+<li><strong>Unexpectedly scrolling when you wanted flip</strong> — the room is larger than the screen (30×17 tiles); add <code>camera=&quot;flip&quot;</code> to force static framing.</li>
+<li><strong>Spikes/lava never hurt a standing player</strong> — the player's collision box is smaller than a tile and its feet sit on the floor, so hazards must be placed where the player's body travels <em>through</em> them (see §3.2).</li>
+<li><strong>Acid drops pass through walls</strong> — drops disappear only on collision-layer contact; if the spawner is placed with a clear path through a passage, the drop sails through. Place spawners so their line of fire hits a solid wall/floor/ceiling. Drops also live for 5 s — long enough to cross a room.</li>
+<li><strong>Flame trap too fast/too slow</strong> — <code>pulseSpeed</code> controls the grow/shrink animation speed, not the on/off cycle. The on/off rhythm is <code>duration</code> (on) + <code>cooldown</code> (off). Multiple flames in a room start at random phases; to stagger them, use different <code>cooldown</code> values.</li>
+<li><strong>Effect tile does nothing</strong> — <code>effect=&quot;light&quot;</code> only works on <strong>tile layers</strong> (background, decoration, collision, etc.), not the <code>objects</code> layer. If you stamp the tile on <code>objects</code>, it spawns nothing via the effect system (though <code>type=&quot;torch&quot;</code> on objects still works via the old path). <code>MapLoader.scanEffectLayers()</code> scans all tile layers.</li>
+<li><strong>Light halo offset wrong</strong> — the light center is read from the tile's collision-editor shape (draw a Point in Tiled's Tile Collision Editor). If no shape is drawn, it defaults to the tile center. Use a Point to precisely position the flame/glow.</li>
+<li><strong>Drop platform behaves like a wall</strong> — the tile doesn't carry <code>oneWay = true</code> on the tileset tile; or the platform's collision was authored as a plain solid tile. Also remember one-way platforms are drop-through <strong>only for the player</strong> — enemies and popped items stand on them like solid tiles, and flying enemies fly through them.</li>
+<li><strong>Secret wall doesn't break</strong> — the tile isn't flagged <code>secret = true</code> on the tileset tile (a plain solid tile won't break); also remember one swing breaks at most one tile, and the strike hitbox must actually reach the wall (it's a solid block until broken).</li>
+<li><strong>Secret room spawns loot from the start / never reveals</strong> — the interior markers don't carry the <code>secretRoom</code> object property (so they spawn normally instead of being deferred), or the entry wall's tile doesn't carry <code>secretRoom</code> naming the <code>Rooms</code> rect (so breaking it never triggers a reveal). Remember the wall's <code>secretRoom</code> is a <strong>tile</strong> property read from the tile itself — <code>cell.setTile(null)</code> wipes it, which is why the name can't live on the cell.</li>
+<li><strong>Secret room is visible through the wall before reveal</strong> — the <code>secret_hide</code> layer doesn't cover the full room footprint (or the room's <code>Rooms</code> rect is bigger than the painted veil). The veil must tile every cell over the rect, and it must sit at the top of the layer stack.</li>
+</ul>
+<hr />
+<h2 id="9-related-tooling-docs">9. Related tooling &amp; docs</h2>
+<ul>
+<li><code>.opencode/skills/tmx-map-generator</code> — generates a standalone prototype <code>.tmx</code> (a linear chain of rooms with enemies/items and walk-through doorways, plus a hidden secret room — either appended to the right, or, with <code>--inside-secret</code>, carved as a 6×8-tile chamber inside the last room) so you can test a layout without hand-tracing collision CSVs. Rooms <strong>default to 24×10 tiles</strong> (mobile-oriented, dead-zone scroll under the <code>BAND_ZOOM</code> camera); pass <code>--room-width 30 --room-height 17</code> for whole-screen desktop rooms. <code>--platforms N</code> additionally decorates every room with a deterministic, always-jumpable staircase of N floating one-way platforms (2 rows up / 2 cols right per step — within the player's single-jump envelope of 2 up / 4 across — a <code>bg-*</code> filler tile behind each, and a coin on the top platform) while keeping the flat floor intact — see the skill's SKILL.md. <strong>Templates:</strong> <code>--template NAME[,ROOM[,COL]]</code> (repeatable) and <code>--template-pick N</code> stamp ASCII-art courses from <code>scripts/templates/*.tmpl</code> (e.g. <code>staircase</code>, <code>chasm-bridge</code>, <code>hazard-strip</code>) floor-anchored into rooms — the generator then runs jump-aware design checks (supported ground + reachability within the jump envelope, warnings only). <strong>Grid layouts:</strong> <code>--grid-cols C --grid-rows R</code> tiles <code>C×R</code> rooms over the map (width × height = <code>C×W × R×H</code>), links horizontal neighbours with doorways and vertical neighbours with one-way <strong>platform shafts</strong> (§3.6), and places <code>playerStart</code> in the bottom-left room; grid maps use <code>--no-secret</code> to omit the secret room (required for multi-row grids). Run <code>generate_tmx.py</code> (from <code>assets/maps/world1</code>) with <code>--rooms N --seed S --out level_05.tmx</code> or <code>--grid-cols 2 --grid-rows 2 --no-secret --seed S --out level_01.tmx</code>; see the skill's SKILL.md for CLI + conventions. It reads the collision tileset from <code>world1/dungeon_tiles.tsx</code>, the item/enemy tilesets from <code>world1/</code>, and clones <code>world1/secret_wall.tsx</code> inline for the secret room's entry wall; output is standalone (no <code>LevelCatalog</code>/exit-gate wiring by design — the exit gate is added by hand).</li>
+<li><code>resources/docs-ai/enemies.md</code> — enemy catalog, stats, and how to add new types.</li>
+<li><code>resources/docs-ai/gameplay.md</code> §AB — trap design spec (acid drops, flames, damage resolution).</li>
+<li><code>resources/docs-ai/ashley-ecs.md</code> — the <code>MapLoader</code>/<code>EntityFactory</code>/<code>Room</code>/<code>RoomState</code>/<code>CameraSystem</code> code shape and priorities.</li>
+<li><code>resources/docs-ai/gameplay.md</code> — movement/combat mechanics and how they read map data.</li>
+</ul>
+
+<hr>
+<p><em>Auto-generated from <code>map-design-for-tiled.md</code> — do not edit this file directly.</em></p>
+</main>
+</div>
+</body>
+</html>

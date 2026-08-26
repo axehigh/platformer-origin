@@ -14,10 +14,12 @@ import com.badlogic.gdx.utils.Array;
 import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
- * Owns the opened-chest coin-pop: once an opened chest's timer reaches 0 (and it hasn't already
- * dropped), a random number of coin pickups pop out of its position, each with a random upward +
- * horizontal launch velocity, before gravity/collision (via MovementSystem) pulls them back down
- * to rest nearby. The chest entity itself stays in the world with its open sprite as decoration.
+ * Owns the opened-chest loot pop: once an opened chest's timer reaches 0 (and it hasn't already
+ * dropped), loot pops out of its position. If the chest has a {@code potionType}, a single potion
+ * pickup is spawned; otherwise, a random number of coin pickups pop out, each with a random upward +
+ * horizontal launch velocity, before gravity/collision (via {@code MovementSystem}) pulls them back
+ * down to rest nearby. The chest entity itself stays in the world with its open sprite as
+ * decoration.
  */
 public class ChestSystem extends IteratingSystem {
     private static final int MIN_COIN_DROPS = 2;
@@ -65,8 +67,12 @@ public class ChestSystem extends IteratingSystem {
             centerY = collision.worldBounds.y + collision.worldBounds.height / 2f;
         }
 
-        int coinCount = MathUtils.random(MIN_COIN_DROPS, MAX_COIN_DROPS);
-        entityFactory.popCoins(getEngine(), centerX, centerY, coinCount, unitScale, collisionRects);
+        if (chest.potionType != null) {
+            getEngine().addEntity(entityFactory.createPotionPickup(centerX, centerY, chest.potionType.name()));
+        } else {
+            int coinCount = MathUtils.random(MIN_COIN_DROPS, MAX_COIN_DROPS);
+            entityFactory.popCoins(getEngine(), centerX, centerY, coinCount, unitScale, collisionRects);
+        }
 
         chest.coinsDropped = true;
     }
