@@ -13,19 +13,17 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import static com.axehigh.platformer.assets.GameAssetRegistry.HERO_ASSET;
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_UI_GFX;
 
 /**
- * Top HUD overlay: avatar + heart icons (top-left), coin counter + selected-potion indicator +
- * buff countdown row (top-center), item tracker + pause button (top-right) — reflecting the live
- * values on {@link PlayerComponent} and the running buffs on {@link BuffComponent}. The coin/item/
- * potion text uses a dedicated drop-shadowed clone of the skin font so it stays legible against
+ * Top HUD overlay: avatar + heart icons + coin counter (top-left), buff countdown row
+ * (top-center), item tracker + pause button (top-right) — reflecting the live values on
+ * {@link PlayerComponent} and the running buffs on {@link BuffComponent}. The coin/item
+ * text uses a dedicated drop-shadowed clone of the skin font so it stays legible against
  * bright background tiles.
  */
 public class HudStage extends Stage {
@@ -41,9 +39,6 @@ public class HudStage extends Stage {
     private final BuffComponent buffComponent;
     private final Image[] heartImages;
     private final Label coinLabel;
-    private final Label itemLabel;
-    private final Image potionImage;
-    private final Label potionLabel;
     private final TextButton pauseButton;
     private final ObjectMap<PotionType, TextureRegionDrawable> potionDrawables = new ObjectMap<>();
     private final Image[] buffImages;
@@ -65,9 +60,9 @@ public class HudStage extends Stage {
         addActor(root);
 
         Table leftGroup = new Table();
-        TextureAtlas heroAtlas = assetManager.get(HERO_ASSET, TextureAtlas.class);
-        Image avatar = new Image(heroAtlas.findRegion("idle"));
-        leftGroup.add(avatar).size(66f, 66f).padRight(17f);
+     //   TextureAtlas heroAtlas = assetManager.get(HERO_ASSET, TextureAtlas.class);
+       // Image avatar = new Image(heroAtlas.findRegion("idle"));
+        //leftGroup.add(avatar).size(66f, 66f).padRight(17f);
 
         Table heartsTable = new Table();
         Texture heartTexture = assetManager.get("gfx/old/heart.png", Texture.class);
@@ -76,24 +71,20 @@ public class HudStage extends Stage {
             heartImages[i] = new Image(new TextureRegion(heartTexture));
             heartsTable.add(heartImages[i]).size(HEART_SIZE, HEART_SIZE).padRight(HEART_PAD);
         }
-        leftGroup.add(heartsTable);
+        leftGroup.add(heartsTable).padRight(24f);
 
-        Table centerGroup = new Table();
         Image coinIcon = new Image(new TextureRegion(assetManager.get("gfx/old/coin.png", Texture.class)));
-        centerGroup.add(coinIcon).size(34f, 34f).padRight(17f);
+        leftGroup.add(coinIcon).size(34f, 34f).padRight(10f);
         coinLabel = new ShadowLabel("", counterStyle);
-        centerGroup.add(coinLabel);
+        leftGroup.add(coinLabel);
 
         TextureAtlas uiAtlas = assetManager.get(ORIGIN_UI_GFX, TextureAtlas.class);
         for (PotionType type : PotionType.values()) {
             TextureAtlas.AtlasRegion region = uiAtlas.findRegion(type.regionName());
             potionDrawables.put(type, new TextureRegionDrawable(region));
         }
-        potionImage = new Image(potionDrawables.get(PotionType.HEALING));
-        potionLabel = new ShadowLabel("", counterStyle);
-        centerGroup.row();
-        centerGroup.add(potionImage).size(34f, 34f).padRight(17f).padTop(10f);
-        centerGroup.add(potionLabel).padTop(10f);
+
+        Table centerGroup = new Table();
 
         Table buffRow = new Table();
         buffImages = new Image[BUFF_ORDER.length];
@@ -108,10 +99,6 @@ public class HudStage extends Stage {
         centerGroup.add(buffRow).colspan(2).center().padTop(10f);
 
         Table rightGroup = new Table();
-        Image itemIcon = new Image(new TextureRegion(assetManager.get("gfx/old/dagger.png", Texture.class)));
-        rightGroup.add(itemIcon).size(66f, 66f).padRight(17f);
-        itemLabel = new ShadowLabel("", counterStyle);
-        rightGroup.add(itemLabel).padRight(33f);
         pauseButton = new TextButton("||", skin);
         rightGroup.add(pauseButton).size(83f, 66f);
 
@@ -134,12 +121,6 @@ public class HudStage extends Stage {
             heartImages[i].setColor(i < playerComponent.health ? Color.RED : Color.DARK_GRAY);
         }
         coinLabel.setText(String.format("x %04d", playerComponent.coins));
-        itemLabel.setText(String.format("x %02d/%02d", playerComponent.items, playerComponent.maxItems));
-        Drawable drawable = potionDrawables.get(playerComponent.selectedPotion);
-        if (drawable != null) {
-            potionImage.setDrawable(drawable);
-        }
-        potionLabel.setText(String.format("x %02d", playerComponent.countPotion(playerComponent.selectedPotion)));
         refreshBuffRow();
     }
 
