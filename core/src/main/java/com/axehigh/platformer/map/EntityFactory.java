@@ -92,6 +92,11 @@ public class EntityFactory {
         return pickupFactory.createPotionPickup(x, y, potionType);
     }
 
+    /** Spawns a popped potion pickup, avoiding spawn inside collision rects. */
+    public void popPotion(Engine engine, float x, float y, String potionType, float unitScale, Array<Rectangle> collisionRects) {
+        pickupFactory.popPotion(engine, x, y, potionType, unitScale, collisionRects);
+    }
+
     /**
      * Spawns decorative entities (coin, chest, torch, exit gate, enemy) found in the object layer.
      * {@code roomState} is used to assign each spawned enemy to whichever Room rectangle contains

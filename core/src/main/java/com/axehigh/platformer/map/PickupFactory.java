@@ -214,7 +214,7 @@ class PickupFactory {
 
         TransformComponent transform = new TransformComponent();
         transform.position.set(x, y);
-        transform.scale.set(context.unitScale * 0.5f, context.unitScale * 0.5f);
+        transform.scale.set(context.unitScale * 0.375f, context.unitScale * 0.375f);
         transform.z = FactoryContext.DECOR_Z;
         entity.add(transform);
 
@@ -223,7 +223,7 @@ class PickupFactory {
         entity.add(textureComponent);
 
         CollisionComponent collisionComponent = new CollisionComponent();
-        collisionComponent.bounds.setSize(region.getRegionWidth() * context.unitScale * 0.5f, region.getRegionHeight() * context.unitScale * 0.5f);
+        collisionComponent.bounds.setSize(region.getRegionWidth() * context.unitScale * 0.375f, region.getRegionHeight() * context.unitScale * 0.375f);
         entity.add(collisionComponent);
 
         PotionPickupComponent potionPickup = new PotionPickupComponent();
@@ -231,6 +231,52 @@ class PickupFactory {
         entity.add(potionPickup);
 
         return entity;
+    }
+
+    /**
+     * Builds a potion pickup that launches with the given initial velocity (a small upward pop
+     * plus horizontal scatter) instead of sitting still, so it visibly arcs up and out before
+     * gravity/collision pulls it back down to rest. Used for chest-dropped potions.
+     */
+    public Entity createPoppedPotionPickup(float x, float y, float velocityX, float velocityY, String potionType) {
+        Entity entity = createPotionPickup(x, y, potionType);
+
+        MovementComponent movementComponent = new MovementComponent();
+        movementComponent.velocity.set(velocityX, velocityY);
+        entity.add(movementComponent);
+
+        entity.add(new PoppedItemComponent());
+
+        return entity;
+    }
+
+    /**
+     * Collision-aware spawn of a single popped potion at {@code (x, y)} into {@code engine}.
+     * Launched with a random upward velocity ({@value #MIN_POP_VELOCITY_Y}-{@value #MAX_POP_VELOCITY_Y}
+     * u/s) and a smaller sideways scatter (up to {@value #MAX_POP_VELOCITY_X} u/s), scaled by the
+     * given {@code unitScale}. If the spawn position overlaps a static collision rect, the potion
+     * is nudged upward until it sits just above the obstacle.
+     */
+    public void popPotion(Engine engine, float x, float y, String potionType, float unitScale, Array<Rectangle> collisionRects) {
+        float potionSize = 8f * unitScale;
+        float velocityX = 0f;
+        float velocityY = MathUtils.random(MIN_POP_VELOCITY_Y, MAX_POP_VELOCITY_Y) * unitScale;
+
+        float spawnX = x;
+        float spawnY = y;
+
+        if (collisionRects != null) {
+            Rectangle testRect = new Rectangle(spawnX - potionSize / 2f, spawnY - potionSize / 2f, potionSize, potionSize);
+            for (Rectangle rect : collisionRects) {
+                if (testRect.overlaps(rect)) {
+                    spawnY = rect.y + rect.height + potionSize / 2f + 1f;
+                    testRect.setY(spawnY - potionSize / 2f);
+                    break;
+                }
+            }
+        }
+
+        engine.addEntity(createPoppedPotionPickup(spawnX, spawnY, velocityX, velocityY, potionType));
     }
 
     /** Parses a {@code potionType} map property, defaulting to {@code HEALING} on unknown values. */

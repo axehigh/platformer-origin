@@ -68,7 +68,7 @@ public class ChestSystem extends IteratingSystem {
         }
 
         if (chest.potionType != null) {
-            getEngine().addEntity(entityFactory.createPotionPickup(centerX, centerY, chest.potionType.name()));
+            entityFactory.popPotion(getEngine(), centerX, centerY, chest.potionType.name(), unitScale, collisionRects);
         } else {
             int coinCount = MathUtils.random(MIN_COIN_DROPS, MAX_COIN_DROPS);
             entityFactory.popCoins(getEngine(), centerX, centerY, coinCount, unitScale, collisionRects);

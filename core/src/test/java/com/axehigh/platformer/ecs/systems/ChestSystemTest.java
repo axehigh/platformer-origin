@@ -25,12 +25,6 @@ public class ChestSystemTest extends SystemTestBase {
     @Before
     public void setUp() {
         entityFactory = mock(EntityFactory.class);
-        // Stub createPotionPickup to return a real entity so engine.addEntity() doesn't NPE
-        when(entityFactory.createPotionPickup(anyFloat(), anyFloat(), anyString())).thenAnswer(invocation -> {
-            Entity e = new Entity();
-            e.add(new com.axehigh.platformer.ecs.components.TransformComponent());
-            return e;
-        });
         system = new ChestSystem(entityFactory);
         system.setCollisionRects(collisionRects);
         system.setUnitScale(1f);
@@ -60,7 +54,7 @@ public class ChestSystemTest extends SystemTestBase {
         // Timer still active — nothing should happen
         engine.update(DT);
         verify(entityFactory, never()).popCoins(any(), anyFloat(), anyFloat(), anyInt(), anyFloat(), any());
-        verify(entityFactory, never()).createPotionPickup(anyFloat(), anyFloat(), anyString());
+        verify(entityFactory, never()).popPotion(any(), anyFloat(), anyFloat(), anyString(), anyFloat(), any());
 
         // Advance past the 0.3s timer
         for (int i = 0; i < 20; i++) {
@@ -68,7 +62,7 @@ public class ChestSystemTest extends SystemTestBase {
         }
 
         verify(entityFactory).popCoins(eq(engine), anyFloat(), anyFloat(), anyInt(), anyFloat(), eq(collisionRects));
-        verify(entityFactory, never()).createPotionPickup(anyFloat(), anyFloat(), anyString());
+        verify(entityFactory, never()).popPotion(any(), anyFloat(), anyFloat(), anyString(), anyFloat(), any());
     }
 
     @Test
@@ -77,7 +71,7 @@ public class ChestSystemTest extends SystemTestBase {
 
         // Timer still active — nothing should happen
         engine.update(DT);
-        verify(entityFactory, never()).createPotionPickup(anyFloat(), anyFloat(), anyString());
+        verify(entityFactory, never()).popPotion(any(), anyFloat(), anyFloat(), anyString(), anyFloat(), any());
         verify(entityFactory, never()).popCoins(any(), anyFloat(), anyFloat(), anyInt(), anyFloat(), any());
 
         // Advance past the 0.3s timer
@@ -85,7 +79,7 @@ public class ChestSystemTest extends SystemTestBase {
             engine.update(DT);
         }
 
-        verify(entityFactory).createPotionPickup(anyFloat(), anyFloat(), eq("HEALING"));
+        verify(entityFactory).popPotion(eq(engine), anyFloat(), anyFloat(), eq("HEALING"), anyFloat(), eq(collisionRects));
         verify(entityFactory, never()).popCoins(any(), anyFloat(), anyFloat(), anyInt(), anyFloat(), any());
     }
 
@@ -97,7 +91,7 @@ public class ChestSystemTest extends SystemTestBase {
             engine.update(DT);
         }
 
-        verify(entityFactory).createPotionPickup(anyFloat(), anyFloat(), eq("STRENGTH"));
+        verify(entityFactory).popPotion(eq(engine), anyFloat(), anyFloat(), eq("STRENGTH"), anyFloat(), eq(collisionRects));
     }
 
     @Test
@@ -133,6 +127,6 @@ public class ChestSystemTest extends SystemTestBase {
         }
 
         verify(entityFactory, never()).popCoins(any(), anyFloat(), anyFloat(), anyInt(), anyFloat(), any());
-        verify(entityFactory, never()).createPotionPickup(anyFloat(), anyFloat(), anyString());
+        verify(entityFactory, never()).popPotion(any(), anyFloat(), anyFloat(), anyString(), anyFloat(), any());
     }
 }
