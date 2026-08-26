@@ -10,8 +10,8 @@ import static com.axehigh.platformer.GameConstants.*;
  */
 public enum PotionType {
     HEALING("Healing", "Restores 1 heart", "+1 HP", MESSAGE_COLOR_HEAL),
-    STRENGTH("Strength", "Extra melee damage for 20s", "Strength!", MESSAGE_COLOR_STRENGTH),
-    SPEED("Speed", "Move faster for 15s", "Speed!", MESSAGE_COLOR_SPEED),
+    STRENGTH("Strength", "Extra melee damage for 20s", "Double strength!!", MESSAGE_COLOR_STRENGTH),
+    SPEED("Speed", "Move faster + triple jump for 15s", "Triple jump!!", MESSAGE_COLOR_SPEED),
     INVULNERABILITY("Invulnerability", "Take no damage for 10s", "Invulnerable!", MESSAGE_COLOR_INVULN);
 
     private final String displayName;

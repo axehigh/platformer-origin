@@ -46,6 +46,7 @@ public class BuffSystem extends IteratingSystem {
     protected void processEntity(Entity entity, float deltaTime) {
         BuffComponent buff = BUFF.get(entity);
         MovementComponent movement = MOVEMENT.get(entity);
+        PlayerComponent player = PLAYER.get(entity);
 
         buff.strength.update(deltaTime);
         buff.speed.update(deltaTime);
@@ -57,9 +58,15 @@ public class BuffSystem extends IteratingSystem {
                 buff.speedApplied = true;
             }
             movement.maxSpeedX = buff.speedBaseMaxSpeedX * GameConstants.SPEED_MULTIPLIER;
+            if (player != null) {
+                player.maxJumps = 3;
+            }
         } else if (buff.speedApplied) {
             movement.maxSpeedX = buff.speedBaseMaxSpeedX;
             buff.speedApplied = false;
+            if (player != null) {
+                player.maxJumps = 2;
+            }
         }
 
         updateHalo(entity, buff, deltaTime);
