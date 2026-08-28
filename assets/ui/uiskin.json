@@ -65,6 +65,11 @@ com.badlogic.gdx.scenes.scene2d.ui.ImageButton$ImageButtonStyle: {
 		imageDown: button
 		pressedOffsetY: -3
 	}
+	gameplay: {
+		imageUp: left
+		imageDown: left
+		pressedOffsetY: -2
+	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton$ImageTextButtonStyle: {
 	default: {

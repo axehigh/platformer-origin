@@ -86,7 +86,7 @@ public class InventoryBarStage extends Stage {
         // --- Potion Row ---
         Table potionRow = new Table();
         for (PotionType type : PotionType.values()) {
-            TouchButton drinkButton = new TouchButton(skin, "flatUp", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+            TouchButton drinkButton = new TouchButton(skin, "potion", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                     () -> drink(type));
             TextureRegionDrawable icon = new TextureRegionDrawable(uiAtlas.findRegion(type.regionName()));
             icon.setMinWidth(ICON_SIZE);
@@ -120,7 +120,7 @@ public class InventoryBarStage extends Stage {
 
     private Slot createEquipmentSlot(Skin skin, TextureAtlas uiAtlas, String title, String defaultIconRegion) {
         LabelStyle counterStyle = skin.get(LabelStyle.class);
-        TouchButton btn = new TouchButton(skin, "flatUp", 1f, 0f, () -> {});
+        TouchButton btn = new TouchButton(skin, "potion", 1f, 0f, () -> {});
         TextureRegion region = uiAtlas.findRegion(defaultIconRegion);
         if (region != null) {
             TextureRegionDrawable icon = new TextureRegionDrawable(region);
