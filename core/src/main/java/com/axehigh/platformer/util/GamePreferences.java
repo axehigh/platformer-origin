@@ -18,12 +18,14 @@ public class GamePreferences {
     private static final String KEY_SELECT_LEVEL_ENABLED = "selectLevelEnabled";
     private static final String KEY_DEVICE_CLASS = "deviceClass";
     private static final String KEY_LAYOUT_MODE = "layoutMode";
+    private static final String KEY_UI_ICON_SCALE = "uiIconScale";
 
     private static final float DEFAULT_MUSIC_VOLUME = 100f;
     private static final float DEFAULT_SFX_VOLUME = 100f;
     private static final boolean DEFAULT_MUSIC_ENABLED = true;
     private static final boolean DEFAULT_SFX_ENABLED = true;
     private static final boolean DEFAULT_DEBUG_MODE = false;
+    private static final float DEFAULT_UI_ICON_SCALE = 2f;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
     static final boolean DEFAULT_WALL_CLIMB_ENABLED = true;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
@@ -142,6 +144,15 @@ public class GamePreferences {
     /** Persists the chosen {@link LayoutMode}; {@code null} stores "unset". */
     public void setLayoutMode(LayoutMode layoutMode) {
         putEnum(KEY_LAYOUT_MODE, layoutMode);
+    }
+
+    public float getUiIconScale() {
+        return preferences.getFloat(KEY_UI_ICON_SCALE, DEFAULT_UI_ICON_SCALE);
+    }
+
+    public void setUiIconScale(float scale) {
+        preferences.putFloat(KEY_UI_ICON_SCALE, scale);
+        preferences.flush();
     }
 
     private <E extends Enum<E>> E enumOrNull(String key, Class<E> enumType) {

@@ -9,7 +9,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
+import static com.axehigh.platformer.GameConstants.UI_ICON_SCALE;
 import static com.axehigh.platformer.GameConstants.UI_TOUCH_HIT_PAD;
+import static com.badlogic.gdx.utils.Scaling.fit;
 
 /**
  * {@link ImageButton} for the mobile touch overlay. Uses the "gameplay" skin style with a per-button
@@ -29,6 +31,8 @@ public class TouchButton extends ImageButton {
 
     public TouchButton(Skin skin, String drawableName, float pressedScale, float scaleDuration, Handler handler) {
         super(new ImageButtonStyle(skin.get("gameplay", ImageButtonStyle.class)));
+        getImage().setScaling(fit);
+        getImage().setScale(UI_ICON_SCALE);
         ImageButtonStyle style = getStyle();
         style.imageUp = skin.getDrawable(drawableName);
         style.imageDown = skin.getDrawable(drawableName);

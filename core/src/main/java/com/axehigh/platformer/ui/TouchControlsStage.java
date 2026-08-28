@@ -129,6 +129,13 @@ public class TouchControlsStage extends Stage {
         root.getColor().a = alpha;
     }
 
+    /**
+     * Shows/hides the inventory (bag) button, e.g. while the inventory is open.
+     */
+    public void setInventoryVisible(boolean visible) {
+        inventoryButton.setVisible(visible);
+    }
+
     /** Fades the inventory (bag) button when the player has no potions. */
     public void setInventoryAlpha(float alpha) {
         inventoryButton.getColor().a = alpha;

@@ -91,7 +91,21 @@ public class PreferencesScreen extends MenuScreen {
                 preferences.setDebugMode(debugCheckBox.isChecked());
             }
         });
-        content.add(debugCheckBox).colspan(2).padBottom(10f).row();
+        content.add(debugCheckBox).colspan(2).padBottom(6f).row();
+
+        Label scaleLabel = new Label("UI Icon Scale", skin);
+        scaleLabel.setFontScale(GameConstants.FontScale);
+        Slider scaleSlider = new Slider(0.5f, 4f, 0.1f, false, skin);
+        scaleSlider.setValue(preferences.getUiIconScale());
+        scaleSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                preferences.setUiIconScale(scaleSlider.getValue());
+                GameConstants.UI_ICON_SCALE = scaleSlider.getValue();
+            }
+        });
+        content.add(scaleLabel).padRight(12f);
+        content.add(scaleSlider).padBottom(10f).row();
 
         content.add(createMenuButton("Back", () -> changeScreen(new MainMenuScreen(game))))
             .colspan(2).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).row();

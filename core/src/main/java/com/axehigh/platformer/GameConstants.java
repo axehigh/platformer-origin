@@ -132,6 +132,9 @@ public final class GameConstants {
 
     //UI
 
+    /** Scale factor for touch control button images. Set to 2f for double size icons. */
+    public static float UI_ICON_SCALE = 2f;
+
     //UI Only for touch control
     public static float UI_Button_Action_Size = 170f;
     public static float UI_Button_Move_Size = 195f;

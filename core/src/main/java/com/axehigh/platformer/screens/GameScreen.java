@@ -1,5 +1,6 @@
 package com.axehigh.platformer.screens;
 
+import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.assets.GameAssetRegistry;
 import com.axehigh.platformer.assets.SpriteConstants;
 import com.axehigh.platformer.audio.AudioManager;
@@ -11,6 +12,7 @@ import com.axehigh.platformer.ecs.systems.CameraSystem;
 import com.axehigh.platformer.map.*;
 import com.axehigh.platformer.particles.ParticleHelper;
 import com.axehigh.platformer.ui.*;
+import com.axehigh.platformer.util.GamePreferences;
 import com.axehigh.platformer.util.SpawnSafety;
 import com.axehigh.platformer.viewport.OffsetFitViewport;
 import com.badlogic.ashley.core.Entity;
@@ -90,6 +92,9 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
     @Override
     public void show() {
         super.show();
+        GamePreferences prefs = new GamePreferences();
+        GameConstants.UI_ICON_SCALE = prefs.getUiIconScale();
+
         GameAssetRegistry.loadAssets(assetManager);
         assetManager.finishLoading();
         ParticleHelper.load(assetManager);
@@ -240,6 +245,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         if (gameOverActive || playerComponent.isDead) return;
         inventoryOpen = !inventoryOpen;
         inventoryBarStage.setOpen(inventoryOpen);
+        touchControlsStage.setInventoryVisible(!inventoryOpen);
     }
 
     private void showPauseDialog() {
