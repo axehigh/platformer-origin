@@ -61,8 +61,18 @@ public class TouchControlsStage extends Stage {
                         inputSystem.setTouchRight(false);
                     }
                 });
-        dpad.add(leftButton).size(UI_Button_Move_Size, UI_Button_Move_Size).padRight(UI_Button_Move_Size);
-        dpad.add(rightButton).size(UI_Button_Move_Size, UI_Button_Move_Size);
+        inventoryButton = new TouchButton(skin, "potion", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+                new TouchButton.Handler() {
+                    @Override
+                    public void onPress() {
+                        onInventoryToggle.run();
+                    }
+                });
+        inventoryButton.setDrawable(inventoryIcon);
+
+        dpad.add(leftButton).size(UI_Button_Move_Size, UI_Button_Move_Size).padRight(UI_Button_Move_Size * 0.5f);
+        dpad.add(rightButton).size(UI_Button_Move_Size, UI_Button_Move_Size).padRight(UI_PADDING_TOUCH * 2f);
+        dpad.add(inventoryButton).size(UI_Button_Contextual_Size, UI_Button_Contextual_Size);
 
         TouchButton yButton = new TouchButton(skin, "daggers", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 () -> inputSystem.requestTouchShoot());
@@ -80,25 +90,15 @@ public class TouchControlsStage extends Stage {
                 () -> inputSystem.requestTouchDrop());
         dropButton.setVisible(false);
 
-        inventoryButton = new TouchButton(skin, "potion", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
-                new TouchButton.Handler() {
-                    @Override
-                    public void onPress() {
-                        onInventoryToggle.run();
-                    }
-                });
-        inventoryButton.setDrawable(inventoryIcon);
-
         Table actions = new Table();
-        actions.add(inventoryButton).size(UI_Button_Contextual_Size, UI_Button_Contextual_Size).padLeft(UI_PADDING_TOUCH).padRight(UI_PADDING_TOUCH);
         actions.add(interactButton).size(UI_Button_Contextual_Size, UI_Button_Contextual_Size).padLeft(UI_PADDING_TOUCH).padRight(UI_PADDING_TOUCH);
         actions.add(dropButton).size(UI_Button_Contextual_Size, UI_Button_Contextual_Size).padLeft(UI_PADDING_TOUCH).padRight(UI_PADDING_TOUCH);
         actions.add(yButton).size(UI_Button_Action_Size, UI_Button_Action_Size).padLeft(UI_PADDING_TOUCH).padRight(UI_PADDING_TOUCH);
         actions.add(bButton).size(UI_Button_Action_Size, UI_Button_Action_Size).padLeft(UI_PADDING_TOUCH).padRight(UI_PADDING_TOUCH);
         actions.add(aButton).size(UI_Button_Jump_Size, UI_Button_Jump_Size).padLeft(UI_PADDING_TOUCH).padRight(UI_PADDING_TOUCH);
 
-        root.add(dpad).expandX().left().bottom().pad(UI_BOTTOM_PAD);
-        root.add(actions).expandX().right().bottom().pad(UI_BOTTOM_PAD);
+        root.add(dpad).expandX().left().bottom().padLeft(UI_BOTTOM_PAD * 4f).pad(UI_BOTTOM_PAD);
+        root.add(actions).expandX().right().bottom().padRight(UI_BOTTOM_PAD * 4f).pad(UI_BOTTOM_PAD);
     }
 
     /**
