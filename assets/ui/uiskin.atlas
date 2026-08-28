@@ -48,126 +48,77 @@ button_on
   index: -1
 daggers
   rotate: false
-  xy: 1619, 1686
+  xy: 1619, 1768
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 door
   rotate: false
-  xy: 1701, 1768
+  xy: 1947, 1945
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 down
   rotate: false
-  xy: 1947, 1863
-  size: 80, 80
-  orig: 80, 80
-  offset: 0, 0
-  index: -1
-flatAttack
-  rotate: false
-  xy: 1619, 1768
-  size: 80, 80
-  orig: 80, 80
-  offset: 0, 0
-  index: -1
-flatDown
-  rotate: false
-  xy: 1947, 1945
-  size: 80, 80
-  orig: 80, 80
-  offset: 0, 0
-  index: -1
-flatFlame
-  rotate: false
   xy: 515, 367
-  size: 80, 80
-  orig: 80, 80
-  offset: 0, 0
-  index: -1
-flatFly
-  rotate: false
-  xy: 817, 700
-  size: 80, 80
-  orig: 80, 80
-  offset: 0, 0
-  index: -1
-flatLeft
-  rotate: false
-  xy: 940, 1123
-  size: 80, 80
-  orig: 80, 80
-  offset: 0, 0
-  index: -1
-flatRight
-  rotate: false
-  xy: 1, 121
-  size: 80, 80
-  orig: 80, 80
-  offset: 0, 0
-  index: -1
-flatUp
-  rotate: false
-  xy: 1105, 1341
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 inventory
   rotate: false
-  xy: 515, 285
+  xy: 817, 700
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 bag
   rotate: false
-  xy: 515, 285
+  xy: 817, 700
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 jump
   rotate: false
-  xy: 597, 367
+  xy: 940, 1123
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 left
   rotate: false
-  xy: 817, 618
+  xy: 1, 121
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 potion
   rotate: false
-  xy: 940, 1041
+  xy: 1105, 1341
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 right
   rotate: false
-  xy: 1, 39
+  xy: 1619, 1686
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 sword
   rotate: false
-  xy: 1619, 1604
+  xy: 1701, 1768
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 sword-power
   rotate: false
-  xy: 1701, 1686
+  xy: 1947, 1863
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
@@ -188,21 +139,21 @@ potion_invulnerability
   index: -1
 potion_speed
   rotate: false
-  xy: 1022, 1171
+  xy: 515, 333
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 potion_strength
   rotate: false
-  xy: 83, 169
+  xy: 597, 415
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 rope_big
   rotate: false
-  xy: 940, 567
+  xy: 940, 649
   size: 40, 472
   orig: 40, 472
   offset: 0, 0
