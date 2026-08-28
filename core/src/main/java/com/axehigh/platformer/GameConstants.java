@@ -97,7 +97,8 @@ public final class GameConstants {
 
     //Enemy Stats
     public static int EnemyBaseHealth = 5;
-    //Potions & buffs
+    /** Feature flag for displaying equipment slots in the inventory bar. */
+    public static boolean ENABLE_INVENTORY_EQUIPMENT = false;
     /** How many of each potion type the player can hold at once. */
     public static int POTION_CAP = 5;
     /** Coins granted instead of a potion pickup when the player is already at {@link #POTION_CAP}. */
