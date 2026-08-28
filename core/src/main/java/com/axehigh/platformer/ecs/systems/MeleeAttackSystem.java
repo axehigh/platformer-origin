@@ -19,6 +19,8 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
+import static com.axehigh.platformer.GameConstants.PLAYER_MELEE_HEIGHT_MULTIPLIER;
+import static com.axehigh.platformer.GameConstants.PLAYER_MELEE_Y_OFFSET_FACTOR;
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
 import static com.axehigh.platformer.assets.SpriteConstants.PLAYER_ATTACK_REACH;
 import static com.axehigh.platformer.assets.SpriteConstants.PLAYER_MAX_ATTACK_REACH;
@@ -125,7 +127,9 @@ public class MeleeAttackSystem extends IteratingSystem {
         float strikeX = player.facingDirection > 0
             ? collision.worldBounds.x + collision.worldBounds.width
             : collision.worldBounds.x - reach;
-        strikeBounds.set(strikeX, collision.worldBounds.y, reach, collision.worldBounds.height);
+        float strikeHeight = collision.worldBounds.height * PLAYER_MELEE_HEIGHT_MULTIPLIER;
+        float strikeY = collision.worldBounds.y - (collision.worldBounds.height * PLAYER_MELEE_Y_OFFSET_FACTOR);
+        strikeBounds.set(strikeX, strikeY, reach, strikeHeight);
         activeStrikeBounds = reach > 0f ? strikeBounds : null;
 
         if (reach > 0f) {

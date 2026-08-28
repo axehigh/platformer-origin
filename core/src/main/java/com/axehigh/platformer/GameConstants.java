@@ -94,11 +94,17 @@ public final class GameConstants {
     public static int MaxItems = 10;
     public static int BaseDamage = 5;
     public static int MaxHealth = 3;
+    /** Player melee strike hitbox height multiplier (extends above and below). */
+    public static float PLAYER_MELEE_HEIGHT_MULTIPLIER = 1.75f;
+    /** Player melee strike hitbox vertical offset factor relative to collision height. */
+    public static float PLAYER_MELEE_Y_OFFSET_FACTOR = 0.25f;
 
     //Enemy Stats
     public static int EnemyBaseHealth = 5;
     /** Feature flag for displaying equipment slots in the inventory bar. */
     public static boolean ENABLE_INVENTORY_EQUIPMENT = false;
+    /** Feature flag for enabling bullet mechanics and shooting controls. */
+    public static boolean USE_BULLET = false;
     /** How many of each potion type the player can hold at once. */
     public static int POTION_CAP = 5;
     /** Coins granted instead of a potion pickup when the player is already at {@link #POTION_CAP}. */

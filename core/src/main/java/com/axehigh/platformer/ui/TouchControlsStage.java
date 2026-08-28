@@ -66,6 +66,7 @@ public class TouchControlsStage extends Stage {
 
         TouchButton yButton = new TouchButton(skin, "flatFlame", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 () -> inputSystem.requestTouchShoot());
+        yButton.setVisible(USE_BULLET);
         TouchButton bButton = new TouchButton(skin, "flatAttack", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 () -> inputSystem.requestTouchMelee());
         TouchButton aButton = new TouchButton(skin, "flatUp", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,

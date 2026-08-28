@@ -126,6 +126,9 @@ public class PlayerComponent implements Component {
         if (countPotion(type) <= 0) {
             return false;
         }
+        if (type == PotionType.HEALING && health >= maxHealth) {
+            return false;
+        }
         setPotionCount(type, countPotion(type) - 1);
         return true;
     }
