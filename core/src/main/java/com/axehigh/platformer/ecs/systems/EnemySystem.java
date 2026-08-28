@@ -4,9 +4,11 @@ import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.ecs.components.EnemyComponent.AiMode;
 import com.axehigh.platformer.map.EntityFactory;
 import com.axehigh.platformer.map.RoomState;
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
@@ -30,6 +32,11 @@ import static com.axehigh.platformer.ecs.components.Mappers.*;
  * A {@code FlyingEnemyComponent} enemy additionally gets a time-based vertical bob wave driven into
  * {@code movement.velocity.y} (see {@code FlyingEnemyComponent}); flyers are never {@code grounded},
  * so wall/ledge/hazard probes never fire for them and a {@code SIDE_TO_SIDE} flyer flies straight.
+ * A melee-capable enemy that has detected the player (same live detection box as
+ * {@code EnemyAttackSystem}: center-based, {@code attackRange*3} per side, {@code detectionHeight}
+ * tall) instead chases them: it moves toward the player using normal movement but never turns away,
+ * so a wall, ledge, or hazard simply holds it in place while it keeps facing the player. The chase
+ * overrides patrol turn/range logic entirely for as long as the player is detected.
  * An enemy whose {@code roomIndex} doesn't match {@code RoomState.activeRoomIndex} is frozen
  * entirely (velocity zeroed, no patrol/bob) until the player re-enters its owning room, per the
  * Room-Based Entity management requirement.
@@ -58,6 +65,7 @@ public class EnemySystem extends IteratingSystem {
     private final RoomState roomState;
     private final Rectangle ledgeProbe = new Rectangle();
     private final Rectangle hazardProbe = new Rectangle();
+    private ImmutableArray<Entity> players;
     private float unitScale = 1f;
 
     public EnemySystem(EntityFactory entityFactory, Array<Rectangle> collisionRects, Array<Rectangle> oneWayRects, Array<Rectangle> hazardRects, RoomState roomState) {
@@ -78,12 +86,25 @@ public class EnemySystem extends IteratingSystem {
     }
 
     @Override
+    public void addedToEngine(Engine engine) {
+        super.addedToEngine(engine);
+        players = engine.getEntitiesFor(Family.all(PlayerComponent.class, TransformComponent.class, CollisionComponent.class).get());
+    }
+
+    @Override
     protected void processEntity(Entity entity, float deltaTime) {
         EnemyComponent enemy = ENEMY.get(entity);
         MovementComponent movement = MOVEMENT.get(entity);
         TransformComponent transform = TRANSFORM.get(entity);
         CollisionComponent collision = COLLISION.get(entity);
         FlyingEnemyComponent flying = FLYING.get(entity);
+
+        // The attack pause (wind-up + post-strike recovery stand) is captured/updated below: the
+        // attack system (priority 8, this frame LATER) starts the recovery stand when a strike
+        // resolves, and on the frame the recovery ends the enemy's velocity is still zeroed from
+        // standing still — so that frame must not misread the zero as a wall block (which would
+        // flip the enemy right after it finished its swing).
+        EnemyAttackComponent attack = ENEMY_ATTACK.get(entity);
 
         if (enemy.isDead) {
             if (!enemy.deathCoinsSpawned) {
@@ -95,6 +116,11 @@ public class EnemySystem extends IteratingSystem {
                 getEngine().removeEntity(entity);
             }
             return;
+        }
+
+        boolean wasRecovering = attack != null && attack.recovery.isActive();
+        if (attack != null) {
+            attack.recovery.update(deltaTime);
         }
 
         boolean wasHitStunActive = enemy.hitStun.isActive();
@@ -127,6 +153,45 @@ public class EnemySystem extends IteratingSystem {
             return;
         }
 
+        // Wind-up attack: pause patrol entirely (stationary + facing locked) so the attack
+        // animation plays cleanly — and so the zeroed attack velocity isn't misread as a
+        // wall block (which would flip the enemy mid-wind-up and swing the wrong way).
+        if (attack != null && attack.isAttacking) {
+            movement.velocity.x = 0;
+            if (flying != null) {
+                movement.velocity.y = 0;
+            }
+            return;
+        }
+
+        // Post-strike "wind down": the enemy stands still, facing locked, for
+        // EnemyAttackComponent.recoveryDuration after a strike, then resumes its patrol in
+        // the same direction (normal wall/ledge/hazard/range turn checks apply from then on).
+        if (attack != null && attack.recovery.isActive()) {
+            movement.velocity.x = 0;
+            if (flying != null) {
+                movement.velocity.y = 0;
+            }
+            return;
+        }
+
+        // Detection box (shared with EnemyAttackSystem): center-based, attackRange*3 per side,
+        // detectionHeight(=1.25 tiles) total. Detected = the player is being chased. playerCenterX
+        // is meaningless when attack == null / no player, but the chase branch below only runs when
+        // playerInDetection is true.
+        float playerCenterX = 0f;
+        boolean playerInDetection = false;
+        if (attack != null && players.size() > 0) {
+            Entity playerEntity = players.first();
+            CollisionComponent playerCollision = COLLISION.get(playerEntity);
+            playerCenterX = playerCollision.worldBounds.x + playerCollision.worldBounds.width / 2f;
+            float pcy = playerCollision.worldBounds.y + playerCollision.worldBounds.height / 2f;
+            float ecx = collision.worldBounds.x + collision.worldBounds.width / 2f;
+            float ecy = collision.worldBounds.y + collision.worldBounds.height / 2f;
+            playerInDetection = Math.abs(playerCenterX - ecx) <= attack.attackRange * 3f * unitScale
+                && Math.abs(pcy - ecy) <= attack.detectionHeight * unitScale / 2f;
+        }
+
         boolean wasTurnPaused = enemy.turnPause.isActive();
         enemy.turnPause.update(deltaTime);
 
@@ -146,9 +211,29 @@ public class EnemySystem extends IteratingSystem {
         boolean resumedFromTurnPause = wasTurnPaused;
         boolean resumedFromFreeze = enemy.wasFrozen;
         enemy.wasFrozen = false;
-        boolean blockedByWall = !resumedFromTurnPause && !resumedFromFreeze && movement.grounded && movement.velocity.x == 0f;
+        boolean resumedFromAttack = wasRecovering;
+        boolean blockedByWall = !resumedFromTurnPause && !resumedFromFreeze && !resumedFromAttack && movement.grounded && movement.velocity.x == 0f;
         boolean atLedge = movement.grounded && !hasGroundAhead(transform, collision, enemy.direction);
         boolean atHazard = movement.grounded && hazardAhead(collision, enemy.direction);
+
+        // Chase: detected player → move toward them using normal movement, but never turn away
+        // (a wall/ledge/hazard just holds the enemy in place, still facing the player).
+        if (playerInDetection) {
+            float enemyCenterX = collision.worldBounds.x + collision.worldBounds.width / 2f;
+            if (Math.abs(playerCenterX - enemyCenterX) > 1f) {
+                enemy.direction = playerCenterX > enemyCenterX ? 1 : -1;
+            }
+            if (blockedByWall || atLedge || atHazard) {
+                movement.velocity.x = 0f;
+            } else {
+                movement.velocity.x = enemy.speed * enemy.direction;
+            }
+            if (flying != null) {
+                flying.bobTime += deltaTime;
+                movement.velocity.y = flying.bobAmplitude * flying.bobFrequency * MathUtils.cos(flying.bobTime * flying.bobFrequency);
+            }
+            return;
+        }
 
         if (blockedByWall || atLedge || atHazard) {
             turnAround(enemy);

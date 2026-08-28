@@ -127,8 +127,11 @@ class EnemyFactory {
             attack.attackType = EnemyAttackComponent.AttackType.MELEE;
             float intervalOverride = TileProps.getFloatProperty(object, tile, "attackInterval", Float.NaN);
             if (!Float.isNaN(intervalOverride)) attack.attackInterval = intervalOverride;
-            float rangeOverride = TileProps.getFloatProperty(object, tile, "meleeRange", Float.NaN);
-            if (!Float.isNaN(rangeOverride)) attack.meleeRange = rangeOverride;
+            float rangeOverride = TileProps.getFloatProperty(object, tile, "attackRange", Float.NaN);
+            if (Float.isNaN(rangeOverride)) {
+                rangeOverride = TileProps.getFloatProperty(object, tile, "meleeRange", Float.NaN); // legacy alias
+            }
+            if (!Float.isNaN(rangeOverride)) attack.attackRange = rangeOverride;
             float windUpOverride = TileProps.getFloatProperty(object, tile, "windUpDuration", Float.NaN);
             if (!Float.isNaN(windUpOverride)) attack.windUpDuration = windUpOverride;
             attack.attackCooldown.start(MathUtils.random(0f, attack.attackInterval));

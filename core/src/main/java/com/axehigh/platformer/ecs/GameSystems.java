@@ -116,7 +116,7 @@ public class GameSystems {
         enemyContactSystem.setUnitScale(unitScale);
         engine.addSystem(enemyContactSystem);
 
-        EnemyAttackSystem enemyAttackSystem = new EnemyAttackSystem(PRIORITY_ENEMY_CONTACT);
+        EnemyAttackSystem enemyAttackSystem = new EnemyAttackSystem(roomState, PRIORITY_ENEMY_CONTACT);
         enemyAttackSystem.setUnitScale(unitScale);
         engine.addSystem(enemyAttackSystem);
         engine.addSystem(new HazardSystem(mapLoader.getHazardRects(), PRIORITY_ENEMY_CONTACT));
@@ -137,6 +137,7 @@ public class GameSystems {
         lightRenderSystem = new LightRenderSystem(batch, camera, PRIORITY_LIGHT_RENDER);
         engine.addSystem(lightRenderSystem);
         debugRenderSystem = new DebugRenderSystem(camera, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), roomState, PRIORITY_DEBUG_RENDER);
+        debugRenderSystem.setUnitScale(unitScale);
         engine.addSystem(debugRenderSystem);
 
         levelManager = new LevelManager(engine, entityFactory, viewport, tiledMapRenderSystem, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), mapLoader.getSecretRects(), roomState, secretRoomRevealer, mapLoader);
