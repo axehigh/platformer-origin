@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.2" name="dungeon_tiles" tilewidth="256" tileheight="257" tilecount="57" columns="0">
+<tileset version="1.10" tiledversion="1.12.2" name="dungeon_tiles" tilewidth="256" tileheight="299" tilecount="59" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0" type="Ground">
   <properties>
@@ -202,5 +202,18 @@
  </tile>
  <tile id="61">
   <image source="../gfx/tiles/dwarf_mine/Wooden_Barrel.png" width="128" height="128"/>
+ </tile>
+ <tile id="63">
+  <image source="../gfx/tiles/bg/cart.png" width="128" height="96"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="1" y="9" width="125" height="88"/>
+  </objectgroup>
+ </tile>
+ <tile id="64">
+  <image source="../gfx/tiles/bg/pole_lamp.png" width="170" height="299"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="27" y="5" width="35" height="299"/>
+   <object id="2" x="63" y="26" width="85" height="27"/>
+  </objectgroup>
  </tile>
 </tileset>

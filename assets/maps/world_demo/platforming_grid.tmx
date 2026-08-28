@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="48" height="20" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="967">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
- <tileset firstgid="63" source="../tileset/items.tsx"/>
- <tileset firstgid="92" source="../tileset/enemy.tsx"/>
- <tileset firstgid="99" source="../tileset/bg.tsx"/>
+ <tileset firstgid="66" source="../tileset/items.tsx"/>
+ <tileset firstgid="95" source="../tileset/enemy.tsx"/>
+ <tileset firstgid="102" source="../tileset/bg.tsx"/>
  <layer id="1" name="background" width="48" height="20">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -24,7 +24,7 @@
 0,0,0,0,0,0,13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,133,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,136,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
@@ -48,7 +48,7 @@
 2,0,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
-2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+2,0,0,0,0,0,0,0,0,0,0,0,65,0,0,64,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
 </data>
  </layer>
@@ -70,21 +70,21 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,83,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,86,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,137,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
  <objectgroup id="3" name="objects">
-  <object id="3" name="coin_r0" gid="75" x="1408" y="1152" width="128" height="128"/>
+  <object id="3" name="coin_r0" gid="78" x="1408" y="1152" width="128" height="128"/>
   <object id="5" name="playerStart" type="playerStart" x="2304" y="2304" width="128" height="128"/>
-  <object id="6" name="coin_r2" gid="75" x="1152" y="2432" width="128" height="128"/>
-  <object id="7" name="coin_platform_r0" gid="75" x="1024" y="384" width="128" height="128"/>
-  <object id="8" name="coin_platform_r1" gid="75" x="4096" y="384" width="128" height="128"/>
-  <object id="9" name="coin_platform_r2" gid="75" x="1024" y="1664" width="128" height="128"/>
-  <object id="10" name="coin_platform_r3" gid="75" x="4096" y="1664" width="128" height="128"/>
-  <object id="966" gid="68" x="2688" y="2432" width="128" height="128"/>
+  <object id="6" name="coin_r2" gid="78" x="1152" y="2432" width="128" height="128"/>
+  <object id="7" name="coin_platform_r0" gid="78" x="1024" y="384" width="128" height="128"/>
+  <object id="8" name="coin_platform_r1" gid="78" x="4096" y="384" width="128" height="128"/>
+  <object id="9" name="coin_platform_r2" gid="78" x="1024" y="1664" width="128" height="128"/>
+  <object id="10" name="coin_platform_r3" gid="78" x="4096" y="1664" width="128" height="128"/>
+  <object id="966" gid="71" x="2688" y="2432" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="7" name="enemies">
   <object id="1" name="enemy_r0_flyer" type="enemy" x="2176" y="1024" width="128" height="128">
@@ -92,7 +92,7 @@
     <property name="enemyType" value="flyer"/>
    </properties>
   </object>
-  <object id="2" name="enemy_r0_walker" gid="94" x="1792" y="1152" width="128" height="128"/>
+  <object id="2" name="enemy_r0_walker" gid="97" x="1792" y="1152" width="128" height="128"/>
   <object id="4" name="enemy_r1_flyer" type="enemy" x="3584" y="1024" width="128" height="128">
    <properties>
     <property name="enemyType" value="flyer"/>
@@ -103,7 +103,7 @@
     <property name="enemyType" value="flyer"/>
    </properties>
   </object>
-  <object id="8" name="enemy_r3_shooter" gid="96" x="3712" y="2432" width="128" height="128"/>
+  <object id="8" name="enemy_r3_shooter" gid="99" x="3712" y="2432" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="6" name="Rooms">
   <object id="961" name="room0" x="0" y="0" width="3072" height="1280"/>

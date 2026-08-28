@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.2" name="bg" tilewidth="256" tileheight="386" tilecount="17" columns="0">
+<tileset version="1.10" tiledversion="1.12.2" name="bg" tilewidth="256" tileheight="386" tilecount="18" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="5">
   <image source="../gfx/tiles/bg/chains2.png" width="200" height="170"/>
@@ -51,5 +51,8 @@
  </tile>
  <tile id="34">
   <image source="../gfx/tiles/bg/door2.png" width="167" height="180"/>
+ </tile>
+ <tile id="35">
+  <image source="../gfx/tiles/bg/cart.png" width="128" height="96"/>
  </tile>
 </tileset>
