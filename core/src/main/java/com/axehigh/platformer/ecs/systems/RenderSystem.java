@@ -13,9 +13,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import java.util.Comparator;
 
-import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
-import static com.axehigh.platformer.ecs.components.Mappers.TEXTURE;
-import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /** Draws every entity that has a TransformComponent + TextureComponent, sorted by z-index. */
 public class RenderSystem extends SortedIteratingSystem {

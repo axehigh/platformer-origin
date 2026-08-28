@@ -3,6 +3,7 @@ package com.axehigh.platformer.ecs.systems;
 import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
+import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.util.Timer;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -10,9 +11,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-import static com.axehigh.platformer.ecs.components.Mappers.ANIMATION;
-import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
-import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
  * Detects the player's health reaching 0 and fires a one-time callback into GameScreen — but only
@@ -32,17 +31,26 @@ public class PlayerDeathSystem extends IteratingSystem {
     private static final float DEATH_EXTRA_BEAT = 0.5f;
 
     private final Runnable onDeath;
+    private final float killY;
     private boolean triggered = false;
     private final Timer deathDelay = new Timer();
 
-    public PlayerDeathSystem(Runnable onDeath, int priority) {
-        super(Family.all(PlayerComponent.class).get(), priority);
+    public PlayerDeathSystem(Runnable onDeath, float killY, int priority) {
+        super(Family.all(PlayerComponent.class, TransformComponent.class).get(), priority);
         this.onDeath = onDeath;
+        this.killY = killY;
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         PlayerComponent player = PLAYER.get(entity);
+        TransformComponent transform = TRANSFORM.get(entity);
+
+        // Falling below the map (past the kill-plane) is lethal; force health to 0 so the
+        // standard death animation and Game Over callback fire.
+        if (transform != null && transform.position.y < killY && player.health > 0) {
+            player.health = 0;
+        }
 
         if (player.health > 0) {
             // Revived (e.g. Continue from the Game Over dialog): fully re-arm so a later death

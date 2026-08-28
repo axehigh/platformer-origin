@@ -3,6 +3,7 @@ package com.axehigh.platformer.ecs.systems;
 import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
+import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -10,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import org.junit.Before;
 import org.junit.Test;
 
+import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -30,7 +32,7 @@ public class PlayerDeathSystemTest extends SystemTestBase {
     @Before
     public void setUp() {
         callbackCount[0] = 0;
-        system = new PlayerDeathSystem(() -> callbackCount[0]++, 0);
+        system = new PlayerDeathSystem(() -> callbackCount[0]++, -1000f, 0);
         engine = newEngine();
         engine.addSystem(system);
     }
@@ -39,7 +41,8 @@ public class PlayerDeathSystemTest extends SystemTestBase {
         player = new PlayerComponent();
         player.health = health;
         movement = movement();
-        Entity entity = entity(player, movement);
+        TransformComponent transform = transform(0f, 0f);
+        Entity entity = entity(player, movement, transform);
         engine.addEntity(entity);
     }
 
@@ -47,13 +50,14 @@ public class PlayerDeathSystemTest extends SystemTestBase {
         player = new PlayerComponent();
         player.health = health;
         movement = movement();
+        TransformComponent transform = transform(0f, 0f);
         AnimationComponent animation = new AnimationComponent();
         TextureRegion[] regions = new TextureRegion[frames];
         for (int i = 0; i < frames; i++) {
             regions[i] = new TextureRegion();
         }
         animation.animations.put(AnimationComponent.State.DEATH, new Animation<>(frameDuration, regions));
-        Entity entity = entity(player, movement, animation);
+        Entity entity = entity(player, movement, transform, animation);
         engine.addEntity(entity);
     }
 
@@ -101,6 +105,17 @@ public class PlayerDeathSystemTest extends SystemTestBase {
             engine.update(0.1f);
         }
         assertEquals(1, callbackCount[0]);
+    }
+
+    @Test
+    public void fallingBelowKillPlaneTriggersDeath() {
+        playerWithHealth(3);
+        TransformComponent transform = TRANSFORM.get(engine.getEntities().first());
+        transform.position.y = -1500f;
+        engine.update(DT);
+
+        assertTrue(player.isDead);
+        assertEquals(0, player.health);
     }
 
     @Test

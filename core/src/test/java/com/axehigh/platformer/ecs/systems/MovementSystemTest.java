@@ -1,14 +1,7 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.GameConstants;
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.EnemyComponent;
-import com.axehigh.platformer.ecs.components.FlyingEnemyComponent;
-import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.ParticleComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.components.PoppedItemComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.util.FeatureFlags;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -18,13 +11,8 @@ import com.badlogic.gdx.utils.Array;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
-import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
-import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
+import static org.junit.Assert.*;
 
 /**
  * Headless unit tests for {@code MovementSystem}: gravity integration, velocity clamping, AABB
@@ -415,6 +403,21 @@ public class MovementSystemTest extends SystemTestBase {
         ParticleComponent pc = firstParticle(pooled);
         assertNotNull(pc);
         assertEquals(10f, pc.scale, EPSILON);
+    }
+
+    @Test
+    public void hugeTimeStepDoesNotTunnelThroughFloor() {
+        collisionRects.add(new Rectangle(-100f, 0f, 200f, 20f));
+        Entity entity = player(0f, 100f);
+        MovementComponent movement = MOVEMENT.get(entity);
+        TransformComponent transform = TRANSFORM.get(entity);
+        movement.velocity.y = -10000f;
+
+        engine.update(0.5f);
+
+        assertTrue(movement.grounded);
+        assertEquals(0f, movement.velocity.y, EPSILON);
+        assertEquals(50f, transform.position.y, EPSILON);
     }
 
     private static ParticleComponent firstParticle(Engine engine) {

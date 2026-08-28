@@ -62,6 +62,9 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
     private boolean inventoryOpen = false;
     private boolean debugTouchLogging = false;
 
+    /** Largest single-step delta allowed for the ECS simulation; prevents tunneling on Android's first-frame hitch. */
+    private static final float MAX_FRAME_DELTA = 1f / 30f;
+
     /**
      * Defaults to the catalog's first level.
      */
@@ -109,8 +112,9 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
 
         camera.position.set(viewport.getWorldWidth() / 2f, viewport.getWorldHeight() / 2f, 0f);
 
+        float killY = -mapLoader.getMapWorldHeight();
         systems = new GameSystems(engine, batch, camera, skin, assetManager, mapLoader, roomState,
-            secretRoomRevealer, entityFactory, viewport, scale, this::onPlayerDeath);
+            secretRoomRevealer, entityFactory, viewport, scale, this::onPlayerDeath, killY);
 
         Vector2 playerStart = SpawnSafety.findSafeSpawn(
             mapLoader.findPlayerStart(),
@@ -260,7 +264,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         viewport.apply();
 
         if (!gameOverActive && !gamePaused) {
-            engine.update(Gdx.graphics.getDeltaTime());
+            engine.update(Math.min(Gdx.graphics.getDeltaTime(), MAX_FRAME_DELTA));
         }
 
         touchControlsStage.setInteractVisible(playerComponent.nearExit);

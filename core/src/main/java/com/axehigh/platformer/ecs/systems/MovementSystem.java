@@ -1,11 +1,7 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.assets.SpriteConstants;
-import com.axehigh.platformer.ecs.components.BulletComponent;
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.particles.ParticleHelper;
 import com.axehigh.platformer.util.FeatureFlags;
 import com.badlogic.ashley.core.Engine;
@@ -17,12 +13,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
-import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
-import static com.axehigh.platformer.ecs.components.Mappers.FLYING;
-import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
-import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
-import static com.axehigh.platformer.ecs.components.Mappers.POPPED_ITEM;
-import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
  * Integrates velocity into position and resolves AABB collisions against the static map boundary
@@ -44,6 +35,12 @@ public class MovementSystem extends IteratingSystem {
     private static final float LANDING_DUST_MIN_FALL = 16f;
     /** Tolerances a falling player's pre-move feet position against a one-way platform's top before a top-only landing sticks. */
     private static final float ONE_WAY_LANDING_EPSILON = 0.5f;
+    /**
+     * Maximum vertical displacement handled in one collision sub-step. Keeps the AABB from
+     * tunneling through 128-unit-thick solid floors when a frame hitch produces a huge delta
+     * (e.g. Android first frame ~0.3 s).
+     */
+    private static final float MAX_Y_STEP = 8f;
 
     private final Array<Rectangle> collisionRects;
     private final Array<Rectangle> oneWayRects;
@@ -235,40 +232,55 @@ public class MovementSystem extends IteratingSystem {
     }
 
     private void moveY(TransformComponent transform, MovementComponent movement, CollisionComponent collision, float deltaTime, Entity entity) {
-        float deltaY = movement.velocity.y * deltaTime;
+        float totalDeltaY = movement.velocity.y * deltaTime;
         movement.grounded = false;
 
-        float newY = transform.position.y + deltaY;
-        entityBounds.set(transform.position.x + collision.bounds.x, newY + collision.bounds.y, collision.bounds.width, collision.bounds.height);
-
         PlayerComponent player = PLAYER.get(entity);
-        Rectangle hit = findCollision(entityBounds);
         boolean landedOnOneWay = false;
-        if (hit == null) {
-            if (player != null) {
-                hit = findOneWayCollision(transform, movement, collision, deltaTime, player);
-                landedOnOneWay = hit != null;
-            } else if (isOneWaySolid(entity)) {
-                hit = findCollision(entityBounds, oneWayRects);
+
+        // Sub-step vertical movement so a single large delta (e.g. Android's first frame) cannot
+        // leap through a solid floor. Each step is small enough that the destination AABB must
+        // overlap anything it would have passed through.
+        float remaining = totalDeltaY;
+        int stepsLeft = 64;
+        while (remaining != 0f && stepsLeft-- > 0) {
+            float step = MathUtils.clamp(remaining, -MAX_Y_STEP, MAX_Y_STEP);
+            if (step == 0f) {
+                break;
             }
-        }
-        if (hit == null) {
+            float newY = transform.position.y + step;
+            entityBounds.set(transform.position.x + collision.bounds.x, newY + collision.bounds.y, collision.bounds.width, collision.bounds.height);
+
+            Rectangle hit = findCollision(entityBounds);
+            if (hit == null) {
+                if (player != null) {
+                    hit = findOneWayCollision(transform, movement, collision, deltaTime, player);
+                    landedOnOneWay = hit != null;
+                } else if (isOneWaySolid(entity)) {
+                    hit = findCollision(entityBounds, oneWayRects);
+                }
+            }
+
+            if (hit != null) {
+                if (step < 0f) {
+                    transform.position.y = hit.y + hit.height - collision.bounds.y;
+                    movement.grounded = true;
+                } else if (step > 0f) {
+                    transform.position.y = hit.y - collision.bounds.height - collision.bounds.y;
+                }
+                movement.velocity.y = 0f;
+                if (player != null) {
+                    player.onDropTile = landedOnOneWay;
+                }
+                return;
+            }
+
             transform.position.y = newY;
-            if (player != null) {
-                player.onDropTile = false;
-            }
-            return;
+            remaining -= step;
         }
 
-        if (deltaY < 0f) {
-            transform.position.y = hit.y + hit.height - collision.bounds.y;
-            movement.grounded = true;
-        } else if (deltaY > 0f) {
-            transform.position.y = hit.y - collision.bounds.height - collision.bounds.y;
-        }
-        movement.velocity.y = 0f;
         if (player != null) {
-            player.onDropTile = landedOnOneWay;
+            player.onDropTile = false;
         }
     }
 

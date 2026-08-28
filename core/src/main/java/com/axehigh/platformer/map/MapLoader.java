@@ -232,6 +232,11 @@ public class MapLoader implements Disposable {
         return tmxPath;
     }
 
+    /** Total map height in world units (rows * tileHeight). */
+    public float getMapWorldHeight() {
+        return map.getProperties().get("height", 0, Integer.class) * tileHeight;
+    }
+
     public Array<Rectangle> getCollisionRects() {
         return collisionRects;
     }
