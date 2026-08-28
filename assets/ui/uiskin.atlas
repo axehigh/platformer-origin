@@ -20,7 +20,7 @@ sansserif
   index: -1
 button
   rotate: false
-  xy: 1619, 1802
+  xy: 1105, 1423
   size: 81, 46
   orig: 81, 46
   offset: 0, 0
@@ -46,60 +46,130 @@ button_on
   orig: 131, 63
   offset: 0, 0
   index: -1
+daggers
+  rotate: false
+  xy: 1619, 1686
+  size: 80, 80
+  orig: 80, 80
+  offset: 0, 0
+  index: -1
+door
+  rotate: false
+  xy: 1701, 1768
+  size: 80, 80
+  orig: 80, 80
+  offset: 0, 0
+  index: -1
+down
+  rotate: false
+  xy: 1947, 1863
+  size: 80, 80
+  orig: 80, 80
+  offset: 0, 0
+  index: -1
 flatAttack
   rotate: false
-  xy: 1947, 1945
+  xy: 1619, 1768
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 flatDown
   rotate: false
-  xy: 515, 367
+  xy: 1947, 1945
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 flatFlame
   rotate: false
-  xy: 817, 700
+  xy: 515, 367
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 flatFly
   rotate: false
-  xy: 940, 1123
+  xy: 817, 700
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 flatLeft
   rotate: false
-  xy: 1, 121
+  xy: 940, 1123
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 flatRight
   rotate: false
-  xy: 1235, 1389
+  xy: 1, 121
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 flatUp
   rotate: false
-  xy: 1619, 1720
+  xy: 1105, 1341
+  size: 80, 80
+  orig: 80, 80
+  offset: 0, 0
+  index: -1
+inventory
+  rotate: false
+  xy: 515, 285
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 bag
   rotate: false
-  xy: 1105, 1341
-  size: 128, 128
-  orig: 128, 128
+  xy: 515, 285
+  size: 80, 80
+  orig: 80, 80
+  offset: 0, 0
+  index: -1
+jump
+  rotate: false
+  xy: 597, 367
+  size: 80, 80
+  orig: 80, 80
+  offset: 0, 0
+  index: -1
+left
+  rotate: false
+  xy: 817, 618
+  size: 80, 80
+  orig: 80, 80
+  offset: 0, 0
+  index: -1
+potion
+  rotate: false
+  xy: 940, 1041
+  size: 80, 80
+  orig: 80, 80
+  offset: 0, 0
+  index: -1
+right
+  rotate: false
+  xy: 1, 39
+  size: 80, 80
+  orig: 80, 80
+  offset: 0, 0
+  index: -1
+sword
+  rotate: false
+  xy: 1619, 1604
+  size: 80, 80
+  orig: 80, 80
+  offset: 0, 0
+  index: -1
+sword-power
+  rotate: false
+  xy: 1701, 1686
+  size: 80, 80
+  orig: 80, 80
   offset: 0, 0
   index: -1
 potion_healing
@@ -111,28 +181,28 @@ potion_healing
   index: -1
 potion_invulnerability
   rotate: false
-  xy: 1105, 1307
+  xy: 1188, 1437
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 potion_speed
   rotate: false
-  xy: 1702, 1816
+  xy: 1022, 1171
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 potion_strength
   rotate: false
-  xy: 1947, 1911
+  xy: 83, 169
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 rope_big
   rotate: false
-  xy: 940, 649
+  xy: 940, 567
   size: 40, 472
   orig: 40, 472
   offset: 0, 0

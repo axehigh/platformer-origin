@@ -37,7 +37,7 @@ public class TouchControlsStage extends Stage {
 
         Table dpad = new Table();
         //dpad.setDebug(true);
-        TouchButton leftButton = new TouchButton(skin, "flatLeft", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+        TouchButton leftButton = new TouchButton(skin, "left", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 new TouchButton.Handler() {
                     @Override
                     public void onPress() {
@@ -49,7 +49,7 @@ public class TouchControlsStage extends Stage {
                         inputSystem.setTouchLeft(false);
                     }
                 });
-        TouchButton rightButton = new TouchButton(skin, "flatRight", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+        TouchButton rightButton = new TouchButton(skin, "right", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 new TouchButton.Handler() {
                     @Override
                     public void onPress() {
@@ -64,23 +64,23 @@ public class TouchControlsStage extends Stage {
         dpad.add(leftButton).size(UI_Button_Move_Size, UI_Button_Move_Size).padRight(UI_Button_Move_Size);
         dpad.add(rightButton).size(UI_Button_Move_Size, UI_Button_Move_Size);
 
-        TouchButton yButton = new TouchButton(skin, "flatFlame", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+        TouchButton yButton = new TouchButton(skin, "daggers", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 () -> inputSystem.requestTouchShoot());
         yButton.setVisible(USE_BULLET);
-        TouchButton bButton = new TouchButton(skin, "flatAttack", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+        TouchButton bButton = new TouchButton(skin, "sword", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 () -> inputSystem.requestTouchMelee());
-        TouchButton aButton = new TouchButton(skin, "flatUp", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+        TouchButton aButton = new TouchButton(skin, "jump", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 () -> inputSystem.requestTouchJump());
 
-        interactButton = new TouchButton(skin, "flatFly", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+        interactButton = new TouchButton(skin, "door", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 () -> inputSystem.requestTouchInteract());
         interactButton.setVisible(false);
 
-        dropButton = new TouchButton(skin, "flatDown", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+        dropButton = new TouchButton(skin, "down", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 () -> inputSystem.requestTouchDrop());
         dropButton.setVisible(false);
 
-        inventoryButton = new TouchButton(skin, "flatUp", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+        inventoryButton = new TouchButton(skin, "potion", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 new TouchButton.Handler() {
                     @Override
                     public void onPress() {
