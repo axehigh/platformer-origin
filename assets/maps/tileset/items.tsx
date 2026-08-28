@@ -14,6 +14,9 @@
   <image source="../gfx/items/Chest_01_Unlocked.png" width="128" height="128"/>
  </tile>
  <tile id="5" type="chest_elite">
+  <properties>
+   <property name="potionType" value="speed"/>
+  </properties>
   <image source="../gfx/items/Chest_02_Locked.png" width="128" height="128"/>
  </tile>
  <tile id="6" type="chest_elite_open">

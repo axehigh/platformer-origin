@@ -13,6 +13,7 @@ import com.axehigh.platformer.map.*;
 import com.axehigh.platformer.particles.ParticleHelper;
 import com.axehigh.platformer.ui.*;
 import com.axehigh.platformer.util.GamePreferences;
+import com.axehigh.platformer.util.SaveManager;
 import com.axehigh.platformer.util.SpawnSafety;
 import com.axehigh.platformer.viewport.OffsetFitViewport;
 import com.badlogic.ashley.core.Entity;
@@ -459,7 +460,11 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         snapCameraToPlayerRoom();
     }
 
-    // --- GameOverDialog.Listener ---
+    @Override
+    public int getTriesRemaining() {
+        SaveData currentSave = saveData != null ? saveData : (SaveManager.hasSave() ? SaveManager.load() : null);
+        return currentSave != null ? currentSave.triesRemaining : 3;
+    }
 
     @Override
     public void onContinue() {
@@ -471,6 +476,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
 
     @Override
     public void onExit() {
+        SaveManager.clear();
         changeScreen(new MainMenuScreen(game));
     }
 

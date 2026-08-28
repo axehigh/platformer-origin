@@ -151,8 +151,9 @@ public class EntityFactory {
                     spawned = true;
                     break;
                 case "chest":
+                case "chest_elite":
                     String chestPotionType = TileProps.getProperty(object, tile, "potionType", null);
-                    engine.addEntity(createChest(spawnX, spawnY, chestPotionType));
+                    engine.addEntity(createChest(spawnX, spawnY, chestPotionType,type));
                     spawned = true;
                     break;
                 case "torch":
@@ -357,9 +358,10 @@ public class EntityFactory {
      * variant is swapped in by {@code MeleeAttackSystem} when the chest is struck.
      *
      * @param potionType if non-null, the chest drops a potion of this type instead of coins
+     * @param type
      */
-    private Entity createChest(float x, float y, String potionType) {
-        AtlasRegion region = context.originAtlas.findRegion(SpriteConstants.CHEST_CLOSED_REGION);
+    private Entity createChest(float x, float y, String potionType, String type) {
+        AtlasRegion region = findRegionFor(type);
 
         Entity entity = new Entity();
 
@@ -388,6 +390,16 @@ public class EntityFactory {
         entity.add(chest);
 
         return entity;
+    }
+
+    private AtlasRegion findRegionFor(String type) {
+        AtlasRegion region;
+        if (type.equals("chest")) {
+            region = context.originAtlas.findRegion(SpriteConstants.CHEST_CLOSED_REGION);
+        } else {
+            region = context.originAtlas.findRegion(SpriteConstants.CHEST_CLOSED_REGION_ELITE);
+        }
+        return region;
     }
 
     /**

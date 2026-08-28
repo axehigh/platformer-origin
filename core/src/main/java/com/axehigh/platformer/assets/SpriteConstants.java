@@ -36,6 +36,8 @@ public class SpriteConstants {
     //matching open sprite when a chest is melee-struck (see MeleeAttackSystem).
     public static final String CHEST_CLOSED_REGION = "Chest_01_Locked";
     public static final String CHEST_OPEN_REGION = "Chest_01_Unlocked";
+    public static final String CHEST_CLOSED_REGION_ELITE = "Chest_02_Locked";
+    public static final String CHEST_OPEN_REGION_ELITE = "Chest_02_Unlocked";
 
     //Enemy Collision Box (base units, scaled by ENEMY_SCALE)
 

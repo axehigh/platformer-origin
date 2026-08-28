@@ -33,7 +33,9 @@ public final class PotionEffects {
      * can't benefit from the buff potions.
      */
     public static void apply(Entity playerEntity, PlayerComponent player, PotionType type) {
-        Gdx.app.log("PotionEffects", "apply " + type + ", listener=" + (potionListener != null));
+        if (Gdx.app != null) {
+            Gdx.app.log("PotionEffects", "apply " + type + ", listener=" + (potionListener != null));
+        }
         if (type == PotionType.HEALING) {
             player.health = Math.min(player.maxHealth, player.health + GameConstants.HEALING_POTION_HEAL);
             if (potionListener != null) {

@@ -32,8 +32,13 @@ public class GameOverDialog extends Dialog {
         Label deathLabel = new Label("You died!", skin);
         deathLabel.setFontScale(FontScale);
         text(deathLabel);
+        getContentTable().row();
 
         SaveData currentSave = SaveManager.hasSave() ? SaveManager.load() : new SaveData();
+
+        Label triesLabel = new Label("Tries remaining: " + currentSave.triesRemaining, skin);
+        triesLabel.setFontScale(FontScale);
+        getContentTable().add(triesLabel).padTop(5f).row();
 
         if (currentSave.triesRemaining > 0) {
             TextButton continueButton = new TextButton("Continue (uses 1 try)", skin);

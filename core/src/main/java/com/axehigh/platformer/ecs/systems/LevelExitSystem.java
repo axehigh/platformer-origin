@@ -131,6 +131,10 @@ public class LevelExitSystem extends IteratingSystem {
         SaveData saveData = SaveData.of(player);
         saveData.levelPath = nextLevelPath;
         saveData.completedLevelIds = buildCompletedLevelIds();
+        if (SaveManager.hasSave()) {
+            SaveData previousSave = SaveManager.load();
+            saveData.triesRemaining = previousSave.triesRemaining;
+        }
         return saveData;
     }
 

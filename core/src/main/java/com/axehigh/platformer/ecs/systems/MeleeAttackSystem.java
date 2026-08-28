@@ -22,8 +22,7 @@ import com.badlogic.gdx.utils.Array;
 import static com.axehigh.platformer.GameConstants.PLAYER_MELEE_HEIGHT_MULTIPLIER;
 import static com.axehigh.platformer.GameConstants.PLAYER_MELEE_Y_OFFSET_FACTOR;
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
-import static com.axehigh.platformer.assets.SpriteConstants.PLAYER_ATTACK_REACH;
-import static com.axehigh.platformer.assets.SpriteConstants.PLAYER_MAX_ATTACK_REACH;
+import static com.axehigh.platformer.assets.SpriteConstants.*;
 import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
@@ -68,15 +67,19 @@ public class MeleeAttackSystem extends IteratingSystem {
         this(assetManager, null, null, null, null, priority);
     }
 
-    /** Fully wired constructor: the shared secret/collision rect arrays, the collision tile layer
-     * (blanked cell = removed sprite), and the SFX system for the wall-break sound. */
+    /**
+     * Fully wired constructor: the shared secret/collision rect arrays, the collision tile layer
+     * (blanked cell = removed sprite), and the SFX system for the wall-break sound.
+     */
     public MeleeAttackSystem(AssetManager assetManager, Array<Rectangle> secretRects,
                              Array<Rectangle> collisionRects, TiledMapTileLayer collisionLayer,
                              SfxSystem sfxSystem, int priority) {
         this(assetManager, secretRects, collisionRects, collisionLayer, sfxSystem, null, priority);
     }
 
-    /** Fully wired constructor plus the {@link SecretRoomRevealer} that opens a secret room when its wall breaks. */
+    /**
+     * Fully wired constructor plus the {@link SecretRoomRevealer} that opens a secret room when its wall breaks.
+     */
     public MeleeAttackSystem(AssetManager assetManager, Array<Rectangle> secretRects,
                              Array<Rectangle> collisionRects, TiledMapTileLayer collisionLayer,
                              SfxSystem sfxSystem, SecretRoomRevealer secretRoomRevealer, int priority) {
@@ -93,12 +96,16 @@ public class MeleeAttackSystem extends IteratingSystem {
         this.unitScale = unitScale;
     }
 
-    /** Swaps the collision tile layer (blanked cells = removed sprites) on a level change. */
+    /**
+     * Swaps the collision tile layer (blanked cells = removed sprites) on a level change.
+     */
     public void setCollisionLayer(TiledMapTileLayer collisionLayer) {
         this.collisionLayer = collisionLayer;
     }
 
-    /** The current strike hitbox (last frame's), or {@code null} while not attacking / on non-hitting frames. */
+    /**
+     * The current strike hitbox (last frame's), or {@code null} while not attacking / on non-hitting frames.
+     */
     public Rectangle getActiveStrikeBounds() {
         return activeStrikeBounds;
     }
@@ -148,15 +155,19 @@ public class MeleeAttackSystem extends IteratingSystem {
         player.meleeAttack.update(deltaTime);
     }
 
-    /** True while the player's Strength potion buff is active (no-op without a buff). */
+    /**
+     * True while the player's Strength potion buff is active (no-op without a buff).
+     */
     private boolean isStrengthBuffActive(Entity entity) {
         BuffComponent buff = BUFF.get(entity);
         return buff != null && buff.isStrengthActive();
     }
 
-    /** Damages every enemy overlapping {@code bounds} that hasn't already been hit this swing
+    /**
+     * Damages every enemy overlapping {@code bounds} that hasn't already been hit this swing
      * (tracked in {@link PlayerComponent#meleeHitEnemies}, reset at every swing start) via
-     * {@code EnemyDamageResolver}, so a single swing can hit every enemy in reach. */
+     * {@code EnemyDamageResolver}, so a single swing can hit every enemy in reach.
+     */
     private void hitAllEnemies(Rectangle bounds, PlayerComponent player, int damage) {
         for (Entity hitEnemy : enemies) {
             CollisionComponent enemyCollision = COLLISION.get(hitEnemy);
@@ -173,9 +184,11 @@ public class MeleeAttackSystem extends IteratingSystem {
         }
     }
 
-    /** Opens every unopened chest overlapping {@code bounds} (sprite swap to the open region,
+    /**
+     * Opens every unopened chest overlapping {@code bounds} (sprite swap to the open region,
      * disappear timer, smoke puff). Chests are independent of enemy hits, so one swing can both
-     * damage an enemy and open a chest. */
+     * damage an enemy and open a chest.
+     */
     private void openAllChests(Rectangle bounds, PlayerComponent player) {
         for (Entity hitChest : chests) {
             CollisionComponent chestCollision = COLLISION.get(hitChest);
@@ -189,9 +202,8 @@ public class MeleeAttackSystem extends IteratingSystem {
             chest.opened = true;
             chest.disappearTimer.start(CHEST_DISAPPEAR_DELAY);
             TextureComponent texture = TEXTURE.get(hitChest);
-            texture.region = assetManager.get(ORIGIN_GAME_GFX, TextureAtlas.class)
-                .findRegion(SpriteConstants.CHEST_OPEN_REGION);
-            if (engine != null && chestCollision != null) {
+            texture.region = assetManager.get(ORIGIN_GAME_GFX, TextureAtlas.class).findRegion(CHEST_OPEN_REGION);
+            if (engine != null) {
                 ParticleHelper.spawnSmallSmoke(engine,
                     chestCollision.worldBounds.x + chestCollision.worldBounds.width / 2f,
                     chestCollision.worldBounds.y + chestCollision.worldBounds.height / 2f);
@@ -237,7 +249,9 @@ public class MeleeAttackSystem extends IteratingSystem {
         return false;
     }
 
-    /** The {@code secretRoom} property of the wall's collision-layer cell tile, or null when it guards no room. */
+    /**
+     * The {@code secretRoom} property of the wall's collision-layer cell tile, or null when it guards no room.
+     */
     private String secretRoomOf(Rectangle rect) {
         int tileX = (int) (rect.x / collisionLayer.getTileWidth());
         int tileY = (int) (rect.y / collisionLayer.getTileHeight());
@@ -269,7 +283,10 @@ public class MeleeAttackSystem extends IteratingSystem {
         return false;
     }
 
-    /** Blanks the collision-layer cell underneath a broken secret-wall rect (removes its sprite). */    private void blankSecretTile(Rectangle rect) {
+    /**
+     * Blanks the collision-layer cell underneath a broken secret-wall rect (removes its sprite).
+     */
+    private void blankSecretTile(Rectangle rect) {
         int tileX = (int) (rect.x / collisionLayer.getTileWidth());
         int tileY = (int) (rect.y / collisionLayer.getTileHeight());
         TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);

@@ -50,6 +50,8 @@ public class PauseDialog extends Dialog {
         void cycleLayout();
 
         void onExit();
+
+        int getTriesRemaining();
     }
 
     private static final float TAB_BUTTON_MIN_WIDTH = 130f;
@@ -110,6 +112,10 @@ public class PauseDialog extends Dialog {
 
     private void buildGameplayTab() {
         gameplayContent.defaults().pad(ELEMENT_PAD).left();
+        Label triesLabel = new Label("Tries remaining: " + listener.getTriesRemaining(), getSkin());
+        triesLabel.setFontScale(FontScale);
+        gameplayContent.add(triesLabel).row();
+
         gameplayContent.add(toggleCheckBox("Music",
             AudioManager.get()::isMusicEnabled,
             AudioManager.get()::setMusicEnabled)).row();

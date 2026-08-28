@@ -26,6 +26,12 @@ public final class SaveManager {
         preferences.flush();
     }
 
+    public static void clear() {
+        Preferences preferences = Gdx.app.getPreferences(PREFS_NAME);
+        preferences.remove(KEY_SAVE);
+        preferences.flush();
+    }
+
     /** Returns the persisted save, or {@code null} if none exists. */
     public static SaveData load() {
         if (!hasSave()) {

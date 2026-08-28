@@ -12,7 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -68,12 +69,18 @@ public class PauseDialogTest {
         public void onExit() {
             exited = true;
         }
+
+        @Override
+        public int getTriesRemaining() {
+            return 3;
+        }
     }
 
     @Before
     public void setUp() {
         Gdx.app = mock(Application.class);
         Gdx.files = mock(com.badlogic.gdx.Files.class);
+        Gdx.audio = mock(com.badlogic.gdx.Audio.class);
         preferences = mock(Preferences.class);
         when(Gdx.app.getPreferences(Mockito.anyString())).thenReturn(preferences);
 
@@ -114,6 +121,7 @@ public class PauseDialogTest {
     public void tearDown() {
         Gdx.app = null;
         Gdx.files = null;
+        Gdx.audio = null;
     }
 
     @Test
