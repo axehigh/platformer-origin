@@ -19,13 +19,13 @@
   </properties>
   <image source="../gfx/enemies/ghost01_idle1.png" width="128" height="128"/>
  </tile>
- <tile id="5">
+ <tile id="5" type="enemy">
   <properties>
    <property name="enemyType" value="shooter"/>
   </properties>
   <image source="../gfx/enemies/spider_0spider.png" width="128" height="128"/>
  </tile>
- <tile id="6">
+ <tile id="6" type="enemy">
   <properties>
    <property name="enemyType" value="flyer"/>
   </properties>
