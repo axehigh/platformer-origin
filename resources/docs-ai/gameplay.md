@@ -433,3 +433,7 @@ A global two-layer parallax skybox draws **behind** every level's Tiled map — 
 2. **Layout:** Independent fill-parent overlay tables pin each cluster so they can't skew each other: the "Origin" title is screen-centered near the top (`3 × UI_PADDING` down); **Preferences** sits top-right; **New Game** above **Continue** stack centered at the bottom (`2 × UI_PADDING` margins); **Select Level** occupies the bottom-right corner — all padded with `UI_PADDING` and sized with the standard `MENU_BUTTON_*` constants.
 3. **Select Level feature flag:** The bottom-right Select Level button is only built when `FeatureFlags.isSelectLevelEnabled()` (default **ON**, persisted via `GamePreferences`; flip with `FeatureFlags.setSelectLevelEnabled(...)`). When OFF the button isn't created at all, leaving an empty corner.
 4. **Buttons:** New Game seeds a fresh `SaveData` (`triesRemaining = 3`, first catalog level); Continue resumes the persisted save (disabled/grayed when no save exists); Preferences opens the preferences screen. All play the shared click sound via `createMenuButton`.
+
+### AD. UI Skin & Drawables Rule (Mandatory)
+- **Never hardcode or guess style/drawable names** (such as `"default-window"`) in Scene2D `Skin.getDrawable(...)` or table backgrounds. 
+- Always use drawables verified to exist in the loaded skin/atlas (e.g. `"table"` for container window panels and slot backgrounds, as seen in `InventoryBarStage`). Refer to existing UI code or asset definitions before adding component background styling to avoid runtime `GdxRuntimeException` crashes.

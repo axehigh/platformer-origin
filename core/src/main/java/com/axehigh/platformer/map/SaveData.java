@@ -21,6 +21,7 @@ public class SaveData {
     public int invulnerabilityPotions;
     public Array<String> completedLevelIds = new Array<>();
     public int triesRemaining = 3;
+    public int enemiesKilled = 0;
 
     /** No-arg constructor required by libGDX {@code Json}. */
     public SaveData() {

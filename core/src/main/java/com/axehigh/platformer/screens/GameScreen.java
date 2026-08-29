@@ -39,7 +39,7 @@ import static com.axehigh.platformer.ecs.components.Mappers.*;
  * System construction lives in {@link GameSystems}, dialogs in {@link PauseDialog} /
  * {@link GameOverDialog}; this screen stays lifecycle, layout, and input orchestration.
  */
-public class GameScreen extends BaseScreen implements PauseDialog.Listener, GameOverDialog.Listener {
+public class GameScreen extends BaseScreen implements PauseDialog.Listener, GameOverScreen.Listener {
     private final AssetManager assetManager = new AssetManager();
     private final PooledEngine engine = new PooledEngine();
     private final SpriteBatch batch = new SpriteBatch();
@@ -228,7 +228,22 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
 
     private void onPlayerDeath() {
         gameOverActive = true;
-        showGameOverDialog();
+        game.setScreen(new GameOverScreen(game, this));
+    }
+
+    @Override
+    public void onContinue() {
+        if (saveData != null) {
+            game.setScreen(new GameScreen(game, saveData));
+        } else {
+            SaveData save = SaveManager.hasSave() ? SaveManager.load() : new SaveData();
+            game.setScreen(new GameScreen(game, save));
+        }
+    }
+
+    @Override
+    public void onExit() {
+        changeScreen(new MainMenuScreen(game));
     }
 
     private void togglePause() {
@@ -253,12 +268,6 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         PauseDialog dialog = new PauseDialog(skin, this);
         dialog.show(stage);
         DialogPanelFitter.fitToPanel(skin, stage, dialog);
-    }
-
-    private void showGameOverDialog() {
-        GameOverDialog dialog = new GameOverDialog(skin, this);
-        dialog.show(stage);
-        DialogPanelFitter.sizeToPanel(skin, stage, dialog);
     }
 
     @Override
@@ -464,20 +473,6 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
     public int getTriesRemaining() {
         SaveData currentSave = saveData != null ? saveData : (SaveManager.hasSave() ? SaveManager.load() : null);
         return currentSave != null ? currentSave.triesRemaining : 3;
-    }
-
-    @Override
-    public void onContinue() {
-        systems.levelManager.loadLevel(systems.levelManager.getCurrentLevelPath(), playerEntity);
-        playerComponent.health = playerComponent.maxHealth;
-        playerComponent.isDead = false;
-        gameOverActive = false;
-    }
-
-    @Override
-    public void onExit() {
-        SaveManager.clear();
-        changeScreen(new MainMenuScreen(game));
     }
 
     private void snapCameraToPlayerRoom() {

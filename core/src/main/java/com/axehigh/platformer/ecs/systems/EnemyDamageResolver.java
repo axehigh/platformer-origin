@@ -1,16 +1,15 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.AnimationComponent;
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.EnemyComponent;
-import com.axehigh.platformer.ecs.components.Mappers;
-import com.axehigh.platformer.ecs.components.MovementComponent;
+import com.axehigh.platformer.ecs.components.*;
+import com.axehigh.platformer.map.SaveData;
 import com.axehigh.platformer.particles.GlobalParticles;
 import com.axehigh.platformer.particles.ParticleHelper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+
+import static com.axehigh.platformer.util.SaveManager.*;
 
 /**
  * Shared enemy-damage resolution used by both {@code MeleeAttackSystem} and {@code CollisionSystem}
@@ -66,6 +65,13 @@ final class EnemyDamageResolver {
         if (enemy.health <= 0f) {
             enemy.isDead = true;
             movement.velocity.set(0, 0);
+
+            // Track kill in SaveData if save exists or can be updated
+            if (hasSave()) {
+                SaveData save = load();
+                save.enemiesKilled++;
+                save(save);
+            }
 
             AnimationComponent anim = Mappers.ANIMATION.get(enemyEntity);
             float duration = 0.5f;
