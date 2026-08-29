@@ -83,9 +83,9 @@ public class GameSystems {
         movementSystem.setUnitScale(unitScale);
         engine.addSystem(movementSystem);
 
-        CollisionSystem collisionSystem = new CollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION);
-        collisionSystem.setUnitScale(unitScale);
-        engine.addSystem(collisionSystem);
+        PlayerBulletSystem playerBulletSystem = new PlayerBulletSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION);
+        playerBulletSystem.setUnitScale(unitScale);
+        engine.addSystem(playerBulletSystem);
 
         EnemyBulletCollisionSystem enemyBulletSystem = new EnemyBulletCollisionSystem(mapLoader.getCollisionRects(), PRIORITY_COLLISION);
         enemyBulletSystem.setUnitScale(unitScale);

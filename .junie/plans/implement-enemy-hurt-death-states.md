@@ -25,7 +25,7 @@ When an enemy is hit, it should transition to the `HURT` animation state. When i
 ### Current Implementation
 - Enemies have `health` and `hitStun` in `EnemyComponent`.
 - `EnemyDamageResolver` handles damage and knockback, returning `true` if health <= 0.
-- Callers (`CollisionSystem`, `MeleeAttackSystem`) immediately remove the enemy entity if `applyHit` returns `true`.
+- Callers (`PlayerBulletSystem`, `MeleeAttackSystem`) immediately remove the enemy entity if `applyHit` returns `true`.
 - `AnimationSystem` already handles the `HURT` state when `hitStun` is active.
 
 ### Proposed Changes

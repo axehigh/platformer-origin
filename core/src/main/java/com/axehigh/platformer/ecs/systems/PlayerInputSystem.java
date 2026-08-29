@@ -1,33 +1,26 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.GameConstants;
-import com.axehigh.platformer.ecs.components.AnimationComponent;
-import com.axehigh.platformer.ecs.components.BulletComponent;
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.components.TextureComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.particles.ParticleHelper;
 import com.axehigh.platformer.util.PotionEffects;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.core.PooledEngine;
-import com.badlogic.gdx.Gdx;
+import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 
-import static com.axehigh.platformer.ecs.components.Mappers.ANIMATION;
-import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
-import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
-import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
-import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
+import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
+import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_UI_GFX;
+import static com.axehigh.platformer.assets.SpriteConstants.*;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
+import static com.badlogic.gdx.Gdx.input;
 import static com.badlogic.gdx.Input.Keys.*;
 
 /**
@@ -43,8 +36,7 @@ public class PlayerInputSystem extends IteratingSystem {
     private static final float SHOOT_COOLDOWN = 0.35f;
     private static final float BULLET_SPEED = 220f;
     private static final float BULLET_DAMAGE = 10f;
-    private static final float BULLET_LIFETIME = 1.5f;
-    private static final float BULLET_SIZE = 4f;
+    private static final float BULLET_LIFETIME = 300f;
     private static final float BULLET_Z = 8f;
 
     private static final float MELEE_COOLDOWN = 0.2f;
@@ -148,8 +140,8 @@ public class PlayerInputSystem extends IteratingSystem {
         TransformComponent transform = TRANSFORM.get(entity);
         CollisionComponent collision = COLLISION.get(entity);
 
-        boolean left = Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT) || touchLeft;
-        boolean right = Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT) || touchRight;
+        boolean left = input.isKeyPressed(Input.Keys.A) || input.isKeyPressed(Input.Keys.LEFT) || touchLeft;
+        boolean right = input.isKeyPressed(Input.Keys.D) || input.isKeyPressed(Input.Keys.RIGHT) || touchRight;
 
         // Hit-stun lock: while hurt, the player loses control — no horizontal input (so the
         // knockback pop set by PlayerDamageResolver isn't overwritten), no jump/melee/shoot.
@@ -167,7 +159,7 @@ public class PlayerInputSystem extends IteratingSystem {
             movement.velocity.x = 0f;
         }
 
-        boolean jumpPressed = Gdx.input.isKeyJustPressed(W) || Gdx.input.isKeyJustPressed(UP) || touchJumpRequested;
+        boolean jumpPressed = input.isKeyJustPressed(W) || input.isKeyJustPressed(UP) || touchJumpRequested;
 
         if (!locked && jumpPressed && player.jumpCount < player.maxJumps) {
             if (movement.grounded) {
@@ -190,18 +182,18 @@ public class PlayerInputSystem extends IteratingSystem {
 
         // Potion cycle/use: unlike movement/attacks, drinking stays available during the brief
         // hit-stun window (healing mid-fight is a clutch play) and is only blocked while dead.
-        boolean potionCyclePressed = Gdx.input.isKeyJustPressed(Z);
+        boolean potionCyclePressed = input.isKeyJustPressed(Z);
         if (!player.isDead && potionCyclePressed) {
             player.cyclePotion();
         }
 
-        boolean potionUsePressed = Gdx.input.isKeyJustPressed(C);
+        boolean potionUsePressed = input.isKeyJustPressed(C);
         if (!player.isDead && potionUsePressed && player.potionCooldown.isDone() && player.consumeSelectedPotion()) {
             PotionEffects.apply(entity, player, player.selectedPotion);
             player.potionCooldown.start(GameConstants.POTION_USE_COOLDOWN);
         }
 
-        boolean meleePressed = Gdx.input.isKeyJustPressed(Input.Keys.J) || Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || touchMeleeRequested;
+        boolean meleePressed = input.isKeyJustPressed(Input.Keys.J) || input.isKeyJustPressed(Input.Keys.SPACE) || touchMeleeRequested;
         if (!locked && meleePressed && player.meleeCooldown.isDone()) {
             float attackDuration = findAttackDuration(entity);
             player.meleeAttack.start(attackDuration);
@@ -211,17 +203,17 @@ public class PlayerInputSystem extends IteratingSystem {
             player.meleeCooldown.start(Math.max(MELEE_COOLDOWN, attackDuration));
         }
 
-        boolean shootPressed = Gdx.input.isKeyJustPressed(Input.Keys.K) || Gdx.input.isKeyJustPressed(Input.Keys.Y) || touchShootRequested;
-        if (!locked && shootPressed && player.shootCooldown.isDone() && player.items > 0) {
+        boolean shootPressed = input.isKeyJustPressed(Input.Keys.K) || input.isKeyJustPressed(Input.Keys.Y) || touchShootRequested;
+        if (!locked && shootPressed && player.shootCooldown.isDone() && player.ammo > 0) {
             spawnBullet(transform, collision, player);
-            player.items--;
+            player.ammo--;
             player.shootCooldown.start(SHOOT_COOLDOWN);
         }
 
-        player.interactPressed = Gdx.input.isKeyJustPressed(Input.Keys.E) || touchInteractRequested;
+        player.interactPressed = input.isKeyJustPressed(Input.Keys.E) || touchInteractRequested;
 
-        boolean dropPressed = Gdx.input.isKeyJustPressed(Input.Keys.S)
-            || Gdx.input.isKeyJustPressed(Input.Keys.DOWN)
+        boolean dropPressed = input.isKeyJustPressed(Input.Keys.S)
+            || input.isKeyJustPressed(Input.Keys.DOWN)
             || touchDropRequested;
         if (!locked && dropPressed) {
             player.dropWindow.start(DROP_WINDOW_DURATION);
@@ -251,20 +243,48 @@ public class PlayerInputSystem extends IteratingSystem {
     private void spawnBullet(TransformComponent playerTransform, CollisionComponent playerCollision, PlayerComponent player) {
         Entity bullet = engine.createEntity();
 
-        float bulletSize = BULLET_SIZE * unitScale;
-        float centerY = playerTransform.position.y + (playerCollision.bounds.height - bulletSize) / 2f;
-        float spawnX = player.facingDirection > 0
-            ? playerTransform.position.x + playerCollision.bounds.width
-            : playerTransform.position.x - bulletSize;
+        TextureRegion region = findRegion(assetManager, PLAYER_BULLET_REGION);
+        float bulletScale = unitScale * PLAYER_BULLET_SCALE;
+        // The sprite's on-screen scale drives the render; the collision box is authored per-sprite
+        // (BulletCollisionWidth/Height, scaled by PLAYER_BULLET_SCALE) since the visible blade can
+        // be smaller than the full atlas frame. Offsets position the box within the frame.
+        float bulletWidth = BulletCollisionWidth * bulletScale;
+        float bulletHeight = BulletCollisionHeight * bulletScale;
+        float bulletOffsetX = BulletOffsetX * bulletScale;
+        float bulletOffsetY = BulletOffsetY * bulletScale;
+        float frameWidth = region.getRegionWidth() * bulletScale;
+        // Center the sprite's vertical extent on the player's collision center. The blade sits at
+        // a fixed offset within the (tall) atlas frame, so centering the frame keeps the visible
+        // blade level with the player; the authored BulletOffsetY then places the hitbox over it.
+        float frameHeight = region.getRegionHeight() * bulletScale;
+        float playerCenterY = playerTransform.position.y + playerCollision.bounds.y
+            + playerCollision.bounds.height / 2f;
+        float centerY = playerCenterY - frameHeight / 2f;
 
+        // Collision box offset within the frame: firing left flips the sprite horizontally, which
+        // mirrors the blade to the opposite side of the frame (RenderSystem draws the flipped
+        // region about the position). Mirror the hitbox x-offset so it stays over the flipped blade.
+        float collisionOffsetX = player.facingDirection > 0
+            ? bulletOffsetX
+            : frameWidth - bulletOffsetX - bulletWidth;
+
+        // Launch the bullet from the player: the hitbox's center lands on the player's collision
+        // center, so the blade pokes out half its width in the facing direction (symmetric in both
+        // directions, no gap term needed).
+        float playerCenterX = playerTransform.position.x + playerCollision.bounds.x
+            + playerCollision.bounds.width / 2f;
+        float spawnX = playerCenterX - collisionOffsetX - bulletWidth / 2f;
         TransformComponent transform = engine.createComponent(TransformComponent.class);
         transform.position.set(spawnX, centerY);
-        transform.scale.set(unitScale, unitScale);
+        // Negative scale.x when facing left flips the blade horizontally so it points backwards.
+        transform.scale.set(bulletScale * player.facingDirection, bulletScale);
+        //transform.rotation = -90f;
         transform.z = BULLET_Z;
         bullet.add(transform);
 
         TextureComponent textureComponent = engine.createComponent(TextureComponent.class);
-        textureComponent.region = new TextureRegion(assetManager.get("gfx/old/bullet.png", Texture.class));
+
+        textureComponent.region = region;
         bullet.add(textureComponent);
 
         MovementComponent movement = engine.createComponent(MovementComponent.class);
@@ -275,14 +295,24 @@ public class PlayerInputSystem extends IteratingSystem {
         bullet.add(movement);
 
         CollisionComponent collision = engine.createComponent(CollisionComponent.class);
-        collision.bounds.setSize(bulletSize, bulletSize);
+        collision.bounds.set(collisionOffsetX, bulletOffsetY, bulletWidth, bulletHeight);
+        collision.updateWorldBounds(transform.position);
         bullet.add(collision);
 
         BulletComponent bulletComponent = engine.createComponent(BulletComponent.class);
         bulletComponent.damage = BULLET_DAMAGE;
         bulletComponent.lifetime = BULLET_LIFETIME;
         bullet.add(bulletComponent);
-
         engine.addEntity(bullet);
+    }
+
+    private static TextureAtlas.AtlasRegion findRegion(AssetManager assetManager, String regionName) {
+        TextureAtlas atlas = assetManager.get(ORIGIN_GAME_GFX, TextureAtlas.class);
+        TextureAtlas.AtlasRegion region = atlas.findRegion(regionName);
+        if (region == null) {
+            TextureAtlas uiAtlas = assetManager.get(ORIGIN_UI_GFX, TextureAtlas.class);
+            region = uiAtlas.findRegion(regionName);
+        }
+        return region;
     }
 }

@@ -1,13 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.BulletComponent;
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.EnemyBulletComponent;
-import com.axehigh.platformer.ecs.components.EnemyComponent;
-import com.axehigh.platformer.ecs.components.EnemyShooterComponent;
-import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.TextureComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.map.RoomState;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -18,10 +11,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
-import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
-import static com.axehigh.platformer.ecs.components.Mappers.ENEMY_SHOOTER;
-import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
  * Drives shooter-enemy firing: every {@code shootInterval} seconds, spawns a bullet at the
@@ -115,6 +105,7 @@ public class EnemyShootSystem extends IteratingSystem {
 
         CollisionComponent collision = engine.createComponent(CollisionComponent.class);
         collision.bounds.setSize(bulletSize, bulletSize);
+        collision.updateWorldBounds(transform.position);
         bullet.add(collision);
 
         BulletComponent bulletComponent = engine.createComponent(BulletComponent.class);

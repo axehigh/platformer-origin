@@ -39,6 +39,7 @@ public class HudStage extends Stage {
     private final BuffComponent buffComponent;
     private final Image[] heartImages;
     private final Label coinLabel;
+    private Label bulletLabel;
     private final TextButton pauseButton;
     private final ObjectMap<PotionType, TextureRegionDrawable> potionDrawables = new ObjectMap<>();
     private final Image[] buffImages;
@@ -64,6 +65,12 @@ public class HudStage extends Stage {
        // Image avatar = new Image(heroAtlas.findRegion("idle"));
         //leftGroup.add(avatar).size(66f, 66f).padRight(17f);
 
+        TextureAtlas uiAtlas = assetManager.get(ORIGIN_UI_GFX, TextureAtlas.class);
+        for (PotionType type : PotionType.values()) {
+            TextureAtlas.AtlasRegion region = uiAtlas.findRegion(type.regionName());
+            potionDrawables.put(type, new TextureRegionDrawable(region));
+        }
+
         Table heartsTable = new Table();
         Texture heartTexture = assetManager.get("gfx/old/heart.png", Texture.class);
         heartImages = new Image[playerComponent.maxHealth];
@@ -76,12 +83,13 @@ public class HudStage extends Stage {
         Image coinIcon = new Image(new TextureRegion(assetManager.get("gfx/old/coin.png", Texture.class)));
         leftGroup.add(coinIcon).size(34f, 34f).padRight(10f);
         coinLabel = new ShadowLabel("", counterStyle);
-        leftGroup.add(coinLabel);
+        leftGroup.add(coinLabel).padRight(24f);
 
-        TextureAtlas uiAtlas = assetManager.get(ORIGIN_UI_GFX, TextureAtlas.class);
-        for (PotionType type : PotionType.values()) {
-            TextureAtlas.AtlasRegion region = uiAtlas.findRegion(type.regionName());
-            potionDrawables.put(type, new TextureRegionDrawable(region));
+        if (GameConstants.USE_BULLET) {
+            Image bulletIcon = new Image(uiAtlas.findRegion("daggers"));
+            leftGroup.add(bulletIcon).size(30f, 30f).padRight(8f);
+            bulletLabel = new ShadowLabel("", counterStyle);
+            leftGroup.add(bulletLabel);
         }
 
         Table centerGroup = new Table();
@@ -121,6 +129,9 @@ public class HudStage extends Stage {
             heartImages[i].setColor(i < playerComponent.health ? Color.RED : Color.DARK_GRAY);
         }
         coinLabel.setText(String.format("x %04d", playerComponent.coins));
+        if (GameConstants.USE_BULLET && bulletLabel != null) {
+            bulletLabel.setText(String.format("x %02d", playerComponent.ammo));
+        }
         refreshBuffRow();
     }
 

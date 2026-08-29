@@ -6,6 +6,7 @@ import com.axehigh.platformer.particles.GlobalParticles;
 import com.axehigh.platformer.particles.ParticleHelper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
@@ -67,7 +68,7 @@ final class EnemyDamageResolver {
             movement.velocity.set(0, 0);
 
             // Track kill in SaveData if save exists or can be updated
-            if (hasSave()) {
+            if (Gdx.app != null && hasSave()) {
                 SaveData save = load();
                 save.enemiesKilled++;
                 save(save);

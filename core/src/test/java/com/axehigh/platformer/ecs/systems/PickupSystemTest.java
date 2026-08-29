@@ -1,10 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.CoinPickupComponent;
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.DaggerPickupComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.map.EntityFactory;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -13,13 +9,11 @@ import org.junit.Test;
 
 import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.*;
 
 /**
  * Headless unit tests for {@code PickupSystem}: coin/dagger overlap resolution, the ammo cap at
- * {@code maxItems}, that a non-overlapping pickup is left untouched, and that only a coin pickup
+ * {@code maxAmmo}, that a non-overlapping pickup is left untouched, and that only a coin pickup
  * triggers the coin SFX.
  */
 public class PickupSystemTest extends SystemTestBase {
@@ -103,12 +97,12 @@ public class PickupSystemTest extends SystemTestBase {
     public void daggerPickupIncrementsItemsCappedAtMax() {
         Entity player = player(0f, 130f);
         PlayerComponent playerComponent = PLAYER.get(player);
-        playerComponent.items = 9;
+        playerComponent.ammo = 9;
         dagger(0f, 130f, 5);
 
         engine.update(DT);
 
-        assertEquals(playerComponent.maxItems, playerComponent.items);
+        assertEquals(playerComponent.maxAmmo, playerComponent.ammo);
         assertEquals(1, engine.getEntities().size());
     }
 
@@ -119,7 +113,7 @@ public class PickupSystemTest extends SystemTestBase {
 
         engine.update(DT);
 
-        assertEquals(5, PLAYER.get(player).items);
+        assertEquals(5, PLAYER.get(player).ammo);
     }
 
     @Test

@@ -120,7 +120,9 @@ public class DebugRenderSystem extends EntitySystem implements Disposable {
         shapeRenderer.setColor(Color.LIME);
         for (Entity entity : collidables) {
             CollisionComponent collision = COLLISION.get(entity);
-            shapeRenderer.rect(collision.worldBounds.x, collision.worldBounds.y, collision.worldBounds.width, collision.worldBounds.height);
+            if (collision != null) {
+                shapeRenderer.rect(collision.worldBounds.x, collision.worldBounds.y, collision.worldBounds.width, collision.worldBounds.height);
+            }
         }
 
         for (int i = 0; i < roomState.rooms.size; i++) {

@@ -15,7 +15,9 @@ import java.util.Comparator;
 
 import static com.axehigh.platformer.ecs.components.Mappers.*;
 
-/** Draws every entity that has a TransformComponent + TextureComponent, sorted by z-index. */
+/**
+ * Draws every entity that has a TransformComponent + TextureComponent, sorted by z-index.
+ */
 public class RenderSystem extends SortedIteratingSystem {
     private final SpriteBatch batch;
     private final OrthographicCamera camera;
@@ -25,7 +27,11 @@ public class RenderSystem extends SortedIteratingSystem {
     }
 
     public RenderSystem(SpriteBatch batch, OrthographicCamera camera, int priority) {
-        super(Family.all(TransformComponent.class, TextureComponent.class).get(), new ZComparator(), priority);
+        super(Family.all(
+                TransformComponent.class,
+                TextureComponent.class).get(),
+            new ZComparator(),
+            priority);
         this.batch = batch;
         this.camera = camera;
     }
@@ -53,6 +59,10 @@ public class RenderSystem extends SortedIteratingSystem {
         float drawY = transform.position.y;
 
         CollisionComponent collision = COLLISION.get(entity);
+        if (BULLET.get(entity) != null) {
+            batch.draw(region, drawX, drawY, width, height);
+            return;
+        }
         if (collision != null && region instanceof AtlasRegion) {
             AtlasRegion atlasRegion = (AtlasRegion) region;
             float absScaleX = Math.abs(transform.scale.x);

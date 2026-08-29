@@ -1,5 +1,6 @@
 package com.axehigh.platformer.map;
 
+import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.assets.SpriteConstants;
 import com.axehigh.platformer.ecs.components.*;
 import com.badlogic.ashley.core.Entity;
@@ -67,7 +68,9 @@ class PlayerFactory {
         collisionComponent.bounds.setY(collisionComponent.baseOffsetY + collisionComponent.currentOffsetY);
         player.add(collisionComponent);
 
-        player.add(new PlayerComponent());
+        PlayerComponent playerComponent = new PlayerComponent();
+        playerComponent.ammo = GameConstants.PlayerStartBullet;
+        player.add(playerComponent);
         player.add(new BuffComponent());
         attachPlayerAnimations(player, heroAtlas);
 

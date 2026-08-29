@@ -24,6 +24,7 @@ public class TouchControlsStage extends Stage {
     private final TouchButton interactButton;
     private final TouchButton dropButton;
     private final TouchButton inventoryButton;
+    private final TouchButton shootButton;
 
     public TouchControlsStage(Viewport viewport, Skin skin, PlayerInputSystem inputSystem,
                               Drawable inventoryIcon, Runnable onInventoryToggle) {
@@ -76,6 +77,7 @@ public class TouchControlsStage extends Stage {
 
         TouchButton yButton = new TouchButton(skin, "daggers", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 () -> inputSystem.requestTouchShoot());
+        shootButton = yButton;
         yButton.setVisible(USE_BULLET);
         TouchButton bButton = new TouchButton(skin, "sword", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 () -> inputSystem.requestTouchMelee());
@@ -139,5 +141,10 @@ public class TouchControlsStage extends Stage {
     /** Fades the inventory (bag) button when the player has no potions. */
     public void setInventoryAlpha(float alpha) {
         inventoryButton.getColor().a = alpha;
+    }
+
+    /** Fades the shoot (daggers/Y) button when the player has no ammo. */
+    public void setShootAlpha(float alpha) {
+        shootButton.getColor().a = alpha;
     }
 }

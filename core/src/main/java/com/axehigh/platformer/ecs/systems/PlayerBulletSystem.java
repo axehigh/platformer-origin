@@ -17,17 +17,21 @@ import static com.axehigh.platformer.ecs.components.Mappers.*;
  * applies damage (and a hit-stun/knockback via {@code EnemyDamageResolver}) and removes bullets
  * on enemy impact, and despawns bullets whose lifetime expires.
  */
-public class CollisionSystem extends IteratingSystem {
+public class PlayerBulletSystem extends IteratingSystem {
+    /** Grace window (seconds) during which a freshly-spawned bullet is exempt from wall culling,
+     *  so it can clear the wall it spawned against instead of being removed on its first frame. */
+    private static final float SPAWN_GRACE = 0.12f;
+
     private final Array<Rectangle> collisionRects;
     private ImmutableArray<Entity> enemies;
     private PooledEngine engine;
     private float unitScale = 1f;
 
-    public CollisionSystem(Array<Rectangle> collisionRects) {
+    public PlayerBulletSystem(Array<Rectangle> collisionRects) {
         this(collisionRects, 0);
     }
 
-    public CollisionSystem(Array<Rectangle> collisionRects, int priority) {
+    public PlayerBulletSystem(Array<Rectangle> collisionRects, int priority) {
         super(Family.all(BulletComponent.class, TransformComponent.class, MovementComponent.class, CollisionComponent.class)
             .exclude(EnemyBulletComponent.class).get(), priority);
         this.collisionRects = collisionRects;
@@ -52,7 +56,6 @@ public class CollisionSystem extends IteratingSystem {
         TransformComponent transform = TRANSFORM.get(bulletEntity);
         MovementComponent movement = MOVEMENT.get(bulletEntity);
         CollisionComponent collision = COLLISION.get(bulletEntity);
-
         bullet.lifetime -= deltaTime;
         if (bullet.lifetime <= 0f) {
             getEngine().removeEntity(bulletEntity);
@@ -62,7 +65,12 @@ public class CollisionSystem extends IteratingSystem {
         transform.position.mulAdd(movement.velocity, deltaTime);
         collision.updateWorldBounds(transform.position);
 
-        if (hitsWall(collision.worldBounds)) {
+        // Give a freshly-spawned bullet a short grace window before wall collision applies,
+        // so it can move past terrain it happened to spawn overlapping (e.g. a wall directly
+        // against the player) instead of being culled on its very first frame.
+        if (bullet.elapsed < SPAWN_GRACE) {
+            bullet.elapsed += deltaTime;
+        } else if (hitsWall(collision.worldBounds)) {
             getEngine().removeEntity(bulletEntity);
             return;
         }

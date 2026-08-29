@@ -1,12 +1,7 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.GameConstants;
-import com.axehigh.platformer.ecs.components.CoinPickupComponent;
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.DaggerPickupComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.components.PotionPickupComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.map.EntityFactory;
 import com.axehigh.platformer.particles.GlobalParticles;
 import com.axehigh.platformer.particles.ParticleHelper;
@@ -16,14 +11,8 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.math.Rectangle;
 
-import static com.axehigh.platformer.ecs.components.Mappers.COIN_PICKUP;
-import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
-import static com.axehigh.platformer.ecs.components.Mappers.DAGGER_PICKUP;
-import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
-import static com.axehigh.platformer.ecs.components.Mappers.POTION_PICKUP;
-import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
  * Resolves pickup-vs-player overlap: looks up the single player entity once, then for each
@@ -90,7 +79,12 @@ public class PickupSystem extends IteratingSystem {
 
         DaggerPickupComponent daggerPickup = DAGGER_PICKUP.get(pickupEntity);
         if (daggerPickup != null) {
-            player.items = Math.min(player.maxItems, player.items + daggerPickup.amount);
+            player.ammo = Math.min(player.maxAmmo, player.ammo + daggerPickup.amount);
+            if (com.badlogic.gdx.Gdx.app != null) {
+                com.badlogic.gdx.Gdx.app.log("PickupSystem", "Picked up dagger! Added " + daggerPickup.amount + " ammo. Total items: " + player.ammo);
+            }
+            spawnCoinSpark(pickupCollision);
+            queueItemMessage(player, daggerPickup.amount);
         } else {
             PotionPickupComponent potionPickup = POTION_PICKUP.get(pickupEntity);
             if (potionPickup != null) {
@@ -114,6 +108,13 @@ public class PickupSystem extends IteratingSystem {
             spawnCoinMessage(player);
         }
         player.coinMessageCooldown.start(GameConstants.COIN_MESSAGE_COOLDOWN);
+    }
+
+    private void queueItemMessage(PlayerComponent player, int amount) {
+        if (entityFactory != null) {
+            entityFactory.createFloatingMessage(getEngine(),
+                    "+" + amount + " Ammo", GameConstants.MESSAGE_COLOR_COINS, players.first());
+        }
     }
 
     private void spawnCoinMessage(PlayerComponent player) {

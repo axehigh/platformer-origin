@@ -15,7 +15,7 @@ three-layer loop: log it, check the geometry, then look at the pixels.
 ECS does not render an entity the instant it is spawned. Within a single frame the engine runs
 every system in priority order (`PRIORITY_*` in `GameScreen`). So an entity can be created
 (priority 0, e.g. `PlayerInputSystem.spawnBullet`) and **removed in the same frame** (priority 7,
-e.g. `CollisionSystem` wall/enemy hit, `EnemyBulletCollisionSystem`), before `RenderSystem`
+e.g. `PlayerBulletSystem` wall/enemy hit, `EnemyBulletCollisionSystem`), before `RenderSystem`
 (priority 30) ever draws it. Symptom: ammo/HP/logic proves the entity spawned, but no sprite is
 ever visible. Bullets that spawn overlapping a wall or enemy die frame 1 and never draw. Before
 blaming rendering, **prove the entity survives past its first update**.

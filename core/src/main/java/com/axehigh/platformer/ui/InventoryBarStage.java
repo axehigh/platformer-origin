@@ -208,8 +208,8 @@ public class InventoryBarStage extends Stage {
 
         // Refresh equipment slots if enabled
         if (GameConstants.ENABLE_INVENTORY_EQUIPMENT && bulletSlot != null) {
-            bulletSlot.countLabel.setText(String.format("x %02d", playerComponent.items));
-            bulletSlot.button.getColor().a = playerComponent.items > 0 ? 1f : 0.35f;
+            bulletSlot.countLabel.setText(String.format("x %02d", playerComponent.ammo));
+            bulletSlot.button.getColor().a = playerComponent.ammo > 0 ? 1f : 0.35f;
         }
     }
 

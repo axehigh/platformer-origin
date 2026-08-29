@@ -14,6 +14,9 @@ public final class SaveManager {
     }
 
     public static boolean hasSave() {
+        if (Gdx.app == null) {
+            return false;
+        }
         Preferences preferences = Gdx.app.getPreferences(PREFS_NAME);
         String json = preferences.getString(KEY_SAVE, "");
         return json != null && !json.isEmpty();

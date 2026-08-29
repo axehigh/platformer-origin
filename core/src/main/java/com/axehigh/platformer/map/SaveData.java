@@ -36,7 +36,7 @@ public class SaveData {
         saveData.health = player.health;
         saveData.maxHealth = player.maxHealth;
         saveData.coins = player.coins;
-        saveData.items = player.items;
+        saveData.items = player.ammo;
         saveData.swordDamage = player.swordDamage;
         saveData.sharpEdgePurchased = player.sharpEdgePurchased;
         saveData.daggerBandolierPurchased = player.daggerBandolierPurchased;
@@ -53,7 +53,7 @@ public class SaveData {
         player.health = health;
         player.maxHealth = maxHealth;
         player.coins = coins;
-        player.items = items;
+        player.ammo = items;
         player.swordDamage = swordDamage;
         player.sharpEdgePurchased = sharpEdgePurchased;
         player.daggerBandolierPurchased = daggerBandolierPurchased;

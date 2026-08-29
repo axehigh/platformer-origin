@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
@@ -182,7 +184,7 @@ class PickupFactory {
         }
     }
 
-    public Entity createDaggerPickup(float x, float y) {
+    public Entity createDaggerPickup(float x, float y, MapObject object, TiledMapTile tile) {
         Texture texture = context.getTexture("gfx/old/dagger.png");
 
         Entity entity = new Entity();
@@ -201,9 +203,15 @@ class PickupFactory {
         collisionComponent.bounds.setSize(texture.getWidth() * context.unitScale, texture.getHeight() * context.unitScale);
         entity.add(collisionComponent);
 
-        entity.add(new DaggerPickupComponent());
+        DaggerPickupComponent daggerPickup = new DaggerPickupComponent();
+        daggerPickup.amount = TileProps.getIntProperty(object, tile, "amount", daggerPickup.amount);
+        entity.add(daggerPickup);
 
         return entity;
+    }
+
+    public Entity createDaggerPickup(float x, float y) {
+        return createDaggerPickup(x, y, null, null);
     }
 
     public Entity createPotionPickup(float x, float y, String potionType) {

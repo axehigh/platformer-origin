@@ -166,7 +166,7 @@ public class EntityFactory {
                     spawned = true;
                     break;
                 case "dagger":
-                    engine.addEntity(pickupFactory.createDaggerPickup(spawnX, spawnY));
+                    engine.addEntity(pickupFactory.createDaggerPickup(spawnX, spawnY, object, tile));
                     spawned = true;
                     break;
                 case "potion":

@@ -239,7 +239,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
             save.health = save.maxHealth; // Restore health in save so continue doesn't spawn dead
             save.maxHealth = playerComponent.maxHealth;
             save.coins = playerComponent.coins;
-            save.items = playerComponent.items;
+            save.items = playerComponent.ammo;
             save.swordDamage = playerComponent.swordDamage;
             save.sharpEdgePurchased = playerComponent.sharpEdgePurchased;
             save.daggerBandolierPurchased = playerComponent.daggerBandolierPurchased;
@@ -310,6 +310,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
             totalPotions += playerComponent.countPotion(t);
         }
         touchControlsStage.setInventoryAlpha(totalPotions > 0 ? 1f : 0.4f);
+        touchControlsStage.setShootAlpha(playerComponent.ammo > 0 ? 1f : 0.4f);
 
         hudStage.getViewport().apply();
         hudStage.act(delta);

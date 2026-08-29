@@ -11,8 +11,8 @@ public class PlayerComponent implements Component {
     public int health = GameConstants.MaxHealth;
     public int maxHealth = GameConstants.MaxHealth;
     public int coins = 0;
-    public int items = 0;
-    public int maxItems = GameConstants.MaxItems;
+    public int ammo = 0;
+    public int maxAmmo = GameConstants.MaxAmmo;
     /** Held Healing potions, capped at {@link GameConstants#POTION_CAP}. */
     public int healingPotions = 0;
     /** Held Strength potions, capped at {@link GameConstants#POTION_CAP}. */

@@ -26,7 +26,7 @@ public class ShopManager {
             false,
             player -> player.sharpEdgePurchased));
         catalog.add(new ShopItem(DAGGER_BANDOLIER, 75,
-            player -> player.maxItems = 60,
+            player -> player.maxAmmo = 60,
             false,
             player -> player.daggerBandolierPurchased));
         catalog.add(new ShopItem(IRON_HEART, 150,

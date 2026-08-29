@@ -88,7 +88,7 @@ A **drop-through platform for the player, a normal solid tile for everyone else*
 *   The player can **land on its top** (it sticks only when the player's feet were at/above the platform's top before the move) and can **jump up through** it from below.
 *   While standing on it, the contextual **`v` button** appears (mobile) or **`S`/`DOWN`** (keyboard) starts a short ~0.25s pass-through window: the player drops straight through the platform, then normal gravity takes over.
 *   **Enemies and popped items treat it as a fully-solid tile (all four sides)** — they land on top, are blocked by its sides/underside, and ground enemies patrol along it exactly like a regular floor. **Flying enemies pass through it entirely.**
-*   Player bullets still fly through (they're excluded from `MovementSystem` entirely, and `CollisionSystem` only resolves them against `collisionRects`).
+*   Player bullets still fly through (they're excluded from `MovementSystem` entirely, and `PlayerBulletSystem` only resolves them against `collisionRects`).
 
 ### §3.4 Secret walls (breakable)
 

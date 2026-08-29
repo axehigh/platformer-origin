@@ -1,40 +1,32 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.BulletComponent;
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.EnemyComponent;
-import com.axehigh.platformer.ecs.components.FlyingEnemyComponent;
-import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.axehigh.platformer.ecs.components.Mappers.BULLET;
-import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
-import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
-import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Headless unit tests for {@code CollisionSystem} (player bullets): lifetime expiry, velocity
- * integration, wall impact removal, enemy impact damage + removal, and the knockback direction /
- * flying vertical-hop handling routed through {@code EnemyDamageResolver}.
+ * Headless unit tests for {@code PlayerBulletSystem} (player bullets): lifetime expiry, velocity
+ * integration, wall impact removal (after the spawn grace window), enemy impact damage + removal,
+ * and the knockback direction / flying vertical-hop handling routed through
+ * {@code EnemyDamageResolver}.
  */
 public class CollisionSystemTest extends SystemTestBase {
 
     private final Array<Rectangle> collisionRects = new Array<>();
     private Engine engine;
-    private CollisionSystem system;
+    private PlayerBulletSystem system;
 
     @Before
     public void setUp() {
-        system = new CollisionSystem(collisionRects);
+        system = new PlayerBulletSystem(collisionRects);
         system.setUnitScale(1f);
         engine = newEngine();
         engine.addSystem(system);
@@ -42,7 +34,7 @@ public class CollisionSystemTest extends SystemTestBase {
 
     private Entity bullet(float x, float y, float velocityX, float lifetime) {
         TransformComponent transform = transform(x, y);
-        CollisionComponent collision = collision(-5f, -5f, 10f, 10f);
+        CollisionComponent collision = collision(0f, 0f, 10f, 10f);
         place(transform, collision, x, y);
         MovementComponent movement = movement();
         movement.velocity.x = velocityX;
@@ -56,9 +48,11 @@ public class CollisionSystemTest extends SystemTestBase {
 
     private Entity enemy(float x, float y) {
         TransformComponent transform = transform(x, y);
-        CollisionComponent collision = collision(-10f, -20f, 20f, 40f);
+        CollisionComponent collision = collision(0f, 0f, 20f, 40f);
         place(transform, collision, x, y);
-        Entity entity = entity(transform, movement(), collision, new EnemyComponent());
+        EnemyComponent enemyComponent = new EnemyComponent();
+        enemyComponent.health = 5f;
+        Entity entity = entity(transform, movement(), collision, enemyComponent);
         engine.addEntity(entity);
         return entity;
     }
@@ -86,25 +80,31 @@ public class CollisionSystemTest extends SystemTestBase {
         collisionRects.add(new Rectangle(0f, -5f, 5f, 10f));
         bullet(0f, 0f, 0f, 1f);
 
-        engine.update(DT);
+        // Steps the bullet well past the spawn-grace window (0.12s) so the wall check can run.
+        for (int i = 0; i < 10; i++) {
+            engine.update(DT);
+        }
 
         assertEquals(0, engine.getEntities().size());
     }
 
     @Test
     public void bulletDamagesEnemyAndIsRemoved() {
-        enemy(6f, 5f);
-        bullet(0f, 0f, 0f, 1f);
+        Entity enemy = enemy(0f, 0f);
+        Entity bullet = bullet(0f, 0f, 0f, 1f);
+        BULLET.get(bullet).damage = 2f;
 
         engine.update(0f);
 
         assertEquals(1, engine.getEntities().size());
+        assertEquals(3f, ENEMY.get(enemy).health, EPSILON);
     }
 
     @Test
     public void lethalBulletKillsEnemy() {
-        Entity enemy = enemy(6f, 5f);
-        bullet(0f, 0f, 0f, 1f);
+        Entity enemy = enemy(0f, 0f);
+        Entity bullet = bullet(0f, 0f, 0f, 1f);
+        BULLET.get(bullet).damage = 10f;
 
         engine.update(0f);
 
@@ -115,30 +115,30 @@ public class CollisionSystemTest extends SystemTestBase {
 
     @Test
     public void survivingEnemyGetsHorizontalKnockbackOnlyWhenFlying() {
-        Entity enemy = enemy(6f, 5f);
+        Entity enemy = enemy(0f, 0f);
         enemy.add(new FlyingEnemyComponent());
         EnemyComponent enemyComponent = ENEMY.get(enemy);
         MovementComponent enemyMovement = MOVEMENT.get(enemy);
         Entity bullet = bullet(0f, 0f, 0f, 1f);
-        BULLET.get(bullet).damage = 5f;
+        BULLET.get(bullet).damage = 2f;
 
         engine.update(0f);
 
-        assertEquals(5f, enemyComponent.health, EPSILON);
-        assertEquals(90f, enemyMovement.velocity.x, EPSILON);
-        assertEquals(0f, enemyMovement.velocity.y, EPSILON);
+        assertEquals(3f, enemyComponent.health, 0.001f);
+        assertEquals(90f, enemyMovement.velocity.x, 0.001f);
+        assertEquals(0f, enemyMovement.velocity.y, 0.001f);
     }
 
     @Test
     public void groundedEnemyGetsVerticalHopToo() {
-        Entity enemy = enemy(6f, 5f);
+        Entity enemy = enemy(0f, 0f);
         MovementComponent enemyMovement = MOVEMENT.get(enemy);
         Entity bullet = bullet(0f, 0f, 0f, 1f);
-        BULLET.get(bullet).damage = 5f;
+        BULLET.get(bullet).damage = 2f;
 
         engine.update(0f);
 
-        assertEquals(90f, enemyMovement.velocity.x, EPSILON);
-        assertEquals(140f, enemyMovement.velocity.y, EPSILON);
+        assertEquals(90f, enemyMovement.velocity.x, 0.001f);
+        assertEquals(140f, enemyMovement.velocity.y, 0.001f);
     }
 }

@@ -89,9 +89,9 @@ public class LevelManager implements Disposable {
         if (shootSystem != null) {
             shootSystem.setUnitScale(newScale);
         }
-        CollisionSystem collisionSystem = engine.getSystem(CollisionSystem.class);
-        if (collisionSystem != null) {
-            collisionSystem.setUnitScale(newScale);
+        PlayerBulletSystem playerBulletSystem = engine.getSystem(PlayerBulletSystem.class);
+        if (playerBulletSystem != null) {
+            playerBulletSystem.setUnitScale(newScale);
         }
         EnemyBulletCollisionSystem enemyBulletSystem = engine.getSystem(EnemyBulletCollisionSystem.class);
         if (enemyBulletSystem != null) {

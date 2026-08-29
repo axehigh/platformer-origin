@@ -79,14 +79,14 @@ public class PlayerHurtTest extends SystemTestBase {
     @Test
     public void hurtLockBlocksMeleeAndShoot() {
         player.hurtTimer.start(1f);
-        player.items = 5;
+        player.ammo = 5;
         system.requestTouchMelee();
         system.requestTouchShoot();
 
         engine.update(DT);
 
         assertEquals(false, player.meleeAttack.isActive());
-        assertEquals(5, player.items);
+        assertEquals(5, player.ammo);
     }
 
     @Test
