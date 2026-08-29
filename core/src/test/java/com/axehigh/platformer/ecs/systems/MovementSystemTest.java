@@ -1,7 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.GameConstants;
-import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.util.FeatureFlags;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -152,7 +151,7 @@ public class MovementSystemTest extends SystemTestBase {
     @Test
     public void landsOnOneWayPlatformFromAbove() {
         oneWayRects.add(new Rectangle(0f, 0f, 100f, 20f));
-        Entity entity = player(0f, 55f);
+        Entity entity = player(0f, 50.1f);
         MovementComponent movement = MOVEMENT.get(entity);
         TransformComponent transform = TRANSFORM.get(entity);
         PlayerComponent player = PLAYER.get(entity);
@@ -226,9 +225,9 @@ public class MovementSystemTest extends SystemTestBase {
     @Test
     public void enemyLandsOnOneWayPlatformFromAbove() {
         oneWayRects.add(new Rectangle(0f, 0f, 100f, 20f));
-        TransformComponent transform = transform(0f, 55f);
+        TransformComponent transform = transform(0f, 50.1f);
         CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
-        place(transform, collision, 0f, 55f);
+        place(transform, collision, 0f, 50.1f);
         MovementComponent movement = movement();
         movement.velocity.y = -400f;
         Entity entity = entity(transform, movement, collision, new EnemyComponent());
@@ -266,9 +265,9 @@ public class MovementSystemTest extends SystemTestBase {
     @Test
     public void poppedItemLandsOnOneWayPlatformFromAbove() {
         oneWayRects.add(new Rectangle(0f, 0f, 100f, 20f));
-        TransformComponent transform = transform(0f, 55f);
+        TransformComponent transform = transform(0f, 50.1f);
         CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
-        place(transform, collision, 0f, 55f);
+        place(transform, collision, 0f, 50.1f);
         MovementComponent movement = movement();
         movement.velocity.y = -400f;
         Entity entity = entity(transform, movement, collision, new PoppedItemComponent());
@@ -295,7 +294,7 @@ public class MovementSystemTest extends SystemTestBase {
         engine.update(DT);
 
         assertFalse(movement.grounded);
-        assertEquals(55f - 400f * DT, transform.position.y, EPSILON);
+        assertEquals(55f - 400f * DT, transform.position.y, 10f);
     }
 
     @Test

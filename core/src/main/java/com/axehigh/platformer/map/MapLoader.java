@@ -91,20 +91,22 @@ public class MapLoader implements Disposable {
                 Rectangle rect = new Rectangle(x * tileWidth, y * tileHeight, tileWidth, tileHeight);
                 TiledMapTile tile = cell.getTile();
                 if (tile.getProperties().get(PROPERTY_HAZARD, false, Boolean.class)) {
-                    addHazardRects(cell, x, y, tileWidth, tileHeight, rect);
+                    addCustomRects(cell, x, y, tileWidth, tileHeight, rect, hazardRects);
                 } else if (!isSolid(cell)) {
                     // solid=false passage tile: no collision at all.
                     continue;
                 } else if (tile.getProperties().get(PROPERTY_ONE_WAY, false, Boolean.class)) {
-                    oneWayRects.add(rect);
+                    addCustomRects(cell, x, y, tileWidth, tileHeight, rect, oneWayRects);
                 } else {
                     // A secret wall tile is fully solid until struck (unlike hazard, which is never
                     // solid), so it lands in the normal collision set too; breaking it later removes
                     // the rect from both arrays to open the doorway.
                     if (tile.getProperties().get(PROPERTY_SECRET, false, Boolean.class)) {
-                        secretRects.add(rect);
+                        addCustomRects(cell, x, y, tileWidth, tileHeight, rect, secretRects);
+                        addCustomRects(cell, x, y, tileWidth, tileHeight, rect, collisionRects);
+                    } else {
+                        addCustomRects(cell, x, y, tileWidth, tileHeight, rect, collisionRects);
                     }
-                    collisionRects.add(rect);
                 }
             }
         }
@@ -175,15 +177,22 @@ public class MapLoader implements Disposable {
      * full-tile rect is used. Shapes load in tile-local coordinates with a bottom-left Y-up origin,
      * matching this world's axes.
      */
-    private void addHazardRects(TiledMapTileLayer.Cell cell, float cellX, float cellY, float tileWidth, float tileHeight, Rectangle fullTile) {
+    /**
+     * Adds custom rect(s) for a cell (whether solid, hazard, one-way, or secret). When the tile carries
+     * collision-editor shapes (drawn in Tiled on the tile, e.g. L-shapes, smaller boxes, or hitboxes)
+     * and the cell isn't flipped, one world-space rect is added per shape (rectangle/polygon/circle/ellipse
+     * bounding box); otherwise the full-tile rect is used. Shapes load in tile-local coordinates with
+     * a bottom-left Y-up origin, matching this world's axes.
+     */
+    private void addCustomRects(TiledMapTileLayer.Cell cell, float cellX, float cellY, float tileWidth, float tileHeight, Rectangle fullTile, Array<Rectangle> targetArray) {
         if (cell.getFlipHorizontally() || cell.getFlipVertically() || cell.getRotation() != 0) {
-            hazardRects.add(fullTile);
+            targetArray.add(fullTile);
             return;
         }
         TiledMapTile tile = cell.getTile();
         MapObjects shapes = tile.getObjects();
         if (shapes.getCount() == 0) {
-            hazardRects.add(fullTile);
+            targetArray.add(fullTile);
             return;
         }
         boolean added = false;
@@ -192,11 +201,11 @@ public class MapLoader implements Disposable {
             if (local == null) {
                 continue;
             }
-            hazardRects.add(new Rectangle(cellX * tileWidth + local.x, cellY * tileHeight + local.y, local.width, local.height));
+            targetArray.add(new Rectangle(cellX * tileWidth + local.x, cellY * tileHeight + local.y, local.width, local.height));
             added = true;
         }
         if (!added) {
-            hazardRects.add(fullTile);
+            targetArray.add(fullTile);
         }
     }
 

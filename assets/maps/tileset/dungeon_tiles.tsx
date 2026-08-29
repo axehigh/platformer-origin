@@ -42,6 +42,9 @@
  </tile>
  <tile id="12">
   <image source="../gfx/tiles/dungeon/bg-crate.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="3">
+   <object id="2" x="16" y="32" width="98" height="96"/>
+  </objectgroup>
  </tile>
  <tile id="13">
   <properties>
@@ -202,6 +205,9 @@
  </tile>
  <tile id="61">
   <image source="../gfx/tiles/dwarf_mine/Wooden_Barrel.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="9" y="10" width="110" height="117"/>
+  </objectgroup>
  </tile>
  <tile id="63">
   <image source="../gfx/tiles/bg/cart.png" width="128" height="96"/>

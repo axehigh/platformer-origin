@@ -1,11 +1,7 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.EnemyComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.ecs.components.EnemyComponent.AiMode;
-import com.axehigh.platformer.ecs.components.FlyingEnemyComponent;
-import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.map.EntityFactory;
 import com.axehigh.platformer.map.RoomState;
 import com.badlogic.ashley.core.Engine;
@@ -18,17 +14,9 @@ import org.junit.Test;
 
 import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
 import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyFloat;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Headless unit tests for {@code EnemySystem}: patrol velocity, range/ledge/wall turn-arounds,
@@ -328,7 +316,7 @@ public class EnemySystemTest extends SystemTestBase {
 
         assertEquals(1, engine.getEntities().size());
         assertTrue(enemyComponent.deathCoinsSpawned);
-        verify(entityFactory).popCoins(eq(engine), anyFloat(), anyFloat(), eq(2), eq(1f));
+        verify(entityFactory).popCoins(eq(engine), anyFloat(), anyFloat(), eq(2), eq(1f), eq(collisionRects));
     }
 
     @Test
@@ -342,7 +330,7 @@ public class EnemySystemTest extends SystemTestBase {
         engine.update(DT);
         engine.update(DT);
 
-        verify(entityFactory, times(1)).popCoins(any(), anyFloat(), anyFloat(), anyInt(), anyFloat());
+        verify(entityFactory, times(1)).popCoins(any(), anyFloat(), anyFloat(), anyInt(), anyFloat(), any());
     }
 
     @Test
@@ -356,6 +344,6 @@ public class EnemySystemTest extends SystemTestBase {
         engine.update(0.2f);
 
         assertEquals(0, engine.getEntities().size());
-        verify(entityFactory, never()).popCoins(any(), anyFloat(), anyFloat(), anyInt(), anyFloat());
+        verify(entityFactory, never()).popCoins(any(), anyFloat(), anyFloat(), anyInt(), anyFloat(), any());
     }
 }

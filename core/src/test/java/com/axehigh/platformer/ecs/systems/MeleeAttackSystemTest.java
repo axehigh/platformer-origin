@@ -1,14 +1,7 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.assets.SpriteConstants;
-import com.axehigh.platformer.ecs.components.AnimationComponent;
-import com.axehigh.platformer.ecs.components.ChestComponent;
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.EnemyComponent;
-import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.components.TextureComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.assets.AssetManager;
@@ -21,14 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
-import static com.axehigh.platformer.ecs.components.Mappers.CHEST;
-import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
-import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -138,7 +125,7 @@ public class MeleeAttackSystemTest extends SystemTestBase {
 
         Rectangle box = system.getActiveStrikeBounds();
         assertNotNull(box);
-        assertEquals(24f, box.width, EPSILON);
+        assertEquals(24f * SpriteConstants.PlayerScale, box.width, EPSILON);
         assertEquals(15f, box.x, EPSILON);
         assertEquals(100f, box.y, EPSILON);
         assertEquals(60f, box.height, EPSILON);
@@ -153,8 +140,8 @@ public class MeleeAttackSystemTest extends SystemTestBase {
 
         Rectangle box = system.getActiveStrikeBounds();
         assertNotNull(box);
-        assertEquals(-15f - 24f, box.x, EPSILON);
-        assertEquals(24f, box.width, EPSILON);
+        assertEquals(-15f - (24f * SpriteConstants.PlayerScale), box.x, EPSILON);
+        assertEquals(24f * SpriteConstants.PlayerScale, box.width, EPSILON);
     }
 
     @Test
@@ -204,7 +191,7 @@ public class MeleeAttackSystemTest extends SystemTestBase {
     @Test
     public void enemyReachedOnLaterFrameStillHit() {
         Entity player = player(0f, 130f, 1);
-        Entity enemy = enemy(46f, 105f);
+        Entity enemy = enemy(15f + (44f * SpriteConstants.PlayerScale), 105f);
         EnemyComponent enemyComponent = ENEMY.get(enemy);
         PlayerComponent playerComponent = PLAYER.get(player);
 
