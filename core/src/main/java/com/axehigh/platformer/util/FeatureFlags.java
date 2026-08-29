@@ -15,6 +15,7 @@ public final class FeatureFlags {
     private static boolean wallClimbingEnabled = GamePreferences.DEFAULT_WALL_CLIMB_ENABLED;
     private static boolean squashEnabled = GamePreferences.DEFAULT_SQUASH_ENABLED;
     private static boolean selectLevelEnabled = GamePreferences.DEFAULT_SELECT_LEVEL_ENABLED;
+    private static boolean levelOpen = GamePreferences.DEFAULT_LEVEL_OPEN;
     private static boolean initialized = false;
 
     private FeatureFlags() {
@@ -29,6 +30,7 @@ public final class FeatureFlags {
         wallClimbingEnabled = preferences.isWallClimbingEnabled();
         squashEnabled = preferences.isSquashEnabled();
         selectLevelEnabled = preferences.isSelectLevelEnabled();
+        levelOpen = preferences.isLevelOpen();
     }
 
     /** Whether wall-climb (wall-slide gravity + wall-jump latch) is enabled. Defaults to {@code true}. */
@@ -79,6 +81,23 @@ public final class FeatureFlags {
     }
 
     /**
+     * Whether all levels are open in level select. Defaults to {@code true}.
+     */
+    public static boolean isLevelOpen() {
+        ensureInitialized();
+        return levelOpen;
+    }
+
+    /** Sets whether all levels are open in level select for the whole session and persists the choice. */
+    public static void setLevelOpen(boolean enabled) {
+        levelOpen = enabled;
+        initialized = true;
+        if (Gdx.app != null) {
+            new GamePreferences().setLevelOpen(enabled);
+        }
+    }
+
+    /**
      * Restores the pristine pre-init state. Test support (same package): headless tests must call
      * this before/after exercising the static so no state bleeds across test methods.
      */
@@ -86,6 +105,7 @@ public final class FeatureFlags {
         wallClimbingEnabled = GamePreferences.DEFAULT_WALL_CLIMB_ENABLED;
         squashEnabled = GamePreferences.DEFAULT_SQUASH_ENABLED;
         selectLevelEnabled = GamePreferences.DEFAULT_SELECT_LEVEL_ENABLED;
+        levelOpen = GamePreferences.DEFAULT_LEVEL_OPEN;
         initialized = false;
     }
 }

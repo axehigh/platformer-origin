@@ -16,6 +16,7 @@ public class GamePreferences {
     private static final String KEY_WALL_CLIMB_ENABLED = "wallClimbEnabled";
     private static final String KEY_SQUASH_ENABLED = "squashEnabled";
     private static final String KEY_SELECT_LEVEL_ENABLED = "selectLevelEnabled";
+    private static final String KEY_LEVEL_OPEN = "levelOpen";
     private static final String KEY_DEVICE_CLASS = "deviceClass";
     private static final String KEY_LAYOUT_MODE = "layoutMode";
     private static final String KEY_UI_ICON_SCALE = "uiIconScale";
@@ -32,6 +33,8 @@ public class GamePreferences {
     static final boolean DEFAULT_SQUASH_ENABLED = false;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
     static final boolean DEFAULT_SELECT_LEVEL_ENABLED = true;
+    /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
+    static final boolean DEFAULT_LEVEL_OPEN = true;
 
     private final Preferences preferences;
 
@@ -120,6 +123,19 @@ public class GamePreferences {
 
     public void setSelectLevelEnabled(boolean selectLevelEnabled) {
         preferences.putBoolean(KEY_SELECT_LEVEL_ENABLED, selectLevelEnabled);
+        preferences.flush();
+    }
+
+    /**
+     * Whether all levels are open/selectable in level select or restricted to completed/next.
+     * A feature flag (default {@code true}); see {@code FeatureFlags}.
+     */
+    public boolean isLevelOpen() {
+        return preferences.getBoolean(KEY_LEVEL_OPEN, DEFAULT_LEVEL_OPEN);
+    }
+
+    public void setLevelOpen(boolean levelOpen) {
+        preferences.putBoolean(KEY_LEVEL_OPEN, levelOpen);
         preferences.flush();
     }
 

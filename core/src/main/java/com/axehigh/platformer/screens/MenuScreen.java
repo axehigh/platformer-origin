@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Scaling;
@@ -52,7 +53,34 @@ public abstract class MenuScreen extends BaseScreen {
         backgroundImage.setTouchable(Touchable.disabled);
     }
 
-    /** Creates a title label styled for a menu screen. The caller adds it to its table layout. */
+    /**
+     * Creates a standard menu screen root table with top alignment and vertical padding.
+     */
+    protected Table createMenuRoot() {
+        Table root = new Table();
+        root.setFillParent(true);
+        root.top().padTop(40f).padBottom(40f);
+        stage.addActor(root);
+        return root;
+    }
+
+    /**
+     * Adds a standard title with glow and bottom spacing to a menu root table.
+     */
+    protected void addMenuTitle(Table root, String titleText) {
+        root.add(menuEffects.createGlowBehind(createMenuTitle(titleText))).colspan(2).padBottom(30f).row();
+    }
+
+    /**
+     * Adds a standard bottom-right Back button to a menu root table.
+     */
+    protected void addBackButton(Table root, Runnable onBack) {
+        Table bottomTable = new Table();
+        bottomTable.right();
+        bottomTable.add(createMenuButton("Back", onBack))
+            .size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT);
+        root.add(bottomTable).colspan(2).right().padRight(40f).padBottom(20f).row();
+    }
     protected Label createMenuTitle(String text) {
         Label title = new Label(text, skin);
         title.setFontScale(FontScale * MENU_TITLE_SCALE);

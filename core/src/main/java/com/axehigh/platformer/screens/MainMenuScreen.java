@@ -48,6 +48,10 @@ public class MainMenuScreen extends MenuScreen {
         cornerTopRight.top().right();
         cornerTopRight.add(preferencesButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
             .pad(UI_PADDING).row();
+        
+        TextButton creditsButton = createMenuButton("Credits", () -> changeScreen(new CreditsScreen(game)));
+        cornerTopRight.add(creditsButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
+            .pad(UI_PADDING).row();
         stage.addActor(cornerTopRight);
 
         TextButton selectLevelButton = createMenuButton("Select Level", () -> changeScreen(new LevelSelectScreen(game)));
@@ -81,6 +85,10 @@ public class MainMenuScreen extends MenuScreen {
             continueButton.setColor(Color.GRAY);
         }
         bottomCenter.add(continueButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
+            .padBottom(2 * UI_PADDING).row();
+
+        TextButton exitGameButton = createMenuButton("Exit Game", () -> com.badlogic.gdx.Gdx.app.exit());
+        bottomCenter.add(exitGameButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
             .padBottom(2 * UI_PADDING).row();
 
     stage.addActor(bottomCenter);

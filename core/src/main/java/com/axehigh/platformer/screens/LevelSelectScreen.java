@@ -3,6 +3,7 @@ package com.axehigh.platformer.screens;
 import com.axehigh.platformer.audio.AudioManager;
 import com.axehigh.platformer.map.LevelCatalog;
 import com.axehigh.platformer.map.LevelDefinition;
+import com.axehigh.platformer.util.FeatureFlags;
 import com.axehigh.platformer.util.SaveManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Input.Keys;
@@ -57,26 +58,22 @@ public class LevelSelectScreen extends MenuScreen {
 
         completedLevelIds = SaveManager.hasSave() ? SaveManager.load().completedLevelIds : new Array<>();
 
-        Table content = new Table();
-        content.setFillParent(true);
-        stage.addActor(content);
+        Table content = createMenuRoot();
+        addMenuTitle(content, "Select Level");
 
-        content.add(menuEffects.createGlowBehind(createMenuTitle("Select Level"))).padBottom(4f).row();
-
-        content.add(createWorldTabs()).padBottom(8f).row();
+        content.add(createWorldTabs()).padBottom(16f).row();
 
         progress = new Label("", skin);
         progress.setFontScale(FontScale);
-        content.add(progress).padBottom(12f).row();
+        content.add(progress).padBottom(16f).row();
 
         grid = new Table();
         scrollPane = new ScrollPane(grid, skin);
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
-        content.add(scrollPane).size(GRID_WIDTH, GRID_HEIGHT).row();
+        content.add(scrollPane).size(GRID_WIDTH, GRID_HEIGHT).padBottom(20f).row();
 
-        TextButton backButton = createMenuButton("Back", () -> changeScreen(new MainMenuScreen(game)));
-        content.add(backButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).padTop(14f).row();
+        addBackButton(content, () -> changeScreen(new MainMenuScreen(game)));
 
         switchWorld(currentWorldIndex);
 
@@ -154,10 +151,20 @@ public class LevelSelectScreen extends MenuScreen {
 
         grid.clearChildren();
         levelButtons.clear();
+        boolean levelOpen = FeatureFlags.isLevelOpen();
+        boolean foundFirstUncompleted = false;
         for (int i = 0; i < levels.size; i++) {
             LevelDefinition level = levels.get(i);
             boolean completed = completedLevelIds.contains(level.id, false);
-            ImageTextButton levelButton = createLevelButton(level, completed);
+            boolean accessible = levelOpen || completed;
+            if (!accessible && !foundFirstUncompleted) {
+                accessible = true;
+                foundFirstUncompleted = true;
+            } else if (!completed && !foundFirstUncompleted) {
+                foundFirstUncompleted = true;
+            }
+            
+            ImageTextButton levelButton = createLevelButton(level, completed, accessible);
             levelButtons.add(levelButton);
             grid.add(levelButton).size(BUTTON_WIDTH, BUTTON_HEIGHT).pad(10f);
             if (i % COLUMNS == COLUMNS - 1) {
@@ -172,7 +179,7 @@ public class LevelSelectScreen extends MenuScreen {
         selectedIndex = -1;
     }
 
-    private ImageTextButton createLevelButton(final LevelDefinition level, boolean completed) {
+    private ImageTextButton createLevelButton(final LevelDefinition level, boolean completed, boolean accessible) {
         String text = level.displayName;
         ImageTextButton button;
         if (completed) {
@@ -187,9 +194,17 @@ public class LevelSelectScreen extends MenuScreen {
             button = new ImageTextButton(text, skin);
         }
         button.getLabel().setFontScale(FontScale);
+        button.setDisabled(!accessible);
+        if (!accessible) {
+            button.setColor(0.5f, 0.5f, 0.5f, 0.7f);
+        }
         button.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                if (!accessible) {
+                    AudioManager.get().playClick();
+                    return;
+                }
                 AudioManager.get().playClick();
                 changeScreen(new GameScreen(game, level.tmxPath));
             }
@@ -214,6 +229,10 @@ public class LevelSelectScreen extends MenuScreen {
 
     private void startLevel(int index) {
         if (index < 0 || index >= levels.size) {
+            return;
+        }
+        ImageTextButton button = levelButtons.get(index);
+        if (button.isDisabled()) {
             return;
         }
         AudioManager.get().playClick();
