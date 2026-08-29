@@ -120,19 +120,48 @@ public class LevelSelectScreen extends MenuScreen {
 
     private Table createWorldTabs() {
         Table tabs = new Table();
+        final boolean levelOpen = FeatureFlags.isLevelOpen();
+        Array<LevelDefinition> world1Levels = LevelCatalog.levelsForWorld(LevelCatalog.WORLD_1);
+        boolean w1Done = true;
+        for (LevelDefinition lvl : world1Levels) {
+            if (!completedLevelIds.contains(lvl.id, false)) {
+                w1Done = false;
+                break;
+            }
+        }
+        final boolean world1Completed = w1Done;
+
+        worldTabs.clear();
         for (int i = 0; i < worldIds.size; i++) {
-            final int worldIndex = i;
             final int worldId = worldIds.get(i);
+
+            // Demo only available when LEVEL_OPEN is true
+            if (worldId == LevelCatalog.WORLD_DEMO && !levelOpen) {
+                continue;
+            }
+
+            final int tabIndex = worldTabs.size;
             TextButton tab = new TextButton(LevelCatalog.worldName(worldId), skin);
             tab.getLabel().setFontScale(FontScale);
+
+            // World 2 requires all levels in world 1 to be completed (unless levelOpen)
+            if (worldId == LevelCatalog.WORLD_2 && !levelOpen && !world1Completed) {
+                tab.setDisabled(true);
+                tab.setColor(0.5f, 0.5f, 0.5f, 0.7f);
+            }
+
             tab.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
-                    if (worldIndex == currentWorldIndex) {
+                    if (worldId == LevelCatalog.WORLD_2 && !levelOpen && !world1Completed) {
+                        AudioManager.get().playClick();
+                        return;
+                    }
+                    if (tabIndex == currentWorldIndex) {
                         return;
                     }
                     AudioManager.get().playClick();
-                    switchWorld(worldIndex);
+                    switchWorld(tabIndex);
                 }
             });
             worldTabs.add(tab);
@@ -141,9 +170,19 @@ public class LevelSelectScreen extends MenuScreen {
         return tabs;
     }
 
-    private void switchWorld(int worldIndex) {
-        currentWorldIndex = worldIndex;
-        levels = LevelCatalog.levelsForWorld(worldIds.get(worldIndex));
+    private void switchWorld(int tabIndex) {
+        currentWorldIndex = tabIndex;
+        boolean levelOpen = FeatureFlags.isLevelOpen();
+        
+        IntArray activeWorldIds = new IntArray();
+        for (int i = 0; i < worldIds.size; i++) {
+            int id = worldIds.get(i);
+            if (id == LevelCatalog.WORLD_DEMO && !levelOpen) continue;
+            activeWorldIds.add(id);
+        }
+
+        int worldId = activeWorldIds.get(Math.max(0, Math.min(activeWorldIds.size - 1, tabIndex)));
+        levels = LevelCatalog.levelsForWorld(worldId);
 
         for (int i = 0; i < worldTabs.size; i++) {
             worldTabs.get(i).setColor(i == currentWorldIndex ? Color.GOLD : Color.WHITE);
@@ -151,7 +190,6 @@ public class LevelSelectScreen extends MenuScreen {
 
         grid.clearChildren();
         levelButtons.clear();
-        boolean levelOpen = FeatureFlags.isLevelOpen();
         boolean foundFirstUncompleted = false;
         for (int i = 0; i < levels.size; i++) {
             LevelDefinition level = levels.get(i);

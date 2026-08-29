@@ -54,8 +54,16 @@ public class MainMenuScreen extends MenuScreen {
             .pad(UI_PADDING).row();
         stage.addActor(cornerTopRight);
 
+        Table cornerTopLeft = new Table();
+        cornerTopLeft.setFillParent(true);
+        cornerTopLeft.top().left();
+        TextButton exitGameButton = createMenuButton("Exit Game", () -> com.badlogic.gdx.Gdx.app.exit());
+        cornerTopLeft.add(exitGameButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
+            .pad(UI_PADDING).row();
+        stage.addActor(cornerTopLeft);
+
         TextButton selectLevelButton = createMenuButton("Select Level", () -> changeScreen(new LevelSelectScreen(game)));
-        if (FeatureFlags.isSelectLevelEnabled()) {
+        if (FeatureFlags.isSelectLevelEnabled() && FeatureFlags.isLevelOpen()) {
             Table cornerBottomRight = new Table();
             cornerBottomRight.setFillParent(true);
             cornerBottomRight.bottom().right();
@@ -68,28 +76,52 @@ public class MainMenuScreen extends MenuScreen {
         bottomCenter.setFillParent(true);
         bottomCenter.bottom();
 
-        TextButton newGameButton = createMenuButton("New Game", this::newGame);
-        bottomCenter.add(newGameButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
-            .padBottom(2 * UI_PADDING).row();
+        SaveData save = SaveManager.hasSave() ? SaveManager.load() : null;
+        boolean hasOngoingGame = save != null && save.triesRemaining > 0;
 
-        TextButton continueButton = createMenuButton("Continue", () -> {
-            SaveData save = SaveManager.load();
-            if (save != null) {
-                save.health = save.maxHealth;
-                SaveManager.save(save);
-                changeScreen(new GameScreen(game, save));
+        TextButton newGameButton = createMenuButton("New Game", () -> {
+            if (hasOngoingGame) {
+                com.badlogic.gdx.scenes.scene2d.ui.Dialog confirmDialog = new com.badlogic.gdx.scenes.scene2d.ui.Dialog("New Game", skin) {
+                    @Override
+                    protected void result(Object object) {
+                        if (Boolean.TRUE.equals(object)) {
+                            newGame();
+                        }
+                    }
+                };
+                confirmDialog.text("An ongoing game exists.\nStarting a new game will clear it out.\nAre you sure?");
+                confirmDialog.button("Yes", true);
+                confirmDialog.button("No", false);
+                confirmDialog.show(stage);
+                com.axehigh.platformer.ui.DialogPanelFitter.sizeToPanel(skin, stage, confirmDialog);
+            } else {
+                newGame();
             }
         });
-        if (!SaveManager.hasSave()) {
+        TextButton continueButton = createMenuButton("Continue", () -> {
+            changeScreen(new LevelSelectScreen(game));
+        });
+        if (!hasOngoingGame) {
             continueButton.setTouchable(Touchable.disabled);
             continueButton.setColor(Color.GRAY);
         }
-        bottomCenter.add(continueButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
-            .padBottom(2 * UI_PADDING).row();
 
-        TextButton exitGameButton = createMenuButton("Exit Game", () -> com.badlogic.gdx.Gdx.app.exit());
-        bottomCenter.add(exitGameButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
-            .padBottom(2 * UI_PADDING).row();
+        if (hasOngoingGame) {
+            // Ongoing game: Continue visible as is, New Game below Credits
+            bottomCenter.add(continueButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
+                .padBottom(2 * UI_PADDING).row();
+
+            // And New Game below Credits in cornerTopRight:
+            cornerTopRight.add(newGameButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
+                .pad(UI_PADDING).row();
+        } else {
+            // No ongoing game: only New Game visible where it is today (bottomCenter)
+            bottomCenter.add(newGameButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
+                .padBottom(2 * UI_PADDING).row();
+
+            bottomCenter.add(continueButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
+                .padBottom(2 * UI_PADDING).row();
+        }
 
     stage.addActor(bottomCenter);
 
