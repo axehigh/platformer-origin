@@ -17,6 +17,7 @@ public class GamePreferences {
     private static final String KEY_SQUASH_ENABLED = "squashEnabled";
     private static final String KEY_SELECT_LEVEL_ENABLED = "selectLevelEnabled";
     private static final String KEY_LEVEL_OPEN = "levelOpen";
+    private static final String KEY_EMBERS_ENABLED = "embersEnabled";
     private static final String KEY_DEVICE_CLASS = "deviceClass";
     private static final String KEY_LAYOUT_MODE = "layoutMode";
     private static final String KEY_UI_ICON_SCALE = "uiIconScale";
@@ -35,6 +36,8 @@ public class GamePreferences {
     static final boolean DEFAULT_SELECT_LEVEL_ENABLED = true;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
     static final boolean DEFAULT_LEVEL_OPEN = true;
+    /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
+    static final boolean DEFAULT_EMBERS_ENABLED = true;
 
     private final Preferences preferences;
 
@@ -136,6 +139,15 @@ public class GamePreferences {
 
     public void setLevelOpen(boolean levelOpen) {
         preferences.putBoolean(KEY_LEVEL_OPEN, levelOpen);
+        preferences.flush();
+    }
+
+    public boolean isEmbersEnabled() {
+        return preferences.getBoolean(KEY_EMBERS_ENABLED, DEFAULT_EMBERS_ENABLED);
+    }
+
+    public void setEmbersEnabled(boolean embersEnabled) {
+        preferences.putBoolean(KEY_EMBERS_ENABLED, embersEnabled);
         preferences.flush();
     }
 

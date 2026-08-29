@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Scaling;
 
 import static com.axehigh.platformer.GameConstants.FontScale;
+import static com.axehigh.platformer.util.FeatureFlags.isEmbersEnabled;
 
 /**
  * Base class for the game's menu screens. Shares the visual chrome used on every menu: a
@@ -44,7 +45,9 @@ public abstract class MenuScreen extends BaseScreen {
         super.show();
         addBackground();
         menuEffects.applyKenBurns(stage, backgroundImage);
-        menuEffects.addEmbers(stage, EMBER_COUNT);
+        if (isEmbersEnabled()) {
+            menuEffects.addEmbers(stage, EMBER_COUNT);
+        }
     }
 
     private void addBackground() {

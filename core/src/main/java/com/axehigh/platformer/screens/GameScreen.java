@@ -60,6 +60,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
     private HudStage hudStage;
     private TouchControlsStage touchControlsStage;
     private InventoryBarStage inventoryBarStage;
+    private final com.axehigh.platformer.ui.MenuEffects menuEffects = new com.axehigh.platformer.ui.MenuEffects();
     private boolean gameOverActive = false;
     private boolean gamePaused = false;
     private boolean inventoryOpen = false;
@@ -161,6 +162,10 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
 
         inventoryBarStage = new InventoryBarStage(new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT), skin, assetManager, playerComponent, playerEntity);
         inventoryBarStage.setOnTapOutside(this::toggleInventory);
+
+        if (com.axehigh.platformer.util.FeatureFlags.isEmbersEnabled()) {
+            menuEffects.addEmbers(hudStage, 28);
+        }
 
         DeviceClass savedDevice = LayoutPrefs.savedDevice();
         if (savedDevice != null) {

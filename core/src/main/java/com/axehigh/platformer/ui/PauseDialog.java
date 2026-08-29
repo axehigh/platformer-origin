@@ -138,11 +138,15 @@ public class PauseDialog extends Dialog {
         CheckBox touchDebugBox = toggleCheckBox("Touch Debug",
             listener::isTouchDebugOn,
             listener::setTouchDebugOn);
+        CheckBox embersDebugBox = toggleCheckBox("Embers",
+            FeatureFlags::isEmbersEnabled,
+            FeatureFlags::setEmbersEnabled);
 
         Table debugRow = new Table();
         debugRow.defaults().pad(ELEMENT_PAD);
         debugRow.add(collisionDebugBox).left();
         debugRow.add(touchDebugBox).left();
+        debugRow.add(embersDebugBox).left();
         debugContent.add(debugRow).left().row();
 
         deviceButton = new TextButton("Device: " + listener.deviceLabel(), getSkin());

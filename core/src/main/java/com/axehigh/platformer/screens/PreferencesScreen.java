@@ -131,6 +131,17 @@ public class PreferencesScreen extends MenuScreen {
                     });
                     tabContent.add(levelOpenCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
 
+                    CheckBox embersCheckBox = new CheckBox(" Embers Effect", skin);
+                    embersCheckBox.getLabel().setFontScale(GameConstants.FontScale);
+                    embersCheckBox.setChecked(com.axehigh.platformer.util.FeatureFlags.isEmbersEnabled());
+                    embersCheckBox.addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            com.axehigh.platformer.util.FeatureFlags.setEmbersEnabled(embersCheckBox.isChecked());
+                        }
+                    });
+                    tabContent.add(embersCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
+
                     TextButton clearPlayerButton = createMenuButton("Clear Player", () -> {
                         com.axehigh.platformer.util.SaveManager.clear();
                     });

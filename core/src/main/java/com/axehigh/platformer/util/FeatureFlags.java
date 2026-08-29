@@ -16,6 +16,7 @@ public final class FeatureFlags {
     private static boolean squashEnabled = GamePreferences.DEFAULT_SQUASH_ENABLED;
     private static boolean selectLevelEnabled = GamePreferences.DEFAULT_SELECT_LEVEL_ENABLED;
     private static boolean levelOpen = GamePreferences.DEFAULT_LEVEL_OPEN;
+    private static boolean embersEnabled = GamePreferences.DEFAULT_EMBERS_ENABLED;
     private static boolean initialized = false;
 
     private FeatureFlags() {
@@ -31,6 +32,7 @@ public final class FeatureFlags {
         squashEnabled = preferences.isSquashEnabled();
         selectLevelEnabled = preferences.isSelectLevelEnabled();
         levelOpen = preferences.isLevelOpen();
+        embersEnabled = preferences.isEmbersEnabled();
     }
 
     /** Whether wall-climb (wall-slide gravity + wall-jump latch) is enabled. Defaults to {@code true}. */
@@ -80,6 +82,19 @@ public final class FeatureFlags {
         }
     }
 
+    public static boolean isEmbersEnabled() {
+        ensureInitialized();
+        return embersEnabled;
+    }
+
+    public static void setEmbersEnabled(boolean enabled) {
+        embersEnabled = enabled;
+        initialized = true;
+        if (Gdx.app != null) {
+            new GamePreferences().setEmbersEnabled(enabled);
+        }
+    }
+
     /**
      * Whether all levels are open in level select. Defaults to {@code true}.
      */
@@ -106,6 +121,7 @@ public final class FeatureFlags {
         squashEnabled = GamePreferences.DEFAULT_SQUASH_ENABLED;
         selectLevelEnabled = GamePreferences.DEFAULT_SELECT_LEVEL_ENABLED;
         levelOpen = GamePreferences.DEFAULT_LEVEL_OPEN;
+        embersEnabled = GamePreferences.DEFAULT_EMBERS_ENABLED;
         initialized = false;
     }
 }

@@ -45,7 +45,7 @@ See @resources/docs-ai/ashley-ecs.md for the full, AI-usable overview of every E
 ---
 
 ## 5. Coding Conventions & Best Practices
-*   **Import** Never Use qualified imports, unless you have to.
+*   **Java Import** Never Use qualified imports, unless you have to. Use static import if you can.
 *   **Asset Management:** Use `AssetManager` to load all `TextureAtlas`, `TiledMap`, and audio assets asynchronously.
 *   **Memory Management:** Always explicitly `dispose()` of Textures, SpriteBatches, and TiledMaps when changing screens or shutting down to prevent memory leaks. Pool frequent ECS components if garbage collection spikes occur.
 *   **Frame-Rate Independence:** Always use `Gdx.graphics.getDeltaTime()` inside your Ashley systems' `update` methods.
