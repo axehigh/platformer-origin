@@ -228,17 +228,32 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
 
     private void onPlayerDeath() {
         gameOverActive = true;
-        game.setScreen(new GameOverScreen(game, this));
+        SaveData save = saveData != null ? saveData : (SaveManager.hasSave() ? SaveManager.load() : new SaveData());
+        save.levelPath = systems.levelManager.getCurrentLevelPath();
+        if (playerComponent != null) {
+            save.health = save.maxHealth; // Restore health in save so continue doesn't spawn dead
+            save.maxHealth = playerComponent.maxHealth;
+            save.coins = playerComponent.coins;
+            save.items = playerComponent.items;
+            save.swordDamage = playerComponent.swordDamage;
+            save.sharpEdgePurchased = playerComponent.sharpEdgePurchased;
+            save.daggerBandolierPurchased = playerComponent.daggerBandolierPurchased;
+            save.ironHeartCount = playerComponent.ironHeartCount;
+            save.healingPotions = playerComponent.countPotion(com.axehigh.platformer.ecs.components.PotionType.HEALING);
+            save.strengthPotions = playerComponent.countPotion(com.axehigh.platformer.ecs.components.PotionType.STRENGTH);
+            save.speedPotions = playerComponent.countPotion(com.axehigh.platformer.ecs.components.PotionType.SPEED);
+            save.invulnerabilityPotions = playerComponent.countPotion(com.axehigh.platformer.ecs.components.PotionType.INVULNERABILITY);
+        }
+        SaveManager.save(save);
+        changeScreen(new GameOverScreen(game, this));
     }
 
     @Override
     public void onContinue() {
-        if (saveData != null) {
-            game.setScreen(new GameScreen(game, saveData));
-        } else {
-            SaveData save = SaveManager.hasSave() ? SaveManager.load() : new SaveData();
-            game.setScreen(new GameScreen(game, save));
-        }
+        SaveData save = SaveManager.hasSave() ? SaveManager.load() : (saveData != null ? saveData : new SaveData());
+        save.health = save.maxHealth;
+        SaveManager.save(save);
+        game.setScreen(new GameScreen(game, save));
     }
 
     @Override

@@ -68,7 +68,14 @@ public class MainMenuScreen extends MenuScreen {
         bottomCenter.add(newGameButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
             .padBottom(2 * UI_PADDING).row();
 
-        TextButton continueButton = createMenuButton("Continue", () -> changeScreen(new GameScreen(game, SaveManager.load())));
+        TextButton continueButton = createMenuButton("Continue", () -> {
+            SaveData save = SaveManager.load();
+            if (save != null) {
+                save.health = save.maxHealth;
+                SaveManager.save(save);
+                changeScreen(new GameScreen(game, save));
+            }
+        });
         if (!SaveManager.hasSave()) {
             continueButton.setTouchable(Touchable.disabled);
             continueButton.setColor(Color.GRAY);

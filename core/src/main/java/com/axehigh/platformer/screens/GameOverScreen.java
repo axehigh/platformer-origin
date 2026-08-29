@@ -4,18 +4,23 @@ import com.axehigh.platformer.audio.AudioManager;
 import com.axehigh.platformer.map.SaveData;
 import com.axehigh.platformer.util.SaveManager;
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Scaling;
 
 import static com.axehigh.platformer.GameConstants.FontScale;
 
 /**
  * Full-screen Game Over view displayed when the player dies and has no tries remaining,
- * or chooses to exit. Renders over the menu backdrop with Ken Burns zoom/embers, displays
- * run statistics (coins, items, sword damage, remaining tries, potions), and provides
+ * or chooses to exit. Renders over the gameover-screen backdrop with Ken Burns zoom/embers, displays
+ * run statistics (coins, items, enemies killed, sword damage, remaining tries), and provides
  * Continue (if tries remain) or Exit to Main Menu buttons.
  */
 public class GameOverScreen extends MenuScreen {
@@ -26,15 +31,26 @@ public class GameOverScreen extends MenuScreen {
     }
 
     private final Listener listener;
+    private final Texture gameOverBackgroundTexture;
 
     public GameOverScreen(Game game, Listener listener) {
         super(game);
         this.listener = listener;
+        this.gameOverBackgroundTexture = new Texture(Gdx.files.internal("splash/gameover-screen.jpg"));
     }
 
     @Override
     public void show() {
         super.show();
+        // Override background image with gameover-screen.jpg
+        stage.getActors().first().remove(); // remove background image added by super
+        Image bg = new Image(gameOverBackgroundTexture);
+        bg.setScaling(Scaling.fill);
+        bg.setTouchable(Touchable.disabled);
+        stage.getRoot().addActorAt(0, bg);
+
+        menuEffects.applyKenBurns(stage, bg);
+
         AudioManager.get().playMenuMusic();
 
         Table root = new Table();
@@ -80,7 +96,7 @@ public class GameOverScreen extends MenuScreen {
         }
 
         TextButton exitButton = createMenuButton("Exit to Main Menu", () -> {
-            listener.onExit();
+            changeScreen(new MainMenuScreen(game));
         });
         buttonTable.add(exitButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).row();
 
@@ -99,5 +115,11 @@ public class GameOverScreen extends MenuScreen {
 
         table.add(lbl).left().padRight(50f).padBottom(10f);
         table.add(val).right().padBottom(10f).row();
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        gameOverBackgroundTexture.dispose();
     }
 }
