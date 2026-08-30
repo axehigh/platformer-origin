@@ -172,7 +172,9 @@ public final class GameConstants {
 
     //UI Menu, everything else.
     public static final float UI_PADDING = 33f;
-    public static float FontScale = 1f;
+    public static float FontScale = .8f;
+
+    public static final String SKIN_TITLE = "title";
 
     private GameConstants() {
     }

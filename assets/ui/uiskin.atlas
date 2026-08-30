@@ -11,6 +11,13 @@ edgeofgalaxy
   orig: 512, 512
   offset: 0, 0
   index: -1
+moria-citadel
+  rotate: false
+  xy: 515, 268
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
 sansserif
   rotate: false
   xy: 1105, 1513
@@ -34,133 +41,133 @@ button_empty
   index: -1
 button_off
   rotate: false
-  xy: 940, 1205
+  xy: 1, 203
   size: 131, 63
   orig: 131, 63
   offset: 0, 0
   index: -1
 button_on
   rotate: false
-  xy: 1, 203
+  xy: 940, 1205
   size: 131, 63
   orig: 131, 63
   offset: 0, 0
   index: -1
 daggers
   rotate: false
-  xy: 1619, 1768
+  xy: 1947, 1945
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 door
   rotate: false
-  xy: 1947, 1945
+  xy: 1, 121
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 down
   rotate: false
-  xy: 515, 367
+  xy: 940, 1123
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 inventory
   rotate: false
-  xy: 817, 700
+  xy: 1105, 1341
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 bag
   rotate: false
-  xy: 817, 700
+  xy: 1105, 1341
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 jump
   rotate: false
-  xy: 940, 1123
+  xy: 1947, 1863
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 left
   rotate: false
-  xy: 1, 121
+  xy: 1, 39
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 pause
   rotate: false
-  xy: 515, 285
+  xy: 1105, 1259
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 potion
   rotate: false
-  xy: 1105, 1341
+  xy: 940, 1041
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 right
   rotate: false
-  xy: 1619, 1686
+  xy: 940, 959
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 sword
   rotate: false
-  xy: 1701, 1768
+  xy: 940, 877
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 sword-power
   rotate: false
-  xy: 1947, 1863
+  xy: 940, 795
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 potion_healing
   rotate: false
-  xy: 134, 234
+  xy: 83, 169
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 potion_invulnerability
   rotate: false
-  xy: 1188, 1437
+  xy: 1022, 1171
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 potion_speed
   rotate: false
-  xy: 597, 415
+  xy: 1, 5
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 potion_strength
   rotate: false
-  xy: 1022, 1171
+  xy: 1579, 1479
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 rope_big
   rotate: false
-  xy: 940, 649
+  xy: 1921, 1376
   size: 40, 472
   orig: 40, 472
   offset: 0, 0
@@ -174,14 +181,14 @@ rope_big_horisontal
   index: -1
 star
   rotate: false
-  xy: 1579, 1473
+  xy: 134, 228
   size: 38, 38
   orig: 38, 38
   offset: 0, 0
   index: -1
 scroll_info
   rotate: false
-  xy: 515, 449
+  xy: 1619, 1517
   size: 300, 331
   orig: 300, 331
   offset: 0, 0

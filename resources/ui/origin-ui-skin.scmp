@@ -564,6 +564,26 @@ atlasData: {
 			type: FONT
 			hidden: false
 		}
+		{
+			file: C:/skuld/dev_olona/libgdx/platformer-origin/resources/fonts/moria-citadel/moria-citadel.png
+			bgColor: {
+				r: 1
+				g: 1
+				b: 1
+				a: 1
+			}
+			tint: null
+			tintName: null
+			name: moria-citadel
+			tiled: false
+			minWidth: -1
+			minHeight: -1
+			customized: false
+			tenPatchData: null
+			tvgData: null
+			type: FONT
+			hidden: false
+		}
 	]
 }
 jsonData: {
@@ -577,6 +597,16 @@ jsonData: {
 				a: 1
 			}
 			name: BLACK
+		}
+		{
+			class: com.ray3k.skincomposer.data.ColorData
+			color: {
+				r: 0.90588236
+				g: 0.8901961
+				b: 0.8901961
+				a: 1
+			}
+			name: GRAY
 		}
 		{
 			class: com.ray3k.skincomposer.data.ColorData
@@ -630,6 +660,14 @@ jsonData: {
 		}
 		{
 			class: com.ray3k.skincomposer.data.FontData
+			name: moria-citadel
+			flip: false
+			markupEnabled: false
+			scaling: -1
+			file: C:/skuld/dev_olona/libgdx/platformer-origin/resources/fonts/moria-citadel/moria-citadel.fnt
+		}
+		{
+			class: com.ray3k.skincomposer.data.FontData
 			name: sansserif
 			flip: false
 			markupEnabled: false
@@ -665,6 +703,33 @@ jsonData: {
 					}
 				}
 				deletable: false
+				parent: null
+			}
+			{
+				class: com.ray3k.skincomposer.data.StyleData
+				name: title
+				clazz: com.badlogic.gdx.scenes.scene2d.ui.Label
+				properties: {
+					font: {
+						type: com.badlogic.gdx.graphics.g2d.BitmapFont
+						name: font
+						optional: false
+						value: moria-citadel
+					}
+					fontColor: {
+						type: com.badlogic.gdx.graphics.Color
+						name: fontColor
+						optional: true
+						value: GRAY
+					}
+					background: {
+						type: com.badlogic.gdx.scenes.scene2d.utils.Drawable
+						name: background
+						optional: true
+						value: null
+					}
+				}
+				deletable: true
 				parent: null
 			}
 		]
@@ -1254,7 +1319,7 @@ jsonData: {
 						type: com.badlogic.gdx.graphics.g2d.BitmapFont
 						name: font
 						optional: false
-						value: edgeofgalaxy
+						value: moria-citadel
 					}
 					fontColor: {
 						type: com.badlogic.gdx.graphics.Color
@@ -2369,6 +2434,13 @@ preferences: {
 	id: {
 		class: java.lang.Integer
 		value: 323394887
+	}
+	preview-bg-color: {
+		class: com.badlogic.gdx.graphics.Color
+		r: 0.08627451
+		g: 0.08627451
+		b: 0.08627451
+		a: 1
 	}
 	last-import-export-path: {
 		class: java.lang.String

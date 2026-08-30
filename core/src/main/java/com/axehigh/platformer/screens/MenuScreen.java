@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Scaling;
 
 import static com.axehigh.platformer.GameConstants.FontScale;
+import static com.axehigh.platformer.GameConstants.SKIN_TITLE;
 import static com.axehigh.platformer.util.FeatureFlags.isEmbersEnabled;
 
 /**
@@ -84,8 +85,9 @@ public abstract class MenuScreen extends BaseScreen {
             .size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT);
         root.add(bottomTable).colspan(2).right().padRight(40f).padBottom(20f).row();
     }
+
     protected Label createMenuTitle(String text) {
-        Label title = new Label(text, skin);
+        Label title = new Label(text, skin, SKIN_TITLE);
         title.setFontScale(FontScale * MENU_TITLE_SCALE);
         return title;
     }
