@@ -3,6 +3,7 @@ package com.axehigh.platformer.ecs.systems;
 import com.axehigh.platformer.ecs.components.*;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import org.junit.Before;
@@ -140,5 +141,24 @@ public class CollisionSystemTest extends SystemTestBase {
 
         assertEquals(90f, enemyMovement.velocity.x, 0.001f);
         assertEquals(140f, enemyMovement.velocity.y, 0.001f);
+    }
+
+    @Test
+    public void bulletHittingWallSpawnsSpark() {
+        // Fresh PooledEngine so PlayerBulletSystem captures a PooledEngine and ParticleHelper's
+        // headless path can create a dummy ParticleComponent entity on the impact.
+        engine = new PooledEngine();
+        engine.addSystem(system);
+        collisionRects.add(new Rectangle(0f, -5f, 5f, 10f));
+        bullet(0f, 0f, 0f, 1f);
+
+        // Step past the spawn-grace window (0.12s) so the wall check runs and spawns the spark.
+        for (int i = 0; i < 10; i++) {
+            engine.update(DT);
+        }
+
+        // Bullet is removed; a spark particle entity remains.
+        assertEquals(1, engine.getEntities().size());
+        assertTrue(PARTICLE.get(engine.getEntities().get(0)) != null);
     }
 }

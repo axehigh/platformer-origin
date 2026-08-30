@@ -1,6 +1,8 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.ecs.components.*;
+import com.axehigh.platformer.particles.GlobalParticles;
+import com.axehigh.platformer.particles.ParticleHelper;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -71,6 +73,7 @@ public class PlayerBulletSystem extends IteratingSystem {
         if (bullet.elapsed < SPAWN_GRACE) {
             bullet.elapsed += deltaTime;
         } else if (hitsWall(collision.worldBounds)) {
+            spawnImpactSpark(collision.worldBounds);
             getEngine().removeEntity(bulletEntity);
             return;
         }
@@ -84,6 +87,16 @@ public class PlayerBulletSystem extends IteratingSystem {
             EnemyDamageResolver.applyHit(hitEnemy, enemy, enemyMovement, bullet.damage, knockbackDirection, isFlying, unitScale, engine);
             getEngine().removeEntity(bulletEntity);
         }
+    }
+
+    /** Spawns a spark burst at the bullet impact point (used for non-enemy/wall despawns). */
+    private void spawnImpactSpark(Rectangle bounds) {
+        if (engine == null) {
+            return;
+        }
+        ParticleHelper.spawnParticle(engine, GlobalParticles.SPARKS,
+            bounds.x + bounds.width / 2f, bounds.y + bounds.height / 2f,
+            0f, EnemyDamageResolver.HIT_SPARK_SCALE, EnemyDamageResolver.HIT_SPARK_MAX_LIFETIME);
     }
 
     private boolean hitsWall(Rectangle bounds) {
