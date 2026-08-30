@@ -22,6 +22,10 @@ public class TrapComponent implements Component, Poolable {
     public float spawnInterval = 2.0f;
     public float projectileSpeed = 200f;
     public float damage = 1f;
+    /** World-space offset (from the spawner's tile corner) where each drop originates — set from
+     *  the designer's collision-editor point on the acid tile when one is present. */
+    public float spawnOffsetX = 0f;
+    public float spawnOffsetY = 0f;
     public Timer spawnTimer = new Timer();
 
     // === Acid drop fields ===
@@ -51,6 +55,8 @@ public class TrapComponent implements Component, Poolable {
         spawnInterval = 2.0f;
         projectileSpeed = 200f;
         damage = 1f;
+        spawnOffsetX = 0f;
+        spawnOffsetY = 0f;
         spawnTimer.reset();
         dropDamage = 1f;
         lifetime = 3.0f;

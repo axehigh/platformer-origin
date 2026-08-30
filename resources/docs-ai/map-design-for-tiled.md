@@ -185,6 +185,8 @@ An invisible entity that periodically shoots projectiles in the configured direc
 
 Projectile behaviour: moves at constant speed (no gravity), uses `acid_drop.png` (8×12 px teardrop sprite), disappears on wall/floor/ceiling contact or after 5 s lifetime.
 
+**Optional drop-origin point:** draw a single **point** in the acid tile's Tile Collision Editor (Tiled) to set exactly where projectiles originate within the tile — e.g. the vent mouth instead of the marker's corner. The point's coordinates are in the tile, measured bottom-left Y-up, matching world units (1 tile = 128 units here), and libGDX's default `flipY` already orients it correctly. Each drop's sprite+collision box (8×12 scaled) is **centered on the point** (its bottom-left sits half-width/half-height below-left of the point). Without a point, drops fall from the marker's bottom-left corner.
+
 **Trap B: Flame Trap (`trapType = "flame"`)**
 
 An animated flame that pulses between small and large on a timed cycle. The collision box scales with the visual — anchored at the source wall/floor/ceiling and extending outward in the configured direction.

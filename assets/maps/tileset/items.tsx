@@ -48,7 +48,7 @@
    <frame tileid="12" duration="100"/>
   </animation>
  </tile>
- <tile id="13">
+ <tile id="13" type="crystal">
   <image source="../gfx/items/Diamond.png" width="128" height="128"/>
  </tile>
  <tile id="14" type="key">

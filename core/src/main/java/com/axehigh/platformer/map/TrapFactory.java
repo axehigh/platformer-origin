@@ -6,8 +6,11 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.objects.PointMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 
 import static com.axehigh.platformer.ecs.components.AnimationComponent.State.IDLE;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
@@ -105,9 +108,36 @@ class TrapFactory {
 
         String dir = TileProps.getProperty(object, tile, "direction", "down");
         trap.spawnDirection = parseDirection(dir);
+
+        // If the designer drew a collision point on the acid tile (Tile Collision Editor), use it
+        // as the exact world-space origin for each drop (measured from the tile's bottom-left
+        // corner, already flipped to this world's Y-up by libGDX). Otherwise the drop falls from
+        // the tile corner.
+        Rectangle point = acidSpawnPoint(tile);
+        if (point != null) {
+            trap.spawnOffsetX = point.x;
+            trap.spawnOffsetY = point.y;
+        }
         entity.add(trap);
 
         return entity;
+    }
+
+    /**
+     * Returns the {@code PointMapObject} collision shape drawn on the acid marker tile, converted
+     * to a zero-size world-space rectangle (or {@code null} when the tile has no point).
+     */
+    private static Rectangle acidSpawnPoint(TiledMapTile tile) {
+        if (tile == null) {
+            return null;
+        }
+        MapObjects shapes = tile.getObjects();
+        for (MapObject shape : shapes) {
+            if (shape instanceof PointMapObject) {
+                return MapLoader.shapeBounds(shape);
+            }
+        }
+        return null;
     }
 
     /**

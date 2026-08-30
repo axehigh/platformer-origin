@@ -2,9 +2,9 @@ package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.TextureComponent;
+import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.ecs.components.TrapComponent;
 import com.axehigh.platformer.ecs.components.TrapComponent.TrapType;
-import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.map.RoomState;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -18,9 +18,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
-import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
-import static com.axehigh.platformer.ecs.components.Mappers.TRAP;
-import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
  * Drives trap entity lifecycle: acid/lava drop spawner timers, falling drop movement and
@@ -83,9 +81,20 @@ public class TrapSystem extends IteratingSystem {
     private void spawnDrop(TransformComponent spawnerTransform, TrapComponent spawnerTrap) {
         Entity drop = engine.createEntity();
 
+        float scaleX = spawnerTransform.scale.x;
+        float scaleY = spawnerTransform.scale.y;
+        float dropW = 8f * scaleX;
+        float dropH = 12f * scaleY;
+
         TransformComponent transform = engine.createComponent(TransformComponent.class);
-        transform.position.set(spawnerTransform.position.x, spawnerTransform.position.y);
-        transform.scale.set(spawnerTransform.scale.x, spawnerTransform.scale.y);
+        // Drops originate at the designer's collision point on the acid tile (world offset from the
+        // spawner's tile corner) when one is present, otherwise at the spawner's corner itself. The
+        // transform is shifted back by half the drop's collision box so the point is the CENTER of
+        // the drop (sprite + hitbox), not its bottom-left corner.
+        transform.position.set(
+            spawnerTransform.position.x + spawnerTrap.spawnOffsetX - dropW / 2f,
+            spawnerTransform.position.y + spawnerTrap.spawnOffsetY - dropH / 2f);
+        transform.scale.set(scaleX, scaleY);
         transform.z = TRAP_Z;
         drop.add(transform);
 
@@ -99,7 +108,7 @@ public class TrapSystem extends IteratingSystem {
         drop.add(texture);
 
         CollisionComponent collision = engine.createComponent(CollisionComponent.class);
-        collision.bounds.setSize(8f * transform.scale.x, 12f * transform.scale.y);
+        collision.bounds.setSize(dropW, dropH);
         drop.add(collision);
 
         TrapComponent trap = engine.createComponent(TrapComponent.class);
