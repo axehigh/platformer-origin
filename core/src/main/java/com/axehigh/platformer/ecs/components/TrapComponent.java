@@ -10,7 +10,7 @@ import com.badlogic.gdx.utils.Pool.Poolable;
  */
 public class TrapComponent implements Component, Poolable {
 
-    public enum TrapType { ACID_DROP_SPAWNER, ACID_DROP, FLAME }
+    public enum TrapType { ACID_DROP_SPAWNER, ACID_DROP, ACID_POOL, FLAME }
 
     public enum TrapDirection { UP, DOWN, LEFT, RIGHT }
 
@@ -32,6 +32,24 @@ public class TrapComponent implements Component, Poolable {
     public float dropDamage = 1f;
     public float lifetime = 3.0f;
     public Timer lifetimeTimer = new Timer();
+    /** Short grace window after a drop spawns during which wall-culling is skipped, so a drop that
+     *  spawns overlapping the wall cell around the spawn point can clear it instead of being removed
+     *  on its first frame. Started when the drop is spawned. */
+    public Timer spawnGrace = new Timer();
+    /** Current xy velocity of a falling drop (starts at {@code projectileSpeed}, accelerated by
+     *  {@link #dropAccel} each frame along the travel direction for a dripping feel). */
+    public float dropVelocityX = 0f;
+    public float dropVelocityY = 0f;
+    /** Signed acceleration (world-units/s^2) applied along the drop's travel direction. */
+    public float dropAccel = 0f;
+    /** Brief hang at the spawn point before the drop releases and falls (so it visibly forms, then
+     *  snaps loose, like a real viscous droplet). */
+    public float dripBuild = 0.15f;
+    public Timer dripBuildTimer = new Timer();
+
+    // === Acid pool fields ===
+    public float poolDuration = 1.5f;
+    public Timer poolTimer = new Timer();
 
     // === Flame fields ===
     public TrapDirection flameDirection = TrapDirection.DOWN;
@@ -61,6 +79,14 @@ public class TrapComponent implements Component, Poolable {
         dropDamage = 1f;
         lifetime = 3.0f;
         lifetimeTimer.reset();
+        spawnGrace.reset();
+        dropVelocityX = 0f;
+        dropVelocityY = 0f;
+        dropAccel = 0f;
+        dripBuild = 0.15f;
+        dripBuildTimer.reset();
+        poolDuration = 1.5f;
+        poolTimer.reset();
         flameDirection = TrapDirection.DOWN;
         minScale = 0.2f;
         maxScale = 1.0f;

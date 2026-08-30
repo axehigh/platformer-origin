@@ -5,8 +5,7 @@ import com.axehigh.platformer.ecs.components.TextureComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.ecs.components.TrapComponent;
 import com.axehigh.platformer.ecs.components.TrapComponent.TrapType;
-import com.axehigh.platformer.map.RoomState;
-import com.badlogic.ashley.core.Engine;
+import com.axehigh.platformer.map.RoomState;import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
@@ -27,6 +26,27 @@ import static com.axehigh.platformer.ecs.components.Mappers.*;
  */
 public class TrapSystem extends IteratingSystem {
     private static final float TRAP_Z = 7f;
+
+    /** Seconds after spawn during which an acid drop ignores wall culling, so it can clear the wall
+     *  cell its spawn point sits in instead of being removed on its first frame. */
+    private static final float ACID_DROP_SPAWN_GRACE = 0.12f;
+
+    /** Seconds a freshly-spawned acid drop hangs at the spawn point (dripping/bulging) before
+     *  releasing and falling. */
+    private static final float ACID_DROP_DRIP_BUILD = 0.15f;
+
+    /** Downward acceleration (world-units/s^2) applied to a falling acid drop so it speeds up like a
+     *  real heavy droplet instead of falling at a constant clip. */
+    private static final float ACID_DROP_GRAVITY = 800f;
+
+    /** Seconds a landed acid pool lingers before disappearing. */
+    private static final float ACID_POOL_LIFETIME = 1.5f;
+
+    /** Pool footprint, as a fraction of the 128px pool sprite's damager box: width = this many drop
+     *  widths, height = this fraction of a drop width. Yields a flat puddle ~1 tile wide. */
+    private static final float ACID_POOL_WIDTH_FACTOR = 2f;
+    private static final float ACID_POOL_HEIGHT_FACTOR = 0.5f;
+    private static final float ACID_POOL_SOURCE_PX = 128f;
 
     private final Array<Rectangle> collisionRects;
     private final RoomState roomState;
@@ -61,6 +81,9 @@ public class TrapSystem extends IteratingSystem {
                 break;
             case ACID_DROP:
                 updateDrop(entity, trap, transform, deltaTime);
+                break;
+            case ACID_POOL:
+                updatePool(entity, trap, deltaTime);
                 break;
             case FLAME:
                 if (roomActive) {
@@ -119,6 +142,17 @@ public class TrapSystem extends IteratingSystem {
         trap.projectileSpeed = spawnerTrap.projectileSpeed;
         trap.lifetime = 5.0f;
         trap.lifetimeTimer.start(trap.lifetime);
+        // Hangs briefly at the spawn point (drip build) before releasing; the wall-cull grace is
+        // started when the drip releases (see updateDrop) so it can clear the spawn wall.
+        trap.dripBuild = ACID_DROP_DRIP_BUILD;
+        trap.dripBuildTimer.start(trap.dripBuild);
+        switch (trap.spawnDirection) {
+            case DOWN: trap.dropVelocityY = -spawnerTrap.projectileSpeed; break;
+            case UP: trap.dropVelocityY = spawnerTrap.projectileSpeed; break;
+            case LEFT: trap.dropVelocityX = -spawnerTrap.projectileSpeed; break;
+            case RIGHT: trap.dropVelocityX = spawnerTrap.projectileSpeed; break;
+        }
+        trap.dropAccel = ACID_DROP_GRAVITY;
         drop.add(trap);
 
         engine.addEntity(drop);
@@ -131,26 +165,92 @@ public class TrapSystem extends IteratingSystem {
             return;
         }
 
-        float speed = trap.projectileSpeed;
-        switch (trap.spawnDirection) {
-            case DOWN:
-                transform.position.y -= speed * deltaTime;
-                break;
-            case UP:
-                transform.position.y += speed * deltaTime;
-                break;
-            case LEFT:
-                transform.position.x -= speed * deltaTime;
-                break;
-            case RIGHT:
-                transform.position.x += speed * deltaTime;
-                break;
+        // Drip build: hang at the spawn point, bulging, before releasing. The wall-cull grace is
+        // started the moment the drop releases so it can clear the wall it spawned on.
+        if (trap.dripBuildTimer.isActive()) {
+            trap.dripBuildTimer.update(deltaTime);
+            if (trap.dripBuildTimer.isDone()) {
+                trap.spawnGrace.start(ACID_DROP_SPAWN_GRACE);
+            }
+            return;
+        }
+
+        // Released: move along the travel direction — a falling (DOWN) drop accelerates under
+        // gravity like a real heavy droplet; other directions keep constant speed.
+        if (trap.spawnDirection == TrapComponent.TrapDirection.DOWN) {
+            trap.dropVelocityY -= trap.dropAccel * deltaTime;
+            transform.position.y += trap.dropVelocityY * deltaTime;
+        } else {
+            transform.position.x += trap.dropVelocityX * deltaTime;
+            transform.position.y += trap.dropVelocityY * deltaTime;
         }
 
         CollisionComponent collision = COLLISION.get(entity);
         collision.updateWorldBounds(transform.position);
 
+        if (trap.spawnGrace.isActive()) {
+            trap.spawnGrace.update(deltaTime);
+            return;
+        }
+
         if (hitsWall(collision.worldBounds)) {
+            if (trap.spawnDirection == TrapComponent.TrapDirection.DOWN) {
+                spawnPool(entity, trap, transform);
+            }
+            getEngine().removeEntity(entity);
+        }
+    }
+
+    /**
+     * Turns a downward-falling drop into a lingering acid pool on the ground at the impact point.
+     * The pool sits for {@link #ACID_POOL_LIFETIME} seconds, deals damage via {@code TrapContactSystem},
+     * then disappears.
+     */
+    private void spawnPool(Entity dropEntity, TrapComponent dropTrap, TransformComponent dropTransform) {
+        float unitScale = dropTransform.scale.x;
+        float poolW = ACID_POOL_WIDTH_FACTOR * 8f * unitScale;
+        float poolH = ACID_POOL_HEIGHT_FACTOR * 8f * unitScale;
+        float poolScaleX = poolW / ACID_POOL_SOURCE_PX;
+        float poolScaleY = poolH / ACID_POOL_SOURCE_PX;
+
+        Entity pool = engine.createEntity();
+
+        TransformComponent transform = engine.createComponent(TransformComponent.class);
+        CollisionComponent dropCollision = COLLISION.get(dropEntity);
+        float centerX = dropTransform.position.x + dropCollision.bounds.x + dropCollision.bounds.width / 2f;
+        float groundY = dropTransform.position.y + dropCollision.bounds.y;
+        transform.position.set(centerX - poolW / 2f, groundY);
+        transform.scale.set(poolScaleX, poolScaleY);
+        transform.z = TRAP_Z;
+        pool.add(transform);
+
+        TextureComponent texture = engine.createComponent(TextureComponent.class);
+        try {
+            Texture tex = assetManager.get("gfx/acid_pool.png", Texture.class);
+            texture.region = new TextureRegion(tex);
+        } catch (Exception e) {
+            // Fallback: use a white pixel if texture not loaded
+        }
+        pool.add(texture);
+
+        CollisionComponent collision = engine.createComponent(CollisionComponent.class);
+        collision.bounds.setSize(poolW, poolH);
+        pool.add(collision);
+
+        TrapComponent trap = engine.createComponent(TrapComponent.class);
+        trap.type = TrapType.ACID_POOL;
+        trap.roomIndex = dropTrap.roomIndex;
+        trap.dropDamage = dropTrap.dropDamage;
+        trap.poolDuration = ACID_POOL_LIFETIME;
+        trap.poolTimer.start(trap.poolDuration);
+        pool.add(trap);
+
+        engine.addEntity(pool);
+    }
+
+    private void updatePool(Entity entity, TrapComponent trap, float deltaTime) {
+        trap.poolTimer.update(deltaTime);
+        if (trap.poolTimer.isDone()) {
             getEngine().removeEntity(entity);
         }
     }

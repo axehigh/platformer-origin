@@ -13,8 +13,8 @@
   <properties>
    <property name="damage" type="int" value="1"/>
    <property name="direction" value="down"/>
-   <property name="interval" type="float" value="2"/>
-   <property name="speed" type="int" value="200"/>
+   <property name="interval" type="float" value="3"/>
+   <property name="speed" type="int" value="100"/>
    <property name="trapType" value="acidDrop"/>
   </properties>
   <image source="../gfx/hazards/acid_trap.png" width="128" height="128"/>
