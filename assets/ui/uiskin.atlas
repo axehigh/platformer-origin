@@ -95,6 +95,13 @@ left
   orig: 80, 80
   offset: 0, 0
   index: -1
+pause
+  rotate: false
+  xy: 515, 285
+  size: 80, 80
+  orig: 80, 80
+  offset: 0, 0
+  index: -1
 potion
   rotate: false
   xy: 1105, 1341
@@ -139,14 +146,14 @@ potion_invulnerability
   index: -1
 potion_speed
   rotate: false
-  xy: 515, 333
+  xy: 597, 415
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 potion_strength
   rotate: false
-  xy: 597, 415
+  xy: 1022, 1171
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
