@@ -36,12 +36,19 @@ public class LevelExitSystem extends IteratingSystem {
     private static final float FADE_DURATION = 0.3f;
     private static final Color DOOR_LIGHT_COLOR = new Color(1f, 0.85f, 0.5f, 0.5f);
 
+    /** Performs the actual in-place level swap; decouples it from the screen's fade transition. */
+    @FunctionalInterface
+    public interface LevelTransition {
+        void transition(String nextLevelPath, Entity playerEntity);
+    }
+
     private final LevelManager levelManager;
     private final Rectangle sensorBounds = new Rectangle();
     private final Rectangle playerBounds = new Rectangle();
     private float unitScale = 1f;
     private ImmutableArray<Entity> players;
     private Runnable onVictory = () -> {};
+    private LevelTransition onTransition;
 
     public LevelExitSystem(LevelManager levelManager) {
         this(levelManager, 0);
@@ -50,6 +57,7 @@ public class LevelExitSystem extends IteratingSystem {
     public LevelExitSystem(LevelManager levelManager, int priority) {
         super(Family.all(LevelExitComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
         this.levelManager = levelManager;
+        this.onTransition = (nextLevelPath, playerEntity) -> levelManager.loadLevel(nextLevelPath, playerEntity);
     }
 
     public LevelExitSystem(LevelManager levelManager, int priority, Runnable onVictory) {
@@ -59,6 +67,10 @@ public class LevelExitSystem extends IteratingSystem {
 
     public void setOnVictory(Runnable onVictory) {
         this.onVictory = onVictory;
+    }
+
+    public void setOnTransition(LevelTransition onTransition) {
+        this.onTransition = onTransition;
     }
 
     public void setUnitScale(float unitScale) {
@@ -139,7 +151,7 @@ public class LevelExitSystem extends IteratingSystem {
                 onVictory.run();
             } else {
                 SaveManager.save(buildSaveData(player, levelExit.nextLevelPath));
-                levelManager.loadLevel(levelExit.nextLevelPath, playerEntity);
+                onTransition.transition(levelExit.nextLevelPath, playerEntity);
             }
         }
     }

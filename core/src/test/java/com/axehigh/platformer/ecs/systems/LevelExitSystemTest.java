@@ -245,6 +245,32 @@ public class LevelExitSystemTest extends SystemTestBase {
     }
 
     @Test
+    public void setOnTransitionCallbackInvokedInsteadOfDirectLoadLevel() {
+        AtomicBoolean transitionFired = new AtomicBoolean(false);
+        final String[] capturedPath = new String[1];
+        final Entity[] capturedPlayer = new Entity[1];
+        system.setOnTransition((nextLevelPath, playerEntity) -> {
+            transitionFired.set(true);
+            capturedPath[0] = nextLevelPath;
+            capturedPlayer[0] = playerEntity;
+        });
+        engine = newEngine();
+        engine.addSystem(system);
+
+        Entity gateEntity = gate(100f, 50f, 32f, 48f, "maps/level2.tmx");
+        Entity playerEntity = player(100f, 50f);
+        PLAYER.get(playerEntity).interactPressed = true;
+
+        engine.update(DT);
+
+        assertTrue("Custom transition callback should fire on a non-final gate", transitionFired.get());
+        assertEquals("maps/level2.tmx", capturedPath[0]);
+        assertSame("Transition callback should receive the player entity", playerEntity, capturedPlayer[0]);
+        assertFalse("interactPressed should be reset after transition", PLAYER.get(playerEntity).interactPressed);
+        verify(levelManager, never()).loadLevel(any(), any());
+    }
+
+    @Test
     public void finalGateSavePersistsCompletedWorldIds() {
         when(levelManager.getCurrentLevelPath()).thenReturn("maps/world1/level_10.tmx");
 

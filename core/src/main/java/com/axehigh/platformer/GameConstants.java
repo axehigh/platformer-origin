@@ -86,6 +86,10 @@ public final class GameConstants {
     /** Duration (seconds) of the fade-in/fade-out transition between screens. */
     public static final float SCREEN_FADE_TIMER = 0.5f;
 
+    /** Duration (seconds) of the fade-in/fade-out for an in-place level swap (exit gate). Slower than
+     *  the generic screen fade so the "fade to black / fade in from black" reads clearly. */
+    public static final float LEVEL_FADE_TIMER = 1.0f;
+
     //Movement MaxSpeedX/Y
     public static float MaxSpeedX = 60f;
     public static float MaxSpeedY = 300f;

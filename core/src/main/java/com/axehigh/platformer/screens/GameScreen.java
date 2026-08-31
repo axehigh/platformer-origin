@@ -25,6 +25,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
@@ -78,6 +80,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
 
     public GameScreen(Game game, String levelPath) {
         super(game);
+        this.renderTransitionInBase = false; // GameScreen renders the world/HUD then the fade last
         this.levelPath = levelPath;
         this.saveData = null;
     }
@@ -87,6 +90,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
      */
     public GameScreen(Game game, SaveData saveData) {
         super(game);
+        this.renderTransitionInBase = false; // GameScreen renders the world/HUD then the fade last
         this.levelPath = saveData.levelPath;
         this.saveData = saveData;
     }
@@ -121,7 +125,8 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
 
         float killY = -mapLoader.getMapWorldHeight();
         systems = new GameSystems(engine, batch, camera, skin, assetManager, mapLoader, roomState,
-            secretRoomRevealer, entityFactory, viewport, scale, this::onPlayerDeath, this::onVictory, killY);
+            secretRoomRevealer, entityFactory, viewport, scale, this::onPlayerDeath,
+            this::onLevelTransition, this::onVictory, killY);
 
         Vector2 playerStart = SpawnSafety.findSafeSpawn(
             mapLoader.findPlayerStart(),
@@ -222,7 +227,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
                     return true;
                 }
                 if (keycode == Input.Keys.Q) {
-                    game.setScreen(new MainMenuScreen(game));
+                    changeScreen(new MainMenuScreen(game));
                     return true;
                 }
                 return false;
@@ -261,12 +266,27 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         changeScreen(new VictoryScreen(game, worldId));
     }
 
+    /**
+     * In-place level-swap handler: runs a fade-out → level swap → fade-in chain on the shared
+     * {@link #fadeOverlay} so walking through a non-final exit gate transitions with the same
+     * fade the screen-level swaps use. Input is blocked for the whole chain.
+     */
+    private void onLevelTransition(String nextLevelPath, Entity playerEntity) {
+        fadeOverlay.setTouchable(Touchable.enabled);
+        fadeOverlay.addAction(Actions.sequence(
+            Actions.fadeIn(LEVEL_FADE_TIMER), // fade out to black
+            Actions.run(() -> systems.levelManager.loadLevel(nextLevelPath, playerEntity)),
+            Actions.fadeOut(LEVEL_FADE_TIMER), // fade back in
+            Actions.touchable(Touchable.disabled)
+        ));
+    }
+
     @Override
     public void onContinue() {
         SaveData save = SaveManager.hasSave() ? SaveManager.load() : (saveData != null ? saveData : new SaveData());
         save.health = save.maxHealth;
         SaveManager.save(save);
-        game.setScreen(new GameScreen(game, save));
+        changeScreen(new GameScreen(game, save));
     }
 
     @Override
@@ -333,6 +353,12 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
             inventoryBarStage.act(delta);
             inventoryBarStage.draw();
         }
+
+        // Draw the fade transition LAST so the overlay sits on top of the gameplay world and HUD.
+        // renderTransitionInBase is false, so super.render() skips it and we render it here as the
+        // topmost layer after all world/HUD drawing (otherwise the fade would sit underneath and be
+        // hidden for the whole transition).
+        renderTransition(delta);
     }
 
     /**

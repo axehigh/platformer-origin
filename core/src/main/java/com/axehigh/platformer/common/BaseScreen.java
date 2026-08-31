@@ -13,11 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 
-import static com.axehigh.platformer.GameConstants.SCREEN_FADE_TIMER;
-import static com.axehigh.platformer.GameConstants.SCREEN_HEIGHT;
-import static com.axehigh.platformer.GameConstants.SCREEN_WIDTH;
+import static com.axehigh.platformer.GameConstants.*;
 
 public class BaseScreen implements Screen {
     public final Game game;
@@ -27,6 +24,15 @@ public class BaseScreen implements Screen {
     public Texture fadeTexture;
     public Stage stage;
     public Stage transitionStage;
+
+    /**
+     * Whether {@link #render(float)} renders the fade transition at its end. Screens that draw
+     * additional content AFTER {@code super.render(...)} (e.g. {@code GameScreen}, which renders the
+     * gameplay world/HUD on top) must set this to {@code false} and call {@link #renderTransition}
+     * themselves as the LAST draw so the black overlay stays topmost. Keeps the transition stage
+     * acted/drawn exactly once per frame (avoiding double-speed fades).
+     */
+    protected boolean renderTransitionInBase = true;
 
     public BaseScreen(Game game) {
         this.game = game;
@@ -80,7 +86,9 @@ public class BaseScreen implements Screen {
         stage.getViewport().apply();
         stage.draw();
 
-        renderTransition(delta);
+        if (renderTransitionInBase) {
+            renderTransition(delta);
+        }
     }
 
     protected void renderTransition(float delta) {
