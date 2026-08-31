@@ -43,7 +43,7 @@ public class MenuEffects {
     private static final float SPARK_BURST_INTERVAL = 1.3f;
     private static final float SPARK_BURST_SCALE = 2.5f;
 
-    /** Distance below the stage top over which embers fade out before wrapping. */
+    /** Distance above the stage bottom over which embers fade out before wrapping. */
     private static final float EMBER_FADE_DISTANCE = 120f;
 
     /** Warm ember tints, picked per mote. */
@@ -101,7 +101,7 @@ public class MenuEffects {
         for (int i = 0; i < count; i++) {
             EmberActor ember = new EmberActor(glowTexture,
                 MathUtils.random(0f, stage.getWidth()),
-                MathUtils.random(-stage.getHeight() * 0.1f, stage.getHeight()));
+                MathUtils.random(0f, stage.getHeight() * 1.1f));
             stage.addActor(ember);
         }
     }
@@ -197,7 +197,7 @@ public class MenuEffects {
         return effect;
     }
 
-    /** A mote of ember light rising from the bottom of the screen with a sinusoidal sway. */
+    /** A mote of ember light falling from the top to the bottom of the screen with a sinusoidal sway. */
     private static class EmberActor extends Image {
         private final float speed;
         private final float swayAmplitude;
@@ -228,15 +228,15 @@ public class MenuEffects {
         @Override
         public void act(float delta) {
             time += delta;
-            setY(getY() + speed * delta);
+            setY(getY() - speed * delta);
             setX(baseX + MathUtils.sin(phase + time * swayFrequency) * swayAmplitude);
             Stage stage = getStage();
-            if (getY() > stage.getHeight() + size) {
-                setY(-size);
+            if (getY() < -size) {
+                setY(stage.getHeight() + size);
                 baseX = MathUtils.random(0f, stage.getWidth());
             }
-            // Fade out approaching the top so the wrap-around is seamless.
-            float fade = MathUtils.clamp((stage.getHeight() - getY()) / EMBER_FADE_DISTANCE, 0f, 1f);
+            // Fade out approaching the bottom so the wrap-around is seamless.
+            float fade = MathUtils.clamp(getY() / EMBER_FADE_DISTANCE, 0f, 1f);
             setColor(tint.r, tint.g, tint.b, baseAlpha * fade);
         }
     }
