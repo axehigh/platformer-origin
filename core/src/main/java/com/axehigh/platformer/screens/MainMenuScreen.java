@@ -1,7 +1,6 @@
 package com.axehigh.platformer.screens;
 
 import com.axehigh.platformer.audio.AudioManager;
-import com.axehigh.platformer.map.LevelCatalog;
 import com.axehigh.platformer.map.SaveData;
 import com.axehigh.platformer.util.FeatureFlags;
 import com.axehigh.platformer.util.SaveManager;
@@ -133,18 +132,7 @@ public class MainMenuScreen extends MenuScreen {
 }
 
 private void newGame() {
-        SaveData freshSaveData = new SaveData();
-        freshSaveData.levelPath = LevelCatalog.levels().first().tmxPath;
-        freshSaveData.health = 3;
-        freshSaveData.maxHealth = 3;
-        freshSaveData.coins = 0;
-        freshSaveData.items = 0;
-        freshSaveData.swordDamage = 5;
-        freshSaveData.sharpEdgePurchased = false;
-        freshSaveData.daggerBandolierPurchased = false;
-        freshSaveData.ironHeartCount = 0;
-        freshSaveData.triesRemaining = 3;
-        changeScreen(new GameScreen(game, freshSaveData));
+        changeScreen(new StoryIntroScreen(game));
 }
 
 }
