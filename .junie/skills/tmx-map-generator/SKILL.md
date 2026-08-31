@@ -1,7 +1,6 @@
 ---
 name: tmx-map-generator
-description: Use when generating a new standalone Tiled .tmx level map for this libgdx platformer (a linear chain — or, with --grid-cols/--grid-rows, a 2D grid — of rooms with doorways, vertical platform shafts, enemies, and items, optionally decorated with floating one-way platform staircases via --platforms N)
-  or regenerating one with a different room count/seed. 
+description: Use when generating a NEW standalone Tiled .tmx level map for this libgdx platformer (a linear chain — or, with --grid-cols/--grid-rows, a 2D grid — of rooms with doorways, vertical platform shafts, enemies, and items, optionally decorated with floating one-way platform staircases via --platforms N). Never to regenerate/overwrite an existing checked-in map (see the HARD RULE below). 
   Rooms default to 24x10 tiles (mobile-oriented scroll rooms) but are configurable (e.g. 30x17 for whole-screen desktop rooms).
   Encodes the project's map conventions (collision/hazard/oneWay properties, Rooms object layer, flipY object Y), 
   reading tile gids live from the external .tsx tilesets instead of hard-coding them. 
@@ -9,6 +8,15 @@ description: Use when generating a new standalone Tiled .tmx level map for this 
 ---
 
 # TMX Map Generator (Standalone Level Maps)
+
+> ## ⛔ HARD RULE — NEVER REGENERATE EXISTING MAPS
+> The shipped maps under `assets/maps/world1/` and `assets/maps/world2/` are **checked-in
+> assets** — many have been hand-edited since generation (level-transition `nextLevel` wiring,
+> `isFinal` victory gates, renames like `level_09_final→level_09`, layout tweaks). The generator
+> **must never** be run to regenerate, overwrite, or "fix" an existing map. It exists **only** to
+> create a brand-new map. If a shipped map needs a change, edit the `.tmx` directly (or use Tiled),
+> never re-run the generator. This preserves hand-authored gates and wiring. Regeneration against
+> an existing map silently destroys that work.
 
 Generates a playable, standalone Tiled `.tmx` map for this prototype: a linear left-to-right
 chain of whole-screen rooms (or, with `--grid-cols`/`--grid-rows`, a 2D grid of rooms), each

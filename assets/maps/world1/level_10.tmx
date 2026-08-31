@@ -56,6 +56,7 @@
   <object id="6" name="exitGate" type="exitGate" x="1773.36" y="1244.03" width="140" height="152">
    <properties>
     <property name="nextLevel" value="maps/world1/level_01.tmx"/>
+    <property name="isFinal" value="true"/>
    </properties>
   </object>
   <object id="7" name="Platform" x="911.264" y="648.299" width="174.442" height="114.559">

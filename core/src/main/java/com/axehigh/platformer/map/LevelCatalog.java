@@ -36,7 +36,7 @@ public final class LevelCatalog {
         LEVELS.add(new LevelDefinition(WORLD_2, "world2_level07", "Level 7", "maps/world2/level_07.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_2, "world2_level08", "Level 8", "maps/world2/level_08.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_2, "world2_level09", "Level 9", "maps/world2/level_09.tmx"));
-        LEVELS.add(new LevelDefinition(WORLD_2, "world2_level10", "Level 10", "maps/world2/level_10.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_2, "world2_level10", "Level 10", "maps/world2/level_10_final.tmx"));
 
         //demo
         LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_platforming_24x10", "24x10", "maps/world_demo/platforming_24x10.tmx"));
@@ -81,5 +81,29 @@ public final class LevelCatalog {
     public static String worldName(int worldId) {
         if (worldId == WORLD_DEMO) return "Demo";
         return "World " + worldId;
+    }
+
+    /** True when {@code worldId} is the last real world in the catalog (i.e. beating it wins the game).
+     *  The demo world (id 0) is a dev/testing catalog and never counts as the final world. */
+    public static boolean isLastWorld(int worldId) {
+        IntArray worlds = worldIds();
+        // Find the last world that is not the demo/dev world.
+        for (int i = worlds.size - 1; i >= 0; i--) {
+            int id = worlds.get(i);
+            if (id != WORLD_DEMO) {
+                return id == worldId;
+            }
+        }
+        return false;
+    }
+
+    /** Returns the worldId for a given tmxPath, or -1 if not found. */
+    public static int worldIdForPath(String tmxPath) {
+        for (LevelDefinition level : LEVELS) {
+            if (level.tmxPath.equals(tmxPath)) {
+                return level.worldId;
+            }
+        }
+        return -1;
     }
 }

@@ -41,6 +41,7 @@ public class LevelExitSystem extends IteratingSystem {
     private final Rectangle playerBounds = new Rectangle();
     private float unitScale = 1f;
     private ImmutableArray<Entity> players;
+    private Runnable onVictory = () -> {};
 
     public LevelExitSystem(LevelManager levelManager) {
         this(levelManager, 0);
@@ -49,6 +50,15 @@ public class LevelExitSystem extends IteratingSystem {
     public LevelExitSystem(LevelManager levelManager, int priority) {
         super(Family.all(LevelExitComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
         this.levelManager = levelManager;
+    }
+
+    public LevelExitSystem(LevelManager levelManager, int priority, Runnable onVictory) {
+        this(levelManager, priority);
+        this.onVictory = onVictory;
+    }
+
+    public void setOnVictory(Runnable onVictory) {
+        this.onVictory = onVictory;
     }
 
     public void setUnitScale(float unitScale) {
@@ -122,8 +132,15 @@ public class LevelExitSystem extends IteratingSystem {
 
         if (inProximity && player != null && player.interactPressed) {
             player.interactPressed = false;
-            SaveManager.save(buildSaveData(player, levelExit.nextLevelPath));
-            levelManager.loadLevel(levelExit.nextLevelPath, playerEntity);
+            if (levelExit.isFinalLevel) {
+                SaveData save = buildSaveData(player, levelExit.nextLevelPath);
+                save.completedWorldIds = buildCompletedWorldIds(save.completedLevelIds);
+                SaveManager.save(save);
+                onVictory.run();
+            } else {
+                SaveManager.save(buildSaveData(player, levelExit.nextLevelPath));
+                levelManager.loadLevel(levelExit.nextLevelPath, playerEntity);
+            }
         }
     }
 
@@ -156,5 +173,26 @@ public class LevelExitSystem extends IteratingSystem {
             }
         }
         return completedLevelIds;
+    }
+
+    private Array<String> buildCompletedWorldIds(Array<String> completedLevelIds) {
+        Array<String> completedWorldIds = new Array<>();
+        if (SaveManager.hasSave()) {
+            SaveData previousSave = SaveManager.load();
+            if (previousSave.completedWorldIds != null) {
+                completedWorldIds.addAll(previousSave.completedWorldIds);
+            }
+        }
+        String currentLevelPath = levelManager.getCurrentLevelPath();
+        for (LevelDefinition level : LevelCatalog.levels()) {
+            if (level.tmxPath.equals(currentLevelPath)) {
+                String worldKey = "world" + level.worldId;
+                if (!completedWorldIds.contains(worldKey, false)) {
+                    completedWorldIds.add(worldKey);
+                }
+                break;
+            }
+        }
+        return completedWorldIds;
     }
 }

@@ -121,7 +121,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
 
         float killY = -mapLoader.getMapWorldHeight();
         systems = new GameSystems(engine, batch, camera, skin, assetManager, mapLoader, roomState,
-            secretRoomRevealer, entityFactory, viewport, scale, this::onPlayerDeath, killY);
+            secretRoomRevealer, entityFactory, viewport, scale, this::onPlayerDeath, this::onVictory, killY);
 
         Vector2 playerStart = SpawnSafety.findSafeSpawn(
             mapLoader.findPlayerStart(),
@@ -251,6 +251,14 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         }
         SaveManager.save(save);
         changeScreen(new GameOverScreen(game, this));
+    }
+
+    private void onVictory() {
+        gameOverActive = true;
+        // Determine which world was just completed
+        String currentLevelPath = systems.levelManager.getCurrentLevelPath();
+        int worldId = LevelCatalog.worldIdForPath(currentLevelPath);
+        changeScreen(new VictoryScreen(game, worldId));
     }
 
     @Override

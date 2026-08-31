@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="16" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="7" nextobjectid="37">
+ <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
+ <tileset firstgid="66" source="../tileset/enemy.tsx"/>
+ <tileset firstgid="73" source="../tileset/items.tsx"/>
+ <tileset firstgid="102" source="../tileset/bg.tsx"/>
+ <layer id="1" name="background" width="16" height="10">
+  <data encoding="csv">
+0,48,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,47,45,48,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,45,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,45,0,0,47,48,0,0,
+0,0,0,0,0,0,0,0,0,45,45,48,0,0,0,0,
+0,0,0,0,0,0,0,0,0,45,48,0,0,0,0,0,
+0,0,0,0,0,0,47,48,0,45,0,0,0,0,0,0,
+0,127,0,0,0,0,0,0,0,45,0,0,0,127,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer id="2" name="collision" width="16" height="10">
+  <data encoding="csv">
+2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+2,0,0,0,0,0,0,0,15,15,15,0,0,33,0,2,
+2,2,2,0,0,0,1,1,0,0,0,0,2,4,0,2,
+2,0,0,0,0,0,0,0,0,0,2,42,0,0,0,2,
+2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+2,0,0,0,0,0,2,2,0,0,0,0,0,0,0,2,
+2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+2,0,0,0,0,0,0,0,0,62,62,0,0,0,0,2,
+2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+</data>
+ </layer>
+ <layer id="5" name="Decoration" width="16" height="10">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+93,0,0,0,0,0,0,0,0,0,0,0,0,0,0,93,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,105,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <objectgroup id="3" name="objects">
+  <object id="3" name="playerStart" type="playerStart" x="128" y="1024" width="128" height="128"/>
+  <object id="6" name="exitGate" type="exitGate" x="1664" y="1024" width="128" height="128">
+   <properties>
+    <property name="isFinal" value="true"/>
+   </properties>
+  </object>
+  <object id="13" gid="68" x="1536" y="1152" width="128" height="128"/>
+  <object id="21" gid="85" x="768" y="768" width="128" height="128"/>
+  <object id="22" gid="85" x="896" y="768" width="128" height="128"/>
+  <object id="23" gid="85" x="1024" y="256" width="128" height="128"/>
+  <object id="24" gid="85" x="1152" y="256" width="128" height="128"/>
+  <object id="25" gid="85" x="1280" y="256" width="128" height="128"/>
+  <object id="26" gid="85" x="1536" y="384" width="128" height="128"/>
+  <object id="27" gid="85" x="1152" y="1024" width="128" height="128"/>
+  <object id="28" gid="85" x="1280" y="1024" width="128" height="128"/>
+  <object id="34" gid="99" x="640" y="1152" width="101" height="101"/>
+ </objectgroup>
+ <objectgroup id="6" name="enemies">
+  <object id="30" gid="69" x="896" y="1152" width="256" height="256"/>
+  <object id="35" gid="72" x="512" y="384" width="128" height="128"/>
+  <object id="36" gid="71" x="1280" y="512" width="128" height="128"/>
+ </objectgroup>
+ <objectgroup id="4" name="Rooms">
+  <object id="2" x="0" y="0" width="2048" height="1283.51"/>
+ </objectgroup>
+</map>

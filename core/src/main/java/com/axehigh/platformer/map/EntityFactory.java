@@ -162,7 +162,9 @@ public class EntityFactory {
                     break;
                 case "exitGate":
                     String nextLevelPath = TileProps.getProperty(object, tile, "nextLevel", null);
-                    engine.addEntity(createExitGate(spawnX, spawnY, objectWidth, objectHeight, nextLevelPath));
+                    String isFinalStr = TileProps.getProperty(object, tile, "isFinal", "false");
+                    boolean isFinal = "true".equalsIgnoreCase(isFinalStr);
+                    engine.addEntity(createExitGate(spawnX, spawnY, objectWidth, objectHeight, nextLevelPath, isFinal));
                     spawned = true;
                     break;
                 case "dagger":
@@ -325,11 +327,15 @@ public class EntityFactory {
      * painted by the level designer in the map layers (see {@code map-design-for-tiled.md}). The
      * {@code CollisionComponent} is sized from the Tiled object rectangle (falling back to a
      * default when the object carries no dimensions) so {@code LevelExitSystem} has bounds to build
-     * its proximity sensor from. Only gets a {@code LevelExitComponent} (and is thus an actual
-     * level-transition trigger) when {@code nextLevelPath} is non-null; otherwise it's purely
-     * decorative, e.g. the dead-end final level.
+     * its proximity sensor from. Gets a {@code LevelExitComponent} (and is thus an actual
+     * level-transition trigger) when it carries a {@code nextLevel} path **or** is flagged
+     * {@code isFinal}; otherwise it's purely decorative (e.g. a dead-end final level that offers no
+     * victory or next level).
+     *
+     * @param isFinalLevel when true, this gate is the last level in its world and interacting with
+     *                     it triggers the victory flow instead of loading the next level
      */
-    private Entity createExitGate(float x, float y, float width, float height, String nextLevelPath) {
+    private Entity createExitGate(float x, float y, float width, float height, String nextLevelPath, boolean isFinalLevel) {
         Entity entity = new Entity();
 
         TransformComponent transform = new TransformComponent();
@@ -343,9 +349,10 @@ public class EntityFactory {
         collisionComponent.bounds.setSize(w, h);
         entity.add(collisionComponent);
 
-        if (nextLevelPath != null) {
+        if (nextLevelPath != null || isFinalLevel) {
             LevelExitComponent levelExitComponent = new LevelExitComponent();
             levelExitComponent.nextLevelPath = nextLevelPath;
+            levelExitComponent.isFinalLevel = isFinalLevel;
             entity.add(levelExitComponent);
         }
 

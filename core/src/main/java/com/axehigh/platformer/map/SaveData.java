@@ -20,6 +20,7 @@ public class SaveData {
     public int speedPotions;
     public int invulnerabilityPotions;
     public Array<String> completedLevelIds = new Array<>();
+    public Array<String> completedWorldIds = new Array<>();
     public int triesRemaining = 3;
     public int enemiesKilled = 0;
 

@@ -1,16 +1,21 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.*;
+import com.axehigh.platformer.ecs.components.LightComponent;
 import com.axehigh.platformer.map.LevelManager;
+import com.axehigh.platformer.map.SaveData;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.utils.Json;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.axehigh.platformer.ecs.components.Mappers.*;
 import static org.junit.Assert.*;
@@ -61,6 +66,12 @@ public class LevelExitSystemTest extends SystemTestBase {
         exit.nextLevelPath = nextLevelPath;
         Entity entity = entity(transform, collision, exit);
         engine.addEntity(entity);
+        return entity;
+    }
+
+    private Entity finalGate(float x, float y, float width, float height, String nextLevelPath) {
+        Entity entity = gate(x, y, width, height, nextLevelPath);
+        entity.getComponent(LevelExitComponent.class).isFinalLevel = true;
         return entity;
     }
 
@@ -192,5 +203,65 @@ public class LevelExitSystemTest extends SystemTestBase {
             engine.update(DT);
         }
         assertFalse(LIGHT.has(gateEntity));
+    }
+
+    @Test
+    public void interactOnFinalGateTriggersVictoryNotLoadLevel() {
+        AtomicBoolean victoryFired = new AtomicBoolean(false);
+        system = new LevelExitSystem(levelManager, 0, () -> victoryFired.set(true));
+        engine = newEngine();
+        engine.addSystem(system);
+
+        Entity gateEntity = finalGate(100f, 50f, 32f, 48f, "maps/world2/level_01.tmx");
+        Entity playerEntity = player(100f, 50f);
+        PlayerComponent player = PLAYER.get(playerEntity);
+        player.interactPressed = true;
+
+        engine.update(DT);
+
+        assertTrue("Victory callback should fire on a final gate", victoryFired.get());
+        assertFalse("interactPressed should be reset after victory trigger", player.interactPressed);
+        assertNotNull("Gate should still have its LevelExitComponent after victory", gateEntity.getComponent(LevelExitComponent.class));
+        verify(levelManager, never()).loadLevel(any(), any());
+        verify(preferences).putString(eq("save"), anyString());
+    }
+
+    @Test
+    public void interactOnNonFinalGateStillLoadsLevel() {
+        AtomicBoolean victoryFired = new AtomicBoolean(false);
+        system = new LevelExitSystem(levelManager, 0, () -> victoryFired.set(true));
+        engine = newEngine();
+        engine.addSystem(system);
+
+        Entity gateEntity = gate(100f, 50f, 32f, 48f, "maps/level2.tmx");
+        Entity playerEntity = player(100f, 50f);
+        PlayerComponent player = PLAYER.get(playerEntity);
+        player.interactPressed = true;
+
+        engine.update(DT);
+
+        assertFalse("Victory callback must not fire on a non-final gate", victoryFired.get());
+        verify(levelManager).loadLevel("maps/level2.tmx", playerEntity);
+    }
+
+    @Test
+    public void finalGateSavePersistsCompletedWorldIds() {
+        when(levelManager.getCurrentLevelPath()).thenReturn("maps/world1/level_10.tmx");
+
+        system = new LevelExitSystem(levelManager, 0, () -> {});
+        engine = newEngine();
+        engine.addSystem(system);
+
+        finalGate(100f, 50f, 32f, 48f, "maps/world2/level_01.tmx");
+        Entity playerEntity = player(100f, 50f);
+        PLAYER.get(playerEntity).interactPressed = true;
+
+        engine.update(DT);
+
+        ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
+        verify(preferences).putString(eq("save"), jsonCaptor.capture());
+        SaveData saved = new Json().fromJson(SaveData.class, jsonCaptor.getValue());
+        assertTrue("Saved completedWorldIds should contain the just-completed world key",
+            saved.completedWorldIds.contains("world1", false));
     }
 }

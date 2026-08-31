@@ -60,7 +60,7 @@ public class GameSystems {
     public GameSystems(PooledEngine engine, SpriteBatch batch, OrthographicCamera camera, Skin skin,
                        AssetManager assetManager, MapLoader mapLoader, RoomState roomState,
                        SecretRoomRevealer secretRoomRevealer, EntityFactory entityFactory,
-                       OffsetFitViewport viewport, float unitScale, Runnable onPlayerDeath, float killY) {
+                       OffsetFitViewport viewport, float unitScale, Runnable onPlayerDeath, Runnable onVictory, float killY) {
         playerInputSystem = new PlayerInputSystem(assetManager, PRIORITY_INPUT);
         playerInputSystem.setUnitScale(unitScale);
         tiledMapRenderSystem = new TiledMapRenderSystem(mapLoader.getMap(), camera, PRIORITY_MAP_RENDER);
@@ -142,7 +142,7 @@ public class GameSystems {
 
         levelManager = new LevelManager(engine, entityFactory, viewport, tiledMapRenderSystem, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), mapLoader.getSecretRects(), roomState, secretRoomRevealer, mapLoader);
 
-        LevelExitSystem exitSystem = new LevelExitSystem(levelManager, PRIORITY_LEVEL_EXIT);
+        LevelExitSystem exitSystem = new LevelExitSystem(levelManager, PRIORITY_LEVEL_EXIT, onVictory);
         exitSystem.setUnitScale(unitScale);
         engine.addSystem(exitSystem);
 
