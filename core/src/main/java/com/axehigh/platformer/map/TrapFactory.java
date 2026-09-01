@@ -3,17 +3,17 @@ package com.axehigh.platformer.map;
 import com.axehigh.platformer.assets.SpriteConstants;
 import com.axehigh.platformer.ecs.components.*;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.MapObjects;
-import com.badlogic.gdx.maps.objects.PointMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
 
 import static com.axehigh.platformer.ecs.components.AnimationComponent.State.IDLE;
+import static com.axehigh.platformer.ecs.components.AnimationComponent.State.WALKING;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
+import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.NORMAL;
 
 /**
  * Builds the scripted hazard entities: oscillating moving platforms, acid/lava drop spawners, and
@@ -79,23 +79,50 @@ class TrapFactory {
     }
 
     /**
-     * Builds an acid/lava drop spawner entity. The spawner is invisible (no texture) and sits at
-     * the Tiled marker position, periodically spawning projectile entities that fall/rise in the
-     * configured direction. Properties: {@code direction} (up/down/left/right, default down),
-     * {@code interval} (seconds between spawns, default 2.0), {@code speed} (projectile velocity,
-     * default 200), {@code damage} (default 1).
+     * Builds an acid/lava drop spawner entity. The spawner is a visible, animated acid tube at the
+     * Tiled marker position: it plays a discharging animation each interval, then releases a
+     * projectile entity that falls/rises in the configured direction. Properties:
+     * {@code direction} (up/down/left/right, default down), {@code interval} (seconds between
+     * spawns, default 2.0), {@code speed} (projectile velocity, default 200), {@code damage}
+     * (default 1).
      */
     public Entity createAcidDropSpawner(float x, float y, MapObject object, TiledMapTile tile, int roomIndex) {
         Entity entity = new Entity();
 
+        float tubeScale = context.unitScale * SpriteConstants.AcidTubeScale;
+
         TransformComponent transform = new TransformComponent();
         transform.position.set(x, y);
-        transform.scale.set(context.unitScale, context.unitScale);
+        transform.scale.set(tubeScale, tubeScale);
         transform.z = FactoryContext.DECOR_Z;
         entity.add(transform);
 
+        TextureComponent texture = new TextureComponent();
+        AtlasRegion tube = context.originAtlas.findRegion(SpriteConstants.ACID_TUBE_REGION + "1");
+        if (tube == null) {
+            tube = context.originAtlas.findRegion("fire1");
+        }
+        texture.region = tube;
+        entity.add(texture);
+
+        // A one-shot discharging clip (acid_tube1..4) on the WALKING state; IDLE is a single static
+        // tube frame. TrapSystem flips currentState between IDLE and WALKING and resets stateTime to
+        // trigger each discharge; AnimationSystem advances the clip and writes the visible region.
+        float frameDuration = 0.1f;
+        TextureRegion idleRegion = context.originAtlas.findRegion(SpriteConstants.ACID_TUBE_REGION + "1");
+        if (idleRegion == null) {
+            idleRegion = context.originAtlas.findRegion("fire1");
+        }
+        AnimationComponent animComp = new AnimationComponent();
+        animComp.animations.put(IDLE, new Animation<TextureRegion>(frameDuration, idleRegion));
+        animComp.animations.put(WALKING, context.buildAnimation(frameDuration, SpriteConstants.ACID_TUBE_REGION, NORMAL));
+        animComp.currentState = IDLE;
+        entity.add(animComp);
+
         CollisionComponent collision = new CollisionComponent();
-        collision.bounds.setSize(4f * context.unitScale, 4f * context.unitScale);
+        // Full-tile collision box so the tube sprite (rendered at AcidTubeScale, one tile) is
+        // anchored squarely on the marker tile. The drop drops from this tile's center.
+        collision.bounds.setSize(16f * context.unitScale, 16f * context.unitScale);
         entity.add(collision);
 
         TrapComponent trap = new TrapComponent();
@@ -105,39 +132,15 @@ class TrapFactory {
         trap.projectileSpeed = TileProps.getFloatProperty(object, tile, "speed", 200f) * context.unitScale;
         trap.damage = TileProps.getFloatProperty(object, tile, "damage", 1f);
         trap.spawnTimer.start(trap.spawnInterval);
+        // The tube discharging animation plays once per spawn; the drop releases when it finishes.
+        trap.tubeWindUp = frameDuration * 4f;
+        trap.tubeWindUpTimer.reset();
 
         String dir = TileProps.getProperty(object, tile, "direction", "down");
         trap.spawnDirection = parseDirection(dir);
-
-        // If the designer drew a collision point on the acid tile (Tile Collision Editor), use it
-        // as the exact world-space origin for each drop (measured from the tile's bottom-left
-        // corner, already flipped to this world's Y-up by libGDX). Otherwise the drop falls from
-        // the tile corner.
-        Rectangle point = acidSpawnPoint(tile);
-        if (point != null) {
-            trap.spawnOffsetX = point.x;
-            trap.spawnOffsetY = point.y;
-        }
         entity.add(trap);
 
         return entity;
-    }
-
-    /**
-     * Returns the {@code PointMapObject} collision shape drawn on the acid marker tile, converted
-     * to a zero-size world-space rectangle (or {@code null} when the tile has no point).
-     */
-    private static Rectangle acidSpawnPoint(TiledMapTile tile) {
-        if (tile == null) {
-            return null;
-        }
-        MapObjects shapes = tile.getObjects();
-        for (MapObject shape : shapes) {
-            if (shape instanceof PointMapObject) {
-                return MapLoader.shapeBounds(shape);
-            }
-        }
-        return null;
     }
 
     /**

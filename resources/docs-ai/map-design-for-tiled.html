@@ -285,7 +285,7 @@ tbody tr:hover { background: rgba(233,69,96,0.08); }
 | <code>interval</code> | float | <code>2.0</code> | Seconds between projectile spawns. |
 | <code>speed</code> | float | <code>200</code> | Projectile velocity in world-units/s (before unitScale). |
 | <code>damage</code> | int | <code>1</code> | HP dealt on contact. |</p>
-<p>Projectile behaviour: moves at constant speed (no gravity), uses <code>acid_drop.png</code> (8×12 px teardrop sprite), disappears on wall/floor/ceiling contact or after 5 s lifetime.</p>
+<p>Projectile behaviour: the spawner is a visible animated acid tube (atlas <code>acid_tube1..4</code>); each interval it plays a one-shot discharging animation, then releases the drop. The falling drop uses the <code>acid_drop</code> atlas region (32×32 single frame, rendered at the shared acid drop scale <code>AcidDropScale = 0.5f × unitScale</code>, matching the tube), a downward drip accelerates under gravity and spawns a static single-frame <code>acid_blob1</code> puddle on landing (the <code>acid_blob1..7</code> clip reserved for a future splash animation), disappears on wall/floor/ceiling contact or after 5 s lifetime, and all acid visuals now come from the game atlas (old <code>acid_drop.png</code>/<code>acid_pool.png</code> no longer used).</p>
 <p><strong>Trap B: Flame Trap (<code>trapType = &quot;flame&quot;</code>)</strong></p>
 <p>An animated flame that pulses between small and large on a timed cycle. The collision box scales with the visual — anchored at the source wall/floor/ceiling and extending outward in the configured direction.</p>
 <p>| Property | Type | Default | Description |

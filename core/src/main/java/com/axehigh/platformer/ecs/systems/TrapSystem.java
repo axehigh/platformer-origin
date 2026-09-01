@@ -1,23 +1,27 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.TextureComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
-import com.axehigh.platformer.ecs.components.TrapComponent;
+import com.axehigh.platformer.assets.SpriteConstants;
+import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.ecs.components.TrapComponent.TrapType;
-import com.axehigh.platformer.map.RoomState;import com.badlogic.ashley.core.Engine;
+import com.axehigh.platformer.map.RoomState;
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
+import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
+import static com.axehigh.platformer.assets.SpriteConstants.AcidDropScale;
+import static com.axehigh.platformer.ecs.components.AnimationComponent.State.*;
 import static com.axehigh.platformer.ecs.components.Mappers.*;
+import static com.axehigh.platformer.ecs.components.TrapComponent.TrapType.ACID_DROP;
 
 /**
  * Drives trap entity lifecycle: acid/lava drop spawner timers, falling drop movement and
@@ -39,8 +43,11 @@ public class TrapSystem extends IteratingSystem {
      *  real heavy droplet instead of falling at a constant clip. */
     private static final float ACID_DROP_GRAVITY = 800f;
 
-    /** Seconds a landed acid pool lingers before disappearing. */
-    private static final float ACID_POOL_LIFETIME = 1.5f;
+    /** Frame duration (s) of the acid tube discharging animation (acid_tube1..4). */
+    private static final float ACID_TUBE_FRAME_DURATION = 0.1f;
+
+    /** Frame duration (s) of the pool's landing splash clip (acid_blob1..7, played once). */
+    private static final float ACID_POOL_FRAME_DURATION = 0.05f;
 
     /** Pool footprint, as a fraction of the 128px pool sprite's damager box: width = this many drop
      *  widths, height = this fraction of a drop width. Yields a flat puddle ~1 tile wide. */
@@ -50,14 +57,19 @@ public class TrapSystem extends IteratingSystem {
 
     private final Array<Rectangle> collisionRects;
     private final RoomState roomState;
-    private final AssetManager assetManager;
+    private final TextureAtlas atlas;
     private PooledEngine engine;
+    private float unitScale = 1f;
 
     public TrapSystem(Array<Rectangle> collisionRects, RoomState roomState, AssetManager assetManager, int priority) {
         super(Family.all(TrapComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
         this.collisionRects = collisionRects;
         this.roomState = roomState;
-        this.assetManager = assetManager;
+        this.atlas = assetManager.get(ORIGIN_GAME_GFX, TextureAtlas.class);
+    }
+
+    public void setUnitScale(float unitScale) {
+        this.unitScale = unitScale;
     }
 
     @Override
@@ -94,39 +106,62 @@ public class TrapSystem extends IteratingSystem {
     }
 
     private void updateSpawner(Entity entity, TrapComponent trap, TransformComponent transform, float deltaTime) {
+        AnimationComponent anim = ANIMATION.get(entity);
+        if (trap.tubeAnimating) {
+            // Mid-discharge: play the tube animation to completion, then release the drop.
+            trap.tubeWindUpTimer.update(deltaTime);
+            if (anim != null) {
+                anim.currentState = WALKING;
+            }
+            if (trap.tubeWindUpTimer.isDone()) {
+                trap.tubeAnimating = false;
+                spawnDrop(transform, trap);
+                trap.spawnTimer.start(trap.spawnInterval);
+            }
+            return;
+        }
+
+        if (anim != null && anim.currentState != IDLE) {
+            anim.currentState = IDLE;
+            anim.stateTime = 0f;
+        }
         trap.spawnTimer.update(deltaTime);
         if (trap.spawnTimer.isDone()) {
-            spawnDrop(transform, trap);
-            trap.spawnTimer.start(trap.spawnInterval);
+            // Begin discharging: play the tube animation, the drop releases at the end.
+            trap.tubeAnimating = true;
+            trap.tubeWindUpTimer.start(trap.tubeWindUp);
+            if (anim != null) {
+                anim.currentState = WALKING;
+                anim.stateTime = 0f;
+            }
         }
     }
 
     private void spawnDrop(TransformComponent spawnerTransform, TrapComponent spawnerTrap) {
         Entity drop = engine.createEntity();
 
-        float scaleX = spawnerTransform.scale.x;
-        float scaleY = spawnerTransform.scale.y;
-        float dropW = 8f * scaleX;
-        float dropH = 12f * scaleY;
+        // The drop is sized from the map unit scale (not the spawner's tube scale, which includes
+        // the 2x tube fill factor) so a drop stays a ~half-tile droplet regardless of tube size.
+        float dropW = 8f * unitScale;
+        float dropH = 12f * unitScale;
 
         TransformComponent transform = engine.createComponent(TransformComponent.class);
-        // Drops originate at the designer's collision point on the acid tile (world offset from the
-        // spawner's tile corner) when one is present, otherwise at the spawner's corner itself. The
-        // transform is shifted back by half the drop's collision box so the point is the CENTER of
-        // the drop (sprite + hitbox), not its bottom-left corner.
-        transform.position.set(
-            spawnerTransform.position.x + spawnerTrap.spawnOffsetX - dropW / 2f,
-            spawnerTransform.position.y + spawnerTrap.spawnOffsetY - dropH / 2f);
-        transform.scale.set(scaleX, scaleY);
+        // Drops spawn centered on the acid tube: the tube is a full tile anchored to the spawner
+        // marker (spawner collision box is one tile), so the tube's center is half a tile up/right
+        // from the corner. The transform is shifted back by half the drop's collision box so the
+        // point is the CENTER of the drop (sprite + hitbox), not its bottom-left corner.
+        float tubeCenterX = spawnerTransform.position.x + 8f * unitScale;
+        float tubeCenterY = spawnerTransform.position.y + 8f * unitScale;
+        transform.position.set(tubeCenterX - dropW / 2f, tubeCenterY - dropH / 2f);
+        // The 32px acid_drop sprite is scaled by the shared drop-scale factor (same as the tube's).
+        transform.scale.set(AcidDropScale * unitScale, AcidDropScale * unitScale);
         transform.z = TRAP_Z;
         drop.add(transform);
 
         TextureComponent texture = engine.createComponent(TextureComponent.class);
-        try {
-            Texture tex = assetManager.get("gfx/acid_drop.png", Texture.class);
-            texture.region = new TextureRegion(tex);
-        } catch (Exception e) {
-            // Fallback: use a white pixel if texture not loaded
+        TextureRegion dropRegion = atlas.findRegion(SpriteConstants.ACID_DROP_REGION);
+        if (dropRegion != null) {
+            texture.region = dropRegion;
         }
         drop.add(texture);
 
@@ -135,7 +170,7 @@ public class TrapSystem extends IteratingSystem {
         drop.add(collision);
 
         TrapComponent trap = engine.createComponent(TrapComponent.class);
-        trap.type = TrapType.ACID_DROP;
+        trap.type = ACID_DROP;
         trap.spawnDirection = spawnerTrap.spawnDirection;
         trap.dropDamage = spawnerTrap.damage;
         trap.roomIndex = spawnerTrap.roomIndex;
@@ -207,7 +242,6 @@ public class TrapSystem extends IteratingSystem {
      * then disappears.
      */
     private void spawnPool(Entity dropEntity, TrapComponent dropTrap, TransformComponent dropTransform) {
-        float unitScale = dropTransform.scale.x;
         float poolW = ACID_POOL_WIDTH_FACTOR * 8f * unitScale;
         float poolH = ACID_POOL_HEIGHT_FACTOR * 8f * unitScale;
         float poolScaleX = poolW / ACID_POOL_SOURCE_PX;
@@ -225,13 +259,31 @@ public class TrapSystem extends IteratingSystem {
         pool.add(transform);
 
         TextureComponent texture = engine.createComponent(TextureComponent.class);
-        try {
-            Texture tex = assetManager.get("gfx/acid_pool.png", Texture.class);
-            texture.region = new TextureRegion(tex);
-        } catch (Exception e) {
-            // Fallback: use a white pixel if texture not loaded
+        // Degrade gracefully if the frames or the drop texture are missing from the atlas; the
+        // splash animation below (if present) overwrites this region every frame via AnimationSystem.
+        TextureRegion poolRegion = atlas.findRegion(SpriteConstants.ACID_POOL_REGION + "1");
+        if (poolRegion == null) {
+            poolRegion = atlas.findRegion(SpriteConstants.ACID_DROP_REGION);
         }
+        texture.region = poolRegion;
         pool.add(texture);
+
+        // One-shot landing splash (acid_blob1..7) on the SPLASHING state: plays a single round
+        // when the drop lands, then rests on the final splat frame for the remaining poolDuration.
+        // Falls back to the static single frame above if any clip frame is missing from the atlas.
+        Array<TextureRegion> splashFrames = new Array<>();
+        for (int i = 1; i <= 7; i++) {
+            TextureRegion frame = atlas.findRegion(SpriteConstants.ACID_POOL_REGION + i);
+            if (frame == null) break;
+            splashFrames.add(frame);
+        }
+        if (splashFrames.size > 0) {
+            AnimationComponent anim = engine.createComponent(AnimationComponent.class);
+            anim.animations.put(SPLASHING,
+                new Animation<>(ACID_POOL_FRAME_DURATION, splashFrames, Animation.PlayMode.NORMAL));
+            anim.currentState = SPLASHING;
+            pool.add(anim);
+        }
 
         CollisionComponent collision = engine.createComponent(CollisionComponent.class);
         collision.bounds.setSize(poolW, poolH);
@@ -241,7 +293,7 @@ public class TrapSystem extends IteratingSystem {
         trap.type = TrapType.ACID_POOL;
         trap.roomIndex = dropTrap.roomIndex;
         trap.dropDamage = dropTrap.dropDamage;
-        trap.poolDuration = ACID_POOL_LIFETIME;
+        trap.poolDuration = SpriteConstants.ACID_POOL_LIFETIME;
         trap.poolTimer.start(trap.poolDuration);
         pool.add(trap);
 

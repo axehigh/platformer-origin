@@ -1,6 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.LightComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.map.LevelManager;
 import com.axehigh.platformer.map.SaveData;
 import com.badlogic.ashley.core.Engine;
@@ -29,7 +29,7 @@ public class LevelExitSystemTest extends SystemTestBase {
 
     private Engine engine;
     private LevelManager levelManager;
-    private LevelExitSystem system;
+    private com.axehigh.platformer.ecs.systems.LevelExitSystem system;
     private Preferences preferences;
 
     @Before
@@ -39,7 +39,7 @@ public class LevelExitSystemTest extends SystemTestBase {
         when(Gdx.app.getPreferences(Mockito.anyString())).thenReturn(preferences);
 
         levelManager = Mockito.mock(LevelManager.class);
-        system = new LevelExitSystem(levelManager);
+        system = new com.axehigh.platformer.ecs.systems.LevelExitSystem(levelManager);
         engine = newEngine();
         engine.addSystem(system);
     }
@@ -208,7 +208,7 @@ public class LevelExitSystemTest extends SystemTestBase {
     @Test
     public void interactOnFinalGateTriggersVictoryNotLoadLevel() {
         AtomicBoolean victoryFired = new AtomicBoolean(false);
-        system = new LevelExitSystem(levelManager, 0, () -> victoryFired.set(true));
+        system = new com.axehigh.platformer.ecs.systems.LevelExitSystem(levelManager, 0, () -> victoryFired.set(true));
         engine = newEngine();
         engine.addSystem(system);
 
@@ -229,7 +229,7 @@ public class LevelExitSystemTest extends SystemTestBase {
     @Test
     public void interactOnNonFinalGateStillLoadsLevel() {
         AtomicBoolean victoryFired = new AtomicBoolean(false);
-        system = new LevelExitSystem(levelManager, 0, () -> victoryFired.set(true));
+        system = new com.axehigh.platformer.ecs.systems.LevelExitSystem(levelManager, 0, () -> victoryFired.set(true));
         engine = newEngine();
         engine.addSystem(system);
 
@@ -274,7 +274,7 @@ public class LevelExitSystemTest extends SystemTestBase {
     public void finalGateSavePersistsCompletedWorldIds() {
         when(levelManager.getCurrentLevelPath()).thenReturn("maps/world1/level_10.tmx");
 
-        system = new LevelExitSystem(levelManager, 0, () -> {});
+        system = new com.axehigh.platformer.ecs.systems.LevelExitSystem(levelManager, 0, () -> {});
         engine = newEngine();
         engine.addSystem(system);
 

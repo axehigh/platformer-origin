@@ -22,11 +22,15 @@ public class TrapComponent implements Component, Poolable {
     public float spawnInterval = 2.0f;
     public float projectileSpeed = 200f;
     public float damage = 1f;
-    /** World-space offset (from the spawner's tile corner) where each drop originates — set from
-     *  the designer's collision-editor point on the acid tile when one is present. */
-    public float spawnOffsetX = 0f;
-    public float spawnOffsetY = 0f;
     public Timer spawnTimer = new Timer();
+    /** Duration of the tube's discharging animation played each time a drop is about to spawn.
+     *  The acid_drop is only released once this animation completes. */
+    public float tubeWindUp = 0.4f;
+    /** Counts down the tube's discharging animation before releasing a drop. Restarted each spawn. */
+    public Timer tubeWindUpTimer = new Timer();
+    /** True while the tube is mid-discharge (playing its acid_tube animation). While active, no
+     *  new spawn is scheduled; the drop drops when it finishes. */
+    public boolean tubeAnimating = false;
 
     // === Acid drop fields ===
     public float dropDamage = 1f;
@@ -73,9 +77,10 @@ public class TrapComponent implements Component, Poolable {
         spawnInterval = 2.0f;
         projectileSpeed = 200f;
         damage = 1f;
-        spawnOffsetX = 0f;
-        spawnOffsetY = 0f;
         spawnTimer.reset();
+        tubeWindUp = 0.4f;
+        tubeWindUpTimer.reset();
+        tubeAnimating = false;
         dropDamage = 1f;
         lifetime = 3.0f;
         lifetimeTimer.reset();

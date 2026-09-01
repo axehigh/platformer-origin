@@ -57,7 +57,8 @@ public class AnimationSystem extends IteratingSystem {
         if (animation != null) {
             boolean looping = animationComponent.currentState != AnimationComponent.State.HURT &&
                              animationComponent.currentState != AnimationComponent.State.DEATH &&
-                             animationComponent.currentState != AnimationComponent.State.ATTACKING;
+                             animationComponent.currentState != AnimationComponent.State.ATTACKING &&
+                             animationComponent.currentState != AnimationComponent.State.SPLASHING;
             textureComponent.region = animation.getKeyFrame(animationComponent.stateTime, looping);
         }
 

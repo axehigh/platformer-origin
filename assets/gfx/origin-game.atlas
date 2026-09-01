@@ -45,8 +45,6 @@ acid_blob7
 bounds:260,358,128,128
 acid_drop
 bounds:198,66,32,32
-acid_trap
-bounds:1558,866,128,128
 acid_tube1
 bounds:1424,1322,64,64
 acid_tube2

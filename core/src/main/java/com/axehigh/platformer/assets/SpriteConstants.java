@@ -46,10 +46,18 @@ public class SpriteConstants {
     public static float EnemyKnightCollisionHeight = 140 * EnemyKnightScale;
     public static float EnemyKnightOffsetY = 10f * EnemyKnightScale;
 
-    //Trap scales and collision boxes
-    public static float AcidDropScale = 0.15f;
-    public static float AcidDropCollisionWidth = 8f;
-    public static float AcidDropCollisionHeight = 12f;
+    //Acid atlas region prefixes (gfx/origin-game.atlas)
+    /** Dispatcher tube animation — 64px sprites, scaled to fill a full 128px tile. */
+    public static final String ACID_TUBE_REGION = "acid_tube";
+    public static final float AcidTubeScale = 0.25f;
+    /** Static falling drop sprite — 32px, scaled to fill a full 128px tile. */
+    public static final String ACID_DROP_REGION = "acid_drop";
+    /** Render scale factor (times {@code unitScale}) for the acid drop, matching the tube's. */
+    public static final float AcidDropScale = .5f;
+    /** Pool/splash animation on landing — 128px sprites. */
+    public static final String ACID_POOL_REGION = "acid_blob";
+    /** Seconds a landed acid pool lingers before disappearing. */
+    public static final float ACID_POOL_LIFETIME = 1.5f;
 
     public static float FlameTrapScale = 0.15f;
     public static float FlameTrapCollisionWidth = 24f;

@@ -78,6 +78,7 @@ public class GameSystems {
         engine.addSystem(new BuffSystem(PRIORITY_BUFF));
 
         TrapSystem trapSystem = new TrapSystem(mapLoader.getCollisionRects(), roomState, assetManager, PRIORITY_TRAP);
+        trapSystem.setUnitScale(unitScale);
         engine.addSystem(trapSystem);
 
         MovementSystem movementSystem = new MovementSystem(mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), PRIORITY_MOVEMENT);

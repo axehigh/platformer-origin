@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="48" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="501">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="48" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="503">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
  <tileset firstgid="66" source="../tileset/items.tsx"/>
  <tileset firstgid="95" source="../tileset/enemy.tsx"/>
@@ -24,7 +24,7 @@
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
-2,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+2,0,0,0,3,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,1,0,0,0,0,0,2,2,2,2,2,2,2,0,0,0,0,2,2,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
@@ -60,13 +60,9 @@
     <property name="potionType" value="speed"/>
    </properties>
   </object>
-  <object id="497" name="Acid" gid="143" x="2048" y="768" width="128" height="64"/>
-  <object id="498" gid="143" x="1024" y="512" width="128" height="128">
-   <properties>
-    <property name="speed" type="int" value="150"/>
-   </properties>
-  </object>
   <object id="500" gid="144" x="1408" y="384" width="128" height="128"/>
+  <object id="501" type="trap" gid="145" x="1280" y="512" width="128" height="128"/>
+  <object id="502" gid="145" x="512" y="512" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="7" name="enemies">
   <object id="2" name="enemy_r1_shooter" gid="99" x="5504" y="1152" width="128" height="128"/>

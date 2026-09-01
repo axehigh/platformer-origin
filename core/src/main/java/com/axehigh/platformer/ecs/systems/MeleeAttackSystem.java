@@ -304,8 +304,8 @@ public class MeleeAttackSystem extends IteratingSystem {
         AnimationComponent anim = ANIMATION.get(entity);
         if (anim != null) {
             Animation<TextureRegion> attack = anim.animations.get(AnimationComponent.State.ATTACKING);
-            if (attack != null && attack.getKeyFrames().length > 0) {
-                float frameDuration = attack.getAnimationDuration() / attack.getKeyFrames().length;
+            if (attack != null && attack.getAnimationDuration() > 0f) {
+                float frameDuration = attack.getFrameDuration();
                 float elapsed = Math.max(0f, attack.getAnimationDuration() - player.meleeAttack.getRemaining());
                 int frame = Math.min((int) (elapsed / frameDuration), PLAYER_ATTACK_REACH.length - 1);
                 return PLAYER_ATTACK_REACH[frame];
