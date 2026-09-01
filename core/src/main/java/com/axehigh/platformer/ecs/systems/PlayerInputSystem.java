@@ -16,9 +16,9 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 
+import static com.axehigh.platformer.PlayerConfig.*;
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_UI_GFX;
-import static com.axehigh.platformer.assets.SpriteConstants.*;
 import static com.axehigh.platformer.ecs.components.Mappers.*;
 import static com.badlogic.gdx.Gdx.input;
 import static com.badlogic.gdx.Input.Keys.*;
@@ -33,14 +33,6 @@ public class PlayerInputSystem extends IteratingSystem {
     private static final float JUMP_VELOCITY = 220f;
     private static final float DOUBLE_JUMP_FACTOR = 0.7f;
 
-    private static final float SHOOT_COOLDOWN = 0.35f;
-    private static final float BULLET_SPEED = 220f;
-    private static final float BULLET_DAMAGE = 10f;
-    private static final float BULLET_LIFETIME = 300f;
-    private static final float BULLET_Z = 8f;
-
-    private static final float MELEE_COOLDOWN = 0.2f;
-    private static final float MELEE_ATTACK_DURATION = 0.2f;
     private static final float DROP_WINDOW_DURATION = 0.25f;
 
     private final AssetManager assetManager;
@@ -246,16 +238,16 @@ public class PlayerInputSystem extends IteratingSystem {
         TextureRegion region = findRegion(assetManager, PLAYER_BULLET_REGION);
         float bulletScale = unitScale * PLAYER_BULLET_SCALE;
         // The sprite's on-screen scale drives the render; the collision box is authored per-sprite
-        // (BulletCollisionWidth/Height, scaled by PLAYER_BULLET_SCALE) since the visible blade can
+        // (BULLET_COLLISION_WIDTH/HEIGHT, scaled by PLAYER_BULLET_SCALE) since the visible blade can
         // be smaller than the full atlas frame. Offsets position the box within the frame.
-        float bulletWidth = BulletCollisionWidth * bulletScale;
-        float bulletHeight = BulletCollisionHeight * bulletScale;
-        float bulletOffsetX = BulletOffsetX * bulletScale;
-        float bulletOffsetY = BulletOffsetY * bulletScale;
+        float bulletWidth = BULLET_COLLISION_WIDTH * bulletScale;
+        float bulletHeight = BULLET_COLLISION_HEIGHT * bulletScale;
+        float bulletOffsetX = BULLET_OFFSET_X * bulletScale;
+        float bulletOffsetY = BULLET_OFFSET_Y * bulletScale;
         float frameWidth = region.getRegionWidth() * bulletScale;
         // Center the sprite's vertical extent on the player's collision center. The blade sits at
         // a fixed offset within the (tall) atlas frame, so centering the frame keeps the visible
-        // blade level with the player; the authored BulletOffsetY then places the hitbox over it.
+        // blade level with the player; the authored BULLET_OFFSET_Y then places the hitbox over it.
         float frameHeight = region.getRegionHeight() * bulletScale;
         float playerCenterY = playerTransform.position.y + playerCollision.bounds.y
             + playerCollision.bounds.height / 2f;

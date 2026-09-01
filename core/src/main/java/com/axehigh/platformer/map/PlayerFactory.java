@@ -1,6 +1,5 @@
 package com.axehigh.platformer.map;
 
-import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.assets.SpriteConstants;
 import com.axehigh.platformer.ecs.components.*;
 import com.badlogic.ashley.core.Entity;
@@ -9,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import static com.axehigh.platformer.PlayerConfig.START_BULLETS;
 import static com.axehigh.platformer.assets.GameAssetRegistry.HERO_ASSET;
 import static com.axehigh.platformer.ecs.components.AnimationComponent.State.*;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
@@ -69,7 +69,7 @@ class PlayerFactory {
         player.add(collisionComponent);
 
         PlayerComponent playerComponent = new PlayerComponent();
-        playerComponent.ammo = GameConstants.PlayerStartBullet;
+        playerComponent.ammo = START_BULLETS;
         player.add(playerComponent);
         player.add(new BuffComponent());
         attachPlayerAnimations(player, heroAtlas);
@@ -104,8 +104,8 @@ class PlayerFactory {
     }
 
     /**
-     * Attaches the hero's full animation set. The {@code ATTACKING} clip is authored ~1.5x faster
-     * than the other action clips (0.066s/frame vs 0.1s) so a swing reads snappy.
+     * Attaches the hero's full animation set. The {@code ATTACKING} clip is authored ~2.5x faster
+     * than the other action clips (0.04s/frame vs 0.1s) so a swing reads snappy.
      */
     private static void attachPlayerAnimations(Entity player, TextureAtlas heroAtlas) {
         AnimationComponent animationComponent = new AnimationComponent();
@@ -115,7 +115,7 @@ class PlayerFactory {
         animationComponent.animations.put(JUMPING, new Animation<>(0.1f, heroAtlas.findRegions("jump"), NORMAL));
         animationComponent.animations.put(DOUBLE_JUMPING, new Animation<>(0.1f, heroAtlas.findRegions("high_jump"), NORMAL));
         animationComponent.animations.put(WALL_CLIMBING, new Animation<>(0.1f, heroAtlas.findRegions("climb"), LOOP));
-        animationComponent.animations.put(ATTACKING, new Animation<>(0.066f, heroAtlas.findRegions("attack"), NORMAL));
+        animationComponent.animations.put(ATTACKING, new Animation<>(0.04f, heroAtlas.findRegions("attack"), NORMAL));
         animationComponent.animations.put(DEATH, new Animation<>(0.1f, heroAtlas.findRegions("death"), NORMAL));
         animationComponent.animations.put(HURT, new Animation<>(0.1f, heroAtlas.findRegions("hurt"), NORMAL));
 

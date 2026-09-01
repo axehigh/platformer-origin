@@ -6,13 +6,15 @@ import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.utils.ObjectSet;
 
+import static com.axehigh.platformer.PlayerConfig.*;
+
 
 public class PlayerComponent implements Component {
-    public int health = GameConstants.MaxHealth;
-    public int maxHealth = GameConstants.MaxHealth;
+    public int health = MAX_HEALTH;
+    public int maxHealth = MAX_HEALTH;
     public int coins = 0;
     public int ammo = 0;
-    public int maxAmmo = GameConstants.MaxAmmo;
+    public int maxAmmo = MAX_AMMO;
     /** Held Healing potions, capped at {@link GameConstants#POTION_CAP}. */
     public int healingPotions = 0;
     /** Held Strength potions, capped at {@link GameConstants#POTION_CAP}. */
@@ -30,7 +32,7 @@ public class PlayerComponent implements Component {
     /** Accumulated coin count waiting to be shown in the next floating message. */
     public int pendingCoinMessage = 0;
     /** Current melee/sword damage per hit; base 5, raised to 8 by the "Sharp Edge" shop upgrade. */
-    public int swordDamage = GameConstants.BaseDamage;
+    public int swordDamage = BASE_DAMAGE;
     /** One-time flag: true once the "Sharp Edge" upgrade (swordDamage -> 8) has been purchased. */
     public boolean sharpEdgePurchased = false;
     /** One-time flag: true once the "Dagger Bandolier" upgrade (maxItems -> 60) has been purchased. */

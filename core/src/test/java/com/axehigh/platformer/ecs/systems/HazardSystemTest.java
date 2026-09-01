@@ -1,6 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.GameConstants;
+import com.axehigh.platformer.PlayerConfig;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
@@ -28,11 +28,11 @@ public class HazardSystemTest extends SystemTestBase {
 
     private final Array<Rectangle> hazardRects = new Array<>();
     private Engine engine;
-    private HazardSystem system;
+    private com.axehigh.platformer.ecs.systems.HazardSystem system;
 
     @Before
     public void setUp() {
-        system = new HazardSystem(hazardRects);
+        system = new com.axehigh.platformer.ecs.systems.HazardSystem(hazardRects);
         engine = newEngine();
         engine.addSystem(system);
     }
@@ -56,7 +56,7 @@ public class HazardSystemTest extends SystemTestBase {
 
         engine.update(DT);
 
-        assertEquals(GameConstants.MaxHealth - 1, player.health);
+        assertEquals(PlayerConfig.MAX_HEALTH - 1, player.health);
         assertEquals(50f, movement.velocity.x, EPSILON);
         assertTrue(player.hurtTimer.isActive());
         assertTrue(player.hitInvulnerability.isActive());
@@ -70,11 +70,11 @@ public class HazardSystemTest extends SystemTestBase {
 
         engine.update(DT);
         engine.update(DT);
-        assertEquals(GameConstants.MaxHealth - 1, player.health);
+        assertEquals(PlayerConfig.MAX_HEALTH - 1, player.health);
 
-        player.hitInvulnerability.update(PlayerDamageResolver.HIT_INVULNERABILITY_DURATION);
+        player.hitInvulnerability.update(com.axehigh.platformer.ecs.systems.PlayerDamageResolver.HIT_INVULNERABILITY_DURATION);
         engine.update(DT);
-        assertEquals(GameConstants.MaxHealth - 2, player.health);
+        assertEquals(PlayerConfig.MAX_HEALTH - 2, player.health);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class HazardSystemTest extends SystemTestBase {
 
         engine.update(DT);
 
-        assertEquals(GameConstants.MaxHealth, player.health);
+        assertEquals(PlayerConfig.MAX_HEALTH, player.health);
     }
 
     @Test
@@ -97,6 +97,6 @@ public class HazardSystemTest extends SystemTestBase {
 
         engine.update(DT);
 
-        assertEquals(GameConstants.MaxHealth, player.health);
+        assertEquals(PlayerConfig.MAX_HEALTH, player.health);
     }
 }

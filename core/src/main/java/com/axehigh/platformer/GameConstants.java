@@ -94,16 +94,6 @@ public final class GameConstants {
     public static float MaxSpeedX = 60f;
     public static float MaxSpeedY = 300f;
 
-    //Player Stats
-    public static int MaxAmmo = 10;
-    public static int BaseDamage = 5;
-    public static int MaxHealth = 3;
-    public static int PlayerStartBullet = 0;
-    /** Player melee strike hitbox height multiplier (extends above and below). */
-    public static float PLAYER_MELEE_HEIGHT_MULTIPLIER = 1.75f;
-    /** Player melee strike hitbox vertical offset factor relative to collision height. */
-    public static float PLAYER_MELEE_Y_OFFSET_FACTOR = 0.25f;
-
     //Enemy Stats
     public static int EnemyBaseHealth = 5;
     /** Feature flag for displaying equipment slots in the inventory bar. */

@@ -1,6 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.assets.SpriteConstants;
+import com.axehigh.platformer.PlayerConfig;
 import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.map.SecretRoomRevealer;
 import com.axehigh.platformer.particles.GlobalParticles;
@@ -19,10 +19,9 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
-import static com.axehigh.platformer.GameConstants.PLAYER_MELEE_HEIGHT_MULTIPLIER;
-import static com.axehigh.platformer.GameConstants.PLAYER_MELEE_Y_OFFSET_FACTOR;
+import static com.axehigh.platformer.PlayerConfig.*;
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
-import static com.axehigh.platformer.assets.SpriteConstants.*;
+import static com.axehigh.platformer.assets.SpriteConstants.CHEST_OPEN_REGION;
 import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
@@ -31,7 +30,7 @@ import static com.axehigh.platformer.ecs.components.Mappers.*;
  * direction the player is facing) and checks it against enemies, chests, and secret walls; a strike
  * hitting a regular solid wall spawns a sword-clank spark. The
  * hitbox is only "live" while the sword is actually extended: each frame of the {@code ATTACKING}
- * animation maps to a reach in the sprite's reach table, {@link SpriteConstants#PLAYER_ATTACK_REACH}
+ * animation maps to a reach in the sprite's reach table, {@link PlayerConfig#PLAYER_ATTACK_REACH}
  * (0 = windup/recovery frames don't hit at all, so a swing never registers before the blade reaches
  * out or after it pulls back). Every overlapping enemy is damaged at most once per swing (tracked in
  * {@link PlayerComponent#meleeHitEnemies}, reset at every swing start, so a swing can still hit
