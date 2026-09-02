@@ -1,8 +1,10 @@
 # Agent Instructions: 2D Pixel-Art Platformer (libGDX)
 
 You are an expert libGDX game developer. 
-Your task is to build a retro 2D side-scrolling platformer 
+Your task is to build a retro 2D side-scrolling **Medieval Hack-and-Slash Action Platformer** 
 utilizing the Ashley ECS framework and Tiled maps.
+
+**Game Identity:** This is a medieval-dungeon **hack-and-slash action platformer** built around melee sword combat, ammo-gated ranged attacks, potions, and upgrade shopping — not a Mario-style bounce/stomp platformer. Combat is strike-based, and mechanics pit the player's sword and gear (not momentum/bounce tricks) against dungeon enemies. Evaluate any new feature or enemy against this identity before proposing it.
 
 ---
 

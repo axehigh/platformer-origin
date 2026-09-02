@@ -197,6 +197,7 @@ public class TrapSystemTest extends SystemTestBase {
 
         Entity pool = singlePool();
         assertNotNull("DOWN landing should spawn an acid pool", pool);
+        assertEquals(-160f, TRANSFORM.get(pool).position.y, EPSILON);
         assertNotNull("pool entity missing collision", COLLISION.get(pool));
 
         // The pool sits for ~1.5s, then disappears.
@@ -247,5 +248,33 @@ public class TrapSystemTest extends SystemTestBase {
         // 7 frames at 0.05s/frame == the full acid_blob1..7 clip played exactly once.
         assertEquals("splash clip should play the full acid_blob1..7 once", 7 * 0.05f, clip.getAnimationDuration(), EPSILON);
         assertEquals("splash clip must not loop (one round)", Animation.PlayMode.NORMAL, clip.getPlayMode());
+    }
+
+    @Test
+    public void subsequentPoolAnimatesCorrectly() {
+        collisionRects.add(new Rectangle(-100f, -300f, 200f, 140f));
+        Entity spawner = acidSpawner(0f, 0f, TrapComponent.TrapDirection.DOWN);
+        TRAP.get(spawner).spawnInterval = 1.2f;
+
+        // First drop lands and spawns pool 1
+        for (int i = 0; i < 80; i++) {
+            engine.update(DT);
+        }
+        Entity pool1 = singlePool();
+        assertNotNull("pool 1 should spawn", pool1);
+        AnimationComponent anim1 = ANIMATION.get(pool1);
+        assertEquals(0f, anim1.stateTime, EPSILON);
+
+        // Wait until pool 1 expires and disappears, plus wait for the next drop from spawner to fall and land
+        for (int i = 0; i < 150; i++) {
+            engine.update(DT);
+        }
+
+        // Second pool should eventually spawn and have stateTime reset (animating from frame 0)
+        Entity pool2 = singlePool();
+        assertNotNull("pool 2 should spawn", pool2);
+        AnimationComponent anim2 = ANIMATION.get(pool2);
+        assertNotNull("pool 2 should carry animation", anim2);
+        assertEquals("pool 2 animation should start at stateTime = 0", 0f, anim2.stateTime, 0.1f);
     }
 }

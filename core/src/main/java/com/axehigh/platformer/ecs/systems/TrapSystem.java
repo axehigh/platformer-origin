@@ -95,7 +95,7 @@ public class TrapSystem extends IteratingSystem {
                 updateDrop(entity, trap, transform, deltaTime);
                 break;
             case ACID_POOL:
-                updatePool(entity, trap, deltaTime);
+                updatePool(entity, trap, transform, deltaTime);
                 break;
             case FLAME:
                 if (roomActive) {
@@ -254,6 +254,12 @@ public class TrapSystem extends IteratingSystem {
         CollisionComponent dropCollision = COLLISION.get(dropEntity);
         float centerX = dropTransform.position.x + dropCollision.bounds.x + dropCollision.bounds.width / 2f;
         float groundY = dropTransform.position.y + dropCollision.bounds.y;
+        for (Rectangle rect : collisionRects) {
+            if (dropCollision.worldBounds.overlaps(rect)) {
+                groundY = rect.y + rect.height;
+                break;
+            }
+        }
         transform.position.set(centerX - poolW / 2f, groundY);
         transform.scale.set(poolScaleX, poolScaleY);
         transform.z = TRAP_Z;
@@ -301,8 +307,17 @@ public class TrapSystem extends IteratingSystem {
         engine.addEntity(pool);
     }
 
-    private void updatePool(Entity entity, TrapComponent trap, float deltaTime) {
+    private static final float ACID_POOL_FADE_DURATION = 0.4f;
+
+    private void updatePool(Entity entity, TrapComponent trap, TransformComponent transform, float deltaTime) {
         trap.poolTimer.update(deltaTime);
+        float remaining = trap.poolTimer.getRemaining();
+        if (remaining <= ACID_POOL_FADE_DURATION) {
+            transform.alpha = Math.max(0f, remaining / ACID_POOL_FADE_DURATION);
+        } else {
+            transform.alpha = 1f;
+        }
+
         if (trap.poolTimer.isDone()) {
             getEngine().removeEntity(entity);
         }

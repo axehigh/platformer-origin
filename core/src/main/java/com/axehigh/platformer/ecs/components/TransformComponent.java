@@ -11,6 +11,8 @@ public class TransformComponent implements Component, Poolable {
     public float rotation = 0f;
     /** Higher z is drawn on top. */
     public float z = 0f;
+    /** Opacity/alpha value for rendering (0.0 to 1.0). */
+    public float alpha = 1f;
 
     @Override
     public void reset() {
@@ -18,5 +20,6 @@ public class TransformComponent implements Component, Poolable {
         scale.set(1f, 1f);
         rotation = 0f;
         z = 0f;
+        alpha = 1f;
     }
 }

@@ -6,6 +6,7 @@ import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.SortedIteratingSystem;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
@@ -59,11 +60,8 @@ public class RenderSystem extends SortedIteratingSystem {
         float drawY = transform.position.y;
 
         CollisionComponent collision = COLLISION.get(entity);
-        if (BULLET.get(entity) != null) {
-            batch.draw(region, drawX, drawY, width, height);
-            return;
-        }
-        if (collision != null && region instanceof AtlasRegion) {
+        boolean isCharacter = PLAYER.get(entity) != null || ENEMY.get(entity) != null;
+        if (BULLET.get(entity) == null && isCharacter && collision != null && region instanceof AtlasRegion) {
             AtlasRegion atlasRegion = (AtlasRegion) region;
             float absScaleX = Math.abs(transform.scale.x);
             float absScaleY = Math.abs(transform.scale.y);
@@ -94,10 +92,17 @@ public class RenderSystem extends SortedIteratingSystem {
             } else {
                 drawY = frameAnchorY + (atlasRegion.originalHeight - atlasRegion.offsetY) * absScaleY;
             }
-        } else {
+        } else if (BULLET.get(entity) == null) {
             // Fallback for non-atlas or non-collision entities
             drawX -= Math.min(0f, width);
             drawY -= Math.min(0f, height);
+        }
+
+        Color oldColor = new Color(batch.getColor());
+        boolean hasAlpha = transform.alpha < 1f;
+        if (hasAlpha) {
+            batch.flush();
+            batch.setColor(oldColor.r, oldColor.g, oldColor.b, oldColor.a * transform.alpha);
         }
 
         batch.draw(region,
@@ -106,6 +111,11 @@ public class RenderSystem extends SortedIteratingSystem {
             width, height,
             1f, 1f,
             transform.rotation);
+
+        if (hasAlpha) {
+            batch.flush();
+            batch.setColor(oldColor);
+        }
     }
 
     private static class ZComparator implements Comparator<Entity> {
