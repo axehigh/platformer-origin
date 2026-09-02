@@ -547,6 +547,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
             systems.tiledMapRenderSystem.dispose();
             systems.debugRenderSystem.dispose();
             systems.lightRenderSystem.dispose();
+            systems.vignetteRenderSystem.dispose();
             systems.levelManager.dispose();
         }
         if (hudStage != null) {

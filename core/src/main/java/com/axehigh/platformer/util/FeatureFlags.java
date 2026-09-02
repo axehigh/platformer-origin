@@ -17,6 +17,8 @@ public final class FeatureFlags {
     private static boolean selectLevelEnabled = GamePreferences.DEFAULT_SELECT_LEVEL_ENABLED;
     private static boolean levelOpen = GamePreferences.DEFAULT_LEVEL_OPEN;
     private static boolean embersEnabled = GamePreferences.DEFAULT_EMBERS_ENABLED;
+    private static boolean vignettePlayerCentricEnabled = GamePreferences.DEFAULT_VIGNETTE_PLAYER_CENTRIC;
+    private static boolean vignetteCinematicEnabled = GamePreferences.DEFAULT_VIGNETTE_CINEMATIC;
     private static boolean initialized = false;
 
     private FeatureFlags() {
@@ -33,6 +35,8 @@ public final class FeatureFlags {
         selectLevelEnabled = preferences.isSelectLevelEnabled();
         levelOpen = preferences.isLevelOpen();
         embersEnabled = preferences.isEmbersEnabled();
+        vignettePlayerCentricEnabled = preferences.isVignettePlayerCentricEnabled();
+        vignetteCinematicEnabled = preferences.isVignetteCinematicEnabled();
     }
 
     /** Whether wall-climb (wall-slide gravity + wall-jump latch) is enabled. Defaults to {@code true}. */
@@ -95,6 +99,32 @@ public final class FeatureFlags {
         }
     }
 
+    public static boolean isVignettePlayerCentricEnabled() {
+        ensureInitialized();
+        return vignettePlayerCentricEnabled;
+    }
+
+    public static void setVignettePlayerCentricEnabled(boolean enabled) {
+        vignettePlayerCentricEnabled = enabled;
+        initialized = true;
+        if (Gdx.app != null) {
+            new GamePreferences().setVignettePlayerCentricEnabled(enabled);
+        }
+    }
+
+    public static boolean isVignetteCinematicEnabled() {
+        ensureInitialized();
+        return vignetteCinematicEnabled;
+    }
+
+    public static void setVignetteCinematicEnabled(boolean enabled) {
+        vignetteCinematicEnabled = enabled;
+        initialized = true;
+        if (Gdx.app != null) {
+            new GamePreferences().setVignetteCinematicEnabled(enabled);
+        }
+    }
+
     /**
      * Whether all levels are open in level select. Defaults to {@code true}.
      */
@@ -122,6 +152,8 @@ public final class FeatureFlags {
         selectLevelEnabled = GamePreferences.DEFAULT_SELECT_LEVEL_ENABLED;
         levelOpen = GamePreferences.DEFAULT_LEVEL_OPEN;
         embersEnabled = GamePreferences.DEFAULT_EMBERS_ENABLED;
+        vignettePlayerCentricEnabled = GamePreferences.DEFAULT_VIGNETTE_PLAYER_CENTRIC;
+        vignetteCinematicEnabled = GamePreferences.DEFAULT_VIGNETTE_CINEMATIC;
         initialized = false;
     }
 }

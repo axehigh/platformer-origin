@@ -47,12 +47,14 @@ public class GameSystems {
     private static final int PRIORITY_FLOATING_MESSAGE = 31;
     private static final int PRIORITY_PARTICLE_RENDER = 35;
     private static final int PRIORITY_LIGHT_RENDER = 36;
+    private static final int PRIORITY_VIGNETTE_RENDER = 37;
     private static final int PRIORITY_DEBUG_RENDER = 40;
 
     public final PlayerInputSystem playerInputSystem;
     public final TiledMapRenderSystem tiledMapRenderSystem;
     public final DebugRenderSystem debugRenderSystem;
     public final LightRenderSystem lightRenderSystem;
+    public final VignetteRenderSystem vignetteRenderSystem;
     public final CameraSystem cameraSystem;
     public final ChestSystem chestSystem;
     public final LevelManager levelManager;
@@ -138,6 +140,8 @@ public class GameSystems {
         engine.addSystem(new ParticleSystem(batch, camera, PRIORITY_PARTICLE_RENDER));
         lightRenderSystem = new LightRenderSystem(batch, camera, PRIORITY_LIGHT_RENDER);
         engine.addSystem(lightRenderSystem);
+        vignetteRenderSystem = new VignetteRenderSystem(batch, camera, PRIORITY_VIGNETTE_RENDER);
+        engine.addSystem(vignetteRenderSystem);
         debugRenderSystem = new DebugRenderSystem(camera, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), roomState, PRIORITY_DEBUG_RENDER);
         debugRenderSystem.setUnitScale(unitScale);
         engine.addSystem(debugRenderSystem);

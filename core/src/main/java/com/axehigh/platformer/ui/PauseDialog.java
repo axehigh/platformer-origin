@@ -127,6 +127,14 @@ public class PauseDialog extends Dialog {
         gameplayContent.add(toggleCheckBox("Wall Climb",
             FeatureFlags::isWallClimbingEnabled,
             FeatureFlags::setWallClimbingEnabled)).row();
+
+        gameplayContent.add(toggleCheckBox("Player Vignette",
+            FeatureFlags::isVignettePlayerCentricEnabled,
+            FeatureFlags::setVignettePlayerCentricEnabled)).row();
+
+        gameplayContent.add(toggleCheckBox("Cinematic Vignette",
+            FeatureFlags::isVignetteCinematicEnabled,
+            FeatureFlags::setVignetteCinematicEnabled)).row();
     }
 
     private void buildDebugTab() {

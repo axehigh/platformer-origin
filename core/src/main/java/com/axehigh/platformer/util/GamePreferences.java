@@ -18,6 +18,8 @@ public class GamePreferences {
     private static final String KEY_SELECT_LEVEL_ENABLED = "selectLevelEnabled";
     private static final String KEY_LEVEL_OPEN = "levelOpen";
     private static final String KEY_EMBERS_ENABLED = "embersEnabled";
+    private static final String KEY_VIGNETTE_PLAYER_CENTRIC = "vignettePlayerCentricEnabled";
+    private static final String KEY_VIGNETTE_CINEMATIC = "vignetteCinematicEnabled";
     private static final String KEY_DEVICE_CLASS = "deviceClass";
     private static final String KEY_LAYOUT_MODE = "layoutMode";
     private static final String KEY_UI_ICON_SCALE = "uiIconScale";
@@ -38,6 +40,10 @@ public class GamePreferences {
     static final boolean DEFAULT_LEVEL_OPEN = true;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
     static final boolean DEFAULT_EMBERS_ENABLED = true;
+    /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
+    static final boolean DEFAULT_VIGNETTE_PLAYER_CENTRIC = true;
+    /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
+    static final boolean DEFAULT_VIGNETTE_CINEMATIC = true;
 
     private final Preferences preferences;
 
@@ -148,6 +154,24 @@ public class GamePreferences {
 
     public void setEmbersEnabled(boolean embersEnabled) {
         preferences.putBoolean(KEY_EMBERS_ENABLED, embersEnabled);
+        preferences.flush();
+    }
+
+    public boolean isVignettePlayerCentricEnabled() {
+        return preferences.getBoolean(KEY_VIGNETTE_PLAYER_CENTRIC, DEFAULT_VIGNETTE_PLAYER_CENTRIC);
+    }
+
+    public void setVignettePlayerCentricEnabled(boolean enabled) {
+        preferences.putBoolean(KEY_VIGNETTE_PLAYER_CENTRIC, enabled);
+        preferences.flush();
+    }
+
+    public boolean isVignetteCinematicEnabled() {
+        return preferences.getBoolean(KEY_VIGNETTE_CINEMATIC, DEFAULT_VIGNETTE_CINEMATIC);
+    }
+
+    public void setVignetteCinematicEnabled(boolean enabled) {
+        preferences.putBoolean(KEY_VIGNETTE_CINEMATIC, enabled);
         preferences.flush();
     }
 

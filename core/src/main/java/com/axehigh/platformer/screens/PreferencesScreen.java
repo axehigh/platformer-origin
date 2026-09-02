@@ -116,9 +116,27 @@ public class PreferencesScreen extends MenuScreen {
                     tabContent.add(scaleLabel).padRight(LABEL_PAD_RIGHT);
                     tabContent.add(scaleSlider).padBottom(ELEMENT_PAD).row();
                 } else if (activeTab[0] == 1) {
-                    Label placeholder = new Label("Gameplay settings", skin);
-                    placeholder.setFontScale(GameConstants.FontScale);
-                    tabContent.add(placeholder).padBottom(ELEMENT_PAD).row();
+                    CheckBox playerVignetteCheckBox = new CheckBox(" Player-Centric Vignette", skin);
+                    playerVignetteCheckBox.getLabel().setFontScale(GameConstants.FontScale);
+                    playerVignetteCheckBox.setChecked(com.axehigh.platformer.util.FeatureFlags.isVignettePlayerCentricEnabled());
+                    playerVignetteCheckBox.addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            com.axehigh.platformer.util.FeatureFlags.setVignettePlayerCentricEnabled(playerVignetteCheckBox.isChecked());
+                        }
+                    });
+                    tabContent.add(playerVignetteCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
+
+                    CheckBox cinematicVignetteCheckBox = new CheckBox(" Cinematic Vignette", skin);
+                    cinematicVignetteCheckBox.getLabel().setFontScale(GameConstants.FontScale);
+                    cinematicVignetteCheckBox.setChecked(com.axehigh.platformer.util.FeatureFlags.isVignetteCinematicEnabled());
+                    cinematicVignetteCheckBox.addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            com.axehigh.platformer.util.FeatureFlags.setVignetteCinematicEnabled(cinematicVignetteCheckBox.isChecked());
+                        }
+                    });
+                    tabContent.add(cinematicVignetteCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
                 } else if (activeTab[0] == 2) {
                     CheckBox levelOpenCheckBox = new CheckBox(" Level Open", skin);
                     levelOpenCheckBox.getLabel().setFontScale(GameConstants.FontScale);
