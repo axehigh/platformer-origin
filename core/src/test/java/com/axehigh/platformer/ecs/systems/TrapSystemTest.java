@@ -19,6 +19,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
+import static com.axehigh.platformer.assets.SpriteConstants.AcidDropCollisionHeight;
+import static com.axehigh.platformer.assets.SpriteConstants.AcidDropCollisionWidth;
 import static com.axehigh.platformer.ecs.components.Mappers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -106,14 +108,15 @@ public class TrapSystemTest extends SystemTestBase {
         }
 
         // Spawner + one drop = 2 entities. At scale 1 the tube is a 16-unit tile at the maker, so
-        // its center is (x+8, y+8); the drop's collision box is 8x12, so its bottom-left sits
-        // half-width/half-height below-left of that center (the center is the drop's center).
+        // its center is (x+8, y+8); the drop's collision box is sized from constants, so its
+        // bottom-left sits half-width/half-height below-left of that center (the center is the
+        // drop's center).
         assertEquals(2, engine.getEntities().size());
         for (Entity e : engine.getEntities()) {
             TrapComponent trap = TRAP.get(e);
             if (trap != null && trap.type == TrapType.ACID_DROP) {
-                assertEquals(100f + 8f - 4f, TRANSFORM.get(e).position.x, EPSILON);
-                assertEquals(200f + 8f - 6f, TRANSFORM.get(e).position.y, EPSILON);
+                assertEquals(100f + 8f - AcidDropCollisionWidth / 2f, TRANSFORM.get(e).position.x, EPSILON);
+                assertEquals(200f + 8f - AcidDropCollisionHeight / 2f, TRANSFORM.get(e).position.y, EPSILON);
                 return;
             }
         }
@@ -169,15 +172,15 @@ public class TrapSystemTest extends SystemTestBase {
 
         Entity drop = singleDrop();
         assertNotNull("acid drop was not spawned", drop);
-        assertEquals(100f + 8f - 4f, TRANSFORM.get(drop).position.x, EPSILON);
-        assertEquals(200f + 8f - 6f, TRANSFORM.get(drop).position.y, EPSILON);
+        assertEquals(100f + 8f - AcidDropCollisionWidth / 2f, TRANSFORM.get(drop).position.x, EPSILON);
+        assertEquals(200f + 8f - AcidDropCollisionHeight / 2f, TRANSFORM.get(drop).position.y, EPSILON);
 
         // A few frames in, still inside the drip-build hang: position must be unchanged.
         for (int i = 0; i < 5; i++) {
             engine.update(DT);
         }
-        assertEquals(100f + 8f - 4f, TRANSFORM.get(drop).position.x, EPSILON);
-        assertEquals(200f + 8f - 6f, TRANSFORM.get(drop).position.y, EPSILON);
+        assertEquals(100f + 8f - AcidDropCollisionWidth / 2f, TRANSFORM.get(drop).position.x, EPSILON);
+        assertEquals(200f + 8f - AcidDropCollisionHeight / 2f, TRANSFORM.get(drop).position.y, EPSILON);
     }
 
     @Test

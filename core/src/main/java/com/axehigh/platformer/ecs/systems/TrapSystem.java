@@ -18,7 +18,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
-import static com.axehigh.platformer.assets.SpriteConstants.AcidDropScale;
+import static com.axehigh.platformer.assets.SpriteConstants.*;
 import static com.axehigh.platformer.ecs.components.AnimationComponent.State.*;
 import static com.axehigh.platformer.ecs.components.Mappers.*;
 import static com.axehigh.platformer.ecs.components.TrapComponent.TrapType.ACID_DROP;
@@ -142,8 +142,9 @@ public class TrapSystem extends IteratingSystem {
 
         // The drop is sized from the map unit scale (not the spawner's tube scale, which includes
         // the 2x tube fill factor) so a drop stays a ~half-tile droplet regardless of tube size.
-        float dropW = 8f * unitScale;
-        float dropH = 12f * unitScale;
+        // After 50% reduction, it's now a ~quarter-tile droplet.
+        float dropW = AcidDropCollisionWidth * unitScale;
+        float dropH = AcidDropCollisionHeight * unitScale;
 
         TransformComponent transform = engine.createComponent(TransformComponent.class);
         // Drops spawn centered on the acid tube: the tube is a full tile anchored to the spawner
