@@ -5,6 +5,7 @@ import com.axehigh.platformer.map.SaveData;
 import com.axehigh.platformer.util.SaveManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -26,7 +27,8 @@ import static com.axehigh.platformer.GameConstants.FontScale;
 public class GameOverScreen extends MenuScreen {
 
     public interface Listener {
-        void onContinue();
+        /** Returns the screen to transition to when the player continues (e.g. a fresh {@code GameScreen}). */
+        Screen onContinue();
         void onExit();
     }
 
@@ -90,7 +92,9 @@ public class GameOverScreen extends MenuScreen {
             TextButton continueButton = createMenuButton("Continue (uses 1 try)", () -> {
                 currentSave.triesRemaining--;
                 SaveManager.save(currentSave);
-                listener.onContinue();
+                // Transition through THIS screen so the fade action runs and game.setScreen actually
+                // fires (the GameScreen whose listener we implement is no longer rendering its fade stage).
+                changeScreen(listener.onContinue());
             });
             buttonTable.add(continueButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).padBottom(20f).row();
         }

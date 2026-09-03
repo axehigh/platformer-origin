@@ -40,7 +40,7 @@ public class HudStage extends Stage {
     private final Image[] heartImages;
     private final Label coinLabel;
     private Label bulletLabel;
-    private final TextButton pauseButton;
+    private final ImageButton pauseButton;
     private final ObjectMap<PotionType, TextureRegionDrawable> potionDrawables = new ObjectMap<>();
     private final Image[] buffImages;
     private final Label[] buffLabels;
@@ -107,7 +107,10 @@ public class HudStage extends Stage {
         centerGroup.add(buffRow).colspan(2).center().padTop(10f);
 
         Table rightGroup = new Table();
-        pauseButton = new TextButton("||", skin);
+        ImageButton.ImageButtonStyle pauseStyle = new ImageButton.ImageButtonStyle(skin.get("gameplay", ImageButton.ImageButtonStyle.class));
+        pauseStyle.imageUp = skin.getDrawable("pause");
+        pauseStyle.imageDown = skin.getDrawable("pause");
+        pauseButton = new ImageButton(pauseStyle);
         rightGroup.add(pauseButton).size(83f, 66f);
 
         root.add(leftGroup).expandX().left().pad(25f);
@@ -171,7 +174,7 @@ public class HudStage extends Stage {
         }
     }
 
-    public TextButton getPauseButton() {
+    public ImageButton getPauseButton() {
         return pauseButton;
     }
 }

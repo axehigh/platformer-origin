@@ -282,11 +282,11 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
     }
 
     @Override
-    public void onContinue() {
+    public Screen onContinue() {
         SaveData save = SaveManager.hasSave() ? SaveManager.load() : (saveData != null ? saveData : new SaveData());
         save.health = save.maxHealth;
         SaveManager.save(save);
-        changeScreen(new GameScreen(game, save));
+        return new GameScreen(game, save);
     }
 
     @Override
