@@ -46,6 +46,7 @@ public final class LevelCatalog {
         LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_template", "Demo", "maps/world_demo/template_demo.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_my_map", "My Map", "maps/world_demo/my_map.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_proto_30x9", "30x9", "maps/world_demo/proto_30x9.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_proto_60x9", "60x9", "maps/world_demo/proto_60x9.tmx"));
 
     }
 

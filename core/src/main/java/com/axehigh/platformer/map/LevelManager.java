@@ -105,6 +105,7 @@ public class LevelManager implements Disposable {
         if (meleeSystem != null) {
             meleeSystem.setUnitScale(newScale);
             meleeSystem.setCollisionLayer(newMapLoader.getCollisionLayer());
+            meleeSystem.resetSecretWallHits();
         }
         ChestSystem chestSystem = engine.getSystem(ChestSystem.class);
         if (chestSystem != null) {

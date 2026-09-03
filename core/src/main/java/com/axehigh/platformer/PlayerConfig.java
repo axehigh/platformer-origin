@@ -32,6 +32,8 @@ public final class PlayerConfig {
     public static final int MAX_AMMO = 10;
     /** Base melee/sword damage per hit (raised to 8 by the "Sharp Edge" shop upgrade). */
     public static final int BASE_DAMAGE = 5;
+
+    public static final float BULLET_DAMAGE = BASE_DAMAGE *.5f;
     /** Starting and maximum player health (hearts). */
     public static final int MAX_HEALTH = 3;
     /** Bullets in the inventory when the player spawns. */
@@ -87,7 +89,7 @@ public final class PlayerConfig {
     /** Bullet horizontal speed (world units/second, before {@code unitScale}). */
     public static final float BULLET_SPEED = 220f;
     /** Damage dealt by one bullet hit. */
-    public static final float BULLET_DAMAGE = 10f;
+
     /** Bullet lifetime (arbitrary duration units, consumed by {@code BulletComponent}). */
     public static final float BULLET_LIFETIME = 300f;
     /** Bullet stacking layer (z), above the player. */

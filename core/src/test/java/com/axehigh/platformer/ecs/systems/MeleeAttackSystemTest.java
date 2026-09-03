@@ -9,7 +9,9 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -90,6 +92,43 @@ public class MeleeAttackSystemTest extends SystemTestBase {
         Entity entity = entity(transform, collision, chestComponent, texture);
         engine.addEntity(entity);
         return entity;
+    }
+
+    @Test
+    public void secretWallTakesThreeHitsToBreak() {
+        Rectangle wall = new Rectangle(50f, 130f, 30f, 30f);
+        Array<Rectangle> secretRects = new Array<>();
+        secretRects.add(wall);
+        Array<Rectangle> collisionRects = new Array<>();
+        collisionRects.add(wall);
+
+        // Remove the default system and add the one with secret wall support
+        engine.removeSystem(system);
+        TiledMapTileLayer collisionLayer = mock(TiledMapTileLayer.class);
+        when(collisionLayer.getTileWidth()).thenReturn(30);
+        when(collisionLayer.getTileHeight()).thenReturn(30);
+        MeleeAttackSystem systemWithWalls = new MeleeAttackSystem(mockAssets(), secretRects, collisionRects, collisionLayer, null, 0);
+        engine.addSystem(systemWithWalls);
+
+        Entity player = player(30f, 130f, 1);
+        PlayerComponent playerComponent = PLAYER.get(player);
+
+        // 1st hit
+        playerComponent.meleeAttack.start(0.2f);
+        engine.update(DT);
+        assertEquals(1, secretRects.size);
+
+        // 2nd hit
+        playerComponent.meleeHasHit = false;
+        playerComponent.meleeAttack.start(0.2f);
+        engine.update(DT);
+        assertEquals(1, secretRects.size);
+
+        // 3rd hit
+        playerComponent.meleeHasHit = false;
+        playerComponent.meleeAttack.start(0.2f);
+        engine.update(DT);
+        assertEquals(0, secretRects.size);
     }
 
     @Test

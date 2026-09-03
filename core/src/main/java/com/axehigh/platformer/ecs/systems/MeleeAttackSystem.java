@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
 
 import static com.axehigh.platformer.PlayerConfig.*;
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
@@ -43,6 +44,7 @@ import static com.axehigh.platformer.ecs.components.Mappers.*;
 public class MeleeAttackSystem extends IteratingSystem {
 
     private static final float CHEST_DISAPPEAR_DELAY = 0.3f;
+    private static final int SECRET_WALL_MAX_HITS = 3;
 
     private final AssetManager assetManager;
     private float unitScale = 1f;
@@ -53,6 +55,7 @@ public class MeleeAttackSystem extends IteratingSystem {
     private ImmutableArray<Entity> enemies;
     private ImmutableArray<Entity> chests;
     private Array<Rectangle> secretRects;
+    private final ObjectMap<Rectangle, Integer> secretRectHits = new ObjectMap<>();
     private Array<Rectangle> collisionRects;
     private TiledMapTileLayer collisionLayer;
     private SfxSystem sfxSystem;
@@ -100,6 +103,13 @@ public class MeleeAttackSystem extends IteratingSystem {
      */
     public void setCollisionLayer(TiledMapTileLayer collisionLayer) {
         this.collisionLayer = collisionLayer;
+    }
+
+    /**
+     * Resets secret wall hit counts on level change.
+     */
+    public void resetSecretWallHits() {
+        secretRectHits.clear();
     }
 
     /**
@@ -228,8 +238,20 @@ public class MeleeAttackSystem extends IteratingSystem {
             if (!bounds.overlaps(rect)) {
                 continue;
             }
+
+            int hits = secretRectHits.get(rect, 0) + 1;
+            if (hits < SECRET_WALL_MAX_HITS) {
+                secretRectHits.put(rect, hits);
+                if (engine != null) {
+                    ParticleHelper.spawnSmallSmoke(engine, rect.x + rect.width / 2f, rect.y + rect.height / 2f);
+                }
+                // Could play a clank sound here if needed.
+                return true;
+            }
+
             String roomName = secretRoomOf(rect);
             secretRects.removeIndex(i);
+            secretRectHits.remove(rect);
             if (collisionRects != null) {
                 collisionRects.removeValue(rect, true);
             }

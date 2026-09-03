@@ -89,7 +89,7 @@ public class GameOverScreen extends MenuScreen {
         Table buttonTable = new Table();
 
         if (currentSave.triesRemaining > 0) {
-            TextButton continueButton = createMenuButton("Continue (uses 1 try)", () -> {
+            TextButton continueButton = createMenuButton("Continue", () -> {
                 currentSave.triesRemaining--;
                 SaveManager.save(currentSave);
                 // Transition through THIS screen so the fade action runs and game.setScreen actually
