@@ -114,6 +114,36 @@ class EnemyFactory {
                 break;
         }
         entity.add(enemyComponent);
+        
+        String lootStr = TileProps.getProperty(object, tile, "loot", null);
+        if (lootStr != null) {
+            LootComponent loot = new LootComponent();
+            String[] items = lootStr.split(",");
+            for (String item : items) {
+                String[] parts = item.trim().replace('=', ':').split(":");
+                if (parts.length != 2) continue;
+                String itemType = parts[0].trim();
+                String value = parts[1].trim();
+
+                LootComponent.LootEntry entry = new LootComponent.LootEntry();
+                if ("coin".equalsIgnoreCase(itemType)) {
+                    entry.type = LootComponent.LootType.COIN;
+                    entry.amount = Integer.parseInt(value);
+                } else if ("ammo".equalsIgnoreCase(itemType)) {
+                    entry.type = LootComponent.LootType.AMMO;
+                    entry.amount = Integer.parseInt(value);
+                } else if ("potion".equalsIgnoreCase(itemType)) {
+                    entry.type = LootComponent.LootType.POTION;
+                    entry.potionType = value;
+                }
+                if (entry.type != null) {
+                    loot.drops.add(entry);
+                }
+            }
+            if (loot.drops.size > 0) {
+                entity.add(loot);
+            }
+        }
 
         // Read attack type from Tiled marker property (default: "melee" for non-shooters, null for shooters)
         String attackTypeStr = TileProps.getProperty(object, tile, "attackType", null);

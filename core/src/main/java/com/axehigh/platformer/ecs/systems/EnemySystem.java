@@ -109,7 +109,7 @@ public class EnemySystem extends IteratingSystem {
         if (enemy.isDead) {
             if (!enemy.deathCoinsSpawned) {
                 enemy.deathCoinsSpawned = true;
-                dropCoins(enemy, transform, collision);
+                dropLoot(entity, enemy, transform, collision);
             }
             enemy.deathTimer.update(deltaTime);
             if (enemy.deathTimer.isDone()) {
@@ -259,22 +259,39 @@ public class EnemySystem extends IteratingSystem {
     }
 
     /**
-     * Spawns the death coin drop (1 coin per full {@link #COINS_PER_HEALTH} max health) at the
-     * enemy's center, on the first frame the death is observed — immediately on the kill, before
-     * the corpse lingers through the death animation and blinks out.
+     * Spawns loot on death, or defaults to coins if no loot is configured.
      */
-    private void dropCoins(EnemyComponent enemy, TransformComponent transform, CollisionComponent collision) {
-        int coinCount = (int) (enemy.maxHealth / COINS_PER_HEALTH);
-        if (coinCount <= 0) {
-            return;
-        }
+    private void dropLoot(Entity entity, EnemyComponent enemy, TransformComponent transform, CollisionComponent collision) {
+        LootComponent loot = LOOT.get(entity);
+
         float centerX = transform.position.x;
         float centerY = transform.position.y;
         if (collision != null) {
             centerX = collision.worldBounds.x + collision.worldBounds.width / 2f;
             centerY = collision.worldBounds.y + collision.worldBounds.height / 2f;
         }
-        entityFactory.popCoins(getEngine(), centerX, centerY, coinCount, unitScale, collisionRects);
+
+        if (loot != null) {
+            for (LootComponent.LootEntry drop : loot.drops) {
+                switch (drop.type) {
+                    case COIN:
+                        entityFactory.popCoins(getEngine(), centerX, centerY, drop.amount, unitScale, collisionRects);
+                        break;
+                    case AMMO:
+                        entityFactory.popAmmo(getEngine(), centerX, centerY, drop.amount, unitScale, collisionRects);
+                        break;
+                    case POTION:
+                        entityFactory.popPotion(getEngine(), centerX, centerY, drop.potionType, unitScale, collisionRects);
+                        break;
+                }
+            }
+        } else {
+            // Default to coins
+            int coinCount = (int) (enemy.maxHealth / COINS_PER_HEALTH);
+            if (coinCount > 0) {
+                entityFactory.popCoins(getEngine(), centerX, centerY, coinCount, unitScale, collisionRects);
+            }
+        }
     }
 
     /** Flips the enemy's travel direction and starts the brief stand-still pause at the turnaround. */

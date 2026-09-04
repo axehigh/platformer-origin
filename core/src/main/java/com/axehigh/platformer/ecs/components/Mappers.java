@@ -28,6 +28,7 @@ public final class Mappers {
     public static final ComponentMapper<LightComponent> LIGHT = ComponentMapper.getFor(LightComponent.class);
     public static final ComponentMapper<FloatingMessageComponent> FLOATING_MESSAGE = ComponentMapper.getFor(FloatingMessageComponent.class);
     public static final ComponentMapper<TrapComponent> TRAP = ComponentMapper.getFor(TrapComponent.class);
+    public static final ComponentMapper<LootComponent> LOOT = ComponentMapper.getFor(LootComponent.class);
 
     private Mappers() {
     }

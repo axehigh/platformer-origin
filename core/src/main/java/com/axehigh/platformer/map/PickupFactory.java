@@ -184,7 +184,10 @@ class PickupFactory {
         }
     }
 
-    public Entity createDaggerPickup(float x, float y, MapObject object, TiledMapTile tile) {
+    /**
+     * Builds a dagger pickup entity.
+     */
+    public Entity createDaggerPickup(float x, float y, MapObject object, TiledMapTile tile, int amount) {
         Texture texture = context.getTexture("gfx/old/dagger.png");
 
         Entity entity = new Entity();
@@ -204,14 +207,52 @@ class PickupFactory {
         entity.add(collisionComponent);
 
         DaggerPickupComponent daggerPickup = new DaggerPickupComponent();
-        daggerPickup.amount = TileProps.getIntProperty(object, tile, "amount", daggerPickup.amount);
+        daggerPickup.amount = amount;
         entity.add(daggerPickup);
 
         return entity;
     }
 
-    public Entity createDaggerPickup(float x, float y) {
-        return createDaggerPickup(x, y, null, null);
+    public Entity createDaggerPickup(float x, float y, MapObject object, TiledMapTile tile) {
+        int amount = 5;
+        if (object != null && tile != null) {
+            amount = TileProps.getIntProperty(object, tile, "amount", amount);
+        }
+        return createDaggerPickup(x, y, object, tile, amount);
+    }
+    
+    public Entity createPoppedDaggerPickup(float x, float y, float velocityX, float velocityY, int amount) {
+        Entity entity = createDaggerPickup(x, y, null, null, amount);
+
+        MovementComponent movementComponent = new MovementComponent();
+        movementComponent.velocity.set(velocityX, velocityY);
+        entity.add(movementComponent);
+
+        entity.add(new PoppedItemComponent());
+
+        return entity;
+    }
+
+    public void popAmmo(Engine engine, float x, float y, int amount, float unitScale, Array<Rectangle> collisionRects) {
+        float ammoSize = 8f * unitScale;
+        float velocityX = MathUtils.random(-MAX_POP_VELOCITY_X, MAX_POP_VELOCITY_X) * unitScale;
+        float velocityY = MathUtils.random(MIN_POP_VELOCITY_Y, MAX_POP_VELOCITY_Y) * unitScale;
+
+        float spawnX = x;
+        float spawnY = y;
+
+        if (collisionRects != null) {
+            Rectangle testRect = new Rectangle(spawnX - ammoSize / 2f, spawnY - ammoSize / 2f, ammoSize, ammoSize);
+            for (Rectangle rect : collisionRects) {
+                if (testRect.overlaps(rect)) {
+                    spawnY = rect.y + rect.height + ammoSize / 2f + 1f;
+                    testRect.setY(spawnY - ammoSize / 2f);
+                    break;
+                }
+            }
+        }
+
+        engine.addEntity(createPoppedDaggerPickup(spawnX, spawnY, velocityX, velocityY, amount));
     }
 
     public Entity createPotionPickup(float x, float y, String potionType) {
