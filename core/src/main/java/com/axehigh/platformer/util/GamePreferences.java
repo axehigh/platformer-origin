@@ -41,9 +41,9 @@ public class GamePreferences {
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
     static final boolean DEFAULT_EMBERS_ENABLED = true;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
-    static final boolean DEFAULT_VIGNETTE_PLAYER_CENTRIC = true;
+    static final boolean DEFAULT_VIGNETTE_PLAYER_CENTRIC = false;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
-    static final boolean DEFAULT_VIGNETTE_CINEMATIC = true;
+    static final boolean DEFAULT_VIGNETTE_CINEMATIC = false;
 
     private final Preferences preferences;
 

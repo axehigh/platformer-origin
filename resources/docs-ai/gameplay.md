@@ -447,6 +447,6 @@ A global two-layer parallax skybox draws **behind** every level's Tiled map — 
 
 ### AE. Vignette Effects & Feature Flags (`VignetteRenderSystem`, `FeatureFlags`)
 1. **Overview:** Dual camera-space vignette effects rendered with a dark medieval tint, controlled by independent feature flags.
-2. **Cinematic Screen-Edge Vignette:** A subtle radial gradient covering the camera viewport edges (`vignetteCinematicEnabled`, default `true`), giving cinematic dungeon framing.
-3. **Player-Centric Torchlight Vignette:** A player-centered torchlight circle/vignette (`vignettePlayerCentricEnabled`, default `true`) that follows the player's world position, enhancing dungeon exploration and unlit room tension.
+2. **Cinematic Screen-Edge Vignette:** A subtle radial gradient covering the camera viewport edges (`vignetteCinematicEnabled`, default `false`), giving cinematic dungeon framing.
+3. **Player-Centric Torchlight Vignette:** A player-centered torchlight circle/vignette (`vignettePlayerCentricEnabled`, default `false`) that follows the player's world position, enhancing dungeon exploration and unlit room tension.
 4. **Configuration & Toggles:** Toggled live in the in-game Pause menu (Gameplay tab) and the Main Menu Preferences screen (Gameplay tab), persisted via `GamePreferences`.

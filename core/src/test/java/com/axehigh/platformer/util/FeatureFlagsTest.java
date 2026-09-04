@@ -41,11 +41,11 @@ public class FeatureFlagsTest {
     }
 
     @Test
-    public void vignettesAreEnabledByDefault() {
+    public void vignettesAreDisabledByDefault() {
         Gdx.app = null;
 
-        assertTrue(com.axehigh.platformer.util.FeatureFlags.isVignettePlayerCentricEnabled());
-        assertTrue(com.axehigh.platformer.util.FeatureFlags.isVignetteCinematicEnabled());
+        assertFalse(com.axehigh.platformer.util.FeatureFlags.isVignettePlayerCentricEnabled());
+        assertFalse(com.axehigh.platformer.util.FeatureFlags.isVignetteCinematicEnabled());
     }
 
     @Test
