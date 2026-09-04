@@ -6,13 +6,11 @@ import com.axehigh.platformer.util.FeatureFlags;
 import com.axehigh.platformer.util.SaveManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.utils.Array;
 
-import static com.axehigh.platformer.GameConstants.*;
+import static com.axehigh.platformer.GameConstants.UI_PADDING;
 
 /**
  * Main menu over a full-bleed {@code startup-menu.jpg} backdrop (uniform cover scaling, edges
@@ -47,7 +45,7 @@ public class MainMenuScreen extends MenuScreen {
         cornerTopRight.top().right();
         cornerTopRight.add(preferencesButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
             .pad(UI_PADDING).row();
-        
+
         TextButton creditsButton = createMenuButton("Credits", () -> changeScreen(new CreditsScreen(game)));
         cornerTopRight.add(creditsButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
             .pad(UI_PADDING).row();
@@ -123,12 +121,6 @@ public class MainMenuScreen extends MenuScreen {
         }
 
     stage.addActor(bottomCenter);
-
-    Array<Vector2> sparkPositions = new Array<>();
-    sparkPositions.add(new Vector2(180f, SCREEN_HEIGHT * 0.45f));
-    sparkPositions.add(new Vector2(SCREEN_WIDTH - 180f, SCREEN_HEIGHT * 0.45f));
-    //Spark effect is not so good.
-    //menuEffects.addSparkBursts(stage, sparkPositions);
 }
 
 private void newGame() {

@@ -61,9 +61,6 @@ public class HudStage extends Stage {
         addActor(root);
 
         Table leftGroup = new Table();
-     //   TextureAtlas heroAtlas = assetManager.get(HERO_ASSET, TextureAtlas.class);
-       // Image avatar = new Image(heroAtlas.findRegion("idle"));
-        //leftGroup.add(avatar).size(66f, 66f).padRight(17f);
 
         TextureAtlas uiAtlas = assetManager.get(ORIGIN_UI_GFX, TextureAtlas.class);
         for (PotionType type : PotionType.values()) {

@@ -73,8 +73,14 @@ public class BuffSystem extends IteratingSystem {
     }
 
     /**
-     * Get-or-adds the blended halo while any buff is active, removes it when none remain, and
-     * blinks its alpha once the soonest-expiring buff is inside the threshold.
+     * Manages the buff feedback halo light:
+     * <ul>
+     *   <li>Adds/removes {@link LightComponent} based on active buff count.</li>
+     *   <li>Blends halo color from the active {@link PotionType} colors (RGB average).</li>
+     *   <li>Centers halo on the player's collision box (follows facing and sprite trimming).</li>
+     *   <li>Blinks alpha between {@value #BUFF_LIGHT_ALPHA} and {@value #BUFF_LIGHT_BLINK_ALPHA}
+     *       when the soonest-expiring buff drops below {@link GameConstants#BUFF_BLINK_THRESHOLD}.</li>
+     * </ul>
      */
     private void updateHalo(Entity entity, BuffComponent buff, float deltaTime) {
         int activeCount = 0;

@@ -173,7 +173,7 @@ public class LevelSelectScreen extends MenuScreen {
     private void switchWorld(int tabIndex) {
         currentWorldIndex = tabIndex;
         boolean levelOpen = FeatureFlags.isLevelOpen();
-        
+
         IntArray activeWorldIds = new IntArray();
         for (int i = 0; i < worldIds.size; i++) {
             int id = worldIds.get(i);
@@ -201,7 +201,7 @@ public class LevelSelectScreen extends MenuScreen {
             } else if (!completed && !foundFirstUncompleted) {
                 foundFirstUncompleted = true;
             }
-            
+
             ImageTextButton levelButton = createLevelButton(level, completed, accessible);
             levelButtons.add(levelButton);
             grid.add(levelButton).size(BUTTON_WIDTH, BUTTON_HEIGHT).pad(10f);

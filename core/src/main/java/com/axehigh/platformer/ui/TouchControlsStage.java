@@ -37,7 +37,6 @@ public class TouchControlsStage extends Stage {
         addActor(root);
 
         Table dpad = new Table();
-        //dpad.setDebug(true);
         TouchButton leftButton = new TouchButton(skin, "left", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 new TouchButton.Handler() {
                     @Override
