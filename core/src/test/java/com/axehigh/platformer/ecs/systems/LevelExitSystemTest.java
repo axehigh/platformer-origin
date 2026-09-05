@@ -1,7 +1,8 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.*;
+import com.axehigh.platformer.ecs.components.LightComponent;
 import com.axehigh.platformer.map.LevelManager;
+import com.axehigh.platformer.map.ProgressData;
 import com.axehigh.platformer.map.SaveData;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -274,7 +275,7 @@ public class LevelExitSystemTest extends SystemTestBase {
     public void finalGateSavePersistsCompletedWorldIds() {
         when(levelManager.getCurrentLevelPath()).thenReturn("maps/world1/level_10.tmx");
 
-        system = new com.axehigh.platformer.ecs.systems.LevelExitSystem(levelManager, 0, () -> {});
+        system = new LevelExitSystem(levelManager, 0, () -> {});
         engine = newEngine();
         engine.addSystem(system);
 
@@ -284,10 +285,22 @@ public class LevelExitSystemTest extends SystemTestBase {
 
         engine.update(DT);
 
-        ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
-        verify(preferences).putString(eq("save"), jsonCaptor.capture());
-        SaveData saved = new Json().fromJson(SaveData.class, jsonCaptor.getValue());
-        assertTrue("Saved completedWorldIds should contain the just-completed world key",
-            saved.completedWorldIds.contains("world1", false));
+        // Durable progress record carries the just-completed world key.
+        ArgumentCaptor<String> progressCaptor = ArgumentCaptor.forClass(String.class);
+        verify(preferences).putString(eq("progress"), progressCaptor.capture());
+        ProgressData progress = new Json().fromJson(ProgressData.class, progressCaptor.getValue());
+        assertTrue("Progress should contain the just-completed world key",
+            progress.completedWorldIds.contains("world1", false));
+
+        // The run save is a separate blob and must NOT contain star data anymore.
+        ArgumentCaptor<String> saveCaptor = ArgumentCaptor.forClass(String.class);
+        verify(preferences).putString(eq("save"), saveCaptor.capture());
+        String saveJson = saveCaptor.getValue();
+        assertFalse("Run save JSON must not carry completedWorldIds",
+            saveJson.contains("completedWorldIds"));
+        assertFalse("Run save JSON must not carry completedLevelIds",
+            saveJson.contains("completedLevelIds"));
+        SaveData saved = new Json().fromJson(SaveData.class, saveJson);
+        assertEquals("maps/world2/level_01.tmx", saved.levelPath);
     }
 }

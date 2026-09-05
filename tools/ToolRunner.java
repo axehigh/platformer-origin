@@ -47,7 +47,12 @@ public class ToolRunner {
             if (choice == 0) return;
             if (menuMap.containsKey(choice)) {
                 String scriptKey = menuMap.get(choice);
-                String defaultFile = scriptKey.equals("validate-maps") ? "map_validation.txt" : null;
+                String defaultFile = null;
+                if (scriptKey.equals("validate-maps")) {
+                    defaultFile = "map_validation.txt";
+                } else if (scriptKey.equals("generate-html")) {
+                    defaultFile = "map-design-for-tiled.html";
+                }
                 System.out.print("Enter output filename" + (defaultFile != null ? " (or press Enter for " + defaultFile + ")" : "") + ": ");
                 String outputFile = scanner.nextLine().trim();
                 if (outputFile.isEmpty()) {

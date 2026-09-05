@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static com.axehigh.platformer.GameConstants.FontScale;
+import static com.axehigh.platformer.GameConstants.SmallFontScale;
 
 /**
  * In-game pause menu, split into a Gameplay tab (audio toggles, wall-climb feature flag) and a
@@ -113,7 +114,7 @@ public class PauseDialog extends Dialog {
     private void buildGameplayTab() {
         gameplayContent.defaults().pad(ELEMENT_PAD).left();
         Label triesLabel = new Label("Tries remaining: " + listener.getTriesRemaining(), getSkin());
-        triesLabel.setFontScale(FontScale);
+        triesLabel.setFontScale(SmallFontScale);
         gameplayContent.add(triesLabel).row();
 
         gameplayContent.add(toggleCheckBox("Music",
@@ -150,7 +151,7 @@ public class PauseDialog extends Dialog {
         debugContent.add(debugRow).left().row();
 
         deviceButton = new TextButton("Device: " + listener.deviceLabel(), getSkin());
-        deviceButton.getLabel().setFontScale(FontScale);
+        deviceButton.getLabel().setFontScale(SmallFontScale);
         deviceButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -161,7 +162,7 @@ public class PauseDialog extends Dialog {
         });
 
         layoutButton = new TextButton("Mobile: " + listener.layoutLabel(), getSkin());
-        layoutButton.getLabel().setFontScale(FontScale);
+        layoutButton.getLabel().setFontScale(SmallFontScale);
         layoutButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -196,7 +197,7 @@ public class PauseDialog extends Dialog {
 
     private TextButton actionButton(String text, Runnable onClick) {
         TextButton button = new TextButton(text, getSkin());
-        button.getLabel().setFontScale(FontScale);
+        button.getLabel().setFontScale(SmallFontScale);
         button.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -209,7 +210,7 @@ public class PauseDialog extends Dialog {
 
     private CheckBox toggleCheckBox(String labelText, Supplier<Boolean> getter, Consumer<Boolean> setter) {
         CheckBox checkBox = new CheckBox(" " + labelText, getSkin());
-        checkBox.getLabel().setFontScale(FontScale);
+        checkBox.getLabel().setFontScale(SmallFontScale);
         checkBox.setChecked(getter.get());
         checkBox.addListener(new ChangeListener() {
             @Override

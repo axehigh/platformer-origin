@@ -1,10 +1,7 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.ecs.components.*;
-import com.axehigh.platformer.map.LevelCatalog;
-import com.axehigh.platformer.map.LevelDefinition;
-import com.axehigh.platformer.map.LevelManager;
-import com.axehigh.platformer.map.SaveData;
+import com.axehigh.platformer.map.*;
 import com.axehigh.platformer.util.SaveManager;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -28,6 +25,11 @@ import static com.axehigh.platformer.ecs.components.Mappers.*;
  * the player moves out of proximity, the light smoothly fades out and is removed once it reaches
  * zero. If the player also pressed interact that same frame, hands off to
  * {@code LevelManager.loadLevel(...)} to perform the actual level transition.
+ * <p>
+ * Persistence is two-layer: every completed gate — final or not — first writes the durable
+ * {@link ProgressData} star record ({@code SaveManager.saveProgress(...)}) seeded from the
+ * previously persisted progress, then writes the run snapshot ({@code SaveManager.save(...)}).
+ * Only the run snapshot is cleared by New Game / death / Clear Player; the stars survive.
  */
 public class LevelExitSystem extends IteratingSystem {
     private static final float SENSOR_PADDING = 6f;
@@ -144,13 +146,13 @@ public class LevelExitSystem extends IteratingSystem {
 
         if (inProximity && player != null && player.interactPressed) {
             player.interactPressed = false;
+            Array<String> levelIds = buildCompletedLevelIds();
+            Array<String> worldIds = buildCompletedWorldIds();
+            SaveManager.saveProgress(toProgress(levelIds, worldIds));
+            SaveManager.save(buildSaveData(player, levelExit.nextLevelPath));
             if (levelExit.isFinalLevel) {
-                SaveData save = buildSaveData(player, levelExit.nextLevelPath);
-                save.completedWorldIds = buildCompletedWorldIds(save.completedLevelIds);
-                SaveManager.save(save);
                 onVictory.run();
             } else {
-                SaveManager.save(buildSaveData(player, levelExit.nextLevelPath));
                 onTransition.transition(levelExit.nextLevelPath, playerEntity);
             }
         }
@@ -159,7 +161,6 @@ public class LevelExitSystem extends IteratingSystem {
     private SaveData buildSaveData(PlayerComponent player, String nextLevelPath) {
         SaveData saveData = SaveData.of(player);
         saveData.levelPath = nextLevelPath;
-        saveData.completedLevelIds = buildCompletedLevelIds();
         if (SaveManager.hasSave()) {
             SaveData previousSave = SaveManager.load();
             saveData.triesRemaining = previousSave.triesRemaining;
@@ -169,11 +170,9 @@ public class LevelExitSystem extends IteratingSystem {
 
     private Array<String> buildCompletedLevelIds() {
         Array<String> completedLevelIds = new Array<>();
-        if (SaveManager.hasSave()) {
-            SaveData previousSave = SaveManager.load();
-            if (previousSave.completedLevelIds != null) {
-                completedLevelIds.addAll(previousSave.completedLevelIds);
-            }
+        ProgressData progress = SaveManager.loadProgress();
+        if (progress.completedLevelIds != null) {
+            completedLevelIds.addAll(progress.completedLevelIds);
         }
         String currentLevelPath = levelManager.getCurrentLevelPath();
         for (LevelDefinition level : LevelCatalog.levels()) {
@@ -187,13 +186,11 @@ public class LevelExitSystem extends IteratingSystem {
         return completedLevelIds;
     }
 
-    private Array<String> buildCompletedWorldIds(Array<String> completedLevelIds) {
+    private Array<String> buildCompletedWorldIds() {
         Array<String> completedWorldIds = new Array<>();
-        if (SaveManager.hasSave()) {
-            SaveData previousSave = SaveManager.load();
-            if (previousSave.completedWorldIds != null) {
-                completedWorldIds.addAll(previousSave.completedWorldIds);
-            }
+        ProgressData progress = SaveManager.loadProgress();
+        if (progress.completedWorldIds != null) {
+            completedWorldIds.addAll(progress.completedWorldIds);
         }
         String currentLevelPath = levelManager.getCurrentLevelPath();
         for (LevelDefinition level : LevelCatalog.levels()) {
@@ -206,5 +203,12 @@ public class LevelExitSystem extends IteratingSystem {
             }
         }
         return completedWorldIds;
+    }
+
+    private ProgressData toProgress(Array<String> levelIds, Array<String> worldIds) {
+        ProgressData progress = new ProgressData();
+        progress.completedLevelIds.addAll(levelIds);
+        progress.completedWorldIds.addAll(worldIds);
+        return progress;
     }
 }

@@ -16,19 +16,22 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 
-import static com.axehigh.platformer.GameConstants.FontScale;
+import static com.axehigh.platformer.GameConstants.*;
 
 /**
- * Full-screen Game Over view displayed when the player dies and has no tries remaining,
- * or chooses to exit. Renders over the gameover-screen backdrop with Ken Burns zoom/embers, displays
- * run statistics (coins, items, enemies killed, sword damage, remaining tries), and provides
- * Continue (if tries remain) or Exit to Main Menu buttons.
+ * Full-screen Game Over view displayed when the player dies. Renders over the gameover-screen
+ * backdrop with Ken Burns zoom/embers, displays run statistics (coins, items, enemies killed,
+ * sword damage, remaining tries), and provides the three-way death economy:
+ * Continue (consumes one of the per-world {@code triesRemaining} budget), Retry World (restarts
+ * the world's first level with kit intact and the budget restored to 3), or Main Menu.
  */
 public class GameOverScreen extends MenuScreen {
 
     public interface Listener {
         /** Returns the screen to transition to when the player continues (e.g. a fresh {@code GameScreen}). */
         Screen onContinue();
+        /** Returns the screen to transition to when the player retries the whole world (tries exhausted). */
+        Screen onRetryWorld();
         void onExit();
     }
 
@@ -62,63 +65,83 @@ public class GameOverScreen extends MenuScreen {
 
         // Title
         Label titleLabel = createMenuTitle("GAME OVER");
+        titleLabel.setFontScale(TitleFontScale);
         titleLabel.setAlignment(Align.center);
         root.add(titleLabel).padBottom(20f).row();
 
         Label subtitleLabel = new Label("You have perished in the dungeons.", skin);
-        subtitleLabel.setFontScale(FontScale * 1.1f);
+        subtitleLabel.setFontScale(BodyFontScale);
         subtitleLabel.setColor(Color.LIGHT_GRAY);
         root.add(subtitleLabel).padBottom(40f).row();
 
         // Stats Panel
         Table statsTable = new Table(skin);
         statsTable.background(skin.getDrawable("table"));
-        statsTable.pad(30f);
+        statsTable.setColor(1, 1, 1, UI_PANEL_ALPHA); // Add transparency
+        statsTable.pad(15f);
 
         SaveData currentSave = SaveManager.hasSave() ? SaveManager.load() : new SaveData();
 
-        addStatRow(statsTable, "Tries Remaining:", String.valueOf(currentSave.triesRemaining));
-        addStatRow(statsTable, "Coins Collected:", String.valueOf(currentSave.coins));
-        addStatRow(statsTable, "Items Found:", String.valueOf(currentSave.items));
-        addStatRow(statsTable, "Enemies Killed:", String.valueOf(currentSave.enemiesKilled));
-        addStatRow(statsTable, "Sword Damage:", String.valueOf(currentSave.swordDamage));
+        // Tries Remaining at top
+        addStatRow(statsTable, "Tries Remaining:", String.valueOf(currentSave.triesRemaining), true);
 
-        root.add(statsTable).width(500f).padBottom(40f).row();
+        // Two-column layout for remaining stats
+        statsTable.row();
+
+        // Column 1: Coins & Items
+        Table col1 = new Table();
+        addStatRow(col1, "Coins Collected:", String.valueOf(currentSave.coins), false);
+        addStatRow(col1, "Items Found:", String.valueOf(currentSave.items), false);
+        statsTable.add(col1).padRight(40f).top();
+
+        // Column 2: Enemies & Damage
+        Table col2 = new Table();
+        addStatRow(col2, "Enemies Killed:", String.valueOf(currentSave.enemiesKilled), false);
+        addStatRow(col2, "Sword Damage:", String.valueOf(currentSave.swordDamage), false);
+        statsTable.add(col2).top();
+
+        root.add(statsTable).width(800f).padBottom(40f).row();
 
         // Buttons
         Table buttonTable = new Table();
 
         if (currentSave.triesRemaining > 0) {
-            TextButton continueButton = createMenuButton("Continue", () -> {
-                currentSave.triesRemaining--;
-                SaveManager.save(currentSave);
-                // Transition through THIS screen so the fade action runs and game.setScreen actually
-                // fires (the GameScreen whose listener we implement is no longer rendering its fade stage).
-                changeScreen(listener.onContinue());
+            TextButton continueButton = createMenuButton(
+                "Continue (" + currentSave.triesRemaining + ")", () -> {
+                    currentSave.triesRemaining--;
+                    SaveManager.save(currentSave);
+                    // Transition through THIS screen so the fade action runs and game.setScreen actually
+                    // fires (the GameScreen whose listener we implement is no longer rendering its fade stage).
+                    changeScreen(listener.onContinue());
+                });
+            buttonTable.add(continueButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).padRight(20f);
+        } else {
+            TextButton retryButton = createMenuButton("Retry World", () -> {
+                changeScreen(listener.onRetryWorld());
             });
-            buttonTable.add(continueButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).padBottom(20f).row();
+            buttonTable.add(retryButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).padRight(20f);
         }
 
-        TextButton exitButton = createMenuButton("Exit to Main Menu", () -> {
+        TextButton exitButton = createMenuButton("Main Menu", () -> {
             changeScreen(new MainMenuScreen(game));
         });
-        buttonTable.add(exitButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).row();
+        buttonTable.add(exitButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT);
 
         root.add(buttonTable);
     }
 
-    private void addStatRow(Table table, String labelText, String valueText) {
+    private void addStatRow(Table table, String labelText, String valueText, boolean isFullRow) {
         Label lbl = new Label(labelText, skin);
-        lbl.setFontScale(FontScale);
+        lbl.setFontScale(SmallFontScale);
         lbl.setColor(Color.WHITE);
 
         Label val = new Label(valueText, skin);
-        val.setFontScale(FontScale);
+        val.setFontScale(SmallFontScale);
         val.setColor(Color.YELLOW);
         val.setAlignment(Align.right);
 
-        table.add(lbl).left().padRight(50f).padBottom(10f);
-        table.add(val).right().padBottom(10f).row();
+        table.add(lbl).left().padRight(isFullRow ? 50f : 20f).padBottom(5f);
+        table.add(val).right().padBottom(5f).row();
     }
 
     @Override

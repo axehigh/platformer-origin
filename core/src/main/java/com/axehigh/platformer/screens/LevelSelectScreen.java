@@ -24,6 +24,11 @@ import static com.axehigh.platformer.GameConstants.FontScale;
  * Lists the levels of one world (world selectable via tabs above the grid) in a scrollable
  * 3-column grid and launches {@link GameScreen} for the chosen one. World 1 is the default.
  * Supports keyboard navigation (arrows/WASD + Enter, number keys switch world).
+ * <p>
+ * Level access is DERIVED from the durable progress-record stars ({@code SaveManager.loadProgress()}
+ * — see {@code ProgressData}), not from the run save: a level is playable iff it is starred, or it
+ * is the first unstarred level in its world (the frontier). The run save's existence drives nothing
+ * here; stars survive New Game / death / Clear Player.
  */
 public class LevelSelectScreen extends MenuScreen {
 
@@ -56,7 +61,7 @@ public class LevelSelectScreen extends MenuScreen {
     public void show() {
         super.show();
 
-        completedLevelIds = SaveManager.hasSave() ? SaveManager.load().completedLevelIds : new Array<>();
+        completedLevelIds = SaveManager.loadProgress().completedLevelIds;
 
         Table content = createMenuRoot();
         addMenuTitle(content, "Select Level");
@@ -284,7 +289,7 @@ public class LevelSelectScreen extends MenuScreen {
                 completed++;
             }
         }
-        return LevelCatalog.worldName(worldIds.get(currentWorldIndex)) + ": Completed " + completed + "/" + levels.size;
+        return LevelCatalog.worldName(worldIds.get(currentWorldIndex)) + ": ★ " + completed + "/" + levels.size;
     }
 
 }

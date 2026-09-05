@@ -2,9 +2,11 @@ package com.axehigh.platformer.map;
 
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.PotionType;
-import com.badlogic.gdx.utils.Array;
 
-/** Plain, JSON-serializable snapshot of the level path plus a player's core persistent stats. */
+/**
+ * Plain, JSON-serializable run snapshot of the level path plus a player's core stats. Stars are
+ * NOT part of this blob — they live in the durable, account-level {@link ProgressData} store.
+ */
 public class SaveData {
     public String levelPath;
     public int health;
@@ -19,8 +21,6 @@ public class SaveData {
     public int strengthPotions;
     public int speedPotions;
     public int invulnerabilityPotions;
-    public Array<String> completedLevelIds = new Array<>();
-    public Array<String> completedWorldIds = new Array<>();
     public int triesRemaining = 3;
     public int enemiesKilled = 0;
 
@@ -30,7 +30,7 @@ public class SaveData {
 
     /**
      * Builds a snapshot from the player's current stats (save path). The caller owns the
-     * non-stat fields: {@code levelPath} and {@code completedLevelIds}.
+     * non-stat fields: {@code levelPath} and {@code triesRemaining}.
      */
     public static SaveData of(PlayerComponent player) {
         SaveData saveData = new SaveData();

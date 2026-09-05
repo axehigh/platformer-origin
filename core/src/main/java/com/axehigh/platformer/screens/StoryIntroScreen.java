@@ -17,7 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 
-import static com.axehigh.platformer.GameConstants.FontScale;
+import static com.axehigh.platformer.GameConstants.BodyFontScale;
 
 /**
  * Full-screen story intro displayed before the first level of a new game.
@@ -48,7 +48,7 @@ public class StoryIntroScreen extends MenuScreen {
 
         Table root = new Table();
         root.setFillParent(true);
-        root.top().padTop(50f);
+        root.pad(50f);
         stage.addActor(root);
 
         // Title
@@ -58,11 +58,11 @@ public class StoryIntroScreen extends MenuScreen {
 
         // Body text
         Label bodyLabel = new Label(StoryText.INTRO_BODY, skin);
-        bodyLabel.setFontScale(FontScale * 1.1f);
+        bodyLabel.setFontScale(BodyFontScale);
         bodyLabel.setColor(Color.LIGHT_GRAY);
         bodyLabel.setAlignment(Align.center);
         bodyLabel.setWrap(true);
-        root.add(bodyLabel).width(900f).padBottom(40f).row();
+        root.add(bodyLabel).width(900f).expandY().row();
 
         // Enter button
         TextButton enterButton = createMenuButton(StoryText.ENTER_BUTTON, () -> newGame());
@@ -70,6 +70,7 @@ public class StoryIntroScreen extends MenuScreen {
     }
 
     private void newGame() {
+        // Run-only snapshot reset: New Game clears the run save, never the durable star progress.
         SaveManager.clear();
         SaveData freshSaveData = new SaveData();
         freshSaveData.levelPath = LevelCatalog.levels().first().tmxPath;

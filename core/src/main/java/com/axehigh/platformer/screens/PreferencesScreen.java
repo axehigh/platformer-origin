@@ -142,7 +142,7 @@ public class PreferencesScreen extends MenuScreen {
                     });
                     tabContent.add(embersCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
 
-                    TextButton clearPlayerButton = createMenuButton("Clear Player", () -> {
+                    TextButton clearPlayerButton = createMenuButton("Clear Player (Keeps Stars)", () -> {
                         com.axehigh.platformer.util.SaveManager.clear();
                     });
                     tabContent.add(clearPlayerButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).colspan(2).padBottom(ELEMENT_PAD).row();

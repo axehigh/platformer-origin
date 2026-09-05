@@ -15,8 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Scaling;
 
-import static com.axehigh.platformer.GameConstants.FontScale;
-import static com.axehigh.platformer.GameConstants.SKIN_TITLE;
+import static com.axehigh.platformer.GameConstants.*;
 import static com.axehigh.platformer.util.FeatureFlags.isEmbersEnabled;
 
 /**
@@ -98,7 +97,7 @@ public abstract class MenuScreen extends BaseScreen {
      */
     protected TextButton createMenuButton(String text, final Runnable onClick) {
         TextButton button = new TextButton(text, skin);
-        button.getLabel().setFontScale(FontScale);
+        button.getLabel().setFontScale(SmallFontScale);
         button.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {

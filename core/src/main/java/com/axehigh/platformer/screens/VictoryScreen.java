@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 
+import static com.axehigh.platformer.GameConstants.BodyFontScale;
 import static com.axehigh.platformer.GameConstants.FontScale;
 
 /**
@@ -72,7 +73,7 @@ public class VictoryScreen extends MenuScreen {
 
             // Developer placeholder text
             Label wonLabel = new Label(GAME_WON_TEXT, skin);
-            wonLabel.setFontScale(FontScale * 1.1f);
+            wonLabel.setFontScale(BodyFontScale);
             wonLabel.setColor(Color.LIGHT_GRAY);
             wonLabel.setAlignment(Align.center);
             root.add(wonLabel).padBottom(40f).row();
@@ -83,7 +84,7 @@ public class VictoryScreen extends MenuScreen {
             root.add(titleLabel).padBottom(20f).row();
 
             Label subtitleLabel = new Label("You have conquered the dungeons of " + LevelCatalog.worldName(worldId) + ".", skin);
-            subtitleLabel.setFontScale(FontScale * 1.1f);
+            subtitleLabel.setFontScale(BodyFontScale);
             subtitleLabel.setColor(Color.LIGHT_GRAY);
             root.add(subtitleLabel).padBottom(40f).row();
         }

@@ -10,6 +10,8 @@ import com.badlogic.gdx.utils.Array;
  * directly once it exists.
  */
 public class ShopManager {
+    /** Hard cap on repeatable "Iron Heart" purchases: 3 buys max (+3 max health). */
+    public static final int MAX_IRON_HEART_BUYS = 3;
     /** "Sharp Edge": raises sword damage from 5 to 8 (one-time). */
     public static final String SHARP_EDGE = "Sharp Edge";
     /** "Dagger Bandolier": doubles max dagger ammo from 30 to 60 (one-time). */
@@ -44,15 +46,20 @@ public class ShopManager {
 
     /**
      * Attempts to buy {@code item} for {@code player}. Rejects the transaction (no state change)
-     * if the player doesn't have enough gold, or if the item is a one-time upgrade that's already
-     * been purchased. Otherwise deducts {@code item.cost} from {@code player.coins}, applies the
-     * item's effect, marks the purchased flag (for one-time items), and returns {@code true}.
+     * if the player doesn't have enough gold, if the item is a one-time upgrade that's already
+     * been purchased, or if the item is "Iron Heart" and the repeatable cap
+     * ({@link #MAX_IRON_HEART_BUYS}) has been reached. Otherwise deducts {@code item.cost} from
+     * {@code player.coins}, applies the item's effect, marks the purchased flag (for one-time
+     * items), and returns {@code true}.
      */
     public boolean purchase(PlayerComponent player, ShopItem item) {
         if (player.coins < item.cost) {
             return false;
         }
         if (!item.repeatable && item.alreadyPurchased != null && item.alreadyPurchased.test(player)) {
+            return false;
+        }
+        if (IRON_HEART.equals(item.name) && player.ironHeartCount >= MAX_IRON_HEART_BUYS) {
             return false;
         }
 

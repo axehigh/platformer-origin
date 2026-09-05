@@ -111,10 +111,9 @@ WARN   assets/maps/world_demo/proto_30x9.tmx
 WARN   assets/maps/world_demo/proto_60x9.tmx
     WARN: No exitGate object found — level has no exit
 
-ERROR  assets/maps/world_demo/template_demo.tmx
-    WARN: Inline tileset 'secret_room_wall' (firstgid=78) — consider moving to a .tsx file for reuse
-    ERROR: playerStart at (1024.0, 1024.0) [col 8, row 8] is inside a solid collision tile — player will spawn embedded in geometry  [objects]
+WARN   assets/maps/world_demo/template_demo.tmx
+    WARN: Inline tileset 'secret_room_wall' (firstgid=102) — consider moving to a .tsx file for reuse
     WARN: No exitGate object found — level has no exit
 
 ============================================================
-Scanned 30 map(s): 14 error(s), 46 warning(s)
+Scanned 30 map(s): 13 error(s), 46 warning(s)

@@ -7,10 +7,16 @@ import com.axehigh.platformer.util.SaveManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
+import static com.axehigh.platformer.GameConstants.SmallFontScale;
 import static com.axehigh.platformer.GameConstants.UI_PADDING;
+import static com.axehigh.platformer.screens.GameConstantText.*;
+import static com.axehigh.platformer.ui.DialogPanelFitter.sizeToPanel;
+import static java.lang.Boolean.TRUE;
 
 /**
  * Main menu over a full-bleed {@code startup-menu.jpg} backdrop (uniform cover scaling, edges
@@ -74,23 +80,28 @@ public class MainMenuScreen extends MenuScreen {
         bottomCenter.bottom();
 
         SaveData save = SaveManager.hasSave() ? SaveManager.load() : null;
-        boolean hasOngoingGame = save != null && save.triesRemaining > 0;
+        // An ongoing run exists whenever a run save is present — regardless of tries left. If the
+        // tries are exhausted, Continue leads back to the level select (stars intact) or a Retry.
+        boolean hasOngoingGame = save != null;
 
-        TextButton newGameButton = createMenuButton("New Game", () -> {
+        TextButton newGameButton = createMenuButton(NEW_GAME, () -> {
             if (hasOngoingGame) {
-                com.badlogic.gdx.scenes.scene2d.ui.Dialog confirmDialog = new com.badlogic.gdx.scenes.scene2d.ui.Dialog("New Game", skin) {
+                Dialog confirmDialog = new Dialog("", skin) {
                     @Override
                     protected void result(Object object) {
-                        if (Boolean.TRUE.equals(object)) {
+                        if (TRUE.equals(object)) {
                             newGame();
                         }
                     }
                 };
-                confirmDialog.text("An ongoing game exists.\nStarting a new game will clear it out.\nAre you sure?");
-                confirmDialog.button("Yes", true);
-                confirmDialog.button("No", false);
+                confirmDialog.getContentTable().add(new Label(ASK_NEW_GAME, skin) {{
+                    setFontScale(SmallFontScale);
+                }});
+                confirmDialog.button(YES, true);
+                confirmDialog.button(NO, false);
+                confirmDialog.background(skin.getDrawable("table"));
                 confirmDialog.show(stage);
-                com.axehigh.platformer.ui.DialogPanelFitter.sizeToPanel(skin, stage, confirmDialog);
+                sizeToPanel(skin, stage, confirmDialog);
             } else {
                 newGame();
             }

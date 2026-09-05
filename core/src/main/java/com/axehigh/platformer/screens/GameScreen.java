@@ -290,6 +290,21 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
     }
 
     @Override
+    public Screen onRetryWorld() {
+        SaveData save = SaveManager.hasSave() ? SaveManager.load() : (saveData != null ? saveData : new SaveData());
+        save.health = save.maxHealth;
+        save.triesRemaining = 3;
+        String currentPath = systems != null ? systems.levelManager.getCurrentLevelPath() : save.levelPath;
+        int worldId = LevelCatalog.worldIdForPath(currentPath);
+        if (worldId < 0) {
+            worldId = LevelCatalog.worldIds().first();
+        }
+        save.levelPath = LevelCatalog.levelsForWorld(worldId).first().tmxPath;
+        SaveManager.save(save);
+        return new GameScreen(game, save);
+    }
+
+    @Override
     public void onExit() {
         changeScreen(new MainMenuScreen(game));
     }

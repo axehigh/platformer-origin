@@ -1,5 +1,6 @@
 package com.axehigh.platformer.ui;
 
+import com.axehigh.platformer.GameConstants;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -25,6 +26,7 @@ public final class DialogPanelFitter {
         float width = panel.getRegion().getRegionWidth() * PANEL_SCALE;
         float height = panel.getRegion().getRegionHeight() * PANEL_SCALE;
         dialog.setSize(width, height);
+        dialog.setColor(1, 1, 1, GameConstants.UI_PANEL_ALPHA);
         center(stage, dialog, width, height);
     }
 
@@ -42,6 +44,7 @@ public final class DialogPanelFitter {
         float width = panelW * scale;
         float height = panelH * scale;
         dialog.setSize(width, height);
+        dialog.setColor(1, 1, 1, GameConstants.UI_PANEL_ALPHA);
         center(stage, dialog, width, height);
     }
 
