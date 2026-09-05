@@ -1,0 +1,119 @@
+
+ERROR  assets/maps/world1/level_01.tmx
+    ERROR: Invalid potionType 'Healing' — valid: ['healing', 'invulnerability', 'speed', 'strength']  [objects:id=34]
+    WARN: 1 room(s) in Rooms layer have no name — engine will use fallback naming
+
+ERROR  assets/maps/world1/level_02.tmx
+    ERROR: Invalid potionType 'Invulnerability' — valid: ['healing', 'invulnerability', 'speed', 'strength']  [objects:id=28]
+    WARN: 1 room(s) in Rooms layer have no name — engine will use fallback naming
+
+WARN   assets/maps/world1/level_03.tmx
+    WARN: Collision tile gid=14 has secret=true but no secretRoom property — secret wall won't be grouped with a room  [collision]
+    WARN: Recommended object layer 'enemies' missing
+    WARN: Unknown object type 'Floating'  [objects:id=22]
+    WARN: Unknown object type 'chest_elite'  [objects:id=25]
+    WARN: 2 room(s) in Rooms layer have no name — engine will use fallback naming
+
+WARN   assets/maps/world1/level_04.tmx
+    WARN: Map is 32×17 tiles (>30×17) but has no Rooms layer
+
+WARN   assets/maps/world1/level_05.tmx
+    WARN: Inline tileset 'secret_room_wall' (firstgid=102) — consider moving to a .tsx file for reuse
+
+WARN   assets/maps/world1/level_06.tmx
+    WARN: Unknown object type 'Floating'  [objects:id=523]
+
+WARN   assets/maps/world1/level_07.tmx
+    WARN: No exitGate object found — level has no exit
+
+WARN   assets/maps/world1/level_08.tmx
+    WARN: Inline tileset 'secret_room_wall' (firstgid=99) — consider moving to a .tsx file for reuse
+
+WARN   assets/maps/world1/level_09.tmx
+    WARN: Inline tileset 'secret_room_wall' (firstgid=71) — consider moving to a .tsx file for reuse
+    WARN: 2 room(s) in Rooms layer have no name — engine will use fallback naming
+
+WARN   assets/maps/world1/level_10.tmx
+    WARN: Object uses TileEnum property 'platform' instead of object type attribute — consider updating  [objects:id=7]
+    WARN: Object uses TileEnum property 'platform' instead of object type attribute — consider updating  [objects:id=9]
+    WARN: 1 room(s) in Rooms layer have no name — engine will use fallback naming
+  OK  assets/maps/world2/level_01.tmx
+
+WARN   assets/maps/world2/level_01b.tmx
+    WARN: Object gid=23 resolves to a tile with no type — will be ignored by engine  [objects:id=994]
+
+WARN   assets/maps/world2/level_02.tmx
+    WARN: Object uses TileEnum property 'platform' instead of object type attribute — consider updating  [objects:id=724]
+
+WARN   assets/maps/world2/level_03.tmx
+    WARN: Collision tile gid=14 has secret=true but no secretRoom property — secret wall won't be grouped with a room  [collision]
+    WARN: Object gid=14 resolves to a tile with no type — will be ignored by engine  [objects:id=1474]
+    WARN: Object gid=14 resolves to a tile with no type — will be ignored by engine  [objects:id=1475]
+
+WARN   assets/maps/world2/level_04.tmx
+    WARN: Object uses TileEnum property 'platform' instead of object type attribute — consider updating  [objects:id=975]
+  OK  assets/maps/world2/level_05.tmx
+  OK  assets/maps/world2/level_06.tmx
+  OK  assets/maps/world2/level_07.tmx
+
+ERROR  assets/maps/world2/level_08.tmx
+    WARN: Unknown object type 'Floating'  [objects:id=980]
+    ERROR: Invalid potionType 'Healing' — valid: ['healing', 'invulnerability', 'speed', 'strength']  [objects:id=981]
+
+ERROR  assets/maps/world2/level_09.tmx
+    WARN: Unknown object type 'Floating'  [objects:id=725]
+    WARN: Unknown object type 'Floating'  [objects:id=739]
+    ERROR: Invalid potionType 'Speed' — valid: ['healing', 'invulnerability', 'speed', 'strength']  [objects:id=740]
+    ERROR: Invalid potionType 'Healing' — valid: ['healing', 'invulnerability', 'speed', 'strength']  [objects:id=741]
+    ERROR: Invalid potionType 'Strength' — valid: ['healing', 'invulnerability', 'speed', 'strength']  [objects:id=742]
+    ERROR: Invalid potionType 'Invulnerability' — valid: ['healing', 'invulnerability', 'speed', 'strength']  [objects:id=743]
+
+ERROR  assets/maps/world2/level_10_final.tmx
+    ERROR: exitGate missing required 'nextLevel' property  [objects:id=6]
+    ERROR: Invalid potionType 'Healing' — valid: ['healing', 'invulnerability', 'speed', 'strength']  [objects:id=34]
+    WARN: 1 room(s) in Rooms layer have no name — engine will use fallback naming
+
+WARN   assets/maps/world_demo/my_map.tmx
+    WARN: Inline tileset 'secret_room_wall' (firstgid=78) — consider moving to a .tsx file for reuse
+    WARN: No exitGate object found — level has no exit
+
+ERROR  assets/maps/world_demo/platforming_24x10.tmx
+    WARN: Collision tile gid=146 has secret=true but no secretRoom property — secret wall won't be grouped with a room  [collision]
+    ERROR: Invalid potionType 'Speed' — valid: ['healing', 'invulnerability', 'speed', 'strength']  [objects:id=490]
+    ERROR: Invalid potionType 'Healing' — valid: ['healing', 'invulnerability', 'speed', 'strength']  [objects:id=491]
+    ERROR: Invalid potionType 'Strength' — valid: ['healing', 'invulnerability', 'speed', 'strength']  [objects:id=492]
+    ERROR: Invalid potionType 'Invulnerability' — valid: ['healing', 'invulnerability', 'speed', 'strength']  [objects:id=493]
+    WARN: No exitGate object found — level has no exit
+
+WARN   assets/maps/world_demo/platforming_30x17.tmx
+    WARN: Inline tileset 'secret_room_wall' (firstgid=77) — consider moving to a .tsx file for reuse
+    WARN: No exitGate object found — level has no exit
+
+WARN   assets/maps/world_demo/platforming_clamp.tmx
+    WARN: Inline tileset 'secret_room_wall' (firstgid=77) — consider moving to a .tsx file for reuse
+    WARN: No exitGate object found — level has no exit
+
+WARN   assets/maps/world_demo/platforming_grid.tmx
+    WARN: Unknown object type 'chest_elite'  [objects:id=966]
+    WARN: Unknown object type 'Floating'  [objects:id=967]
+    WARN: No exitGate object found — level has no exit
+
+WARN   assets/maps/world_demo/platforming_secret.tmx
+    WARN: Inline tileset 'secret_room_wall' (firstgid=99) — consider moving to a .tsx file for reuse
+    WARN: No exitGate object found — level has no exit
+
+WARN   assets/maps/world_demo/proto_30x9.tmx
+    WARN: Unknown object type 'Floating'  [objects:id=272]
+    WARN: Unknown object type 'Floating'  [objects:id=273]
+    WARN: No exitGate object found — level has no exit
+
+WARN   assets/maps/world_demo/proto_60x9.tmx
+    WARN: No exitGate object found — level has no exit
+
+ERROR  assets/maps/world_demo/template_demo.tmx
+    WARN: Inline tileset 'secret_room_wall' (firstgid=78) — consider moving to a .tsx file for reuse
+    ERROR: playerStart at (1024.0, 1024.0) [col 8, row 8] is inside a solid collision tile — player will spawn embedded in geometry  [objects]
+    WARN: No exitGate object found — level has no exit
+
+============================================================
+Scanned 30 map(s): 14 error(s), 46 warning(s)
