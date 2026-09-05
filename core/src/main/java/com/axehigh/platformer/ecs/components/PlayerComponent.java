@@ -13,6 +13,10 @@ public class PlayerComponent implements Component {
     public int health = MAX_HEALTH;
     public int maxHealth = MAX_HEALTH;
     public int coins = 0;
+    /** Crystals collected so far this level attempt (reset to 0 on every level entry). */
+    public int crystalsCollected = 0;
+    /** Number of crystal pickups placed in the current level (0 when the level has none). */
+    public int crystalTarget = 0;
     public int ammo = 0;
     public int maxAmmo = MAX_AMMO;
     /** Held Healing potions, capped at {@link GameConstants#POTION_CAP}. */

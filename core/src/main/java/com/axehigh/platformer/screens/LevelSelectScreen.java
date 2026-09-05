@@ -19,6 +19,7 @@ import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.Scaling;
 
 import static com.axehigh.platformer.GameConstants.FontScale;
+import static com.axehigh.platformer.GameConstants.SmallFontScale;
 
 /**
  * Lists the levels of one world (world selectable via tabs above the grid) in a scrollable
@@ -64,12 +65,12 @@ public class LevelSelectScreen extends MenuScreen {
         completedLevelIds = SaveManager.loadProgress().completedLevelIds;
 
         Table content = createMenuRoot();
-        addMenuTitle(content, "Select Level");
+        addMenuTitle(content, "Dungeons");
 
         content.add(createWorldTabs()).padBottom(16f).row();
 
         progress = new Label("", skin);
-        progress.setFontScale(FontScale);
+        progress.setFontScale(SmallFontScale);
         content.add(progress).padBottom(16f).row();
 
         grid = new Table();

@@ -82,6 +82,8 @@ public final class GameConstants {
     public static final float[] MESSAGE_COLOR_STRENGTH = {1f, 0.6f, 0f};
     public static final float[] MESSAGE_COLOR_SPEED = {0f, 0.9f, 1f};
     public static final float[] MESSAGE_COLOR_INVULN = {1f, 1f, 1f};
+    /** Crystal objective counter / pickup text (cyan). Distinct from the gold coin counter. */
+    public static final float[] MESSAGE_COLOR_CRYSTALS = {0.3f, 0.9f, 1f};
 
     /** Duration (seconds) of the fade-in/fade-out transition between screens. */
     public static final float SCREEN_FADE_TIMER = 0.5f;

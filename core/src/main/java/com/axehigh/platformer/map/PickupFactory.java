@@ -31,11 +31,61 @@ class PickupFactory {
     private static final String[] COIN_REGION_NAMES = {"Coin_01", "Coin_02", "Coin_03", "Coin_04", "Coin_05", "Coin_06"};
     /** The coin sprite renders at half a map tile by default (8px base tile scaled by {@code unitScale}). */
     private static final float DEFAULT_COIN_SIZE = 8f;
+    /** Atlas region name of the crystal sprite (a single static frame, not an animation). */
+    private static final String CRYSTAL_REGION_NAME = "Diamond";
+    /** The crystal sprite renders at 10px base tile, a touch larger than a coin (scaled by {@code unitScale}). */
+    private static final float DEFAULT_CRYSTAL_SIZE = 10f;
 
     private final FactoryContext context;
 
     PickupFactory(FactoryContext context) {
         this.context = context;
+    }
+
+    /**
+     * Builds a crystal pickup entity sized to {@code DEFAULT_CRYSTAL_SIZE * unitScale}, centered on
+     * the given {@code width} x {@code height} marker rect (the marker rect is a pure placement
+     * guide, exactly like coins). Rendered from the single static {@code Diamond} atlas region (no
+     * {@code AnimationComponent}). Adds {@code CrystalPickupComponent} so {@code PickupSystem}
+     * increments the player's crystal objective count on pickup.
+     */
+    public Entity createCrystalPickup(float x, float y, float width, float height) {
+        float size = DEFAULT_CRYSTAL_SIZE * context.unitScale;
+        AtlasRegion region = context.originAtlas.findRegion(CRYSTAL_REGION_NAME);
+        float scale = size / region.getRegionWidth();
+        return buildCrystal(x + width / 2f - size / 2f, y + height / 2f - size / 2f, size, size, scale);
+    }
+
+    /**
+     * Shared crystal-entity builder: places a square {@code scale * regionWidth} crystal centered
+     * inside the {@code width} x {@code height} rect at {@code (x, y)} (bottom-left). No animation —
+     * a single static {@code Diamond} frame.
+     */
+    private Entity buildCrystal(float x, float y, float width, float height, float scale) {
+        AtlasRegion region = context.originAtlas.findRegion(CRYSTAL_REGION_NAME);
+
+        float scaledWidth = region.getRegionWidth() * scale;
+        float scaledHeight = region.getRegionHeight() * scale;
+
+        Entity entity = new Entity();
+
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(x + (width - scaledWidth) / 2f, y + (height - scaledHeight) / 2f);
+        transform.scale.set(scale, scale);
+        transform.z = FactoryContext.DECOR_Z;
+        entity.add(transform);
+
+        TextureComponent textureComponent = new TextureComponent();
+        textureComponent.region = region;
+        entity.add(textureComponent);
+
+        CollisionComponent collisionComponent = new CollisionComponent();
+        collisionComponent.bounds.setSize(scaledWidth, scaledHeight);
+        entity.add(collisionComponent);
+
+        entity.add(new CrystalPickupComponent());
+
+        return entity;
     }
 
     /**

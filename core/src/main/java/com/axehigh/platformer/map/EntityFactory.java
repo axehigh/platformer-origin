@@ -103,6 +103,43 @@ public class EntityFactory {
     }
 
     /**
+     * Derives the level's crystal objective from the given spawn layers and writes it onto the
+     * player: {@code PlayerComponent.crystalTarget} = count of {@code type="crystal"} markers across
+     * {@code layers} (the object + enemy object layers, whichever carry them), and
+     * {@code crystalsCollected} is reset to 0 (the objective is per-attempt, restarting on every
+     * level entry). Must be called **before** {@link #spawnObjects} removes the markers. A level
+     * with no crystals leaves {@code crystalTarget = 0}, hiding the HUD counter (see {@code HudStage}).
+     *
+     * @param player  the persisted player entity whose {@code PlayerComponent} is updated
+     * @param layers  the object layers to scan ({@code MapLoader.getObjectLayer()} /
+     *                {@code MapLoader.getEnemiesLayer()}), typically both
+     */
+    public void applyCrystalObjective(Entity player, MapObjects... layers) {
+        PlayerComponent playerComponent = Mappers.PLAYER.get(player);
+        if (playerComponent == null) {
+            return;
+        }
+        int count = 0;
+        for (MapObjects objects : layers) {
+            if (objects == null) {
+                continue;
+            }
+            for (MapObject object : objects) {
+                TiledMapTile tile = null;
+                if (object instanceof TiledMapTileMapObject) {
+                    tile = ((TiledMapTileMapObject) object).getTile();
+                }
+                String type = TileProps.getProperty(object, tile, "type", null);
+                if ("crystal".equals(type)) {
+                    count++;
+                }
+            }
+        }
+        playerComponent.crystalTarget = count;
+        playerComponent.crystalsCollected = 0;
+    }
+
+    /**
      * Spawns decorative entities (coin, chest, torch, exit gate, enemy) found in the object layer.
      * {@code roomState} is used to assign each spawned enemy to whichever Room rectangle contains
      * its spawn point (see {@code EnemyComponent.roomIndex}).
@@ -153,6 +190,10 @@ public class EntityFactory {
             switch (type) {
                 case "coin":
                     engine.addEntity(pickupFactory.createCoinPickup(spawnX, spawnY, objectWidth, objectHeight));
+                    spawned = true;
+                    break;
+                case "crystal":
+                    engine.addEntity(pickupFactory.createCrystalPickup(spawnX, spawnY, objectWidth, objectHeight));
                     spawned = true;
                     break;
                 case "chest":

@@ -135,7 +135,7 @@ graph LR
 - **New menu screens** (`screens` package), each independently implementing `Screen` (per the confirmed no-shared-base decision), each owning its own `Stage` + reused `SkinFactory.createBasicSkin()` instance:
   - `MainMenuScreen`: title label + 4 `TextButton`s in a `Table` (`setFillParent(true)`); button `ChangeListener`s call `game.setScreen(...)`.
   - `LevelSelectScreen`: title + a `TextButton` per `LevelDefinition` from `LevelCatalog`, laid out in a `Table`, plus a Back button.
-  - `PreferencesScreen`: two `Slider`s (music/SFX, 0–100) + one `CheckBox` (debug mode), pre-filled from `GamePreferences`, each with a `ChangeListener` that writes straight back to `GamePreferences`; plus a Back button.
+  - `SettingsScreen`: two `Slider`s (music/SFX, 0–100) + one `CheckBox` (debug mode), pre-filled from `GamePreferences`, each with a `ChangeListener` that writes straight back to `GamePreferences`; plus a Back button.
 - Each menu screen follows the `HudStage`/`TouchControlsStage` lifecycle conventions already used in `GameScreen`: `Gdx.input.setInputProcessor(stage)` in `show()`, `stage.act/draw` in `render()`, `stage.getViewport().update(w, h, true)` in `resize()`, `stage.dispose()` + `skin.dispose()` in `dispose()`.
 
 ### Data Models / Contracts
@@ -163,7 +163,7 @@ public class GamePreferences {
 ### Components
 - `MainMenuScreen` (new) — entry screen; New Game / Continue(disabled) / Select Level / Preferences buttons.
 - `LevelSelectScreen` (new) — lists `LevelCatalog` entries, launches `GameScreen(levelPath)`.
-- `PreferencesScreen` (new) — music/SFX sliders + debug checkbox bound to `GamePreferences`.
+- `SettingsScreen` (new) — music/SFX sliders + debug checkbox bound to `GamePreferences`.
 - `LevelCatalog` / `LevelDefinition` (new, `map` package) — static level metadata.
 - `GamePreferences` (new, `util` package) — settings persistence wrapper.
 - `GameScreen` (modified) — now takes a level path instead of a hardcoded one.
@@ -497,7 +497,7 @@ Implement the level-picker screen that lets the player jump directly into any ca
 
 ### ✓ Step 5: Build PreferencesScreen bound to GamePreferences
 Implement the settings screen with placeholder, persisted options.
-- Add `PreferencesScreen` implementing `Screen`, with a title, a music-volume `Slider`, an SFX-volume `Slider`, and a debug-mode `CheckBox`, all initialized from `GamePreferences` on `show()`.
+- Add `SettingsScreen` implementing `Screen`, with a title, a music-volume `Slider`, an SFX-volume `Slider`, and a debug-mode `CheckBox`, all initialized from `GamePreferences` on `show()`.
 - Attach `ChangeListener`s to each widget that immediately persist the new value via the corresponding `GamePreferences` setter.
 - Add a Back button that calls `game.setScreen(new MainMenuScreen(game))`.
 - Follow the same Stage/Skin lifecycle as the other menu screens.

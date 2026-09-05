@@ -142,6 +142,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
             saveData.applyTo(PLAYER.get(player));
         }
 
+        entityFactory.applyCrystalObjective(player, mapLoader.getObjectLayer(), mapLoader.getEnemiesLayer());
         entityFactory.spawnObjects(engine, mapLoader.getObjectLayer(), roomState);
         entityFactory.spawnObjects(engine, mapLoader.getEnemiesLayer(), roomState);
         entityFactory.spawnEffects(engine, mapLoader.getEffectSpawns(), roomState);

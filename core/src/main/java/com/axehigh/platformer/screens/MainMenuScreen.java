@@ -42,17 +42,17 @@ public class MainMenuScreen extends MenuScreen {
         Table titleTable = new Table();
         titleTable.setFillParent(true);
         titleTable.top();
-        titleTable.add(menuEffects.createGlowBehind(createMenuTitle("Origin"))).padTop(3 * UI_PADDING).row();
+        titleTable.add(menuEffects.createGlowBehind(createMenuTitle(ORIGIN_TITLE))).padTop(3 * UI_PADDING).row();
         stage.addActor(titleTable);
 
-        TextButton preferencesButton = createMenuButton("Preferences", () -> changeScreen(new PreferencesScreen(game)));
+        TextButton preferencesButton = createMenuButton(SETTINGS, () -> changeScreen(new SettingsScreen(game)));
         Table cornerTopRight = new Table();
         cornerTopRight.setFillParent(true);
         cornerTopRight.top().right();
         cornerTopRight.add(preferencesButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
             .pad(UI_PADDING).row();
 
-        TextButton creditsButton = createMenuButton("Credits", () -> changeScreen(new CreditsScreen(game)));
+        TextButton creditsButton = createMenuButton(CREDITS, () -> changeScreen(new CreditsScreen(game)));
         cornerTopRight.add(creditsButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
             .pad(UI_PADDING).row();
         stage.addActor(cornerTopRight);
@@ -60,12 +60,12 @@ public class MainMenuScreen extends MenuScreen {
         Table cornerTopLeft = new Table();
         cornerTopLeft.setFillParent(true);
         cornerTopLeft.top().left();
-        TextButton exitGameButton = createMenuButton("Exit Game", () -> com.badlogic.gdx.Gdx.app.exit());
+        TextButton exitGameButton = createMenuButton(EXIT, () -> com.badlogic.gdx.Gdx.app.exit());
         cornerTopLeft.add(exitGameButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)
             .pad(UI_PADDING).row();
         stage.addActor(cornerTopLeft);
 
-        TextButton selectLevelButton = createMenuButton("Select Level", () -> changeScreen(new LevelSelectScreen(game)));
+        TextButton selectLevelButton = createMenuButton(DUNGEONS, () -> changeScreen(new LevelSelectScreen(game)));
         if (FeatureFlags.isSelectLevelEnabled() && FeatureFlags.isLevelOpen()) {
             Table cornerBottomRight = new Table();
             cornerBottomRight.setFillParent(true);
@@ -106,7 +106,7 @@ public class MainMenuScreen extends MenuScreen {
                 newGame();
             }
         });
-        TextButton continueButton = createMenuButton("Continue", () -> {
+        TextButton continueButton = createMenuButton(CONTINUE, () -> {
             changeScreen(new LevelSelectScreen(game));
         });
         if (!hasOngoingGame) {

@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 
 import static com.axehigh.platformer.GameConstants.*;
+import static com.axehigh.platformer.screens.GameConstantText.*;
 
 /**
  * Full-screen Game Over view displayed when the player dies. Renders over the gameover-screen
@@ -64,12 +65,9 @@ public class GameOverScreen extends MenuScreen {
         stage.addActor(root);
 
         // Title
-        Label titleLabel = createMenuTitle("GAME OVER");
-        titleLabel.setFontScale(TitleFontScale);
-        titleLabel.setAlignment(Align.center);
-        root.add(titleLabel).padBottom(20f).row();
+        addMenuTitle(root, GAME_OVER);
 
-        Label subtitleLabel = new Label("You have perished in the dungeons.", skin);
+        Label subtitleLabel = new Label(PERISHED_TEXT, skin);
         subtitleLabel.setFontScale(BodyFontScale);
         subtitleLabel.setColor(Color.LIGHT_GRAY);
         root.add(subtitleLabel).padBottom(40f).row();
@@ -83,21 +81,21 @@ public class GameOverScreen extends MenuScreen {
         SaveData currentSave = SaveManager.hasSave() ? SaveManager.load() : new SaveData();
 
         // Tries Remaining at top
-        addStatRow(statsTable, "Tries Remaining:", String.valueOf(currentSave.triesRemaining), true);
+        addStatRow(statsTable, TRIES_REMAINING, String.valueOf(currentSave.triesRemaining), true);
 
         // Two-column layout for remaining stats
         statsTable.row();
 
         // Column 1: Coins & Items
         Table col1 = new Table();
-        addStatRow(col1, "Coins Collected:", String.valueOf(currentSave.coins), false);
-        addStatRow(col1, "Items Found:", String.valueOf(currentSave.items), false);
+        addStatRow(col1, COINS_COLLECTED, String.valueOf(currentSave.coins), false);
+        addStatRow(col1, ITEMS_FOUND, String.valueOf(currentSave.items), false);
         statsTable.add(col1).padRight(40f).top();
 
         // Column 2: Enemies & Damage
         Table col2 = new Table();
-        addStatRow(col2, "Enemies Killed:", String.valueOf(currentSave.enemiesKilled), false);
-        addStatRow(col2, "Sword Damage:", String.valueOf(currentSave.swordDamage), false);
+        addStatRow(col2, ENEMIES_KILLED, String.valueOf(currentSave.enemiesKilled), false);
+        addStatRow(col2, SWORD_DAMAGE, String.valueOf(currentSave.swordDamage), false);
         statsTable.add(col2).top();
 
         root.add(statsTable).width(800f).padBottom(40f).row();
@@ -107,7 +105,7 @@ public class GameOverScreen extends MenuScreen {
 
         if (currentSave.triesRemaining > 0) {
             TextButton continueButton = createMenuButton(
-                "Continue (" + currentSave.triesRemaining + ")", () -> {
+                CONTINUE + " (" + currentSave.triesRemaining + ")", () -> {
                     currentSave.triesRemaining--;
                     SaveManager.save(currentSave);
                     // Transition through THIS screen so the fade action runs and game.setScreen actually
@@ -116,13 +114,13 @@ public class GameOverScreen extends MenuScreen {
                 });
             buttonTable.add(continueButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).padRight(20f);
         } else {
-            TextButton retryButton = createMenuButton("Retry World", () -> {
+            TextButton retryButton = createMenuButton(RETRY_WORLD, () -> {
                 changeScreen(listener.onRetryWorld());
             });
             buttonTable.add(retryButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).padRight(20f);
         }
 
-        TextButton exitButton = createMenuButton("Main Menu", () -> {
+        TextButton exitButton = createMenuButton(MAIN_MENU, () -> {
             changeScreen(new MainMenuScreen(game));
         });
         buttonTable.add(exitButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT);

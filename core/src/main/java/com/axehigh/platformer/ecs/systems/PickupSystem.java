@@ -16,9 +16,9 @@ import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
  * Resolves pickup-vs-player overlap: looks up the single player entity once, then for each
- * dagger or coin pickup checks AABB overlap against it. On overlap, either increments the
- * player's shoot ammo (capped at {@code maxItems}) or coin count (uncapped), then removes the
- * pickup entity.
+ * dagger, coin, or crystal pickup checks AABB overlap against it. On overlap, either increments the
+ * player's shoot ammo (capped at {@code maxItems}), coin count (uncapped), or crystal-objective
+ * count, then removes the pickup entity.
  */
 public class PickupSystem extends IteratingSystem {
     private static final float COIN_SPARK_SCALE = 1.5f;
@@ -35,7 +35,8 @@ public class PickupSystem extends IteratingSystem {
     }
 
     public PickupSystem(SfxSystem sfxSystem, EntityFactory entityFactory, int priority) {
-        super(Family.one(DaggerPickupComponent.class, CoinPickupComponent.class, PotionPickupComponent.class)
+        super(Family.one(DaggerPickupComponent.class, CoinPickupComponent.class, PotionPickupComponent.class,
+            CrystalPickupComponent.class)
             .get(), priority);
         this.sfxSystem = sfxSystem;
         this.entityFactory = entityFactory;
@@ -86,17 +87,27 @@ public class PickupSystem extends IteratingSystem {
             spawnCoinSpark(pickupCollision);
             queueItemMessage(player, daggerPickup.amount);
         } else {
-            PotionPickupComponent potionPickup = POTION_PICKUP.get(pickupEntity);
-            if (potionPickup != null) {
-                pickupPotion(player, potionPickup);
-            } else {
-                CoinPickupComponent coinPickup = COIN_PICKUP.get(pickupEntity);
-                player.coins += coinPickup.amount;
-                if (sfxSystem != null) {
-                    sfxSystem.playCoin();
-                }
+            CrystalPickupComponent crystalPickup = CRYSTAL_PICKUP.get(pickupEntity);
+            if (crystalPickup != null) {
+                player.crystalsCollected += crystalPickup.amount;
                 spawnCoinSpark(pickupCollision);
-                queueCoinMessage(player, coinPickup.amount);
+                if (entityFactory != null) {
+                    entityFactory.createFloatingMessage(getEngine(),
+                            "+" + crystalPickup.amount + " Crystal", GameConstants.MESSAGE_COLOR_CRYSTALS, players.first());
+                }
+            } else {
+                PotionPickupComponent potionPickup = POTION_PICKUP.get(pickupEntity);
+                if (potionPickup != null) {
+                    pickupPotion(player, potionPickup);
+                } else {
+                    CoinPickupComponent coinPickup = COIN_PICKUP.get(pickupEntity);
+                    player.coins += coinPickup.amount;
+                    if (sfxSystem != null) {
+                        sfxSystem.playCoin();
+                    }
+                    spawnCoinSpark(pickupCollision);
+                    queueCoinMessage(player, coinPickup.amount);
+                }
             }
         }
         getEngine().removeEntity(pickupEntity);

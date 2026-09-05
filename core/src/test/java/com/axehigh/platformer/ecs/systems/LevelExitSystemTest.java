@@ -1,6 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.LightComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.map.LevelManager;
 import com.axehigh.platformer.map.ProgressData;
 import com.axehigh.platformer.map.SaveData;

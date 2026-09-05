@@ -17,7 +17,8 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 
 import static com.axehigh.platformer.GameConstants.BodyFontScale;
-import static com.axehigh.platformer.GameConstants.FontScale;
+import static com.axehigh.platformer.GameConstants.SmallFontScale;
+import static com.axehigh.platformer.screens.GameConstantText.*;
 
 /**
  * Full-screen World-complete view displayed when the player finishes the last level of a world.
@@ -67,9 +68,7 @@ public class VictoryScreen extends MenuScreen {
 
         if (lastWorld) {
             // Title
-            Label titleLabel = createMenuTitle("YOU WON THE GAME");
-            titleLabel.setAlignment(Align.center);
-            root.add(titleLabel).padBottom(20f).row();
+            addMenuTitle(root, YOU_WON);
 
             // Developer placeholder text
             Label wonLabel = new Label(GAME_WON_TEXT, skin);
@@ -79,11 +78,9 @@ public class VictoryScreen extends MenuScreen {
             root.add(wonLabel).padBottom(40f).row();
         } else {
             // Title
-            Label titleLabel = createMenuTitle("WORLD " + worldId + " COMPLETE!");
-            titleLabel.setAlignment(Align.center);
-            root.add(titleLabel).padBottom(20f).row();
+            addMenuTitle(root, String.format(WORLD_COMPLETE, worldId));
 
-            Label subtitleLabel = new Label("You have conquered the dungeons of " + LevelCatalog.worldName(worldId) + ".", skin);
+            Label subtitleLabel = new Label(CONQUERED_DUNGEONS + LevelCatalog.worldName(worldId) + ".", skin);
             subtitleLabel.setFontScale(BodyFontScale);
             subtitleLabel.setColor(Color.LIGHT_GRAY);
             root.add(subtitleLabel).padBottom(40f).row();
@@ -96,16 +93,16 @@ public class VictoryScreen extends MenuScreen {
 
         SaveData currentSave = SaveManager.hasSave() ? SaveManager.load() : new SaveData();
 
-        addStatRow(statsTable, "Coins Collected:", String.valueOf(currentSave.coins));
-        addStatRow(statsTable, "Items Found:", String.valueOf(currentSave.items));
-        addStatRow(statsTable, "Enemies Killed:", String.valueOf(currentSave.enemiesKilled));
-        addStatRow(statsTable, "Sword Damage:", String.valueOf(currentSave.swordDamage));
+        addStatRow(statsTable, COINS_COLLECTED, String.valueOf(currentSave.coins));
+        addStatRow(statsTable, ITEMS_FOUND, String.valueOf(currentSave.items));
+        addStatRow(statsTable, ENEMIES_KILLED, String.valueOf(currentSave.enemiesKilled));
+        addStatRow(statsTable, SWORD_DAMAGE, String.valueOf(currentSave.swordDamage));
 
         root.add(statsTable).width(500f).padBottom(40f).row();
 
         // Buttons — always return to Level Select
         Table buttonTable = new Table();
-        TextButton menuButton = createMenuButton("Select Level", () -> {
+        TextButton menuButton = createMenuButton(NEXT, () -> {
             changeScreen(new LevelSelectScreen(game));
         });
         buttonTable.add(menuButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).row();
@@ -115,11 +112,11 @@ public class VictoryScreen extends MenuScreen {
 
     private void addStatRow(Table table, String labelText, String valueText) {
         Label lbl = new Label(labelText, skin);
-        lbl.setFontScale(FontScale);
+        lbl.setFontScale(SmallFontScale);
         lbl.setColor(Color.WHITE);
 
         Label val = new Label(valueText, skin);
-        val.setFontScale(FontScale);
+        val.setFontScale(SmallFontScale);
         val.setColor(Color.YELLOW);
         val.setAlignment(Align.right);
 

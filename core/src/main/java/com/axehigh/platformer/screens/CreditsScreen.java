@@ -6,7 +6,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 
-import static com.axehigh.platformer.GameConstants.FontScale;
+import static com.axehigh.platformer.GameConstants.*;
+import static com.axehigh.platformer.screens.GameConstantText.*;
 
 /**
  * Credits screen displaying development team and assets info, following the unified MenuScreen layout pattern.
@@ -30,22 +31,22 @@ public class CreditsScreen extends MenuScreen {
         Table creditsContent = new Table();
         creditsContent.center();
 
-        addCreditLine(creditsContent, "ORIGIN: 2D PIXEL-ART PLATFORMER", FontScale * 1.2f, Color.GOLD);
+        addCreditLine(creditsContent, ORIGIN_TITLE, TitleFontScale, Color.GOLD);
         creditsContent.row();
 
-        addCreditLine(creditsContent, "Lead Game Developer", FontScale, Color.LIGHT_GRAY);
+        addCreditLine(creditsContent, LEAD_DEV, SmallFontScale, Color.LIGHT_GRAY);
         creditsContent.row();
-        addCreditLine(creditsContent, "AxeHigh Games", FontScale * 1.1f, Color.WHITE);
+        addCreditLine(creditsContent, AXEHIGH_GAMES, BodyFontScale, Color.WHITE);
         creditsContent.row().padBottom(ELEMENT_PAD);
 
-        addCreditLine(creditsContent, "Engine & Framework", FontScale, Color.LIGHT_GRAY);
+        addCreditLine(creditsContent, ENGINE_FRAMEWORK, SmallFontScale, Color.LIGHT_GRAY);
         creditsContent.row();
-        addCreditLine(creditsContent, "libGDX & Ashley ECS", FontScale * 1.1f, Color.WHITE);
+        addCreditLine(creditsContent, LIBGDX_ASHLEY, BodyFontScale, Color.WHITE);
         creditsContent.row().padBottom(ELEMENT_PAD);
 
-        addCreditLine(creditsContent, "Art & Music", FontScale, Color.LIGHT_GRAY);
+        addCreditLine(creditsContent, ART_MUSIC, SmallFontScale, Color.LIGHT_GRAY);
         creditsContent.row();
-        addCreditLine(creditsContent, "Medieval Dungeon Pixel Art Pack", FontScale * 1.1f, Color.WHITE);
+        addCreditLine(creditsContent, MEDIEVAL_DUNGEON_PACK, BodyFontScale, Color.WHITE);
         creditsContent.row().padBottom(ELEMENT_PAD);
 
         content.add(creditsContent).colspan(2).expand().center().padBottom(30f).row();

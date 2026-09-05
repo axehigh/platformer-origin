@@ -17,12 +17,13 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_UI_GFX;
 
 /**
- * Top HUD overlay: avatar + heart icons + coin counter (top-left), buff countdown row
+ * Top HUD overlay: avatar + heart icons + coin/crystal counters (top-left), buff countdown row
  * (top-center), item tracker + pause button (top-right) — reflecting the live values on
- * {@link PlayerComponent} and the running buffs on {@link BuffComponent}. The coin/item
+ * {@link PlayerComponent} and the running buffs on {@link BuffComponent}. The coin/crystal/item
  * text uses a dedicated drop-shadowed clone of the skin font so it stays legible against
  * bright background tiles.
  */
@@ -40,6 +41,8 @@ public class HudStage extends Stage {
     private final Image[] heartImages;
     private final Label coinLabel;
     private Label bulletLabel;
+    private final Image crystalIcon;
+    private final Label crystalLabel;
     private final ImageButton pauseButton;
     private final ObjectMap<PotionType, TextureRegionDrawable> potionDrawables = new ObjectMap<>();
     private final Image[] buffImages;
@@ -81,6 +84,14 @@ public class HudStage extends Stage {
         leftGroup.add(coinIcon).size(34f, 34f).padRight(10f);
         coinLabel = new ShadowLabel("", counterStyle);
         leftGroup.add(coinLabel).padRight(24f);
+
+        // Crystal objective (per-level collectible): a Diamond icon + "N/N" counter. Hidden when the
+        // current level places no crystals (crystalTarget == 0), toggled in refresh().
+        LabelStyle crystalStyle = new LabelStyle(counterStyle);
+        crystalIcon = new Image(new TextureRegion(assetManager.get(ORIGIN_GAME_GFX, TextureAtlas.class).findRegion("Diamond")));
+        crystalLabel = new ShadowLabel("", crystalStyle);
+        leftGroup.add(crystalIcon).size(24f, 24f).padRight(8f);
+        leftGroup.add(crystalLabel).padRight(24f);
 
         if (GameConstants.USE_BULLET) {
             Image bulletIcon = new Image(uiAtlas.findRegion("daggers"));
@@ -132,6 +143,10 @@ public class HudStage extends Stage {
         if (GameConstants.USE_BULLET && bulletLabel != null) {
             bulletLabel.setText(String.format("x %02d", playerComponent.ammo));
         }
+        boolean hasCrystalObjective = playerComponent.crystalTarget > 0;
+        crystalIcon.setVisible(hasCrystalObjective);
+        crystalLabel.setVisible(hasCrystalObjective);
+        crystalLabel.setText(String.format("%d/%d", playerComponent.crystalsCollected, playerComponent.crystalTarget));
         refreshBuffRow();
     }
 

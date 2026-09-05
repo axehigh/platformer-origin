@@ -29,7 +29,6 @@ public abstract class MenuScreen extends BaseScreen {
 
     protected static final float MENU_BUTTON_WIDTH = 330f;
     protected static final float MENU_BUTTON_HEIGHT = 90f;
-    protected static final float MENU_TITLE_SCALE = 1.4f;
 
     private final Texture backgroundTexture;
     protected final MenuEffects menuEffects = new MenuEffects();
@@ -87,7 +86,7 @@ public abstract class MenuScreen extends BaseScreen {
 
     protected Label createMenuTitle(String text) {
         Label title = new Label(text, skin, SKIN_TITLE);
-        title.setFontScale(FontScale * MENU_TITLE_SCALE);
+        title.setFontScale(TitleFontScale);
         return title;
     }
 
