@@ -45,6 +45,11 @@ public class MeleeAttackSystem extends IteratingSystem {
 
     private static final float CHEST_DISAPPEAR_DELAY = 0.3f;
     private static final int SECRET_WALL_MAX_HITS = 3;
+    /** Hit commitment: a connected strike cuts the player's forward momentum to 35% of its current
+     * value for a beat, so the chase stops on contact and the player can't run past a target
+     * mid-combo. Applied on every strike that connects (lethal or not); never on enemies that are
+     * dead or still hit-stunned (immune). */
+    private static final float PLAYER_HIT_MOMENTUM_DAMP = 0.35f;
 
     private final AssetManager assetManager;
     private float unitScale = 1f;
@@ -150,7 +155,7 @@ public class MeleeAttackSystem extends IteratingSystem {
 
         if (reach > 0f) {
             int damage = player.swordDamage * (isStrengthBuffActive(entity) ? 2 : 1);
-            hitAllEnemies(strikeBounds, player, damage);
+            hitAllEnemies(strikeBounds, player, MOVEMENT.get(entity), damage);
             openAllChests(strikeBounds, player);
             if (!player.meleeHasHit) {
                 if (breakSecretWall(strikeBounds)) {
@@ -175,9 +180,13 @@ public class MeleeAttackSystem extends IteratingSystem {
     /**
      * Damages every enemy overlapping {@code bounds} that hasn't already been hit this swing
      * (tracked in {@link PlayerComponent#meleeHitEnemies}, reset at every swing start) via
-     * {@code EnemyDamageResolver}, so a single swing can hit every enemy in reach.
+     * {@code EnemyDamageResolver}, so a single swing can hit every enemy in reach. On any strike
+     * that actually connects (hit commitment, see {@link #PLAYER_HIT_MOMENTUM_DAMP}) the player's
+     * horizontal velocity is cut — whether or not the strike is lethal — so the chase stops for a
+     * beat after the strike connects; an enemy that's immune (hit-stunned) or dead is never a
+     * known connection and never dampens the player.
      */
-    private void hitAllEnemies(Rectangle bounds, PlayerComponent player, int damage) {
+    private void hitAllEnemies(Rectangle bounds, PlayerComponent player, MovementComponent playerMovement, int damage) {
         for (Entity hitEnemy : enemies) {
             CollisionComponent enemyCollision = COLLISION.get(hitEnemy);
             if (!bounds.overlaps(enemyCollision.worldBounds) || player.meleeHitEnemies.contains(hitEnemy)) {
@@ -186,8 +195,17 @@ public class MeleeAttackSystem extends IteratingSystem {
             EnemyComponent enemy = ENEMY.get(hitEnemy);
             MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
             boolean isFlying = FLYING.get(hitEnemy) != null;
+            // The hit resolves this frame when connected (surviving damage or death — there is no
+            // other outcome); only a dead or still-stunned enemy isn't connected. Apply the
+            // commitment dampen on every connected strike, not just lethal ones.
+            boolean connected = EnemyDamageResolver.canBeHit(enemy);
             EnemyDamageResolver.applyHit(hitEnemy, enemy, enemyMovement, damage,
                 player.facingDirection, isFlying, unitScale, engine);
+            if (connected) {
+                // Hit commitment: the strike connected, so dampen the player's forward momentum so
+                // the chase stops for a beat and the player can't run past the target mid-combo.
+                playerMovement.velocity.x *= PLAYER_HIT_MOMENTUM_DAMP;
+            }
             player.meleeHitEnemies.add(hitEnemy);
             player.meleeHasHit = true;
         }

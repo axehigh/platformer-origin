@@ -9,9 +9,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Headless unit tests for the shared {@code EnemyDamageResolver} used by both {@code MeleeAttackSystem}
@@ -41,7 +39,7 @@ public class EnemyDamageResolverTest extends SystemTestBase {
 
         assertFalse(died);
         assertEquals(5f, enemy.health, EPSILON);
-        assertEquals(90f, movement.velocity.x, EPSILON);
+        assertEquals(130f, movement.velocity.x, EPSILON);
         assertEquals(140f, movement.velocity.y, EPSILON);
         assertTrue(enemy.hitStun.isActive());
         assertFalse(enemy.isDead);
@@ -51,7 +49,7 @@ public class EnemyDamageResolverTest extends SystemTestBase {
     public void knockbackFlipsWithDirection() {
         applyHit(5f, -1, false);
 
-        assertEquals(-90f, movement.velocity.x, EPSILON);
+        assertEquals(-130f, movement.velocity.x, EPSILON);
     }
 
     @Test
@@ -63,6 +61,32 @@ public class EnemyDamageResolverTest extends SystemTestBase {
         assertFalse(died);
         assertEquals(10f, enemy.health, EPSILON);
         assertEquals(0f, movement.velocity.x, EPSILON);
+    }
+
+    @Test
+    public void postHitIdleEnemyCanBeHitAgain() {
+        enemy.postHitIdle.start(0.5f);
+
+        boolean died = applyHit(5f, 1, false);
+
+        assertFalse(died);
+        assertEquals(5f, enemy.health, EPSILON);
+        assertEquals(130f, movement.velocity.x, EPSILON);
+        assertTrue(enemy.hitStun.isActive());
+        assertFalse(enemy.postHitIdle.isActive());
+    }
+
+    @Test
+    public void postHitIdleEnemyBecomesHittableOnceTimerEnds() {
+        enemy.postHitIdle.start(0.5f);
+        enemy.postHitIdle.update(1f);
+
+        boolean died = applyHit(5f, 1, false);
+
+        assertFalse(died);
+        assertEquals(5f, enemy.health, EPSILON);
+        assertEquals(130f, movement.velocity.x, EPSILON);
+        assertTrue(enemy.hitStun.isActive());
     }
 
     @Test
@@ -91,7 +115,7 @@ public class EnemyDamageResolverTest extends SystemTestBase {
     public void flyingEnemySkipsVerticalKnockback() {
         applyHit(5f, 1, true);
 
-        assertEquals(90f, movement.velocity.x, EPSILON);
+        assertEquals(130f, movement.velocity.x, EPSILON);
         assertEquals(0f, movement.velocity.y, EPSILON);
     }
 

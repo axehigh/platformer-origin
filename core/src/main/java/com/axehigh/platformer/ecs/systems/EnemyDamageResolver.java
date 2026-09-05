@@ -22,7 +22,7 @@ final class EnemyDamageResolver {
     /** Grace period after a hit during which the enemy is immune to further damage/knockback. */
     private static final float HIT_STUN_DURATION = 0.3f;
     static final float POST_HIT_IDLE_DURATION = 0.5f;
-    private static final float KNOCKBACK_SPEED_X = 90f;
+    private static final float KNOCKBACK_SPEED_X = 130f;
     private static final float KNOCKBACK_SPEED_Y = 140f;
     static final float HIT_SPARK_SCALE = 1.2f;
     /** Hit sparks must not linger: forced removal once this many seconds have elapsed (the sparks
@@ -39,13 +39,24 @@ final class EnemyDamageResolver {
     }
 
     /**
-     * Applies {@code damage} to {@code enemy}, unless it's still within its hit-stun grace period
-     * (in which case the hit is fully ignored). On a surviving hit, kicks off a horizontal +
-     * vertical knockback pop (away from the attacker, given by {@code knockbackDirection}) and
-     * starts the hit-stun timer. If {@code isFlying} is {@code true}, the vertical hop is skipped
-     * (a flying enemy has no gravity to pull it back down, so it would otherwise drift upward
-     * forever) while the horizontal knockback and hit-stun still apply. Returns {@code true} if
-     * the enemy's health reached 0.
+     * Single source of truth for whether an enemy can currently take a hit: not dead and not
+     * within its initial hit-stun grace period. The post-hit recovery idle is NOT immune (it's a
+     * valid combo/re-hit window). Used by {@code MeleeAttackSystem} to decide hit-commitment
+     * dampening independently of {@link #applyHit}'s return value.
+     */
+    static boolean canBeHit(EnemyComponent enemy) {
+        return !enemy.isDead && !enemy.hitStun.isActive();
+    }
+
+    /**
+     * Applies {@code damage} to {@code enemy}, unless it's still within its initial hit-stun
+     * grace period — in which case the hit is fully ignored (the post-hit recovery idle that
+     * follows it is NOT immune; it's a valid combo/re-hit window). On a surviving hit, kicks off
+     * a horizontal + vertical knockback pop (away from the attacker, given by
+     * {@code knockbackDirection}) and starts the hit-stun timer. If {@code isFlying} is
+     * {@code true}, the vertical hop is skipped (a flying enemy has no gravity to pull it back
+     * down, so it would otherwise drift upward forever) while the horizontal knockback and
+     * hit-stun still apply. Returns {@code true} if the enemy's health reached 0.
      */
     static boolean applyHit(Entity enemyEntity, EnemyComponent enemy, MovementComponent movement, float damage, int knockbackDirection, boolean isFlying, float unitScale) {
         return applyHit(enemyEntity, enemy, movement, damage, knockbackDirection, isFlying, unitScale, null);
@@ -56,7 +67,7 @@ final class EnemyDamageResolver {
      * plus a {@link PooledEngine} used to spawn a spark burst at the enemy on an applied hit.
      */
     static boolean applyHit(Entity enemyEntity, EnemyComponent enemy, MovementComponent movement, float damage, int knockbackDirection, boolean isFlying, float unitScale, PooledEngine engine) {
-        if (enemy.isDead || enemy.hitStun.isActive()) {
+        if (!canBeHit(enemy)) {
             return false;
         }
 

@@ -1,6 +1,5 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.*;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
@@ -126,7 +125,7 @@ public class CollisionSystemTest extends SystemTestBase {
         engine.update(0f);
 
         assertEquals(3f, enemyComponent.health, 0.001f);
-        assertEquals(90f, enemyMovement.velocity.x, 0.001f);
+        assertEquals(130f, enemyMovement.velocity.x, 0.001f);
         assertEquals(0f, enemyMovement.velocity.y, 0.001f);
     }
 
@@ -139,7 +138,7 @@ public class CollisionSystemTest extends SystemTestBase {
 
         engine.update(0f);
 
-        assertEquals(90f, enemyMovement.velocity.x, 0.001f);
+        assertEquals(130f, enemyMovement.velocity.x, 0.001f);
         assertEquals(140f, enemyMovement.velocity.y, 0.001f);
     }
 

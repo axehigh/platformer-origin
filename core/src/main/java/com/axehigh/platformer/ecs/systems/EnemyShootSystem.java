@@ -16,8 +16,10 @@ import static com.axehigh.platformer.ecs.components.Mappers.*;
 /**
  * Drives shooter-enemy firing: every {@code shootInterval} seconds, spawns a bullet at the
  * enemy's position traveling horizontally in its current patrol {@code direction} (no
- * player-aiming/aggro). Firing is skipped entirely while the enemy is stunned (mirrors
- * {@code EnemySystem}'s own stun-pause), so a knockback pop isn't interrupted by a shot, and also
+ * player-aiming/aggro). Firing is skipped only during the enemy's initial hit-stun, so a
+ * knockback pop isn't interrupted by a shot — it resumes (this is the shooter's "intent"
+ * defense against a player hugging it mid-combo) once the enemy enters its post-hit recovery
+ * idle. It is also
  * skipped while the shooter's {@code roomIndex} isn't the currently active Room (see {@code
  * RoomState}/{@code CameraSystem}), so a shooter never fires a bullet the player wouldn't be able
  * to see coming from a different, currently inactive room. {@code shootCooldown} keeps

@@ -67,7 +67,7 @@ public class MeleeAttackSystemTest extends SystemTestBase {
         playerComponent.facingDirection = facing;
         AnimationComponent animation = new AnimationComponent();
         animation.animations.put(AnimationComponent.State.ATTACKING, attackAnimation());
-        Entity entity = entity(transform, playerComponent, collision, animation);
+        Entity entity = entity(transform, playerComponent, collision, animation, movement());
         engine.addEntity(entity);
         return entity;
     }
@@ -320,6 +320,138 @@ public class MeleeAttackSystemTest extends SystemTestBase {
         assertTrue(chestComponent.opened);
         assertTrue(chestComponent.disappearTimer.isActive());
         assertTrue(playerComponent.meleeHasHit);
+    }
+
+    @Test
+    public void landedHitDampensPlayerForwardMomentum() {
+        // Player also carries a MovementComponent so hit-commitment damping can be observed.
+        TransformComponent transform = transform(0f, 130f);
+        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        place(transform, collision, 0f, 130f);
+        PlayerComponent playerComponent = player();
+        playerComponent.facingDirection = 1;
+        AnimationComponent animation = new AnimationComponent();
+        animation.animations.put(AnimationComponent.State.ATTACKING, attackAnimation());
+        MovementComponent movement = movement();
+        movement.velocity.x = 100f;
+        Entity player = entity(transform, playerComponent, collision, animation, movement);
+        engine.addEntity(player);
+
+        // Health at/below a single sword hit so the strike lands a kill -> applyHit returns true.
+        Entity enemy = enemy(16f, 105f);
+        ENEMY.get(enemy).health = 5f;
+
+        playerComponent.meleeAttack.start(0.15f);
+        engine.update(0f);
+
+        assertEquals(100f * 0.35f, movement.velocity.x, EPSILON);
+    }
+
+    @Test
+    public void staggeredEnemyHitDoesNotDampenPlayerMomentum() {
+        TransformComponent transform = transform(0f, 130f);
+        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        place(transform, collision, 0f, 130f);
+        PlayerComponent playerComponent = player();
+        playerComponent.facingDirection = 1;
+        AnimationComponent animation = new AnimationComponent();
+        animation.animations.put(AnimationComponent.State.ATTACKING, attackAnimation());
+        MovementComponent movement = movement();
+        movement.velocity.x = 100f;
+        Entity player = entity(transform, playerComponent, collision, animation, movement);
+        engine.addEntity(player);
+
+        // Staggered enemy ignores the hit (applyHit returns false) -> no damping.
+        Entity enemy = enemy(16f, 105f);
+        ENEMY.get(enemy).hitStun.start(0.3f);
+
+        playerComponent.meleeAttack.start(0.15f);
+        engine.update(0f);
+
+        assertEquals(100f, movement.velocity.x, EPSILON);
+    }
+
+    @Test
+    public void connectedStrikeDampensPlayerForwardMomentum() {
+        TransformComponent transform = transform(0f, 130f);
+        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        place(transform, collision, 0f, 130f);
+        PlayerComponent playerComponent = player();
+        playerComponent.facingDirection = 1;
+        AnimationComponent animation = new AnimationComponent();
+        animation.animations.put(AnimationComponent.State.ATTACKING, attackAnimation());
+        MovementComponent movement = movement();
+        movement.velocity.x = 100f;
+        Entity player = entity(transform, playerComponent, collision, animation, movement);
+        engine.addEntity(player);
+
+        // Non-lethal strike: default health 10 vs 5 sword damage -> enemy survives, still connected.
+        Entity enemy = enemy(16f, 105f);
+        EnemyComponent enemyComponent = ENEMY.get(enemy);
+        MovementComponent enemyMovement = MOVEMENT.get(enemy);
+        float healthBefore = enemyComponent.health;
+
+        playerComponent.meleeAttack.start(0.15f);
+        engine.update(0f);
+
+        // Hit commitment cuts forward momentum to 35% even on a surviving (non-lethal) strike.
+        assertEquals(100f * 0.35f, movement.velocity.x, EPSILON);
+        // Enemy still took damage and the knockback was applied as before.
+        assertEquals(healthBefore - 5f, enemyComponent.health, EPSILON);
+        assertEquals(130f * 1, enemyMovement.velocity.x, EPSILON);
+        assertTrue(enemyComponent.hitStun.isActive());
+    }
+
+    @Test
+    public void lethalStrikeStillDampensPlayerMomentum() {
+        TransformComponent transform = transform(0f, 130f);
+        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        place(transform, collision, 0f, 130f);
+        PlayerComponent playerComponent = player();
+        playerComponent.facingDirection = 1;
+        AnimationComponent animation = new AnimationComponent();
+        animation.animations.put(AnimationComponent.State.ATTACKING, attackAnimation());
+        MovementComponent movement = movement();
+        movement.velocity.x = 100f;
+        Entity player = entity(transform, playerComponent, collision, animation, movement);
+        engine.addEntity(player);
+
+        // Health at/below a single sword hit so the strike lands a kill.
+        Entity enemy = enemy(16f, 105f);
+        ENEMY.get(enemy).health = 5f;
+
+        playerComponent.meleeAttack.start(0.15f);
+        engine.update(0f);
+
+        assertEquals(100f * 0.35f, movement.velocity.x, EPSILON);
+        assertTrue(ENEMY.get(enemy).isDead);
+    }
+
+    @Test
+    public void stunnedEnemyStrikeDoesNotDampenAndDoesNoDamage() {
+        TransformComponent transform = transform(0f, 130f);
+        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        place(transform, collision, 0f, 130f);
+        PlayerComponent playerComponent = player();
+        playerComponent.facingDirection = 1;
+        AnimationComponent animation = new AnimationComponent();
+        animation.animations.put(AnimationComponent.State.ATTACKING, attackAnimation());
+        MovementComponent movement = movement();
+        movement.velocity.x = 100f;
+        Entity player = entity(transform, playerComponent, collision, animation, movement);
+        engine.addEntity(player);
+
+        // Stunned (hitStun active) enemy is immune -> neither dampen nor damage.
+        Entity enemy = enemy(16f, 105f);
+        EnemyComponent enemyComponent = ENEMY.get(enemy);
+        enemyComponent.hitStun.start(0.3f);
+        float healthBefore = enemyComponent.health;
+
+        playerComponent.meleeAttack.start(0.15f);
+        engine.update(0f);
+
+        assertEquals(100f, movement.velocity.x, EPSILON);
+        assertEquals(healthBefore, enemyComponent.health, EPSILON);
     }
 
     @Test

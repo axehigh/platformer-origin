@@ -1,21 +1,13 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.EnemyComponent;
-import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
-import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
-import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
+import static org.junit.Assert.*;
 
 /**
  * Headless unit tests for {@code EnemyContactSystem}: overlap-based contact damage routed through
@@ -155,5 +147,85 @@ public class EnemyContactSystemTest extends SystemTestBase {
         engine.update(DT);
 
         assertEquals(0f, movement.velocity.x, EPSILON);
+    }
+
+    @Test
+    public void staggeredEnemyBodyCausesNoContactDamage() {
+        Entity player = player(0f, 130f);
+        Entity enemy = enemy(0f, 130f);
+        ENEMY.get(enemy).hitStun.start(0.3f);
+        PlayerComponent playerComponent = PLAYER.get(player);
+        MovementComponent movement = MOVEMENT.get(player);
+
+        engine.update(DT);
+
+        assertEquals(3, playerComponent.health);
+        assertEquals(0f, movement.velocity.x, EPSILON);
+    }
+
+    @Test
+    public void postHitIdleEnemyBodyEjectsPlayerWithoutDamage() {
+        Entity player = player(0f, 130f);
+        Entity enemy = enemy(0f, 130f);
+        ENEMY.get(enemy).postHitIdle.start(0.5f);
+        PlayerComponent playerComponent = PLAYER.get(player);
+        MovementComponent movement = MOVEMENT.get(player);
+
+        engine.update(DT);
+
+        assertEquals(3, playerComponent.health);
+        // Player/enemy centers coincide (0 >= 0 crosses the >= tie-break), so knockbackDirection = +1:
+        // the recovering body ejects the player rightward at EJECT_SPEED_X, like a gentle wall.
+        assertEquals(110f, movement.velocity.x, EPSILON);
+    }
+
+    @Test
+    public void hitStunEnemyBodyIsFreePassThrough() {
+        Entity player = player(0f, 130f);
+        Entity enemy = enemy(0f, 130f);
+        ENEMY.get(enemy).hitStun.start(0.3f);
+        PlayerComponent playerComponent = PLAYER.get(player);
+        MovementComponent movement = MOVEMENT.get(player);
+        movement.velocity.x = 50f;
+
+        engine.update(DT);
+
+        assertEquals(3, playerComponent.health);
+        // Pure pass-through: neither contact knockback (60) nor the post-hit-idle eject (110) applies.
+        assertEquals(50f, movement.velocity.x, EPSILON);
+    }
+
+    @Test
+    public void attackingPlayerIsImmuneToHealthyEnemyBody() {
+        Entity player = player(0f, 130f);
+        enemy(0f, 130f);
+        PlayerComponent playerComponent = PLAYER.get(player);
+        playerComponent.meleeAttack.start(0.2f);
+
+        engine.update(DT);
+
+        assertEquals(3, playerComponent.health);
+        assertEquals(0f, MOVEMENT.get(player).velocity.x, EPSILON);
+    }
+
+    @Test
+    public void recoveredEnemyBodyDamagesPlayerAgain() {
+        Entity player = player(0f, 130f);
+        Entity enemy = enemy(0f, 130f);
+        EnemyComponent enemyComponent = ENEMY.get(enemy);
+        enemyComponent.hitStun.start(0.3f);
+        enemyComponent.hitStun.update(1f);
+        enemyComponent.postHitIdle.start(0.5f);
+        enemyComponent.postHitIdle.update(1f);
+        assertFalse(enemyComponent.hitStun.isActive());
+        assertFalse(enemyComponent.postHitIdle.isActive());
+        PlayerComponent playerComponent = PLAYER.get(player);
+
+        engine.update(DT);
+
+        assertEquals(2, playerComponent.health);
+        assertEquals(60f, MOVEMENT.get(player).velocity.x, EPSILON);
+        assertTrue(playerComponent.hurtTimer.isActive());
+        assertTrue(playerComponent.hitInvulnerability.isActive());
     }
 }
