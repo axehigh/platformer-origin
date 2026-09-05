@@ -4,7 +4,6 @@ import com.axehigh.platformer.GameConstants;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -21,6 +20,7 @@ public class PlayerComponentTest {
     @Test
     public void consumePotionDecrementsCount() {
         player.setPotionCount(PotionType.HEALING, 3);
+        player.health = player.maxHealth - 1;
 
         assertTrue(player.consumePotion(PotionType.HEALING));
 

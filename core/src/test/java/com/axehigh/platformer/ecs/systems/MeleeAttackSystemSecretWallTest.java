@@ -1,17 +1,7 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.AnimationComponent;
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.EnemyComponent;
-import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.ParticleComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
-import com.axehigh.platformer.map.EntityFactory;
-import com.axehigh.platformer.map.Room;
-import com.axehigh.platformer.map.RoomState;
-import com.axehigh.platformer.map.SecretRoom;
-import com.axehigh.platformer.map.SecretRoomRevealer;
+import com.axehigh.platformer.ecs.components.*;
+import com.axehigh.platformer.map.*;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.assets.AssetManager;
@@ -27,19 +17,10 @@ import com.badlogic.gdx.utils.Array;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
-import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
-import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
-import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * Headless tests for the {@code MeleeAttackSystem} secret-wall break: a live strike overlapping a
@@ -99,7 +80,7 @@ public class MeleeAttackSystemSecretWallTest extends SystemTestBase {
         playerComponent.facingDirection = 1;
         AnimationComponent animation = new AnimationComponent();
         animation.animations.put(AnimationComponent.State.ATTACKING, attackAnimation());
-        Entity entity = entity(transform, playerComponent, collision, animation);
+        Entity entity = entity(transform, playerComponent, collision, animation, movement());
         engine.addEntity(entity);
         return entity;
     }
@@ -111,6 +92,21 @@ public class MeleeAttackSystemSecretWallTest extends SystemTestBase {
         Entity entity = entity(transform, movement(), collision, new EnemyComponent());
         engine.addEntity(entity);
         return entity;
+    }
+
+    /** One full strike on the peak-reach ATTACKING frame (start 0.2 = frame 3), then a fresh swing state. */
+    private void strikeWall(PlayerComponent playerComponent) {
+        playerComponent.meleeHasHit = false;
+        playerComponent.meleeAttack.start(0.2f);
+        engine.update(DT);
+    }
+
+    /** Drives the three swings a secret wall needs before it breaks (initial hit-stun puffs on the
+     *  first two, the break on the third). */
+    private void threeStrikesToBreak(PlayerComponent playerComponent) {
+        strikeWall(playerComponent);
+        strikeWall(playerComponent);
+        strikeWall(playerComponent);
     }
 
     private int particleEntityCount() {
@@ -137,9 +133,7 @@ public class MeleeAttackSystemSecretWallTest extends SystemTestBase {
     public void strikingWallRemovesRectsAndBlanksCell() {
         addSecretWall(16f, 105f);
         Entity playerEntity = player(0f, 130f);
-        PLAYER.get(playerEntity).meleeAttack.start(0.15f);
-
-        engine.update(0f);
+        threeStrikesToBreak(PLAYER.get(playerEntity));
 
         assertEquals(0, secretRects.size);
         assertEquals(0, collisionRects.size);
@@ -211,13 +205,12 @@ public class MeleeAttackSystemSecretWallTest extends SystemTestBase {
         Entity playerEntity = player(0f, 130f);
         PlayerComponent playerComponent = PLAYER.get(playerEntity);
 
-        playerComponent.meleeAttack.start(0.15f);
-        engine.update(0f);
+        threeStrikesToBreak(playerComponent);
         assertEquals(0, secretRects.size);
+        assertNull(collisionLayer.getCell(0, 0).getTile());
 
-        playerComponent.meleeAttack.start(0.35f);
-        engine.update(0f);
-
+        // A fourth swing against the now-open spot doesn't crash and keeps the wall gone.
+        strikeWall(playerComponent);
         assertEquals(0, secretRects.size);
         assertNull(collisionLayer.getCell(0, 0).getTile());
     }
@@ -235,9 +228,7 @@ public class MeleeAttackSystemSecretWallTest extends SystemTestBase {
         addSecretWall(16f, 105f);
         collisionLayer.getCell(0, 0).getTile().getProperties().put("secretRoom", "secretRoom1");
         Entity playerEntity = player(0f, 130f);
-        PLAYER.get(playerEntity).meleeAttack.start(0.15f);
-
-        engine.update(0f);
+        threeStrikesToBreak(PLAYER.get(playerEntity));
 
         assertTrue(revealer.isRevealed("secretRoom1"));
         assertEquals(0, secretRects.size);
@@ -265,13 +256,12 @@ public class MeleeAttackSystemSecretWallTest extends SystemTestBase {
         addSecretWall(16f, 105f);
         collisionLayer.getCell(0, 0).getTile().getProperties().put("secretRoom", "secretRoom1");
         Entity playerEntity = player(0f, 130f);
-        PLAYER.get(playerEntity).meleeAttack.start(0.15f);
-
-        engine.update(0f);
+        threeStrikesToBreak(PLAYER.get(playerEntity));
 
         assertNull(hideLayer.getCell(0, 0).getTile());
         assertNotNull(hideLayer.getCell(1, 1).getTile());
-        assertEquals(2, particleEntityCount());
+        // 2 partial-hit puffs + 1 break puff + 1 veil-crumble puff.
+        assertEquals(4, particleEntityCount());
     }
 
     @Test
@@ -294,15 +284,12 @@ public class MeleeAttackSystemSecretWallTest extends SystemTestBase {
         Entity playerEntity = player(0f, 130f);
         PlayerComponent playerComponent = PLAYER.get(playerEntity);
 
-        playerComponent.meleeAttack.start(0.15f);
-        engine.update(0f);
+        threeStrikesToBreak(playerComponent);
         assertEquals(1, secretRects.size);
         verify(entityFactory, times(1)).spawnObjects(any(com.badlogic.ashley.core.Engine.class), any(MapObjects.class), any(RoomState.class));
 
         place(TRANSFORM.get(playerEntity), COLLISION.get(playerEntity), 160f, 130f);
-        playerComponent.meleeHasHit = false;
-        playerComponent.meleeAttack.start(0.15f);
-        engine.update(0f);
+        threeStrikesToBreak(playerComponent);
         assertEquals(0, secretRects.size);
         verify(entityFactory, times(1)).spawnObjects(any(com.badlogic.ashley.core.Engine.class), any(MapObjects.class), any(RoomState.class));
     }
@@ -312,9 +299,7 @@ public class MeleeAttackSystemSecretWallTest extends SystemTestBase {
         addSecretWall(16f, 105f);
         collisionLayer.getCell(0, 0).getTile().getProperties().put("secretRoom", "secretRoom1");
         Entity playerEntity = player(0f, 130f);
-        PLAYER.get(playerEntity).meleeAttack.start(0.15f);
-
-        engine.update(0f);
+        threeStrikesToBreak(PLAYER.get(playerEntity));
 
         assertEquals(0, secretRects.size);
         assertEquals(0, collisionRects.size);

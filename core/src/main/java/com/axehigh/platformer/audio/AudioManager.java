@@ -55,6 +55,15 @@ public class AudioManager {
         return instance;
     }
 
+    /**
+     * Replaces the singleton. Test seam used by headless UI tests to install a
+     * lightweight stand-in (the real constructor synchronously loads audio assets and spins
+     * forever when no real files/audio backend exist).
+     */
+    public static void setInstance(AudioManager manager) {
+        instance = manager;
+    }
+
     public void playMenuMusic() {
         switchMusic(menuMusic);
     }
@@ -118,11 +127,16 @@ public class AudioManager {
 
     public void dispose() {
         stopMusic();
-        assetManager.dispose();
+        if (assetManager != null) {
+            assetManager.dispose();
+        }
         instance = null;
     }
 
     private void switchMusic(Music music) {
+        if (music == null) {
+            return;
+        }
         if (currentMusic == music) {
             return;
         }
@@ -137,6 +151,9 @@ public class AudioManager {
     }
 
     private void playSfx(Sound sound) {
+        if (sound == null) {
+            return;
+        }
         if (preferences.isSfxEnabled()) {
             sound.play(preferences.getSfxVolume() / 100f);
         }

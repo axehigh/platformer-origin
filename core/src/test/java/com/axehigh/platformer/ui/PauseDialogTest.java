@@ -1,5 +1,6 @@
 package com.axehigh.platformer.ui;
 
+import com.axehigh.platformer.audio.AudioManager;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
@@ -12,7 +13,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -83,6 +85,11 @@ public class PauseDialogTest {
         preferences = mock(Preferences.class);
         when(Gdx.app.getPreferences(Mockito.anyString())).thenReturn(preferences);
 
+        // The real AudioManager constructor loads real audio files via Gdx.files/Gdx.audio and
+        // spins forever on these mocks (null handles) until the heap dies. Install a mock stand-in
+        // so PauseDialog construction stays headless.
+        AudioManager.setInstance(mock(AudioManager.class));
+
         skin = new Skin();
         BitmapFont.BitmapFontData fontData = new BitmapFont.BitmapFontData();
         Array<com.badlogic.gdx.graphics.g2d.TextureRegion> pageRegions = new Array<>();
@@ -118,6 +125,7 @@ public class PauseDialogTest {
 
     @After
     public void tearDown() {
+        AudioManager.setInstance(null);
         Gdx.app = null;
         Gdx.files = null;
         Gdx.audio = null;

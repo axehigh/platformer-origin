@@ -9,7 +9,6 @@ ERROR  assets/maps/world1/level_02.tmx
 
 WARN   assets/maps/world1/level_03.tmx
     WARN: Collision tile gid=14 has secret=true but no secretRoom property — secret wall won't be grouped with a room  [collision]
-    WARN: Recommended object layer 'enemies' missing
     WARN: Unknown object type 'Floating'  [objects:id=22]
     WARN: Unknown object type 'chest_elite'  [objects:id=25]
     WARN: 2 room(s) in Rooms layer have no name — engine will use fallback naming
@@ -54,7 +53,9 @@ WARN   assets/maps/world2/level_04.tmx
     WARN: Object uses TileEnum property 'platform' instead of object type attribute — consider updating  [objects:id=975]
   OK  assets/maps/world2/level_05.tmx
   OK  assets/maps/world2/level_06.tmx
-  OK  assets/maps/world2/level_07.tmx
+
+WARN   assets/maps/world2/level_07.tmx
+    WARN: Unknown object type 'chest_elite'  [objects:id=732]
 
 ERROR  assets/maps/world2/level_08.tmx
     WARN: Unknown object type 'Floating'  [objects:id=980]

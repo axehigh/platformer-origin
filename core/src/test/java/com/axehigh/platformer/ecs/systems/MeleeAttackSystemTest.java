@@ -158,7 +158,7 @@ public class MeleeAttackSystemTest extends SystemTestBase {
     @Test
     public void reachScalesWithFrame() {
         Entity player = player(0f, 130f, 1);
-        PLAYER.get(player).meleeAttack.start(0.15f);
+        PLAYER.get(player).meleeAttack.start(0.35f);
 
         engine.update(0f);
 
@@ -166,14 +166,17 @@ public class MeleeAttackSystemTest extends SystemTestBase {
         assertNotNull(box);
         assertEquals(24f * SpriteConstants.PlayerScale, box.width, EPSILON);
         assertEquals(15f, box.x, EPSILON);
-        assertEquals(100f, box.y, EPSILON);
-        assertEquals(60f, box.height, EPSILON);
+        // The strike box drops PLAYER_MELEE_Y_OFFSET_FACTOR (0.25) of the collision height below the
+        // top of the player's bounds and rises PLAYER_MELEE_HEIGHT_MULTIPLIER (1.75) above it:
+        // y = 100 - 60*0.25 = 85, height = 60*1.75 = 105.
+        assertEquals(85f, box.y, EPSILON);
+        assertEquals(105f, box.height, EPSILON);
     }
 
     @Test
     public void strikeExtendsLeftWhenFacingLeft() {
         Entity player = player(0f, 130f, -1);
-        PLAYER.get(player).meleeAttack.start(0.15f);
+        PLAYER.get(player).meleeAttack.start(0.35f);
 
         engine.update(0f);
 
@@ -230,7 +233,8 @@ public class MeleeAttackSystemTest extends SystemTestBase {
     @Test
     public void enemyReachedOnLaterFrameStillHit() {
         Entity player = player(0f, 130f, 1);
-        Entity enemy = enemy(15f + (44f * SpriteConstants.PlayerScale), 105f);
+        // Enemy stands just past the mid-frame reach so only the peak frame (44*PlayerScale) can hit it.
+        Entity enemy = enemy(37f, 105f);
         EnemyComponent enemyComponent = ENEMY.get(enemy);
         PlayerComponent playerComponent = PLAYER.get(player);
 
