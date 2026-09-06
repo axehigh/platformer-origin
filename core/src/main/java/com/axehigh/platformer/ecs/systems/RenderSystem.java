@@ -1,6 +1,7 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.ecs.components.CollisionComponent;
+import com.axehigh.platformer.ecs.components.EnemyComponent;
 import com.axehigh.platformer.ecs.components.TextureComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.badlogic.ashley.core.Entity;
@@ -99,6 +100,17 @@ public class RenderSystem extends SortedIteratingSystem {
         }
 
         Color oldColor = new Color(batch.getColor());
+        
+        // Size-based color tinting for enemies
+        if (ENEMY.get(entity) != null) {
+            EnemyComponent enemy = ENEMY.get(entity);
+            if (enemy.size == EnemyComponent.Size.MEDIUM) {
+                batch.setColor(Color.ORANGE);
+            } else if (enemy.size == EnemyComponent.Size.LARGE) {
+                batch.setColor(Color.RED);
+            }
+        }
+
         boolean hasAlpha = transform.alpha < 1f;
         if (hasAlpha) {
             batch.flush();
@@ -112,10 +124,7 @@ public class RenderSystem extends SortedIteratingSystem {
             1f, 1f,
             transform.rotation);
 
-        if (hasAlpha) {
-            batch.flush();
-            batch.setColor(oldColor);
-        }
+        batch.setColor(oldColor);
     }
 
     private static class ZComparator implements Comparator<Entity> {

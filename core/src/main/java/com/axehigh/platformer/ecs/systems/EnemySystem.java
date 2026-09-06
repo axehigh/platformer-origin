@@ -287,7 +287,7 @@ public class EnemySystem extends IteratingSystem {
             }
         } else {
             // Default to coins
-            int coinCount = (int) (enemy.maxHealth / COINS_PER_HEALTH);
+            int coinCount = (int) (enemy.maxBaseHealth / COINS_PER_HEALTH);
             if (coinCount > 0) {
                 entityFactory.popCoins(getEngine(), centerX, centerY, coinCount, unitScale, collisionRects);
             }

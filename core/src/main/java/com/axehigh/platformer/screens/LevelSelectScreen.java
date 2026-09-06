@@ -124,18 +124,40 @@ public class LevelSelectScreen extends MenuScreen {
         });
     }
 
+    /** A non-demo world tab is unlocked when LEVEL_OPEN is set, when it is the first
+     *  non-demo world, or when its predecessor (previous non-demo world in catalog order)
+     *  has all its levels starred. World 2 gates on World 1, World 3 on World 2, etc. */
+    private boolean isWorldUnlocked(int worldId, boolean levelOpen) {
+        if (levelOpen) return true;
+        int prevWorld = previousNonDemoWorld(worldId);
+        return prevWorld == -1 || isWorldCompleted(prevWorld);
+    }
+
+    private int previousNonDemoWorld(int worldId) {
+        int prev = -1;
+        IntArray worldIds = LevelCatalog.worldIds();
+        for (int i = 0; i < worldIds.size; i++) {
+            int id = worldIds.get(i);
+            if (id == LevelCatalog.WORLD_DEMO) continue;
+            if (id == worldId) break;
+            prev = id;
+        }
+        return prev;
+    }
+
+    /** True when every level of {@code worldId} has its completion star. */
+    private boolean isWorldCompleted(int worldId) {
+        for (LevelDefinition lvl : LevelCatalog.levelsForWorld(worldId)) {
+            if (!completedLevelIds.contains(lvl.id, false)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private Table createWorldTabs() {
         Table tabs = new Table();
         final boolean levelOpen = FeatureFlags.isLevelOpen();
-        Array<LevelDefinition> world1Levels = LevelCatalog.levelsForWorld(LevelCatalog.WORLD_1);
-        boolean w1Done = true;
-        for (LevelDefinition lvl : world1Levels) {
-            if (!completedLevelIds.contains(lvl.id, false)) {
-                w1Done = false;
-                break;
-            }
-        }
-        final boolean world1Completed = w1Done;
 
         worldTabs.clear();
         for (int i = 0; i < worldIds.size; i++) {
@@ -146,12 +168,15 @@ public class LevelSelectScreen extends MenuScreen {
                 continue;
             }
 
+            // A world is locked until its predecessor (previous non-demo world in catalog
+            // order) has all levels starred; the first world is always unlocked (unless levelOpen).
+            final boolean unlocked = isWorldUnlocked(worldId, levelOpen);
+
             final int tabIndex = worldTabs.size;
             TextButton tab = new TextButton(LevelCatalog.worldName(worldId), skin);
             tab.getLabel().setFontScale(FontScale);
 
-            // World 2 requires all levels in world 1 to be completed (unless levelOpen)
-            if (worldId == LevelCatalog.WORLD_2 && !levelOpen && !world1Completed) {
+            if (!unlocked) {
                 tab.setDisabled(true);
                 tab.setColor(0.5f, 0.5f, 0.5f, 0.7f);
             }
@@ -159,7 +184,7 @@ public class LevelSelectScreen extends MenuScreen {
             tab.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
-                    if (worldId == LevelCatalog.WORLD_2 && !levelOpen && !world1Completed) {
+                    if (!unlocked) {
                         AudioManager.get().playClick();
                         return;
                     }

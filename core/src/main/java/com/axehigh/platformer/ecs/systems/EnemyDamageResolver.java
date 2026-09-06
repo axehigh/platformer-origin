@@ -73,8 +73,8 @@ final class EnemyDamageResolver {
 
         spawnHitSpark(enemyEntity, engine);
 
-        enemy.health -= damage;
-        if (enemy.health <= 0f) {
+        enemy.baseHealth -= damage;
+        if (enemy.baseHealth <= 0f) {
             enemy.isDead = true;
             movement.velocity.set(0, 0);
 

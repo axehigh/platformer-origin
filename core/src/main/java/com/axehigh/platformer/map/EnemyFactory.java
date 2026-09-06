@@ -9,6 +9,8 @@ import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
 
 import static com.axehigh.platformer.ecs.components.AnimationComponent.State.*;
+import static com.axehigh.platformer.ecs.components.EnemyComponent.Size.LARGE;
+import static com.axehigh.platformer.ecs.components.EnemyComponent.Size.MEDIUM;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.NORMAL;
 
@@ -92,8 +94,17 @@ class EnemyFactory {
         // patrol speed ±15%, so each enemy drifts out of phase over time and never re-syncs.
         enemyComponent.direction = MathUtils.randomBoolean() ? 1 : -1;
         enemyComponent.speed *= MathUtils.random(0.85f, 1.15f);
-        enemyComponent.health = type.maxHealth;
-        enemyComponent.maxHealth = type.maxHealth;
+        enemyComponent.baseHealth = type.maxHealth;
+        enemyComponent.maxBaseHealth = type.maxHealth;
+
+        String sizeStr = TileProps.getProperty(object, tile, "size", null);
+        if ("medium".equalsIgnoreCase(sizeStr)) {
+            enemyComponent.size = MEDIUM;
+        } else if ("large".equalsIgnoreCase(sizeStr)) {
+            enemyComponent.size = LARGE;
+        }
+        enemyComponent.baseHealth *= enemyComponent.size.hpMultiplier;
+        enemyComponent.maxBaseHealth *= enemyComponent.size.hpMultiplier;
 
         switch (type) {
             case FLYER:
@@ -114,7 +125,7 @@ class EnemyFactory {
                 break;
         }
         entity.add(enemyComponent);
-        
+
         String lootStr = TileProps.getProperty(object, tile, "loot", null);
         if (lootStr != null) {
             LootComponent loot = new LootComponent();

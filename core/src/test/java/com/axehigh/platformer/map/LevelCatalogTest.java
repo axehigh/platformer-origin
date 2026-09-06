@@ -1,12 +1,9 @@
 package com.axehigh.platformer.map;
 
 import com.badlogic.gdx.utils.Array;
-
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link LevelCatalog} helper methods, notably the demo-world-excluding
@@ -15,10 +12,10 @@ import static org.junit.Assert.assertTrue;
 public class LevelCatalogTest {
 
     @Test
-    public void isLastWorld_treatsWorld2AsFinal() {
-        // World 2 is the last real (player-facing) world; the demo world (0) must not
-        // displace it as the terminal world.
-        assertTrue(LevelCatalog.isLastWorld(LevelCatalog.WORLD_2));
+    public void isLastWorld_treatsWorld3AsFinal() {
+        // World 3 is the last real (player-facing) world; World 2 is now mid-campaign.
+        assertTrue(LevelCatalog.isLastWorld(LevelCatalog.WORLD_3));
+        assertFalse(LevelCatalog.isLastWorld(LevelCatalog.WORLD_2));
     }
 
     @Test
@@ -43,7 +40,19 @@ public class LevelCatalogTest {
     }
 
     @Test
-    public void worldIdForPath_resolvesFinalLevelToWorld2() {
+    public void world3_tenLevels_chainEndsInFinalFile() {
+        Array<LevelDefinition> world3 = LevelCatalog.levelsForWorld(LevelCatalog.WORLD_3);
+        assertEquals(10, world3.size);
+        assertEquals("maps/world3/level_01.tmx", world3.first().tmxPath);
+        assertEquals("maps/world3/level_10_final.tmx", world3.peek().tmxPath);
+        // level_09 is the penultimate entry, chaining into the final.
+        assertEquals("maps/world3/level_09.tmx", world3.get(8).tmxPath);
+    }
+
+    @Test
+    public void worldIdForPath_resolvesFinalLevelToWorld3() {
+        assertEquals(LevelCatalog.WORLD_3,
+            LevelCatalog.worldIdForPath("maps/world3/level_10_final.tmx"));
         assertEquals(LevelCatalog.WORLD_2,
             LevelCatalog.worldIdForPath("maps/world2/level_10_final.tmx"));
     }

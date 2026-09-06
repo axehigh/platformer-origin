@@ -49,7 +49,13 @@ public final class SaveManager {
         }
         Preferences preferences = Gdx.app.getPreferences(PREFS_NAME);
         String json = preferences.getString(KEY_SAVE, "");
-        return new Json().fromJson(SaveData.class, json);
+        try {
+            return new Json().fromJson(SaveData.class, json);
+        } catch (Exception e) {
+            System.err.println("CRITICAL: Failed to load save, clearing corrupted data. Error: " + e.getMessage());
+            clear();
+            return null;
+        }
     }
 
     public static void saveProgress(ProgressData data) {

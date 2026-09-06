@@ -18,9 +18,20 @@ public class EnemyComponent implements Component {
         SIDE_TO_SIDE
     }
 
-    public float health = 10f;
+    public enum Size {
+        DEFAULT(1.0f), MEDIUM(1.5f), LARGE(2.0f);
+
+        public final float hpMultiplier;
+
+        Size(float hpMultiplier) {
+            this.hpMultiplier = hpMultiplier;
+        }
+    }
+
+    public Size size = Size.DEFAULT;
+    public float baseHealth = 10f;
     /** Starting/full health, set alongside {@code health} by {@code EntityFactory}; used to size coin drops on death. */
-    public float maxHealth = 10f;
+    public float maxBaseHealth = 10f;
     /** Horizontal patrol speed, in world units/second. */
     public float speed = 20f;
     /** Current patrol direction: {@code 1} for right, {@code -1} for left. */
