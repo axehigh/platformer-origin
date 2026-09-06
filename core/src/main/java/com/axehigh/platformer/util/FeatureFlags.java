@@ -17,6 +17,7 @@ public final class FeatureFlags {
     private static boolean selectLevelEnabled = GamePreferences.DEFAULT_SELECT_LEVEL_ENABLED;
     private static boolean levelOpen = GamePreferences.DEFAULT_LEVEL_OPEN;
     private static boolean embersEnabled = GamePreferences.DEFAULT_EMBERS_ENABLED;
+    private static boolean wallClankEnabled = GamePreferences.DEFAULT_WALL_CLANK_ENABLED;
     private static boolean initialized = false;
 
     private FeatureFlags() {
@@ -33,6 +34,7 @@ public final class FeatureFlags {
         selectLevelEnabled = preferences.isSelectLevelEnabled();
         levelOpen = preferences.isLevelOpen();
         embersEnabled = preferences.isEmbersEnabled();
+        wallClankEnabled = preferences.isWallClankEnabled();
     }
 
     /** Whether wall-climb (wall-slide gravity + wall-jump latch) is enabled. Defaults to {@code true}. */
@@ -112,16 +114,25 @@ public final class FeatureFlags {
         }
     }
 
-    /**
-     * Restores the pristine pre-init state. Test support (same package): headless tests must call
-     * this before/after exercising the static so no state bleeds across test methods.
-     */
+    public static boolean isWallClankEnabled() {
+        ensureInitialized();
+        return wallClankEnabled;
+    }
+
+    public static void setWallClankEnabled(boolean enabled) {
+        wallClankEnabled = enabled;
+        initialized = true;
+        if (Gdx.app != null) {
+            new GamePreferences().setWallClankEnabled(enabled);
+        }
+    }
     static void resetForTests() {
         wallClimbingEnabled = GamePreferences.DEFAULT_WALL_CLIMB_ENABLED;
         squashEnabled = GamePreferences.DEFAULT_SQUASH_ENABLED;
         selectLevelEnabled = GamePreferences.DEFAULT_SELECT_LEVEL_ENABLED;
         levelOpen = GamePreferences.DEFAULT_LEVEL_OPEN;
         embersEnabled = GamePreferences.DEFAULT_EMBERS_ENABLED;
+        wallClankEnabled = GamePreferences.DEFAULT_WALL_CLANK_ENABLED;
         initialized = false;
     }
 }

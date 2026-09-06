@@ -31,6 +31,18 @@ This is a retro 2D side-scrolling platformer built with:
 - ECS Component/System changes → update `resources/docs-ai/ashley-ecs.md`
 - Enemy changes → update `resources/docs-ai/enemies.md`
 
+## Skills (MANDATORY)
+
+Load the matching skill via the `skill` tool and follow it before implementing:
+- Rendering code (SpriteBatch, ShapeRenderer, draw order, blending) → `libgdx-2d-rendering`
+- Tiled maps, layers, object parsing → `libgdx-tiled`
+- Scene2D UI (HUD, dialogs, touch controls) → `libgdx-scene2d-ui`
+- Assets (AssetManager, async loading, disposal) → `libgdx-assetmanager`
+- Camera/viewport setup → `libgdx-camera-viewport`
+- Math utilities (Vector2, collisions, interpolation) → `libgdx-math`
+- Map generation/regeneration → `tmx-map-generator`
+- Placeholder pixel-art assets → `pixel-art-asset-generator`
+
 ## Before Implementing
 
 "Grill" the requester with clarifying questions about ambiguous design decisions (behavior shape, defaults, edge cases, system interactions). Only proceed once confirmed.

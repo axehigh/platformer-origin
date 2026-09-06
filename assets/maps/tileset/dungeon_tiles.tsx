@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.2" name="dungeon_tiles" tilewidth="256" tileheight="299" tilecount="59" columns="0">
+<tileset version="1.10" tiledversion="1.12.2" name="dungeon_tiles" tilewidth="256" tileheight="299" tilecount="60" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0" type="Ground">
   <properties>
@@ -221,5 +221,11 @@
    <object id="1" x="27" y="5" width="35" height="299"/>
    <object id="2" x="63" y="26" width="85" height="27"/>
   </objectgroup>
+ </tile>
+ <tile id="65" type="crumble">
+  <properties>
+   <property name="crumble" type="bool" value="true"/>
+  </properties>
+  <image source="../gfx/tiles/lava/platform-one-way.png" width="129" height="128"/>
  </tile>
 </tileset>

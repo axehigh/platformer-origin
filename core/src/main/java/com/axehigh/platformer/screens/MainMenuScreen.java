@@ -137,5 +137,4 @@ public class MainMenuScreen extends MenuScreen {
 private void newGame() {
         changeScreen(new StoryIntroScreen(game));
 }
-
 }

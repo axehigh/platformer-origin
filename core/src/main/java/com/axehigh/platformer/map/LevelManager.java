@@ -38,6 +38,7 @@ public class LevelManager implements Disposable {
     private final Array<Rectangle> oneWayRects;
     private final Array<Rectangle> hazardRects;
     private final Array<Rectangle> secretRects;
+    private final Array<CrumblingTile> crumblingTiles;
     private final RoomState roomState;
     private final SecretRoomRevealer secretRoomRevealer;
 
@@ -47,7 +48,7 @@ public class LevelManager implements Disposable {
     public LevelManager(PooledEngine engine, EntityFactory entityFactory, Viewport viewport,
                          TiledMapRenderSystem tiledMapRenderSystem, Array<Rectangle> collisionRects,
                          Array<Rectangle> oneWayRects, Array<Rectangle> hazardRects,
-                         Array<Rectangle> secretRects,
+                         Array<Rectangle> secretRects, Array<CrumblingTile> crumblingTiles,
                          RoomState roomState, SecretRoomRevealer secretRoomRevealer, MapLoader initialMapLoader) {
         this.engine = engine;
         this.entityFactory = entityFactory;
@@ -58,6 +59,7 @@ public class LevelManager implements Disposable {
         this.oneWayRects = oneWayRects;
         this.hazardRects = hazardRects;
         this.secretRects = secretRects;
+        this.crumblingTiles = crumblingTiles;
         this.roomState = roomState;
         this.secretRoomRevealer = secretRoomRevealer;
         this.mapLoader = initialMapLoader;
@@ -126,6 +128,10 @@ public class LevelManager implements Disposable {
         collisionRects.addAll(newMapLoader.getCollisionRects());
         oneWayRects.clear();
         oneWayRects.addAll(newMapLoader.getOneWayRects());
+        // Fresh CrumblingTiles (all INTACT, timers zeroed) — mid-crumble tiles reset for free since
+        // the whole array is replaced with the new map's instances.
+        crumblingTiles.clear();
+        crumblingTiles.addAll(newMapLoader.getCrumblingTiles());
         hazardRects.clear();
         hazardRects.addAll(newMapLoader.getHazardRects());
         secretRects.clear();

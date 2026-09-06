@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.2" name="hazards" tilewidth="128" tileheight="128" tilecount="3" columns="2">
+<tileset version="1.10" tiledversion="1.12.2" name="hazards" tilewidth="129" tileheight="128" tilecount="5" columns="2">
+ <grid orientation="orthogonal" width="128" height="128"/>
  <tile id="2" type="Floating">
   <properties>
    <property name="amplitudeX" value="0"/>
@@ -29,5 +30,14 @@
    <property name="trapType" value="acidDrop"/>
   </properties>
   <image source="../gfx/hazards/acid_tube3.png" width="128" height="128"/>
+ </tile>
+ <tile id="6">
+  <image source="../gfx/tiles/caves/platform-float.png" width="128" height="128"/>
+ </tile>
+ <tile id="7" type="crumble">
+  <properties>
+   <property name="crumble" type="bool" value="true"/>
+  </properties>
+  <image source="../gfx/tiles/lava/platform-one-way.png" width="129" height="128"/>
  </tile>
 </tileset>

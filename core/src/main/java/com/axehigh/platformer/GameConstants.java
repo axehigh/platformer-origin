@@ -127,6 +127,15 @@ public final class GameConstants {
     /** Toggle interval of the buff-expiry blink, halo alpha phases and HUD icon visibility (seconds). */
     public static final float BUFF_BLINK_INTERVAL = 0.2f;
 
+    //Crumbling platforms (shake -> collapse -> respawn, seconds)
+    public static final float CRUMBLE_SHAKE_DURATION = 0.5f;
+    public static final float CRUMBLE_RESPAWN_DURATION = 2.5f;
+    public static final float CRUMBLE_LANDING_GRACE = 0.1f;
+    public static final float CRUMBLE_SETTLE_GRACE = 0.5f;
+    /** Max pixel offset of the visible shake jitter while a crumble tile is {@code SHAKING};
+     *  decays linearly to 1px as the shake runs out so the jitter stays crisp at pixel scale. */
+    public static final float CRUMBLE_SHAKE_MAX_JITTER = 3f;
+
     //UI
 
     /** Scale factor for touch control button images. Set to 2f for double size icons. */
@@ -143,6 +152,7 @@ public final class GameConstants {
     public static final float UI_BUTTON_SCALE_DURATION = 0.05f;
     public static final float UI_PADDING_TOUCH = 16f;
     public static final float UI_BOTTOM_PAD = 10f;
+    public static final float UI_BOTTOM_PAD_INVENTORY = 100f;
 
     /**
      * Invisible hit-area expansion (UI units, 1980x1080 design space) beyond each touch button's
@@ -173,6 +183,7 @@ public final class GameConstants {
     public static float TitleFontScale = FontScale * 3f;
     public static float BodyFontScale = FontScale * 2f;
     public static float SmallFontScale = FontScale ;
+    public static float tinyFontScale = FontScale * 0.85f;
 
     public static final String SKIN_TITLE = "title";
 

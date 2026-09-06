@@ -5,6 +5,7 @@ import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.map.SecretRoomRevealer;
 import com.axehigh.platformer.particles.GlobalParticles;
 import com.axehigh.platformer.particles.ParticleHelper;
+import com.axehigh.platformer.util.FeatureFlags;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -307,7 +308,7 @@ public class MeleeAttackSystem extends IteratingSystem {
      * a wall was clanked, so the swing is consumed (one clank per swing).
      */
     private boolean spawnWallClankSpark(Rectangle bounds) {
-        if (collisionRects == null || engine == null) {
+        if (collisionRects == null || engine == null || !FeatureFlags.isWallClankEnabled()) {
             return false;
         }
         for (Rectangle rect : collisionRects) {

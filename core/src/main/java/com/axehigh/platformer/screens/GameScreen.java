@@ -35,6 +35,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import static com.axehigh.platformer.GameConstants.*;
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_UI_GFX;
 import static com.axehigh.platformer.ecs.components.Mappers.*;
+import static com.axehigh.platformer.util.FeatureFlags.isEmbersEnabled;
 
 /**
  * Owns the Ashley Engine, the fixed-resolution viewport/camera, and drives the game loop.
@@ -169,7 +170,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         inventoryBarStage = new InventoryBarStage(new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT), skin, assetManager, playerComponent, playerEntity);
         inventoryBarStage.setOnTapOutside(this::toggleInventory);
 
-        if (com.axehigh.platformer.util.FeatureFlags.isEmbersEnabled()) {
+        if (isEmbersEnabled()) {
             menuEffects.addEmbers(hudStage, 28);
         }
 

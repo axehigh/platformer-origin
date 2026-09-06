@@ -39,6 +39,8 @@ public class MapLoader implements Disposable {
     private static final String PROPERTY_ONE_WAY = "oneWay";
     /** Tile property marking a non-solid hazard (spikes/lava) that damages the player on touch. */
     private static final String PROPERTY_HAZARD = "hazard";
+    /** Tile property marking a landable platform tile that shakes, collapses, and respawns when stood on. */
+    private static final String PROPERTY_CRUMBLE = "crumble";
     /** Tile property marking a solid breakable wall tile that opens a secret room when melee-struck. */
     private static final String PROPERTY_SECRET = "secret";
     /** Tile/object property naming the {@code Rooms}-layer rectangle (and thus the secret room) a secret wall guards or an object is deferred for. */
@@ -51,6 +53,7 @@ public class MapLoader implements Disposable {
     private final Array<Rectangle> oneWayRects = new Array<>();
     private final Array<Rectangle> hazardRects = new Array<>();
     private final Array<Rectangle> secretRects = new Array<>();
+    private final Array<CrumblingTile> crumblingTiles = new Array<>();
     private final Array<EffectSpawn> effectSpawns = new Array<>();
     private final String tmxPath;
     private final float tileWidth;
@@ -95,6 +98,13 @@ public class MapLoader implements Disposable {
                 } else if (!isSolid(cell)) {
                     // solid=false passage tile: no collision at all.
                     continue;
+                } else if (tile.getProperties().get(PROPERTY_CRUMBLE, false, Boolean.class)) {
+                    // Crumble tiles are always one full-tile rect: the SAME rect must also land in
+                    // oneWayRects and be tracked by identity in CrumblingTileSystem, so custom
+                    // collision shapes on a crumble tile are deliberately unsupported (no
+                    // addCustomRects call here).
+                    oneWayRects.add(rect);
+                    crumblingTiles.add(new CrumblingTile(layer, x, y, cell, rect));
                 } else if (tile.getProperties().get(PROPERTY_ONE_WAY, false, Boolean.class)) {
                     addCustomRects(cell, x, y, tileWidth, tileHeight, rect, oneWayRects);
                 } else {
@@ -253,6 +263,14 @@ public class MapLoader implements Disposable {
     /** Player-only drop-through platforms (collision-layer tiles flagged {@code oneWay=true}). */
     public Array<Rectangle> getOneWayRects() {
         return oneWayRects;
+    }
+
+    /**
+     * Crumbling platforms (collision-layer tiles flagged {@code crumble=true}): shaking, collapsing,
+     * respawning one-way tiles, each carrying the shared rect also present in {@link #getOneWayRects()}.
+     */
+    public Array<CrumblingTile> getCrumblingTiles() {
+        return crumblingTiles;
     }
 
     /** Non-solid hazard tiles (collision-layer tiles flagged {@code hazard=true}). */

@@ -1,7 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.*;
-import com.axehigh.platformer.map.*;
+import com.axehigh.platformer.util.FeatureFlags;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.assets.AssetManager;
@@ -169,6 +168,9 @@ public class MeleeAttackSystemSecretWallTest extends SystemTestBase {
 
     @Test
     public void strikingRegularWallSpawnsSpark() {
+        // Wall-clank is opt-in (feature flag defaults off); the test must enable it explicitly —
+        // otherwise this is order-dependent on whatever prior class in the JVM touched the flag.
+        FeatureFlags.setWallClankEnabled(true);
         collisionRects.add(new Rectangle(16f, 105f, 128f, 128f));
         Entity playerEntity = player(0f, 130f);
         PLAYER.get(playerEntity).meleeAttack.start(0.15f);

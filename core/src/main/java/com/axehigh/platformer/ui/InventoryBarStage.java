@@ -23,6 +23,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 import static com.axehigh.platformer.GameConstants.*;
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_UI_GFX;
+import static com.badlogic.gdx.utils.Scaling.fit;
 
 /**
  * Pause-the-game inventory hotbar: displays equipment slots (Armor, Weapon, Bullet/Dagger Weapon, Key)
@@ -35,7 +36,7 @@ public class InventoryBarStage extends Stage {
     private static final float SLOT_SIZE = 110f;
     private static final float SLOT_PAD = 12f;
     private static final float COUNT_PAD = 6f;
-    private static final float ICON_SIZE = 60f;
+    private static final float ICON_SIZE = 50f;
 
     private final PlayerComponent playerComponent;
     private final Entity playerEntity;
@@ -60,7 +61,7 @@ public class InventoryBarStage extends Stage {
         root = new Table();
         root.setFillParent(true);
         root.bottom();
-        root.padBottom(UI_BOTTOM_PAD + 15f);
+        root.padBottom(UI_BOTTOM_PAD_INVENTORY);
         root.setVisible(false);
         addActor(root);
 
@@ -92,29 +93,31 @@ public class InventoryBarStage extends Stage {
             icon.setMinWidth(ICON_SIZE);
             icon.setMinHeight(ICON_SIZE);
             drinkButton.setDrawable(icon);
+            drinkButton.getImage().setScaling(fit);
+            drinkButton.getImage().setScale(1.40f); // Reset internal scale
+            drinkButton.getImageCell().center();
 
             Label countLabel = new Label("", counterStyle);
-            countLabel.setFontScale(FontScale);
+            countLabel.setFontScale(tinyFontScale);
             countLabel.setAlignment(Align.bottomRight);
 
             Label titleLabel = new Label(type.displayName().toUpperCase(), counterStyle);
-            titleLabel.setFontScale(FontScale * 0.85f);
+            titleLabel.setFontScale(tinyFontScale);
             titleLabel.setAlignment(Align.center);
 
             Table slotTable = new Table();
             slotTable.background(skin.getDrawable("table"));
-            slotTable.add(drinkButton).grow();
+            slotTable.add(drinkButton).size(ICON_SIZE, ICON_SIZE).center();
             slotTable.addActor(countLabel);
 
             Table col = new Table();
             col.add(titleLabel).padBottom(4f);
             col.row();
-            col.add(slotTable).size(SLOT_SIZE, SLOT_SIZE);
+            col.add(slotTable).size(SLOT_SIZE, SLOT_SIZE).center();
 
             potionSlots.put(type, new Slot(drinkButton, countLabel, slotTable));
             potionRow.add(col).padLeft(SLOT_PAD).padRight(SLOT_PAD);
         }
-
         root.add(potionRow);
     }
 
@@ -127,6 +130,9 @@ public class InventoryBarStage extends Stage {
             icon.setMinWidth(ICON_SIZE);
             icon.setMinHeight(ICON_SIZE);
             btn.setDrawable(icon);
+            btn.getImage().setScaling(fit);
+            btn.getImage().setScale(1.0f);
+            btn.getImageCell().center();
         }
         Label countLabel = new Label("", counterStyle);
         countLabel.setFontScale(FontScale);
@@ -137,12 +143,12 @@ public class InventoryBarStage extends Stage {
 
         Table slotTable = new Table();
         slotTable.background(skin.getDrawable("table"));
-        slotTable.add(btn).grow();
+        slotTable.add(btn).size(ICON_SIZE, ICON_SIZE).center();
 
         Table col = new Table();
         col.add(titleLabel).padBottom(4f);
         col.row();
-        col.add(slotTable).size(SLOT_SIZE, SLOT_SIZE);
+        col.add(slotTable).size(SLOT_SIZE, SLOT_SIZE).center();
 
         return new Slot(btn, countLabel, col);
     }

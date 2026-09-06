@@ -7,15 +7,22 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
+import com.badlogic.gdx.graphics.g2d.ParticleEmitter;
 import com.badlogic.gdx.utils.ObjectMap;
 
 import static com.axehigh.platformer.particles.GlobalParticles.SMOKE;
+import static com.axehigh.platformer.particles.GlobalParticles.SPARKS;
 
 /**
  * Helper class for managing and spawning particle effects defined in GlobalParticles.
  */
 public class ParticleHelper {
     private static final ObjectMap<String, ParticleEffect> templates = new ObjectMap<>();
+
+    /** Scale (fraction of the sparks template's native size) for the crumble-collapse chip burst. */
+    private static final float STONE_CHIPS_SCALE = 0.8f;
+    /** Hard lifetime cap (seconds) for the crumble-collapse chip burst. */
+    private static final float STONE_CHIPS_MAX_LIFETIME = 0.7f;
 
     /**
      * Loads all particle effects defined in GlobalParticles into the internal template registry.
@@ -121,6 +128,61 @@ public class ParticleHelper {
     /** Spawns a small smoke puff with an explicit scale (used to size landing puffs by fall speed). */
     public static void spawnSmallSmoke(PooledEngine engine, float x, float y, float scale) {
         spawnParticle(engine, SMOKE, x, y, 0, scale);
+    }
+
+    /**
+     * Spawns a small stone-chip debris burst at the given coordinates — a recolored clone of the
+     * {@link GlobalParticles#SPARKS} template (dark gray → lighter stone gradient), so
+     * crumbling-tile collapse debris needs no new art.
+     *
+     * @param engine The Ashley ECS engine to add the entity to.
+     * @param x      X coordinate in world space.
+     * @param y      Y coordinate in world space.
+     */
+    public static void spawnStoneChips(PooledEngine engine, float x, float y) {
+        if (Gdx.gl == null) {
+            // For headless tests, create a dummy entity mirroring the production shape
+            // (TransformComponent + ParticleComponent) to allow testing if particles were triggered.
+            Entity dummy = engine.createEntity();
+            TransformComponent tc = engine.createComponent(TransformComponent.class);
+            tc.position.x = x;
+            tc.position.y = y;
+            dummy.add(tc);
+            ParticleComponent pc = engine.createComponent(ParticleComponent.class);
+            pc.delay = 0;
+            pc.scale = STONE_CHIPS_SCALE;
+            pc.maxLifetime = STONE_CHIPS_MAX_LIFETIME;
+            dummy.add(pc);
+            engine.addEntity(dummy);
+            return;
+        }
+
+        ParticleEffect template = templates.get(SPARKS);
+        if (template == null) {
+            Gdx.app.error("ParticleHelper", "Particle template not found for path: " + SPARKS);
+            return;
+        }
+
+        ParticleEffect chips = new ParticleEffect(template);
+        for (ParticleEmitter emitter : chips.getEmitters()) {
+            emitter.getTint().setColors(new float[]{0.45f, 0.42f, 0.40f, 0.70f, 0.68f, 0.64f});
+        }
+
+        Entity particleEntity = engine.createEntity();
+        TransformComponent tc = engine.createComponent(TransformComponent.class);
+        tc.position.x = x;
+        tc.position.y = y;
+        particleEntity.add(tc);
+
+        ParticleComponent pc = engine.createComponent(ParticleComponent.class);
+        pc.effect = chips;
+        pc.effect.scaleEffect(STONE_CHIPS_SCALE);
+        pc.delay = 0;
+        pc.scale = STONE_CHIPS_SCALE;
+        pc.maxLifetime = STONE_CHIPS_MAX_LIFETIME;
+        particleEntity.add(pc);
+
+        engine.addEntity(particleEntity);
     }
 
     /**

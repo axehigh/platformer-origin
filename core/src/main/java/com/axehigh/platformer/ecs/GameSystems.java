@@ -26,6 +26,7 @@ public class GameSystems {
     private static final int PRIORITY_ENEMY = 4;
     private static final int PRIORITY_BUFF = 4;
     private static final int PRIORITY_TRAP = 4;
+    private static final int PRIORITY_CRUMBLE = 5;
     private static final int PRIORITY_MOVEMENT = 5;
     private static final int PRIORITY_BOUNDS = 6;
     private static final int PRIORITY_MOVING_PLATFORM = 6;
@@ -40,6 +41,7 @@ public class GameSystems {
     private static final int PRIORITY_PLAYER_DEATH = 8;
     private static final int PRIORITY_CAMERA = 9;
     private static final int PRIORITY_ANIMATION = 10;
+    private static final int PRIORITY_CRUMBLE_RENDER = 21;
     private static final int PRIORITY_SQUASH = 25;
     private static final int PRIORITY_MAP_RENDER = 20;
     private static final int PRIORITY_BACKGROUND_RENDER = 19;
@@ -80,6 +82,11 @@ public class GameSystems {
         TrapSystem trapSystem = new TrapSystem(mapLoader.getCollisionRects(), roomState, assetManager, PRIORITY_TRAP);
         trapSystem.setUnitScale(unitScale);
         engine.addSystem(trapSystem);
+
+        // CrumblingTileSystem shares MovementSystem's tier-5 priority but is inserted first, so a
+        // collapse (rect removed from the shared oneWayRects) happens before the player's move is
+        // resolved — the standing player falls through the same frame a tile crumbles.
+        engine.addSystem(new CrumblingTileSystem(mapLoader.getCrumblingTiles(), mapLoader.getOneWayRects(), PRIORITY_CRUMBLE));
 
         MovementSystem movementSystem = new MovementSystem(mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), PRIORITY_MOVEMENT);
         movementSystem.setUnitScale(unitScale);
@@ -133,6 +140,10 @@ public class GameSystems {
             assetManager.get(BACKGROUND_NEAR, Texture.class),
             PRIORITY_BACKGROUND_RENDER));
         engine.addSystem(tiledMapRenderSystem);
+        // Crumble-shake jitter redraws right after the map layer (20) so the shaken tile sits above
+        // the background it was blanked from, before entities (30) draw. Shares the SAME array
+        // instance as CrumblingTileSystem/LevelManager (refilled in place per level -> no re-wiring).
+        engine.addSystem(new CrumblingTileRenderSystem(batch, camera, mapLoader.getCrumblingTiles(), PRIORITY_CRUMBLE_RENDER));
         engine.addSystem(new RenderSystem(batch, camera, PRIORITY_ENTITY_RENDER));
         engine.addSystem(new FloatingMessageSystem(batch, camera, skin, PRIORITY_FLOATING_MESSAGE));
         engine.addSystem(new ParticleSystem(batch, camera, PRIORITY_PARTICLE_RENDER));
@@ -142,7 +153,7 @@ public class GameSystems {
         debugRenderSystem.setUnitScale(unitScale);
         engine.addSystem(debugRenderSystem);
 
-        levelManager = new LevelManager(engine, entityFactory, viewport, tiledMapRenderSystem, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), mapLoader.getSecretRects(), roomState, secretRoomRevealer, mapLoader);
+        levelManager = new LevelManager(engine, entityFactory, viewport, tiledMapRenderSystem, mapLoader.getCollisionRects(), mapLoader.getOneWayRects(), mapLoader.getHazardRects(), mapLoader.getSecretRects(), mapLoader.getCrumblingTiles(), roomState, secretRoomRevealer, mapLoader);
 
         LevelExitSystem exitSystem = new LevelExitSystem(levelManager, PRIORITY_LEVEL_EXIT, onVictory);
         exitSystem.setUnitScale(unitScale);
