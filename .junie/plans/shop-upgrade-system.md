@@ -41,14 +41,14 @@ Introduce a stat-threshold combat balance model (Grunt/Elite/Knight enemy tiers)
 # Technical Design
 
 ### Current Implementation
-- `PlayerComponent` (`core/.../ecs/components/PlayerComponent.java`): already has `coins` (currency), `health`/`maxHealth`, `items`/`maxAmmo` (dagger ammo, default `30`). No sword-damage or upgrade-flag fields yet.
+- `PlayerComponent` (`core/.../ecs/components/PlayerComponent.java`): already has `coins` (currency), `health`/`maxBaseHealth`, `items`/`maxAmmo` (dagger ammo, default `30`). No sword-damage or upgrade-flag fields yet.
 - `MeleeAttackSystem` (`core/.../ecs/systems/MeleeAttackSystem.java`): hardcodes `private static final float MELEE_DAMAGE = 5f;` at line 37, passed straight into `EnemyDamageResolver.applyHit(enemy, enemyMovement, MELEE_DAMAGE, ...)` at line 85.
 - `EnemyComponent`/`EntityFactory.createEnemy` (`core/.../map/EntityFactory.java` lines 227-272): `enemyType` switch (`"flyer"`, `"shooter"`, default `"walker"`) sets sprite + only overrides `health = 5f` for `"flyer"`; walker/shooter default to `EnemyComponent.health = 10f`.
 - `resources/docs-ai/enemies.md`: single source of truth for the enemy catalog table (§2) — currently lists Patrol/Flying/Shooting types only.
 - No shop/vendor code exists anywhere in the project; no save/persistence layer exists (`LevelManager` keeps `PlayerComponent` alive in-memory across map swaps only).
 
 ### Key Decisions
-1. **Dynamic damage source:** `swordDamage` lives on `PlayerComponent` (not a new component) since it's a player-wide stat, mirroring how `maxAmmo`/`maxHealth` already live there. `MeleeAttackSystem` reads `player.swordDamage` instead of its private constant.
+1. **Dynamic damage source:** `swordDamage` lives on `PlayerComponent` (not a new component) since it's a player-wide stat, mirroring how `maxAmmo`/`maxBaseHealth` already live there. `MeleeAttackSystem` reads `player.swordDamage` instead of its private constant.
 2. **Enemy tiers:** No renaming of Java enum/type strings needed — Grunt/Elite/Knight are documentation-level tier names mapped onto the existing `enemyType` values (`flyer`→Grunt, `walker`/`shooter`→Elite) plus one new `enemyType="knight"` value (15 HP, reuses the walker sprite/behavior, no new component).
 3. **Sharp Edge damage value:** set to `8` (confirmed override) rather than the issue's literal `7`, so Knight's "3 hits → 2 hits" claim is exactly true (`8*2=16 ≥ 15` but `8*1=8 < 15`).
 4. **Shop as plain class:** `ShopManager` is a standalone Java class (not `Component`/`System`) holding a fixed `List<ShopItem>` catalog and a `purchase` method that mutates `PlayerComponent` directly — no Ashley wiring needed since there's no vendor entity yet. This keeps the change additive and easy to wire into a future `ShopSystem`/UI later.
@@ -99,7 +99,7 @@ public class ShopManager {
 Since there's no shop UI/vendor entity yet, validation is done by directly exercising `ShopManager`/`MeleeAttackSystem` logic against constructed `PlayerComponent`/`EnemyComponent` instances (unit-level checks), plus a manual project build to confirm compilation.
 
 ### Key Scenarios
-- Purchasing each of the 3 items with sufficient gold deducts the correct cost and applies the correct stat change (`swordDamage`→8, `maxAmmo`→60, `maxHealth`+1).
+- Purchasing each of the 3 items with sufficient gold deducts the correct cost and applies the correct stat change (`swordDamage`→8, `maxAmmo`→60, `maxBaseHealth`+1).
 - Purchasing with insufficient gold leaves `coins` and all stats unchanged, returns `false`.
 - Re-purchasing a one-time item (Sharp Edge, Dagger Bandolier) is a no-op the second time; re-purchasing Iron Heart stacks correctly.
 - `MeleeAttackSystem` deals `player.swordDamage` (not a fixed `5`) to a hit enemy — verified by changing `swordDamage` and confirming a Grunt (5 HP)/Elite (10 HP)/Knight (15 HP) enemy dies in the expected number of hits before/after Sharp Edge.

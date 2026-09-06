@@ -94,6 +94,11 @@ it with the CWD set to `assets/maps`, keep `--tilesets-dir tileset`, and write t
   (identical to the legacy layout). **Multi-row grids require `--no-secret`.**
 - `--no-secret` — omit the secret room/veil/deferred markers entirely (required for multi-row
   grids; legal for chains too).
+- `--bare` — **empty arena**: only the sealed dungeon-tile frame (perimeter + floor), the
+  `playerStart` marker, and (with `--exit-next`) the `exitGate` + its door decoration. No
+  enemies, coins/chests, secrets, platforms, or templates — implies `--no-secret`, and is
+  mutually exclusive with `--inside-secret`/`--platforms`/`--template`/`--template-pick`.
+  Used for `world3`'s long empty scroll rooms (`--rooms 1 --room-width 60 --room-height 10`).
 - `--exit-next PATH` — place one `exitGate` marker (rectangle, `type="exitGate"`, ~140×152px,
   property `nextLevel=PATH`) in the room **farthest from the player start** (the top-right room;
   the rightmost room on a 1-row map), standing on the floor near the room's right wall. The game

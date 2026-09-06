@@ -218,7 +218,7 @@ class Layout:
 
     def __init__(self, tilesets_dir, room_count, inside_secret=False,
                  room_width=DEFAULT_ROOM_WIDTH, room_height=DEFAULT_ROOM_HEIGHT,
-                 grid_cols=None, grid_rows=None, no_secret=False):
+                 grid_cols=None, grid_rows=None, no_secret=False, bare=False):
         def load(name):
             return Tileset(os.path.join(tilesets_dir, name))
 
@@ -290,6 +290,9 @@ class Layout:
         self.player_room_index = (self.grid_rows - 1) * self.grid_cols if self.grid_rows > 1 else 0
         self.inside_secret = inside_secret
         self.no_secret = no_secret
+        # Bare arenas: empty rooms, dungeon-tile frame only (see --bare). No secrets ever
+        # (handled by the caller forcing no_secret), so no secret_room/chamber is allocated.
+        self.bare = bare
         self.secret_room = None
         self.chamber = None
         if inside_secret:
@@ -560,7 +563,7 @@ def _reserved_template_cols(layout, spawn_col, exit_next=None):
 
 
 def _build_objects(layout, rng, enemy_types, vertical_links, exit_next=None,
-                   spawn_col=None, template_cols_by_room=None):
+                   spawn_col=None, template_cols_by_room=None, bare=False):
     objects = []  # (layer, xml string)
     enemies = []
     next_id = 1
@@ -603,6 +606,10 @@ def _build_objects(layout, rng, enemy_types, vertical_links, exit_next=None,
             rect_object(objects, "playerStart", x, _rect_tiled_y(layout.map_height_px, floor_world_y, TILE_SIZE),
                         TILE_SIZE, TILE_SIZE, name="playerStart")
 
+        # Bare arenas (--bare): only the playerStart marker (+ exitGate with --exit-next) is
+    # emitted -- no enemies, no coins/chests anywhere. The rooms-layer rects and the solid
+    # dungeon-tile frame are still produced by the collision/background builders.
+    if not bare:
         rng.shuffle(interior)
         enemy_count = rng.randint(0, 2)
         for _ in range(min(enemy_count, len(interior))):
@@ -1190,7 +1197,7 @@ def _relative_source(out_path, ts_path):
 def generate_map(output_path, room_count=3, seed=None, tilesets_dir="tileset", enemy_types=None,
                  inside_secret=False, room_width=DEFAULT_ROOM_WIDTH, room_height=DEFAULT_ROOM_HEIGHT,
                  grid_cols=None, grid_rows=None, no_secret=False, exit_next=None, platforms=0,
-                 templates=None, template_pick=0):
+                 templates=None, template_pick=0, bare=False):
     """Builds a chain (default) or grid of rooms (room_width x room_height tiles at 128px;
     defaults 24x10 -- the mobile-oriented default; pass 30x17 for whole-screen desktop rooms),
     perimeter-sealed except for one walk-through doorway to each horizontal neighbour and a
@@ -1212,6 +1219,11 @@ def generate_map(output_path, room_count=3, seed=None, tilesets_dir="tileset", e
     With exit_next=<tmx path> an exitGate trigger is placed in the room farthest from the
     player start (top-right), carrying a nextLevel property pointing at that path, so the
     map is chain-connected to the next level (see LevelExitSystem).
+
+    With bare=True the rooms are empty arenas -- only the dungeon-tile frame (sealed
+    perimeter + floor) plus the playerStart marker and, with exit_next, the exitGate and
+    its door decoration. No enemies, coins/chests, secrets, platforms, or templates are
+    emitted (bare forces no_secret). Used for world 3's long scroll rooms (60x10).
 
     When the cave tileset defines a `type="door"` tile (dungeon_tiles.tsx), that tile is
     painted on the decoration layer beneath the playerStart and the exitGate markers -- on
@@ -1245,8 +1257,18 @@ def generate_map(output_path, room_count=3, seed=None, tilesets_dir="tileset", e
         raise ValueError(
             "multi-row grid layouts require --no-secret (the appended secret room only makes sense "
             "for a linear 1-row chain); pass --no-secret to generate the plain grid map.")
+    if bare:
+        # Bare arenas are pure dungeon-tile frames: no secrets and no content scatter. Any
+        # content-producing option is incompatible by construction.
+        no_secret = True
+        if inside_secret:
+            raise ValueError("--bare is mutually exclusive with --inside-secret (bare maps never "
+                             "carve secret chambers).")
+        if platforms or templates or template_pick:
+            raise ValueError("--bare is mutually exclusive with --platforms/--template/--template-pick "
+                             "(bare maps are empty arenas, dungeon tiles only).")
     layout = Layout(tilesets_dir, room_count, inside_secret, room_width, room_height,
-                    grid_cols, grid_rows, no_secret)
+                    grid_cols, grid_rows, no_secret, bare)
     rng = random.Random(seed)
 
     templates = templates or []
@@ -1300,7 +1322,8 @@ def generate_map(output_path, room_count=3, seed=None, tilesets_dir="tileset", e
     template_footprints = _plan_template_footprints(layout, placements, extra_forbidden=reserved_cols)
     objects, enemies = _build_objects(layout, rng, enemy_types or DEFAULT_ENEMY_TYPES, vertical_links,
                                       exit_next=exit_next, spawn_col=spawn_col,
-                                      template_cols_by_room=_footprint_cols(template_footprints))
+                                      template_cols_by_room=_footprint_cols(template_footprints),
+                                      bare=bare)
     if platforms > 0:
         _apply_platforming(layout, collision_grid, background_grid, objects, platforms)
     _apply_templates(layout, collision_grid, decoration_grid, template_footprints)
@@ -1905,6 +1928,10 @@ def main():
                         help="Stamp N distinct random library templates into N distinct rooms that fit "
                              "(deterministic per --seed; defaults to fewer than N if the library/layout "
                              "cannot fit that many).")
+    parser.add_argument("--bare", action="store_true",
+                        help="Empty arena: a fully solid dungeon-tile frame (perimeter + floor) with "
+                             "NO enemies, NO coins/chests, NO secrets, NO platforms/templates -- just the "
+                             "playerStart marker (and the exitGate with --exit-next). Implies --no-secret.")
     args = parser.parse_args()
 
     enemy_types = None
@@ -1929,7 +1956,8 @@ def main():
                  room_width=args.room_width, room_height=args.room_height,
                  grid_cols=args.grid_cols, grid_rows=args.grid_rows,
                  no_secret=args.no_secret, exit_next=args.exit_next,
-                 platforms=args.platforms, templates=templates, template_pick=args.template_pick)
+                 platforms=args.platforms, templates=templates, template_pick=args.template_pick,
+                 bare=args.bare)
 
 
 if __name__ == "__main__":

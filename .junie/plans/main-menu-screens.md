@@ -9,7 +9,7 @@ Add a real save/continue system so `Continue` on `MainMenuScreen` (currently per
 
 ### Scope
 **In Scope**
-- Autosave triggered from `LevelExitSystem`'s existing gate-transition flow (right when `LevelManager.loadLevel(...)` is invoked), capturing: current/next level path, `health`, `maxHealth`, `coins`, `items`, `swordDamage`, `sharpEdgePurchased`, `daggerBandolierPurchased`, `ironHeartCount`.
+- Autosave triggered from `LevelExitSystem`'s existing gate-transition flow (right when `LevelManager.loadLevel(...)` is invoked), capturing: current/next level path, `health`, `maxBaseHealth`, `coins`, `items`, `swordDamage`, `sharpEdgePurchased`, `daggerBandolierPurchased`, `ironHeartCount`.
 - A `SaveData` POJO serialized with libGDX `Json` and stored as a single string value inside the existing settings `Preferences` store, managed by a new `SaveManager` util class.
 - `MainMenuScreen`'s `Continue` button becomes enabled/clickable only when `SaveManager.hasSave()` is true; otherwise it stays disabled exactly as today.
 - `GameScreen` gains a save-aware construction path so, on Continue, the freshly created player entity's `PlayerComponent` fields are overwritten from the loaded `SaveData` after `entityFactory.createPlayer(...)`.
@@ -33,7 +33,7 @@ Add a real save/continue system so `Continue` on `MainMenuScreen` (currently per
 # Technical Design (Save/Continue)
 
 ### Current Implementation (relevant to save/continue)
-- `PlayerComponent` already tracks all the stats to persist: `health`, `maxHealth`, `coins`, `items`, `swordDamage`, `sharpEdgePurchased`, `daggerBandolierPurchased`, `ironHeartCount`.
+- `PlayerComponent` already tracks all the stats to persist: `health`, `maxBaseHealth`, `coins`, `items`, `swordDamage`, `sharpEdgePurchased`, `daggerBandolierPurchased`, `ironHeartCount`.
 - `LevelExitSystem.processEntity(...)` is the single choke point where a level transition happens: on interact-while-near-exit it calls `levelManager.loadLevel(levelExit.nextLevelPath, playerEntity)` — this is the autosave trigger point (per your decision).
 - `LevelManager.loadLevel(...)` repositions the (same, persisted-in-memory) player entity at the new level's spawn and resets only transient fields (`jumpCount`, `isWallClimbing`, `interactPressed`, `nearExit`) — it never touches disk.
 - `GameScreen` currently has two constructors: `GameScreen(Game game)` (defaults to catalog's first level) and `GameScreen(Game game, String levelPath)`; `MainMenuScreen`'s `Continue` button is currently always rendered `Touchable.disabled`.
@@ -48,7 +48,7 @@ Add a real save/continue system so `Continue` on `MainMenuScreen` (currently per
 - **Applying save to gameplay**: a new `GameScreen(Game game, SaveData saveData)` constructor loads `saveData.levelPath` and, after `entityFactory.createPlayer(...)` builds the player, copies `saveData`'s fields onto that entity's `PlayerComponent` — `EntityFactory.createPlayer(x, y)`'s signature is left untouched (per your decision).
 
 ### Proposed Changes
-- **New `SaveData`** (`map` package, alongside `LevelDefinition`): a plain POJO with a no-arg constructor (required by libGDX `Json`) and public fields `levelPath`, `health`, `maxHealth`, `coins`, `items`, `swordDamage`, `sharpEdgePurchased`, `daggerBandolierPurchased`, `ironHeartCount`.
+- **New `SaveData`** (`map` package, alongside `LevelDefinition`): a plain POJO with a no-arg constructor (required by libGDX `Json`) and public fields `levelPath`, `health`, `maxBaseHealth`, `coins`, `items`, `swordDamage`, `sharpEdgePurchased`, `daggerBandolierPurchased`, `ironHeartCount`.
 - **New `SaveManager`** (`util` package): wraps the same `Preferences` instance used by `GamePreferences` (a shared `Gdx.app.getPreferences("axehigh-platformer-settings")` lookup) and exposes `save(SaveData)` (serializes via `new Json().toJson(data)`, writes to a `"save"` key, `flush()`s), `load()` (reads the key, `new Json().fromJson(SaveData.class, json)`, or `null` if absent), and `hasSave()` (key present and non-empty).
 - **`LevelExitSystem`**: on the interact-and-transition branch (right before/alongside `levelManager.loadLevel(...)`), build a `SaveData` from the player's current `PlayerComponent` plus `levelExit.nextLevelPath`, and call `SaveManager.save(saveData)`.
 - **`GameScreen`**: add a third constructor `GameScreen(Game game, SaveData saveData)` that sets `levelPath = saveData.levelPath` and stores the `saveData` reference; in `show()`, immediately after `attachPlayerAnimations(player)`/`engine.addEntity(player)`, if a `saveData` is present, overwrite `playerComponent`'s stat fields from it before the first `render()` call.
@@ -377,7 +377,7 @@ When the player's health reaches 0, gameplay pauses and a Game Over dialog appea
 # Technical Design (Death / Game Over)
 
 ### Current Implementation (relevant to death/game-over)
-- `PlayerComponent.health`/`maxHealth` already exist and are decremented in `EnemyContactSystem`/`EnemyBulletCollisionSystem` (both clamp at `Math.max(0, ...)`), but nothing currently checks for or reacts to `health == 0`.
+- `PlayerComponent.health`/`maxBaseHealth` already exist and are decremented in `EnemyContactSystem`/`EnemyBulletCollisionSystem` (both clamp at `Math.max(0, ...)`), but nothing currently checks for or reacts to `health == 0`.
 - `GameScreen.show()` wires up all Ashley systems with explicit `PRIORITY_*` constants and builds `hudStage`/`touchControlsStage` via `SkinFactory.createBasicSkin()`; `render()` calls `engine.update(delta)` unconditionally every frame.
 - `LevelManager.loadLevel(tmxPath, player)` already supports reloading a level in place (used by `LevelExitSystem`) while keeping the same `PlayerComponent` instance — the same method the retry flow will reuse to restart the *current* level.
 - `SaveManager`/`SaveData` (added in the Save/Continue feature) already persist level path + core stats via a JSON blob in the shared settings `Preferences`; `triesRemaining` slots naturally alongside `completedLevelIds` as a new field.
@@ -387,7 +387,7 @@ When the player's health reaches 0, gameplay pauses and a Game Over dialog appea
 - **Death detection**: a new dedicated `PlayerDeathSystem` (Ashley `IteratingSystem`, player family) rather than inline checks in each damage system — keeps detection independent of how damage was dealt, matching the project's existing single-responsibility system style (per your decision).
 - **Presentation**: an in-place Scene2D `Dialog` overlay on `GameScreen` (not a separate `GameOverScreen`) — reuses the existing `hudStage`'s `Skin`/`Stage` and avoids tearing down/rebuilding the whole Ashley engine just to show a message (per your decision).
 - **Tries persistence & reset**: `triesRemaining` (default 3) lives in `SaveData` and is reset to 3 only when a brand-new `SaveData` is created for **New Game**; it is *not* refilled by level-exit checkpoints, and Continue-from-menu carries over whatever value was last saved (per your decision).
-- **Retry behavior**: "Continue" on the dialog restarts the *current* level fresh via `LevelManager.loadLevel(...)` with `health` reset to `maxHealth` (coins/items/upgrades untouched) — it does **not** roll back to the last level-exit autosave (per your decision).
+- **Retry behavior**: "Continue" on the dialog restarts the *current* level fresh via `LevelManager.loadLevel(...)` with `health` reset to `maxBaseHealth` (coins/items/upgrades untouched) — it does **not** roll back to the last level-exit autosave (per your decision).
 - **Tries-exhausted UI**: when `triesRemaining == 0`, the dialog is built without a "Continue" button/row at all (not merely disabled) — only "Exit to Main Menu" is present (per your decision).
 
 ### Proposed Changes
@@ -504,7 +504,7 @@ Implement the settings screen with placeholder, persisted options.
 
 ### ✓ Step 6: Add SaveData model and SaveManager persistence
 Introduce the save/load building blocks with no gameplay wiring yet.
-- Add `SaveData` (`map` package): a no-arg-constructor POJO with `levelPath`, `health`, `maxHealth`, `coins`, `items`, `swordDamage`, `sharpEdgePurchased`, `daggerBandolierPurchased`, `ironHeartCount`.
+- Add `SaveData` (`map` package): a no-arg-constructor POJO with `levelPath`, `health`, `maxBaseHealth`, `coins`, `items`, `swordDamage`, `sharpEdgePurchased`, `daggerBandolierPurchased`, `ironHeartCount`.
 - Add `SaveManager` (`util` package): backed by the same `Gdx.app.getPreferences("axehigh-platformer-settings")` store used by `GamePreferences`, exposing `hasSave()`, `save(SaveData)` (libGDX `Json` serialize + `flush()`), and `load()` (deserialize, or `null` if absent).
 - No systems or screens reference these yet; purely foundational persistence code.
 
