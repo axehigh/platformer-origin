@@ -37,7 +37,7 @@ public final class PlayerConfig {
     /** Starting and maximum player health (hearts). */
     public static final int MAX_HEALTH = 3;
     /** Bullets in the inventory when the player spawns. */
-    public static final int START_BULLETS = 0;
+    public static final int START_BULLETS = 5;
 
     //------ Melee strike ------
     /** Minimum delay between two melee swings (seconds). */
@@ -73,7 +73,7 @@ public final class PlayerConfig {
     public static final float PLAYER_MAX_ATTACK_REACH = maxOf(PLAYER_ATTACK_REACH);
 
     //------ Ranged dagger shot ------
-    public static final String PLAYER_BULLET_REGION = "potion_healing";
+    public static final String PLAYER_BULLET_REGION = "dagger";
     public static final float PLAYER_BULLET_SCALE = .2f;
     /** Bullet collision box (base units, scaled by {@link #PLAYER_BULLET_SCALE} in
      *  {@code PlayerInputSystem}). Authored per-sprite like the player/enemy collision boxes: the
@@ -81,7 +81,7 @@ public final class PlayerConfig {
      *  the visible blade), so give it the actual in-sprite footprint plus any offset from the
      *  frame's bottom-left corner. */
     public static final float BULLET_COLLISION_WIDTH = 32f;
-    public static final float BULLET_COLLISION_HEIGHT = 32f;
+    public static final float BULLET_COLLISION_HEIGHT = 16f;
     public static final float BULLET_OFFSET_X = 0f;
     public static final float BULLET_OFFSET_Y = 0f;
     /** Minimum delay between two shots (seconds). */
