@@ -8,9 +8,6 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
 import static com.axehigh.platformer.GameConstants.FontScale;
 import static com.axehigh.platformer.GameConstants.SmallFontScale;
 
@@ -27,6 +24,18 @@ public class PauseDialog extends Dialog {
     private enum Tab {
         GAMEPLAY,
         DEBUG
+    }
+
+    /** RoboVM-safe functional interface: reads a boolean setting (no java.util.function on iOS). */
+    @FunctionalInterface
+    private interface BooleanGetter {
+        boolean get();
+    }
+
+    /** RoboVM-safe functional interface: writes a boolean setting (no java.util.function on iOS). */
+    @FunctionalInterface
+    private interface BooleanSetter {
+        void set(boolean value);
     }
 
     /** Callbacks into the owning screen for state the dialog must read or mutate. */
@@ -208,7 +217,7 @@ public class PauseDialog extends Dialog {
         return button;
     }
 
-    private CheckBox toggleCheckBox(String labelText, Supplier<Boolean> getter, Consumer<Boolean> setter) {
+    private CheckBox toggleCheckBox(String labelText, BooleanGetter getter, BooleanSetter setter) {
         CheckBox checkBox = new CheckBox(" " + labelText, getSkin());
         checkBox.getLabel().setFontScale(SmallFontScale);
         checkBox.setChecked(getter.get());
@@ -216,7 +225,7 @@ public class PauseDialog extends Dialog {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 AudioManager.get().playClick();
-                setter.accept(checkBox.isChecked());
+                setter.set(checkBox.isChecked());
             }
         });
         return checkBox;
