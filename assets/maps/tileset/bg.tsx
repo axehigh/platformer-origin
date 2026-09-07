@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.2" name="bg" tilewidth="256" tileheight="386" tilecount="19" columns="0">
+<tileset version="1.10" tiledversion="1.12.2" name="bg" tilewidth="256" tileheight="386" tilecount="20" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="5">
   <image source="../gfx/tiles/bg/chains2.png" width="200" height="170"/>
@@ -34,14 +34,11 @@
  <tile id="24">
   <image source="../gfx/tiles/bg/skull.png" width="128" height="198"/>
  </tile>
- <tile id="25">
+ <tile id="25" type="door_exit">
   <image source="../gfx/tiles/bg/door.png" width="165" height="186"/>
  </tile>
  <tile id="26">
   <image source="../gfx/tiles/altar.png" width="128" height="109"/>
- </tile>
- <tile id="30">
-  <image source="../gfx/tiles/dungeon/rock.png" width="128" height="128"/>
  </tile>
  <tile id="31">
   <image source="../gfx/tiles/bg/Armor.png" width="256" height="256"/>
@@ -49,7 +46,7 @@
  <tile id="33">
   <image source="../gfx/tiles/bg/Portrait.png" width="128" height="128"/>
  </tile>
- <tile id="34">
+ <tile id="34" type="door_enter">
   <image source="../gfx/tiles/bg/door2.png" width="167" height="180"/>
  </tile>
  <tile id="35">
@@ -57,5 +54,11 @@
  </tile>
  <tile id="37">
   <image source="../gfx/tiles/bg/table.png" width="86" height="75"/>
+ </tile>
+ <tile id="38">
+  <image source="../gfx/tiles/bg/door3.png" width="128" height="138"/>
+ </tile>
+ <tile id="40">
+  <image source="../gfx/tiles/bg/banner6.png" width="256" height="264"/>
  </tile>
 </tileset>

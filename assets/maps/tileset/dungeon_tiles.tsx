@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.2" name="dungeon_tiles" tilewidth="256" tileheight="299" tilecount="60" columns="0">
+<tileset version="1.10" tiledversion="1.12.2" name="dungeon_tiles" tilewidth="170" tileheight="299" tilecount="54" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0" type="Ground">
   <properties>
@@ -37,15 +37,6 @@
  <tile id="10">
   <image source="../gfx/tiles/dungeon/04bc.png" width="128" height="128"/>
  </tile>
- <tile id="11">
-  <image source="../gfx/tiles/dungeon/bg-barrel.png" width="128" height="128"/>
- </tile>
- <tile id="12">
-  <image source="../gfx/tiles/dungeon/bg-crate.png" width="128" height="128"/>
-  <objectgroup draworder="index" id="3">
-   <object id="2" x="16" y="32" width="98" height="96"/>
-  </objectgroup>
- </tile>
  <tile id="13">
   <properties>
    <property name="secret" type="bool" value="true"/>
@@ -71,17 +62,11 @@
  <tile id="17">
   <image source="../gfx/tiles/dungeon/bridge-4.png" width="128" height="128"/>
  </tile>
- <tile id="18">
-  <image source="../gfx/tiles/dungeon/crate-3.png" width="256" height="257"/>
- </tile>
  <tile id="19">
   <image source="../gfx/tiles/dungeon/crystal-bottom-1.png" width="128" height="128"/>
  </tile>
  <tile id="20">
   <image source="../gfx/tiles/dungeon/crystal-bottom-2.png" width="128" height="128"/>
- </tile>
- <tile id="21" type="Door">
-  <image source="../gfx/tiles/dungeon/door.png" width="128" height="256"/>
  </tile>
  <tile id="22">
   <image source="../gfx/tiles/dungeon/doorwall.png" width="128" height="128"/>
@@ -103,6 +88,9 @@
  </tile>
  <tile id="28">
   <image source="../gfx/tiles/dungeon/rock.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="22" y="91" width="84" height="36"/>
+  </objectgroup>
  </tile>
  <tile id="29">
   <image source="../gfx/tiles/dungeon/signboard.png" width="128" height="128"/>
@@ -182,14 +170,8 @@
  <tile id="52">
   <image source="../gfx/tiles/caves/bridge-4.png" width="128" height="129"/>
  </tile>
- <tile id="53" type="Door">
-  <image source="../gfx/tiles/caves/door.png" width="129" height="256"/>
- </tile>
  <tile id="54">
   <image source="../gfx/tiles/caves/pedestal.png" width="128" height="128"/>
- </tile>
- <tile id="56">
-  <image source="../gfx/tiles/caves/bg-barrel.png" width="128" height="128"/>
  </tile>
  <tile id="57">
   <image source="../gfx/tiles/caves/platform-float.png" width="128" height="128"/>

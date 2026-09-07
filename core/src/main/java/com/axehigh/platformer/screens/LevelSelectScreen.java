@@ -138,7 +138,7 @@ public class LevelSelectScreen extends MenuScreen {
         IntArray worldIds = LevelCatalog.worldIds();
         for (int i = 0; i < worldIds.size; i++) {
             int id = worldIds.get(i);
-            if (id == LevelCatalog.WORLD_DEMO) continue;
+            if (id == LevelCatalog.WORLD_TUTORIAL || id == LevelCatalog.WORLD_DEMO) continue;
             if (id == worldId) break;
             prev = id;
         }
@@ -163,8 +163,8 @@ public class LevelSelectScreen extends MenuScreen {
         for (int i = 0; i < worldIds.size; i++) {
             final int worldId = worldIds.get(i);
 
-            // Demo only available when LEVEL_OPEN is true
-            if (worldId == LevelCatalog.WORLD_DEMO && !levelOpen) {
+            // Demo/Tutorial only available when LEVEL_OPEN is true
+            if ((worldId == LevelCatalog.WORLD_DEMO || worldId == LevelCatalog.WORLD_TUTORIAL) && !levelOpen) {
                 continue;
             }
 
@@ -208,7 +208,7 @@ public class LevelSelectScreen extends MenuScreen {
         IntArray activeWorldIds = new IntArray();
         for (int i = 0; i < worldIds.size; i++) {
             int id = worldIds.get(i);
-            if (id == LevelCatalog.WORLD_DEMO && !levelOpen) continue;
+            if ((id == LevelCatalog.WORLD_DEMO || id == LevelCatalog.WORLD_TUTORIAL) && !levelOpen) continue;
             activeWorldIds.add(id);
         }
 

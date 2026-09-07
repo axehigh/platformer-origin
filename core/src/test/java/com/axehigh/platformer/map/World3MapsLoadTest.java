@@ -138,9 +138,9 @@ public class World3MapsLoadTest {
                 float w = objEl.getFloatAttribute("width", 0f);
                 float h = objEl.getFloatAttribute("height", 0f);
                 RectangleMapObject obj = new RectangleMapObject(x, mapHeightWorld - y - h, w, h);
-                String oName = objEl.getAttribute("name");
+                String oName = objEl.getAttribute("name", null);
                 if (oName != null) obj.setName(oName);
-                String type = objEl.getAttribute("type");
+                String type = objEl.getAttribute("type", null);
                 if (type != null) obj.getProperties().put("type", type);
                 XmlReader.Element props = objEl.getChildByName("properties");
                 if (props != null) {

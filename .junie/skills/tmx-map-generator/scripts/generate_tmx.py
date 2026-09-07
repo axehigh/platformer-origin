@@ -95,6 +95,8 @@ EXIT_GATE_H = 152
 COLLISION_TILESET = "dungeon_tiles.tsx"
 ITEMS_TILESET = "items.tsx"
 ENEMY_TILESET = "enemy.tsx"
+BG_TILESET = "bg.tsx"
+HAZARDS_TILESET = "hazards.tsx"
 SECRET_WALL_TILESET = "secret_wall.tsx"
 
 DEFAULT_ENEMY_TYPES = ["walker", "flyer", "shooter", "knight"]
@@ -225,12 +227,16 @@ class Layout:
         self.cave = Tileset(os.path.join(tilesets_dir, COLLISION_TILESET))
         self.items = load(ITEMS_TILESET)
         self.enemy = load(ENEMY_TILESET)
+        self.bg = load(BG_TILESET)
+        self.hazards = load(HAZARDS_TILESET)
         self.secret_wall = load(SECRET_WALL_TILESET)
 
         self.cave.firstgid = 1
         self.items.firstgid = self.cave.firstgid + self.cave.tilecount
         self.enemy.firstgid = self.items.firstgid + self.items.tilecount
-        self.secret_wall.firstgid = self.enemy.firstgid + self.enemy.tilecount
+        self.bg.firstgid = self.enemy.firstgid + self.enemy.tilecount
+        self.hazards.firstgid = self.bg.firstgid + self.bg.tilecount
+        self.secret_wall.firstgid = self.hazards.firstgid + self.hazards.tilecount
 
         self.solid_gids = []
         self.passage_gids = []
@@ -248,10 +254,12 @@ class Layout:
 
         self.coin_gids = self._tiles_with_type(self.items, "coin")
         self.chest_gids = self._tiles_with_type(self.items, "chest")
-        # Tiles with a `type="door"` attribute in the cave tileset: painted on the decoration
-        # layer beneath the playerStart and exitGate markers so the door stands on the floor,
-        # just above the collision layer, instead of looking like it floats.
-        self.door_gids = self._tiles_with_type(self.cave, "door")
+        # Entrance/exit door tiles come from the `bg` tileset, tagged `type="door_enter"` /
+        # `type="door_exit"` in Tiled (Class field). Painted on the decoration layer beneath the
+        # playerStart / exitGate markers so the doors stand on the floor instead of floating.
+        self.enter_door_gid = self._first_tile_type(self.bg, "door_enter")
+        self.exit_door_gid = self._first_tile_type(self.bg, "door_exit")
+        self.door_gids = [g for g in (self.enter_door_gid, self.exit_door_gid) if g is not None]
         self.enemy_tiles = [
             (tile_id, props)
             for tile_id, props in sorted(self.enemy.tiles.items())
@@ -329,6 +337,15 @@ class Layout:
         target = tile_type.lower()
         return [ts.gid(tile_id) for tile_id, props in sorted(ts.tiles.items())
                 if (props["type"] or "").lower() == target]
+
+    @staticmethod
+    def _first_tile_type(ts, tile_type):
+        """The gid of the first tile in `ts` whose `type` matches (case-insensitive), or None."""
+        target = tile_type.lower()
+        for tile_id, props in sorted(ts.tiles.items()):
+            if (props["type"] or "").lower() == target:
+                return ts.gid(tile_id)
+        return None
 
     def enemy_marker(self, enemy_type):
         """Returns (gid, width, height) for a tile-object enemy marker, or None when the
@@ -505,26 +522,34 @@ def _room_marker_cols(layout, room, vertical_links, template_cols_by_room=None):
     return cols
 
 
-def _pick_anchors(layout, rng, vertical_links, exit_next=None, avoid_cols=None):
-    """Choose the fixed entrance/exit anchors BEFORE any template planning: the playerStart
-    column (seeded RNG, clear of shaft/chamber columns and of any explicit template footprint
-    in the player room via avoid_cols) and the deterministic exit-gate column. Returns
-    (spawn_col, door_cells) where door_cells are the decoration-layer (col, row) door
-    placements derived from those anchors. Templates must fit around these columns, never over."""
+def _pick_anchors(layout, rng, vertical_links, exit_next=None, avoid_cols=None, spawn_col=None):
+    """Choose the fixed entrance/exit anchors BEFORE any template planning. When spawn_col is
+    None the playerStart column is picked via seeded RNG (clear of shaft/chamber columns and of
+    any explicit template footprint in the player room via avoid_cols); a fixed spawn_col must
+    be an available interior column of the player room or a ValueError is raised. The exit-gate
+    column is deterministic. Returns (spawn_col, door_cells) where door_cells are the
+    decoration-layer (col, row, kind) door placements derived from those anchors -- kind is
+    "enter" or "exit". Templates must fit around these columns, never over."""
     spawn_room = layout.rooms[layout.player_room_index]
     interior = _room_marker_cols(layout, spawn_room, vertical_links)
     if avoid_cols:
         interior = [c for c in interior if c not in avoid_cols]
-    if not interior:
-        raise ValueError(
-            "cannot place the playerStart: every usable interior column of the player room is "
-            "taken by explicit templates -- use a narrower template or a different room")
-    rng.shuffle(interior)
-    spawn_col = interior.pop(0)
-    door_cells = [(spawn_col, spawn_room.floor_row - 1)]
+    if spawn_col is not None:
+        if spawn_col not in interior:
+            raise ValueError(
+                f"spawn column {spawn_col} is not an available interior column of the player room "
+                f"(usable: {sorted(interior)})")
+    else:
+        if not interior:
+            raise ValueError(
+                "cannot place the playerStart: every usable interior column of the player room is "
+                "taken by explicit templates -- use a narrower template or a different room")
+        rng.shuffle(interior)
+        spawn_col = interior.pop(0)
+    door_cells = [(spawn_col, spawn_room.floor_row - 1, "enter")]
     if exit_next:
         exit_room = layout.rooms[layout.grid_cols - 1]
-        door_cells.append((exit_room.col_end - 2, exit_room.floor_row - 1))
+        door_cells.append((exit_room.col_end - 2, exit_room.floor_row - 1, "exit"))
     return spawn_col, door_cells
 
 
@@ -746,17 +771,20 @@ def _apply_platforming(layout, collision_grid, background_grid, objects, platfor
 
 
 def _paint_door_cells(decoration_grid, layout, door_cells):
-    """Paints the `type="door"` tile (first door gid in the cave tileset) into the decoration
-    layer at each (col, row) cell. Cells sit on the row just above the room floor, and the door
-    tile image is two tiles tall, so the door's bottom edge rests on the floor surface, just
-    above the collision layer. Returns the number of cells painted."""
-    if not layout.door_gids:
-        return 0
-    gid = layout.door_gids[0]
-    for col, row in door_cells:
+    """Paints the bg tileset's door tiles (type="door_enter" under the spawn, type="door_exit"
+    under the exit gate) into the decoration layer at each (col, row) cell. Cells sit on the
+    row just above the room floor so the door stands on the floor surface. Returns the number
+    of cells painted."""
+    painted = 0
+    gid_by_kind = {"enter": layout.enter_door_gid, "exit": layout.exit_door_gid}
+    for col, row, kind in door_cells:
+        gid = gid_by_kind.get(kind)
+        if gid is None:
+            continue
         if 0 <= col < layout.map_cols and 0 <= row < layout.map_rows:
             decoration_grid[row][col] = gid
-    return len(door_cells)
+            painted += 1
+    return painted
 
 
 def _resolve_template_path(name):
@@ -853,7 +881,7 @@ class Template:
             if key.startswith("type:"):
                 tile_type = key.split(":", 1)[1].lower()
                 if tile_type == "door":
-                    gid = layout.door_gids[0] if layout.door_gids else None
+                    gid = layout.enter_door_gid
                     layer = "decoration"
                 else:
                     gid = _first_solid_by_type(layout, tile_type)
@@ -1197,7 +1225,7 @@ def _relative_source(out_path, ts_path):
 def generate_map(output_path, room_count=3, seed=None, tilesets_dir="tileset", enemy_types=None,
                  inside_secret=False, room_width=DEFAULT_ROOM_WIDTH, room_height=DEFAULT_ROOM_HEIGHT,
                  grid_cols=None, grid_rows=None, no_secret=False, exit_next=None, platforms=0,
-                 templates=None, template_pick=0, bare=False):
+                 templates=None, template_pick=0, bare=False, spawn_col=None):
     """Builds a chain (default) or grid of rooms (room_width x room_height tiles at 128px;
     defaults 24x10 -- the mobile-oriented default; pass 30x17 for whole-screen desktop rooms),
     perimeter-sealed except for one walk-through doorway to each horizontal neighbour and a
@@ -1225,10 +1253,10 @@ def generate_map(output_path, room_count=3, seed=None, tilesets_dir="tileset", e
     its door decoration. No enemies, coins/chests, secrets, platforms, or templates are
     emitted (bare forces no_secret). Used for world 3's long scroll rooms (60x10).
 
-    When the cave tileset defines a `type="door"` tile (dungeon_tiles.tsx), that tile is
-    painted on the decoration layer beneath the playerStart and the exitGate markers -- on
-    the row just above the room floor, sitting on the collision floor surface -- so the door
-    stands on the floor instead of looking like it floats.
+    Door tiles come from the `bg` tileset (type="door_enter" under playerStart,
+    type="door_exit" under exitGate), painted on the decoration layer on the row just
+    above the room floor, sitting on the collision floor surface -- so the door stands
+    on the floor instead of looking like it floats.
 
     With platforms=N each room additionally gets a deterministic staircase of N one-way
     platforms floating above the floor (see _apply_platforming): 2-row/2-col steps, the same
@@ -1301,7 +1329,7 @@ def generate_map(output_path, room_count=3, seed=None, tilesets_dir="tileset", e
             _plan_template_footprints(layout, player_explicit)).get(layout.player_room_index, set())
 
     spawn_col, door_cells = _pick_anchors(layout, rng, vertical_links, exit_next,
-                                          avoid_cols=spawn_avoid)
+                                          avoid_cols=spawn_avoid, spawn_col=spawn_col)
     reserved_cols = _reserved_template_cols(layout, spawn_col, exit_next)
 
     placements = list(explicit_placements)
@@ -1342,6 +1370,8 @@ def generate_map(output_path, room_count=3, seed=None, tilesets_dir="tileset", e
     cave_src = _relative_source(output_path, layout.cave.path)
     items_src = _relative_source(output_path, layout.items.path)
     enemy_src = _relative_source(output_path, layout.enemy.path)
+    bg_src = _relative_source(output_path, layout.bg.path)
+    hazards_src = _relative_source(output_path, layout.hazards.path)
     secret_wall_tileset = _secret_wall_tileset_xml(layout, output_path) if not layout.no_secret else ""
 
     tmx = f'''<?xml version="1.0" encoding="UTF-8"?>
@@ -1349,6 +1379,8 @@ def generate_map(output_path, room_count=3, seed=None, tilesets_dir="tileset", e
  <tileset firstgid="{layout.cave.firstgid}" source="{cave_src}"/>
  <tileset firstgid="{layout.items.firstgid}" source="{items_src}"/>
  <tileset firstgid="{layout.enemy.firstgid}" source="{enemy_src}"/>
+ <tileset firstgid="{layout.bg.firstgid}" source="{bg_src}"/>
+ <tileset firstgid="{layout.hazards.firstgid}" source="{hazards_src}"/>
 {secret_wall_tileset}
  <layer id="1" name="background" width="{layout.map_cols}" height="{layout.map_rows}">
   <data encoding="csv">{background_csv}</data>
@@ -1816,12 +1848,12 @@ def validate_map(path, tilesets_dir=None, room_width=None, room_height=None, no_
                        for r0 in normal_rects):
                 problems.append("exitGate not inside any normal room rect")
 
-        # Door decorations: exactly two `type="door"` tiles on the decoration layer, one on the
-        # row just above the floor of the exit room in the gate's column, the other (anywhere)
-        # beneath the spawn.
+        # Door decorations: exactly two door tiles on the decoration layer -- the exit door on
+        # the row just above the exit room's floor in the gate's column, the enter door on the
+        # floor row of the room below the playerStart. Door tiles come from the `bg` tileset,
+        # tagged `type="door_enter"` / `type="door_exit"`.
         decoration = next((layer for layer in root.findall("layer")
                            if layer.get("name") == "decoration"), None)
-        door_gids = layout.door_gids if layout is not None else []
         if decoration is None:
             problems.append("missing 'decoration' layer")
         else:
@@ -1831,18 +1863,56 @@ def validate_map(path, tilesets_dir=None, room_width=None, room_height=None, no_
             if len(door_cells) != 2:
                 problems.append(f"expected exactly 2 door decorations (player start + exit gate), "
                                 f"found {len(door_cells)}")
-            elif normal_rects:
+            elif normal_rects and player_starts:
+                expected = set()
                 exit_rect = max(normal_rects, key=lambda r: r[0])
                 exit_col = (exit_rect[0] + exit_rect[2]) // TILE_SIZE - 3
                 exit_floor_row = (height - 1) - exit_rect[1] // TILE_SIZE - 1
-                if (exit_col, exit_floor_row) not in door_cells:
-                    problems.append(f"no door decoration at expected exit cell "
-                                    f"(col {exit_col}, floor row {exit_floor_row})")
-            if door_gids:
+                expected.add((exit_col, exit_floor_row))
+                if layout is not None and layout.exit_door_gid is not None:
+                    if (exit_col, exit_floor_row) not in door_cells:
+                        problems.append(f"no door decoration at expected exit cell "
+                                        f"(col {exit_col}, floor row {exit_floor_row})")
+                    elif dgrid[exit_floor_row][exit_col] != layout.exit_door_gid:
+                        problems.append(f"exit door decoration at ({exit_col}, {exit_floor_row}) "
+                                        f"uses gid {dgrid[exit_floor_row][exit_col]}, expected "
+                                        f"{layout.exit_door_gid} (type=\"door_exit\")")
+                ox, oy = world_from_object(player_starts[0])
+                spawn_rect = next((r for r in normal_rects
+                                   if r[0] <= ox < r[0] + r[2] and r[1] <= oy < r[1] + r[3]), None)
+                if spawn_rect is not None:
+                    enter_col = ox // TILE_SIZE
+                    enter_floor_row = (height - 1) - spawn_rect[1] // TILE_SIZE - 1
+                    expected.add((enter_col, enter_floor_row))
+                    if layout is not None and layout.enter_door_gid is not None:
+                        if (enter_col, enter_floor_row) not in door_cells:
+                            problems.append(f"no door decoration at expected enter cell "
+                                            f"(col {enter_col}, floor row {enter_floor_row})")
+                        elif dgrid[enter_floor_row][enter_col] != layout.enter_door_gid:
+                            problems.append(f"enter door decoration at ({enter_col}, {enter_floor_row}) "
+                                            f"uses gid {dgrid[enter_floor_row][enter_col]}, expected "
+                                            f"{layout.enter_door_gid} (type=\"door_enter\")")
+                # Any other non-zero decoration cells must still be acceptable door gids.
                 for col, row in door_cells:
-                    if dgrid[row][col] not in door_gids:
+                    if (col, row) in expected:
+                        continue
+                    if layout is None or dgrid[row][col] not in layout.door_gids:
                         problems.append(f"door decoration at ({col}, {row}) uses gid "
-                                        f"{dgrid[row][col]}, not a type=\"door\" tile")
+                                        f"{dgrid[row][col]}, not an acceptable door gid")
+
+    # Without an exit gate the decoration layer may only hold door tiles -- any stray/garbage
+    # gid (e.g. a leak from a stale tileset) is flagged.
+    if exit_next is None:
+        decoration = next((layer for layer in root.findall("layer")
+                           if layer.get("name") == "decoration"), None)
+        if decoration is not None:
+            dgrid, _, _ = _parse_grid_layer(decoration, width, height)
+            if layout is not None and layout.door_gids:
+                for col, row in ((col, row) for row in range(height) for col in range(width)
+                                 if dgrid[row][col] != 0):
+                    if dgrid[row][col] not in layout.door_gids:
+                        problems.append(f"decoration cell at ({col}, {row}) uses gid "
+                                        f"{dgrid[row][col]}, not an acceptable door gid")
 
     # Doors and the spawn must never be buried: every door decoration cell and the playerStart
     # cell must be open in the collision grid (the generation-time reservations make violations
@@ -1902,8 +1972,8 @@ def main():
     parser.add_argument("--seed", type=int, default=None, help="Random seed for reproducible output.")
     parser.add_argument("--tilesets-dir", type=str, default="tileset",
                         help="Directory holding the *.tsx tilesets (dungeon_tiles.tsx, items.tsx, "
-                             "enemy.tsx, secret_wall.tsx; default: 'tileset' relative to the CWD -- "
-                             "run from assets/maps).")
+                             "enemy.tsx, bg.tsx, hazards.tsx, secret_wall.tsx; default: 'tileset' "
+                             "relative to the CWD -- run from assets/maps).")
     parser.add_argument("--enemy-types", type=str, default=None,
                         help="Comma-separated enemy types to scatter (default: walker,flyer,shooter,knight).")
     parser.add_argument("--inside-secret", action="store_true",
@@ -1932,6 +2002,8 @@ def main():
                         help="Empty arena: a fully solid dungeon-tile frame (perimeter + floor) with "
                              "NO enemies, NO coins/chests, NO secrets, NO platforms/templates -- just the "
                              "playerStart marker (and the exitGate with --exit-next). Implies --no-secret.")
+    parser.add_argument("--spawn-col", type=int, default=None,
+                        help="Fixed playerStart column inside the player room (default: seeded RNG).")
     args = parser.parse_args()
 
     enemy_types = None
@@ -1957,7 +2029,7 @@ def main():
                  grid_cols=args.grid_cols, grid_rows=args.grid_rows,
                  no_secret=args.no_secret, exit_next=args.exit_next,
                  platforms=args.platforms, templates=templates, template_pick=args.template_pick,
-                 bare=args.bare)
+                 bare=args.bare, spawn_col=args.spawn_col)
 
 
 if __name__ == "__main__":

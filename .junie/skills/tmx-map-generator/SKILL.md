@@ -26,16 +26,19 @@ random scattering of enemies and items. The output is hand-authored-style — no
 exit-door / progression wiring, just the map file.
 
 The generator is **convention-driven**: it reads tile gids and properties live from the
-project's external tilesets, all of which live in `assets/maps/tileset/`:
-`dungeon_tiles.tsx` (collision), `items.tsx`, `enemy.tsx`, and `secret_wall.tsx` (secret-room
-entry walls — cloned **inline** into the map once as a `secret_room_wall` tileset, because
-Tiled can't attach the `secretRoom` property to a raw cell; see `Secret rooms` below). It
-tracks the tilesets instead of hard-coding gid numbers, so if a tileset changes,
-regeneration picks up the change automatically.
+project's external tilesets, all of which live in `assets/maps/tileset/`. **Every generated
+map always references the five canonical tilesets** in a fixed order
+(`dungeon_tiles.tsx` collision, `items.tsx`, `enemy.tsx`, `bg.tsx`, `hazards.tsx`), plus —
+unless `--no-secret` — `secret_wall.tsx` cloned **inline** as a `secret_room_wall` tileset
+(because Tiled can't attach the `secretRoom` property to a raw cell; see `Secret rooms`
+below). `bg.tsx` holds the decorative door tiles (`type="door_enter"` / `type="door_exit"`)
+and `drop_platform.tsx` is deliberately never referenced. The generator tracks the tilesets
+instead of hard-coding gid numbers, so if a tileset changes, regeneration picks up the
+change automatically.
 
 ## Usage
 
-All four tilesets are in `assets/maps/tileset/`, and the script opens every one relative to
+All five canonical tilesets are in `assets/maps/tileset/`, and the script opens every one relative to
 `--tilesets-dir` (default `tileset`) resolved against the **process working directory**. So run
 it with the CWD set to `assets/maps`, keep `--tilesets-dir tileset`, and write the output to
 `world_demo/` (prototype), `world2/` (a world-2 map), or `world1/` (a world-1 map):
@@ -104,15 +107,17 @@ it with the CWD set to `assets/maps`, keep `--tilesets-dir tileset`, and write t
   the rightmost room on a 1-row map), standing on the floor near the room's right wall. The game
   reads `nextLevel` to chain into the next map (see `LevelExitSystem`); a map with no flag emits
   no gate. Deterministic (pure geometry, no RNG).
-- **Door decorations:** if `tileset/dungeon_tiles.tsx` has a tile with `type="door"` (it does —
-  the 2-tile-tall `door.png`), that tile is painted on the `decoration` layer on the row **just
-  above the floor** beneath the `playerStart` and (with `--exit-next`) beneath the `exitGate`
-  (the gate's column, `col_end-2`). The door image is 2 tiles tall and renders upward from the
-  cell, so the door's bottom edge rests on the collision floor surface — it stands on the floor
-  instead of looking like it floats or sinks into it. **Doors are decided first and painted
-  last:** the entrance/exit anchor columns are chosen before any template planning and reserved
-  from templates, and the door decorations are painted after templates stamp, so a door can
-  never be buried by a course or clobbered.
+- **Door decorations:** the entrance/exit door tiles come from **`tileset/bg.tsx`**, resolved
+  by their `type` — `type="door_enter"` (the entrance door, `bg/door2.png`) and
+  `type="door_exit"` (the exit door, `bg/door.png`). In Tiled these are set via the tile's
+  **Class** field, which Tiled ≥1.10 serializes back to `type` in the file (don't switch the
+  project to "Tiled 1.9" compatibility, which would write `class` and hide the tags from the
+  generator). The `door_enter` tile is painted on the `decoration` layer on the row **just
+  above the floor** beneath the `playerStart` and the `door_exit` tile beneath the `exitGate`,
+  standing on the floor surface (the gate's column, `col_end-2`). **Doors are decided first and
+  painted last:** the entrance/exit anchor columns are chosen before any template planning and
+  reserved from templates, and the door decorations are painted after templates stamp, so a
+  door can never be buried by a course or clobbered.
 - `--room-width W`, `--room-height H` — room dimensions in tiles (defaults `30` and `17`). The
   map then spans `room_count × W` tiles wide × `H` tiles tall (plus one extra room when the
   appended secret room is enabled), so the map is always larger than a single room. All the
@@ -120,18 +125,22 @@ it with the CWD set to `assets/maps`, keep `--tilesets-dir tileset`, and write t
   and inside-chamber footprint, shaft platform spacing, and the marker/`Rooms` Y conversions.
   See **Room size** below.
 - `--seed N` — deterministic RNG for enemy/item placement; same seed ⇒ byte-identical output.
+- `--spawn-col N` — fix the `playerStart` column inside the player room instead of seeding it
+  from RNG (must be an interior column of the player room, else the generator errors with the
+  usable set). Deterministic; used by `world_0_tutorial`'s bare arenas to spawn on the left
+  (`--spawn-col 3`) with a matching deterministic door position.
 - `--out PATH` — output `.tmx`; the `tileset source=` is written relative to this path. With
   the invocation above (output inside `world_demo/`, `world1/`, or `world2/`) the sources
-  resolve to `../tileset/dungeon_tiles.tsx` + `../tileset/items.tsx` + `../tileset/enemy.tsx`
-  and the secret-wall image to `gfx/tiles/secret_wall.png` (`secret_wall.tsx`'s own
-  `../gfx/tiles/secret_wall.png`, re-based onto the output location); the secret-wall tileset
-  itself is written inline as `secret_room_wall`. With `--no-secret` no secret-wall tileset is
-  emitted at all.
-- `--tilesets-dir PATH` — directory holding all four `.tsx` tilesets (`dungeon_tiles.tsx`,
-  `items.tsx`, `enemy.tsx`, `secret_wall.tsx`), resolved against the CWD. Default `tileset` —
-  use it with the invocation above, run from `assets/maps`. (The shared images live in
-  `assets/maps/gfx/`; do not point this at the images directory — it must hold the `.tsx`
-  files.)
+  resolve to `../tileset/dungeon_tiles.tsx` + `../tileset/items.tsx` + `../tileset/enemy.tsx` +
+  `../tileset/bg.tsx` + `../tileset/hazards.tsx` and the secret-wall image to
+  `gfx/tiles/secret_wall.png` (`secret_wall.tsx`'s own `../gfx/tiles/secret_wall.png`, re-based
+  onto the output location); the secret-wall tileset itself is written inline as
+  `secret_room_wall`. With `--no-secret` no secret-wall tileset is emitted at all.
+- `--tilesets-dir PATH` — directory holding all five canonical `.tsx` tilesets
+  (`dungeon_tiles.tsx`, `items.tsx`, `enemy.tsx`, `bg.tsx`, `hazards.tsx`) plus
+  `secret_wall.tsx`, resolved against the CWD. Default `tileset` — use it with the invocation
+  above, run from `assets/maps`. (The shared images live in `assets/maps/gfx/`; do not point
+  this at the images directory — it must hold the `.tsx` files.)
 - `--enemy-types walker,flyer,shooter,knight` — which enemy types may appear. (Default now includes the 15-HP knight; pass an explicit list to opt out, e.g. `--enemy-types walker,flyer,shooter`.)
 - `--platforms N` — decorate each room with N floating one-way platforms in a deterministic,
   always-jumpable staircase (see **Platforming style** below). Composes with every other flag
@@ -352,12 +361,14 @@ does. An inside chamber is detected automatically (its rect is strictly containe
 room rect) and additionally checked for a hollow cavity. On a `--no-secret` map the `secret_hide`
 layer must be entirely empty. When `--exit-next` was used, validation additionally requires
 exactly one `exitGate` marker whose `nextLevel` equals the requested path, sitting inside a
-normal room rect, plus **exactly two** door decorations on the `decoration` layer — one on the
-row just above the exit room's floor in the gate's column (`col_end-2`), one anywhere for the
-spawn — and each decoration cell must use a `type="door"` tile gid. On every map (with or
+normal room rect, plus **exactly two** door decorations on the `decoration` layer — the
+`door_exit` gid in the gate's column (`col_end-2`) one row above the exit room's floor, and
+the `door_enter` gid in the `playerStart` column one row above the spawn room's floor — and
+any extra decoration cells must also use the entrance/exit door gids. On every map (with or
 without `--exit-next`) validation additionally fails on any of: the `playerStart` marker cell
-being a solid collision tile (spawn-in-wall), a door decoration cell backed by a solid collision
-tile (buried door), or a solid tile on a doorway approach corridor's passage rows (blocked
+being a solid collision tile (spawn-in-wall), a door decoration cell backed by a solid
+collision tile (buried door), stray decoration-layer gids outside the door tile set, or a
+solid tile on a doorway approach corridor's passage rows (blocked
 room-to-room travel) — the generation-time reservations make these impossible, so these checks
 are regression guards.
 

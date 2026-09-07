@@ -5,14 +5,20 @@ import com.badlogic.gdx.utils.IntArray;
 
 /** Static catalog of the game's selectable levels, backed by the existing assets/maps/*.tmx files. */
 public final class LevelCatalog {
-    public static final int WORLD_DEMO = 0;
+    public static final int WORLD_TUTORIAL = 0;
     public static final int WORLD_1 = 1;
     public static final int WORLD_2 = 2;
     public static final int WORLD_3 = 3;
+    public static final int WORLD_DEMO = 4;
 
     private static final Array<LevelDefinition> LEVELS = new Array<>();
 
     static {
+
+        //world 3 (Tutorial)
+        LEVELS.add(new LevelDefinition(WORLD_TUTORIAL, "tutorial_level01", "Level 1", "maps/world_0_tutorial/level_01.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_TUTORIAL, "tutorial_level02", "Level 2", "maps/world_0_tutorial/level_02.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_TUTORIAL, "tutorial_level03", "Level 3", "maps/world_0_tutorial/level_03_final.tmx"));
 
         //world 1
         LEVELS.add(new LevelDefinition(WORLD_1, "world1_level01", "Level 1", "maps/world1/level_01.tmx"));
@@ -39,17 +45,6 @@ public final class LevelCatalog {
         LEVELS.add(new LevelDefinition(WORLD_2, "world2_level09", "Level 9", "maps/world2/level_09.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_2, "world2_level10", "Level 10", "maps/world2/level_10_final.tmx"));
 
-        //world 3
-        LEVELS.add(new LevelDefinition(WORLD_3, "world3_level01", "Level 1", "maps/world3/level_01.tmx"));
-        LEVELS.add(new LevelDefinition(WORLD_3, "world3_level02", "Level 2", "maps/world3/level_02.tmx"));
-        LEVELS.add(new LevelDefinition(WORLD_3, "world3_level03", "Level 3", "maps/world3/level_03.tmx"));
-        LEVELS.add(new LevelDefinition(WORLD_3, "world3_level04", "Level 4", "maps/world3/level_04.tmx"));
-        LEVELS.add(new LevelDefinition(WORLD_3, "world3_level05", "Level 5", "maps/world3/level_05.tmx"));
-        LEVELS.add(new LevelDefinition(WORLD_3, "world3_level06", "Level 6", "maps/world3/level_06.tmx"));
-        LEVELS.add(new LevelDefinition(WORLD_3, "world3_level07", "Level 7", "maps/world3/level_07.tmx"));
-        LEVELS.add(new LevelDefinition(WORLD_3, "world3_level08", "Level 8", "maps/world3/level_08.tmx"));
-        LEVELS.add(new LevelDefinition(WORLD_3, "world3_level09", "Level 9", "maps/world3/level_09.tmx"));
-        LEVELS.add(new LevelDefinition(WORLD_3, "world3_level10", "Level 10", "maps/world3/level_10_final.tmx"));
 
         //demo
         LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_platforming_24x10", "24x10", "maps/world_demo/platforming_24x10.tmx"));
@@ -94,18 +89,19 @@ public final class LevelCatalog {
 
     /** Human-readable tab label for a world id. */
     public static String worldName(int worldId) {
+        if (worldId == WORLD_TUTORIAL) return "Tutorial";
         if (worldId == WORLD_DEMO) return "Demo";
         return "World " + worldId;
     }
 
     /** True when {@code worldId} is the last real world in the catalog (i.e. beating it wins the game).
-     *  The demo world (id 0) is a dev/testing catalog and never counts as the final world. */
+     *  The demo/tutorial worlds (id 0, 4) are dev/testing/tutorial catalogs and never count as the final world. */
     public static boolean isLastWorld(int worldId) {
         IntArray worlds = worldIds();
-        // Find the last world that is not the demo/dev world.
+        // Find the last world that is not the demo/tutorial world.
         for (int i = worlds.size - 1; i >= 0; i--) {
             int id = worlds.get(i);
-            if (id != WORLD_DEMO) {
+            if (id != WORLD_DEMO && id != WORLD_TUTORIAL) {
                 return id == worldId;
             }
         }
