@@ -18,6 +18,12 @@ public class BuffComponent implements Component {
     public final Timer speed = new Timer();
     /** Invulnerability buff: the player takes no damage while active. */
     public final Timer invulnerability = new Timer();
+    /** Invisibility buff: monsters ignore the player and player can move through monsters while active. */
+    public final Timer invisibility = new Timer();
+    /** Jump buff: grants triple jump while active. */
+    public final Timer jump = new Timer();
+    /** Fire Breath buff: shoots fireballs instead of knives while active. */
+    public final Timer fireBreath = new Timer();
 
     /** True while the speed multiplier is applied to {@code MovementComponent.maxSpeedX}. */
     public boolean speedApplied = false;
@@ -36,6 +42,18 @@ public class BuffComponent implements Component {
         return invulnerability.isActive();
     }
 
+    public boolean isInvisibilityActive() {
+        return invisibility.isActive();
+    }
+
+    public boolean isJumpActive() {
+        return jump.isActive();
+    }
+
+    public boolean isFireBreathActive() {
+        return fireBreath.isActive();
+    }
+
     /** Refreshes the strength buff to its full duration. */
     public void startStrength() {
         strength.start(GameConstants.STRENGTH_BUFF_DURATION);
@@ -49,5 +67,20 @@ public class BuffComponent implements Component {
     /** Refreshes the invulnerability buff to its full duration. */
     public void startInvulnerability() {
         invulnerability.start(GameConstants.INVULNERABILITY_DURATION);
+    }
+
+    /** Refreshes the invisibility buff to its full duration. */
+    public void startInvisibility() {
+        invisibility.start(GameConstants.INVISIBILITY_DURATION);
+    }
+
+    /** Refreshes the jump buff to its full duration. */
+    public void startJump() {
+        jump.start(GameConstants.JUMP_BUFF_DURATION);
+    }
+
+    /** Refreshes the fire breath buff to its full duration. */
+    public void startFireBreath() {
+        fireBreath.start(GameConstants.FIRE_BREATH_DURATION);
     }
 }

@@ -36,7 +36,7 @@ public abstract class MenuScreen extends BaseScreen {
 
     public MenuScreen(Game game) {
         super(game);
-        backgroundTexture = new Texture(Gdx.files.internal("splash/startup-menu.jpg"));
+        backgroundTexture = new Texture(Gdx.files.internal("splash/main-menu.jpg"));
     }
 
     @Override

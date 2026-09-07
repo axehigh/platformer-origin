@@ -11,8 +11,11 @@ import static com.axehigh.platformer.GameConstants.*;
 public enum PotionType {
     HEALING("Healing", "Restores 1 heart", "+1 HP", MESSAGE_COLOR_HEAL),
     STRENGTH("Strength", "Extra melee damage for 20s", "Double strength!!", MESSAGE_COLOR_STRENGTH),
-    SPEED("Speed", "Move faster + triple jump for 15s", "Triple jump!!", MESSAGE_COLOR_SPEED),
-    INVULNERABILITY("Invulnerability", "Take no damage for 10s", "Invulnerable!", MESSAGE_COLOR_INVULN);
+    SPEED("Speed", "Move faster for 15s", "Speed up!", MESSAGE_COLOR_SPEED),
+    INVULNERABILITY("Invulnerability", "Take no damage for 10s", "Invulnerable!", MESSAGE_COLOR_INVULN),
+    INVISIBILITY("Invisibility", "Walk through monsters for 10s", "Invisible!", MESSAGE_COLOR_INVISIBILITY),
+    JUMP("Jump", "Grants triple jump for 15s", "Triple jump!", MESSAGE_COLOR_JUMP),
+    FIRE_BREATH("Fire Breath", "Shoot fireballs for 15s", "Fire Breath!", MESSAGE_COLOR_FIRE);
 
     private final String displayName;
     private final String description;
@@ -47,5 +50,21 @@ public enum PotionType {
     /** Region key shared by {@code origin-game.atlas} (in-game) and {@code uiskin.atlas} (UI). */
     public String regionName() {
         return "potion_" + name().toLowerCase();
+    }
+
+    /** Parses a potion type name robustly, falling back to {@link #HEALING}. */
+    public static PotionType parse(String name) {
+        if (name == null) {
+            return HEALING;
+        }
+        String clean = name.trim().toUpperCase().replace("-", "_").replace(" ", "_");
+        try {
+            return valueOf(clean);
+        } catch (IllegalArgumentException e) {
+            if ("FIREBREATH".equals(clean)) {
+                return FIRE_BREATH;
+            }
+            return HEALING;
+        }
     }
 }

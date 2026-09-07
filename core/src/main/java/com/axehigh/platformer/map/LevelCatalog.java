@@ -52,7 +52,7 @@ public final class LevelCatalog {
         LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_platforming_grid", "Grid", "maps/world_demo/platforming_grid.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_platforming_secret", "Secret", "maps/world_demo/platforming_secret.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_template", "Demo", "maps/world_demo/template_demo.tmx"));
-        LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_my_map", "My Map", "maps/world_demo/my_map.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_my_map", "Potion", "maps/world_demo/map_potion.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_proto_30x9", "30x9", "maps/world_demo/proto_30x9.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_proto_60x9", "60x9", "maps/world_demo/proto_60x9.tmx"));
 

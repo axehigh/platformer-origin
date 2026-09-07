@@ -90,10 +90,18 @@ public class EnemyAttackSystem extends IteratingSystem {
 
         Entity playerEntity = players.first();
         PlayerComponent player = PLAYER.get(playerEntity);
+        EnemyAttackComponent attack = ENEMY_ATTACK.get(enemyEntity);
+        BuffComponent buff = BUFF.get(playerEntity);
+        if (buff != null && buff.isInvisibilityActive()) {
+            if (attack != null && attack.isAttacking) {
+                attack.isAttacking = false;
+            }
+            return;
+        }
+
         CollisionComponent playerCollision = COLLISION.get(playerEntity);
         CollisionComponent enemyCollision = COLLISION.get(enemyEntity);
         MovementComponent enemyMovement = MOVEMENT.get(enemyEntity);
-        EnemyAttackComponent attack = ENEMY_ATTACK.get(enemyEntity);
 
         float playerCenterX = playerCollision.worldBounds.x + playerCollision.worldBounds.width / 2f;
         float playerCenterY = playerCollision.worldBounds.y + playerCollision.worldBounds.height / 2f;

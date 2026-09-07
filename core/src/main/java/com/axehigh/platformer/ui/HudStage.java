@@ -68,7 +68,13 @@ public class HudStage extends Stage {
         TextureAtlas uiAtlas = assetManager.get(ORIGIN_UI_GFX, TextureAtlas.class);
         for (PotionType type : PotionType.values()) {
             TextureAtlas.AtlasRegion region = uiAtlas.findRegion(type.regionName());
-            potionDrawables.put(type, new TextureRegionDrawable(region));
+            if (region == null) {
+                region = uiAtlas.findRegion("potion_healing");
+            }
+            if (region == null) {
+                region = uiAtlas.findRegion("potion");
+            }
+            potionDrawables.put(type, region != null ? new TextureRegionDrawable(region) : null);
         }
 
         Table heartsTable = new Table();

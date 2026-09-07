@@ -1,10 +1,7 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.PlayerConfig;
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Rectangle;
@@ -98,5 +95,22 @@ public class HazardSystemTest extends SystemTestBase {
         engine.update(DT);
 
         assertEquals(PlayerConfig.MAX_HEALTH, player.health);
+    }
+
+    @Test
+    public void invisiblePlayerStillTakesHazardDamage() {
+        hazardRects.add(new Rectangle(0f, 0f, 100f, 50f));
+        TransformComponent transform = transform(0f, 0f);
+        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        place(transform, collision, 0f, 0f);
+        BuffComponent buff = new BuffComponent();
+        buff.startInvisibility();
+        Entity entity = entity(transform, player(), movement(), collision, buff);
+        engine.addEntity(entity);
+        PlayerComponent player = PLAYER.get(entity);
+
+        engine.update(DT);
+
+        assertEquals(PlayerConfig.MAX_HEALTH - 1, player.health);
     }
 }

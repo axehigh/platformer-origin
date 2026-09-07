@@ -29,9 +29,9 @@ public class EnemyComponent implements Component {
     }
 
     public Size size = Size.DEFAULT;
-    public float baseHealth = 10f;
+    public float health = 10f;
     /** Starting/full health, set alongside {@code health} by {@code EntityFactory}; used to size coin drops on death. */
-    public float maxBaseHealth = 10f;
+    public float maxHealth = 10f;
     /** Horizontal patrol speed, in world units/second. */
     public float speed = 20f;
     /** Current patrol direction: {@code 1} for right, {@code -1} for left. */

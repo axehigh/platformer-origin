@@ -57,6 +57,15 @@ public final class PotionEffects {
             case INVULNERABILITY:
                 buff.startInvulnerability();
                 break;
+            case INVISIBILITY:
+                buff.startInvisibility();
+                break;
+            case JUMP:
+                buff.startJump();
+                break;
+            case FIRE_BREATH:
+                buff.startFireBreath();
+                break;
             default:
                 break;
         }
