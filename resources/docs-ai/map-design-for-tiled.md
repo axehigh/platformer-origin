@@ -123,7 +123,7 @@ Layer **names matter — they are read by string**. Get them exactly right or th
 | `background` | Tile layer | Decorative backdrop (brick, pillars, windows…). Never affects collision. | yes (can be empty) |
 | `collision` | Tile layer | Solid/blocking geometry. Every painted tile is solid unless the tile opts out (see §4). | yes |
 | `decoration` | Tile layer | Foreground decor drawn above the collision tiles. Never affects collision. | optional |
-| `objects` | Object layer | Player start, pickups, chests, torches, exit gate, moving platforms (see §5). | yes |
+| `objects` | Object layer | Player start, pickups, chests, exit gate, moving platforms, standalone light markers (see §5, §7). | yes |
 | `enemies` | Object layer | Enemy markers (see §5). Separate layer keeps enemies easy to find. | optional |
 | `Rooms` | Object layer | Plain rectangles defining camera zones (see §6). | optional (see §6) |
 | `secret_hide` | Tile layer | Rock veil painted over a secret room's footprint to hide its existence until the secret wall is broken (see §4.6). Must render above every other tile layer. | optional |
@@ -261,7 +261,7 @@ Two ways to place a marker:
 | `playerStart` | The player | — | Exactly **one** per map, usually in the first room. Rectangle position = spawn point. |
 | `coin` | Coin pickup | — | Collectible objects are **never** drawn from the Tiled tile sprite — the spawned entity always renders its own `Coin_01..06` atlas spin animation, regardless of the marker source. Every coin renders at **half a map tile** (`DEFAULT_COIN_SIZE * unitScale`, i.e. 64px on a 128px-tile map) **centered on the marker rect — the marker's drawn size is ignored** (it's a pure placement guide). |
 | `chest` | Chest (opens on melee strike) | `potionType` (string, optional) | Built from the atlas `Chest_01_Locked`/`Chest_01_Unlocked` regions (128×128 — one map tile). Without `potionType`: drops 2–6 coins. With `potionType` set (e.g. `healing`, `strength`, `speed`, `invulnerability`): drops a single potion of that type instead. |
-| `torch` | Decorative torch | — | Flickers visually. |
+| `torch` | Decorative torch | — | **Legacy** (still works). Prefer stamping the torch tile from `items.tsx` on a tile layer for new maps (see §7). Flickers visually. |
 | `dagger` | Dagger pickup | — | Collectible item. |
 | `exitGate` | Exit gate / level transition | `nextLevel` (string, optional), `isFinal` (string, default `"false"`) | Spawns a **logic-only** entity: a collision box (sized from the object rectangle) + optional level transition. **No gate art is drawn** — paint the door's decoration yourself. The gate is interactive only when it has `nextLevel` **or** `isFinal="true"`; with neither it's purely decorative. `isFinal="true"` triggers the Victory Screen instead of loading the next level. |
 | `enemy` | Enemy | `enemyType` (string, default `"walker"`), `aiMode` (string), `speed` (float), `patrolRange` (float), `loot` (string) | Put these on the `enemies` layer (or `objects`). Catalog: `walker` (goblin), `flyer` (mosquito), `shooter` (spider), `knight` (15 HP). `loot` defines drop behavior (e.g., `"coin:3, ammo:1"`). See `resources/docs-ai/enemies.md`. |
@@ -413,13 +413,14 @@ For each axis (X and Y) independently:
 
 ## 7. Effects & Lighting
 
-Tiles on **any tile layer** (background, decoration, collision, etc.) can carry an `effect` property to spawn a runtime effect entity at that tile's position. The tile's own sprite is rendered by the Tiled map renderer — the effect entity carries **no texture**, only the effect component (e.g. `LightComponent`). This means what you paint in Tiled is what renders in-game (true WYSIWYG). The tile layer determines draw order (background = behind player, decoration = in front).
+Tiles carrying an `effect` property spawn a runtime effect entity at that position. There are two authoring paths — **tile layers** and **object-layer markers** — both processed by the same scan:
 
 ### How It Works
 
-1. Stamp a tile with `effect="light"` (or future `"particle"`, `"sound"`) on any tile layer.
-2. At level load, `MapLoader.scanEffectLayers()` iterates every tile layer in the map, reads the `effect` property from each cell, and records world positions.
-3. `EntityFactory.spawnEffects()` creates minimal effect entities at those positions.
+1. **Tile layer path (torches):** Stamp a tile with `effect="light"` on any tile layer (`background`, `decoration`, `collision`, etc.). The tile's own sprite is rendered by the Tiled map renderer; the effect entity carries **no texture** — only the effect component (e.g. `LightComponent`). What you paint in Tiled is what renders in-game (WYSIWYG).
+2. **Object-layer path (standalone lights):** Place a tile-object marker on the `objects` layer using a tile that carries `effect="light"` and `render=false` (e.g. `items.tsx` id 30). libGDX never draws `MapLayer` objects — the marker renders nothing in-game, but is visible in the Tiled editor as a placement guide. A light-only entity spawns at the object's x/y position.
+3. At level load, `MapLoader.scanEffectLayers()` iterates every tile layer **and** object layer in the map, reads the `effect` property from each cell (tile layers) or tile-object marker (object layers), and records world positions.
+4. `EntityFactory.spawnEffects()` creates minimal effect entities at those positions.
 
 ### Supported Effect Types
 
@@ -442,7 +443,8 @@ Tiles on **any tile layer** (background, decoration, collision, etc.) can carry 
 
 | Tile | `effect` | Image | Notes |
 |---|---|---|---|
-| id 20 | `"light"` | `tiles/bg/torch.png` (128×156) | Wall torch. Default radius 96. Draw a Point in the Tile Collision Editor to position the light center (e.g. at the flame tip). |
+| id 20 | `"light"` | `tiles/bg/torch.png` (128×156) | Wall torch. Default radius 96. Draw a Point in the Tile Collision Editor to position the light center (e.g. at the flame tip). Stamp on a **tile layer** for a rendered torch. |
+| id 30 | `"light"` + `render="false"` | `gfx/items/Light.png` (128×128) | Standalone light marker. Use on the **objects** layer as a tile-object — renders nothing in-game; spawns a light-only entity. Point collision shape at tile center (64,64). Useful for illuminating a spot near another object without a visible torch sprite. |
 
 ### Adding a New Effect Tile
 
@@ -451,6 +453,7 @@ Tiles on **any tile layer** (background, decoration, collision, etc.) can carry 
 3. Optionally override `lightRadius` / `lightColor` / `lightFlickerSpeed`.
 4. Open the tile in Tiled's **Tile Collision Editor** and draw a Point where the light center should be (e.g. at the flame tip for a torch). The point's coordinates are in tile-local pixel space — the light spawns at that exact world position.
 5. Stamp the tile on any tile layer in Tiled — done.
+6. **For a standalone light marker (no sprite in-game):** add `render="false"` to the tile properties, and stamp it as a **tile-object on the `objects` layer** instead of on a tile layer. The tile renders only in the Tiled editor (as a placement guide); the light-only entity spawns at the object position. This is the recommended way to illuminate a spot near another object.
 
 ### Adding a New Effect Type (e.g. `"particle"`)
 
@@ -458,7 +461,7 @@ Tiles on **any tile layer** (background, decoration, collision, etc.) can carry 
 2. Create a `create*Effect()` method that returns an entity with the appropriate component(s).
 3. Update this documentation section.
 
-**Backward compatibility:** The existing `type="torch"` rectangle markers on the `objects` layer still work via the `spawnObjects()` switch. The new tile-property approach is an alternative — torches can be placed either way. Maps can mix both approaches.
+**Backward compatibility:** The existing `type="torch"` rectangle markers on the `objects` layer still work via the `spawnObjects()` switch. This path is **deprecated for new maps** — prefer stamping torch tiles on a tile layer (id 20) or using object-layer markers (id 30) for standalone lights. Maps may mix both approaches.
 
 ---
 
@@ -547,7 +550,7 @@ Checklist when something feels wrong:
 | Spikes/lava never hurt a standing player | Hazard is on the floor row | Player's collision box is smaller than a tile and feet sit on the floor; place hazards where the player travels *through* them (see §4.2). |
 | Acid drops pass through walls | Spawner has clear path through a passage | Place spawners so line of fire hits a solid wall/floor/ceiling. Drops live 5 s — enough to cross a room. |
 | Flame trap too fast/too slow | Confusing `pulseSpeed` with on/off cycle | `pulseSpeed` = grow/shrink animation speed. On/off rhythm = `duration` (on) + `cooldown` (off). To stagger flames, use different `cooldown` values. |
-| Effect tile does nothing | `effect="light"` on the `objects` layer | Effect system only works on **tile** layers; it scans all tile layers via `scanEffectLayers()`. Use `background`/`decoration`/etc. |
+| Effect tile does nothing | Wrong layer or marker type | Effect system scans **tile layers** (stamp a tile with `effect`) and **object layers** (tile-object markers with `effect`). Rectangle markers do not carry effect properties — use a tile-object with `effect="light"` on the `objects` layer for standalone lights, or stamp an effect tile on a `background`/`decoration` layer. |
 | Light halo offset wrong | No Point shape drawn in Tile Collision Editor | Draw a Point to precisely position the flame/glow center. |
 | Drop platform behaves like a wall | Tileset tile missing `oneWay = true` | Remember: one-way is drop-through **only for the player** — enemies and popped items stand on them like solid tiles, flyers fly through. |
 | Crumble tile arms when it shouldn't | Flush-adjacent to solid floor at same height | Player's overhanging collision box grazes it. Keep crumble tiles in open air; never make one the only way up a vertical shaft (respawns after 2.5s). |

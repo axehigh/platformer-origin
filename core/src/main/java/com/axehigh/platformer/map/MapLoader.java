@@ -1,6 +1,7 @@
 package com.axehigh.platformer.map;
 
 import com.axehigh.platformer.GameConstants;
+import com.badlogic.gdx.maps.MapGroupLayer;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
@@ -123,34 +124,64 @@ public class MapLoader implements Disposable {
     }
 
     /**
-     * Scans the {@code decoration} tile layer for tiles carrying an {@code effect} property
-     * (e.g. {@code "light"}, {@code "particle"}, {@code "sound"}) and records their world positions
-     * so {@code EntityFactory.spawnEffects()} can attach runtime effects (lights, particles, sounds)
-     * at those coordinates. The tile's own sprite is rendered by the Tiled map renderer — no entity
-     * texture is needed.
+     * Scans every map layer for tiles carrying an {@code effect} property (e.g. {@code "light"},
+     * {@code "particle"}, {@code "sound"}) and records their world positions so
+     * {@code EntityFactory.spawnEffects()} can attach runtime effects at those coordinates.
+     * <p>
+     * Tile layers: each non-empty cell whose tile has an {@code effect} property spawns at cell
+     * origin ({@code x * tileWidth}, {@code y * tileHeight}). Object layers (plain {@link MapLayer}
+     * instances): each {@link TiledMapTileMapObject} whose tile has a non-empty {@code effect}
+     * property spawns at the object's own x/y — libGDX already flips object Y to world-up
+     * coordinates when loading (identical to how {@code EntityFactory.spawnObjects} uses
+     * {@code tileObj.getX()/getY()}). {@link MapGroupLayer} instances are ignored (project maps
+     * are flat).
      */
     private void scanEffectLayers() {
         for (MapLayer rawLayer : map.getLayers()) {
-            if (!(rawLayer instanceof TiledMapTileLayer)) {
-                continue;
-            }
-            TiledMapTileLayer layer = (TiledMapTileLayer) rawLayer;
-            float tw = layer.getTileWidth();
-            float th = layer.getTileHeight();
-            for (int y = 0; y < layer.getHeight(); y++) {
-                for (int x = 0; x < layer.getWidth(); x++) {
-                    TiledMapTileLayer.Cell cell = layer.getCell(x, y);
-                    if (cell == null || cell.getTile() == null) {
+            if (rawLayer instanceof TiledMapTileLayer) {
+                TiledMapTileLayer layer = (TiledMapTileLayer) rawLayer;
+                float tw = layer.getTileWidth();
+                float th = layer.getTileHeight();
+                for (int y = 0; y < layer.getHeight(); y++) {
+                    for (int x = 0; x < layer.getWidth(); x++) {
+                        TiledMapTileLayer.Cell cell = layer.getCell(x, y);
+                        if (cell == null || cell.getTile() == null) {
+                            continue;
+                        }
+                        TiledMapTile tile = cell.getTile();
+                        String effect = tile.getProperties().get(PROPERTY_EFFECT, String.class);
+                        if (effect == null || effect.isEmpty()) {
+                            continue;
+                        }
+                        EffectSpawn spawn = new EffectSpawn();
+                        spawn.x = x * tw;
+                        spawn.y = y * th;
+                        spawn.effectType = effect;
+                        spawn.tile = tile;
+                        effectSpawns.add(spawn);
+                    }
+                }
+            } else if (rawLayer instanceof MapGroupLayer) {
+                // Project maps are flat; ignore group layers.
+            } else {
+                // Plain MapLayer — treat as an object layer.  Iterate tile-object
+                // markers whose tile carries an effect property.
+                for (MapObject obj : rawLayer.getObjects()) {
+                    if (!(obj instanceof TiledMapTileMapObject)) {
                         continue;
                     }
-                    TiledMapTile tile = cell.getTile();
+                    TiledMapTileMapObject tileObj = (TiledMapTileMapObject) obj;
+                    TiledMapTile tile = tileObj.getTile();
+                    if (tile == null) {
+                        continue;
+                    }
                     String effect = tile.getProperties().get(PROPERTY_EFFECT, String.class);
                     if (effect == null || effect.isEmpty()) {
                         continue;
                     }
                     EffectSpawn spawn = new EffectSpawn();
-                    spawn.x = x * tw;
-                    spawn.y = y * th;
+                    spawn.x = tileObj.getX();
+                    spawn.y = tileObj.getY();
                     spawn.effectType = effect;
                     spawn.tile = tile;
                     effectSpawns.add(spawn);

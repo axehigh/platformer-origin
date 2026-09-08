@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.2" name="items" tilewidth="128" tileheight="156" tilecount="24" columns="0">
+<tileset version="1.10" tiledversion="1.12.2" name="items" tilewidth="128" tileheight="156" tilecount="25" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="3" type="chest">
   <image source="../gfx/items/Chest_01_Locked.png" width="128" height="128"/>
@@ -57,6 +57,7 @@
  <tile id="17">
   <properties>
    <property name="effect" value="light"/>
+   <property name="render" type="bool" value="true"/>
   </properties>
   <image source="../gfx/items/Light.png" width="128" height="128"/>
   <objectgroup draworder="index" id="2">
@@ -74,7 +75,7 @@
   </properties>
   <image source="../gfx/tiles/bg/torch.png" width="128" height="156"/>
   <objectgroup draworder="index" id="2">
-   <object id="3" x="60" y="51">
+   <object id="3" name="light" x="60" y="51">
     <point/>
    </object>
   </objectgroup>
@@ -127,5 +128,17 @@
    <property name="type" value="potion"/>
   </properties>
   <image source="../gfx/tiles/items/banana.png" width="100" height="100"/>
+ </tile>
+ <tile id="30">
+  <properties>
+   <property name="effect" value="light"/>
+   <property name="render" value="false"/>
+  </properties>
+  <image source="../gfx/items/Light.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="3">
+   <object id="4" x="64" y="64">
+    <point/>
+   </object>
+  </objectgroup>
  </tile>
 </tileset>
