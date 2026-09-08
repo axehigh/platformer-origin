@@ -68,8 +68,8 @@ class TrapFactory {
         } else if ("y".equalsIgnoreCase(axis)) {
             platform.amplitudeX = 0f;
         }
-        platform.amplitudeX = TileProps.getTileXProperty(object, tile, "amplitudeX", platform.amplitudeX, context.tileWidth);
-        platform.amplitudeY = TileProps.getTileYProperty(object, tile, "amplitudeY", platform.amplitudeY, context.tileHeight);
+        platform.amplitudeX = TileProps.getTileXProperty(object, tile, "amplitudeX", platform.amplitudeX, context.tileWidth) * context.unitScale;
+        platform.amplitudeY = TileProps.getTileYProperty(object, tile, "amplitudeY", platform.amplitudeY, context.tileHeight) * context.unitScale;
         platform.speed = TileProps.getFloatProperty(object, tile, "speed", DEFAULT_PLATFORM_SPEED);
         platform.phase = TileProps.getFloatProperty(object, tile, "phase", 0f);
         platform.roomIndex = roomIndex;

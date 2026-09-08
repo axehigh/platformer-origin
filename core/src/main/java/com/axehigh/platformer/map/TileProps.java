@@ -21,7 +21,6 @@ final class TileProps {
         return value != null ? value : defaultValue;
     }
 
-    /** Reads an integer numeric custom property from the object (or its tile), tolerating int/float/string encodings. */
     static int getIntProperty(MapObject object, TiledMapTile tile, String key, int defaultValue) {
         Object value = object != null ? object.getProperties().get(key) : null;
         if (value == null && tile != null) {
@@ -34,13 +33,10 @@ final class TileProps {
             return ((Number) value).intValue();
         }
         try {
-            return Integer.parseInt(String.valueOf(value));
+            // Handle float strings that might exist in map files by parsing as float first
+            return (int) Float.parseFloat(String.valueOf(value));
         } catch (NumberFormatException e) {
-            try {
-                return (int) Float.parseFloat(String.valueOf(value));
-            } catch (NumberFormatException ex) {
-                return defaultValue;
-            }
+            return defaultValue;
         }
     }
     static float getFloatProperty(MapObject object, TiledMapTile tile, String key, float defaultValue) {
