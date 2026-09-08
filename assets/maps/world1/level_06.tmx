@@ -1,11 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="17" tilewidth="128" tileheight="128" infinite="0" nextlayerid="8" nextobjectid="527">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><map height="17" infinite="0" nextlayerid="8" nextobjectid="527" orientation="orthogonal" renderorder="right-down" tiledversion="1.12.2" tileheight="128" tilewidth="128" version="1.10" width="30">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
  <tileset firstgid="66" source="../tileset/items.tsx"/>
  <tileset firstgid="95" source="../tileset/enemy.tsx"/>
  <tileset firstgid="102" source="../tileset/bg.tsx"/>
  <tileset firstgid="140" source="../tileset/hazards.tsx"/>
- <layer id="1" name="background" width="30" height="17">
+ <layer height="17" id="1" name="background" width="30">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,18,0,0,0,0,18,0,0,0,0,6,7,7,7,0,0,0,0,0,0,0,0,0,
@@ -26,7 +25,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <layer id="2" name="collision" width="30" height="17">
+ <layer height="17" id="2" name="collision" width="30">
   <data encoding="csv">
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
@@ -47,7 +46,7 @@
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
 </data>
  </layer>
- <layer id="5" name="decoration" width="30" height="17">
+ <layer height="17" id="5" name="decoration" width="30">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,119,0,0,0,0,0,
@@ -69,41 +68,41 @@
 </data>
  </layer>
  <objectgroup id="3" name="objects">
-  <object id="1" name="playerStart" type="playerStart" x="128" y="1024" width="128" height="128"/>
-  <object id="3" name="coin_r0" gid="78" x="2048" y="2048" width="128" height="128"/>
-  <object id="4" name="coin_r0" gid="78" x="768" y="2048" width="128" height="128"/>
-  <object id="512" name="exitGate" type="exitGate" x="3456" y="1024" width="140" height="152">
+  <object height="128" id="1" name="playerStart" type="playerStart" width="128" x="128" y="1024"/>
+  <object gid="78" height="128" id="3" name="coin_r0" width="128" x="2048" y="2048"/>
+  <object gid="78" height="128" id="4" name="coin_r0" width="128" x="768" y="2048"/>
+  <object height="152" id="512" name="exitGate" type="exitGate" width="140" x="3456" y="1024">
    <properties>
     <property name="nextLevel" value="maps/world1/level_07.tmx"/>
    </properties>
   </object>
-  <object id="517" name="chest1" type="chest" x="1408" y="1920" width="128" height="128"/>
-  <object id="518" name="coin3" type="coin" x="896" y="1408" width="128" height="128"/>
-  <object id="519" name="coin4" type="coin" x="3456" y="1920" width="128" height="128"/>
-  <object id="520" name="torch1" type="torch" x="0" y="1536" width="128" height="128"/>
-  <object id="521" name="torch2" type="torch" x="3712" y="1536" width="128" height="128"/>
-  <object id="523" gid="142" x="3200" y="1664" width="128" height="128">
+  <object height="128" id="517" name="chest1" type="chest" width="128" x="1408" y="1920"/>
+  <object height="128" id="518" name="coin3" type="coin" width="128" x="896" y="1408"/>
+  <object height="128" id="519" name="coin4" type="coin" width="128" x="3456" y="1920"/>
+  <object height="128" id="520" name="torch1" type="torch" width="128" x="0" y="1536"/>
+  <object height="128" id="521" name="torch2" type="torch" width="128" x="3712" y="1536"/>
+  <object gid="142" height="128" id="523" width="128" x="3200" y="1664">
    <properties>
-    <property name="amplitudeY" type="int" value="80"/>
+    <property name="amplitudeY" type="int" value="0"/>
    </properties>
   </object>
-  <object id="524" gid="86" x="3456" y="1408" width="128" height="156"/>
-  <object id="525" gid="86" x="2304" y="384" width="128" height="156"/>
-  <object id="526" gid="79" x="1024" y="384" width="128" height="128"/>
+  <object gid="86" height="156" id="524" width="128" x="3456" y="1408"/>
+  <object gid="86" height="156" id="525" width="128" x="2304" y="384"/>
+  <object gid="79" height="128" id="526" width="128" x="1024" y="384"/>
  </objectgroup>
  <objectgroup id="7" name="enemies">
-  <object id="2" name="enemy_r0_walker" gid="97" x="2816" y="2048" width="128" height="128"/>
-  <object id="513" name="enemy_r0_walker" gid="97" x="2688" y="1152" width="128" height="128"/>
-  <object id="514" name="enemy_r0_walker" gid="97" x="1408" y="1536" width="128" height="128"/>
-  <object id="515" name="enemy_r0_walker" gid="97" x="1280" y="2048" width="128" height="128"/>
-  <object id="516" name="enemy_r0_walker" gid="97" x="2048" y="1152" width="128" height="128"/>
-  <object id="522" name="enemy6" type="enemy" x="2560" y="1536" width="128" height="128">
+  <object gid="97" height="128" id="2" name="enemy_r0_walker" width="128" x="2816" y="2048"/>
+  <object gid="97" height="128" id="513" name="enemy_r0_walker" width="128" x="2688" y="1152"/>
+  <object gid="97" height="128" id="514" name="enemy_r0_walker" width="128" x="1408" y="1536"/>
+  <object gid="97" height="128" id="515" name="enemy_r0_walker" width="128" x="1280" y="2048"/>
+  <object gid="97" height="128" id="516" name="enemy_r0_walker" width="128" x="2048" y="1152"/>
+  <object height="128" id="522" name="enemy6" type="enemy" width="128" x="2560" y="1536">
    <properties>
     <property name="enemyType" value="flyer"/>
    </properties>
   </object>
  </objectgroup>
- <objectgroup id="6" name="Rooms" locked="1">
-  <object id="511" name="room0" x="0" y="0" width="3840" height="2176"/>
+ <objectgroup id="6" locked="1" name="Rooms">
+  <object height="2176" id="511" name="room0" width="3840" x="0" y="0"/>
  </objectgroup>
 </map>

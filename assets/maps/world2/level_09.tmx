@@ -1,11 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="72" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="745">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><map height="10" infinite="0" nextlayerid="9" nextobjectid="745" orientation="orthogonal" renderorder="right-down" tiledversion="1.12.2" tileheight="128" tilewidth="128" version="1.10" width="72">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
  <tileset firstgid="66" source="../tileset/items.tsx"/>
  <tileset firstgid="95" source="../tileset/enemy.tsx"/>
  <tileset firstgid="102" source="../tileset/hazards.tsx"/>
  <tileset firstgid="108" source="../tileset/bg.tsx"/>
- <layer id="1" name="background" width="72" height="10">
+ <layer height="10" id="1" name="background" width="72">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -19,7 +18,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <layer id="2" name="collision" width="72" height="10">
+ <layer height="10" id="2" name="collision" width="72">
   <data encoding="csv">
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,2,
@@ -33,7 +32,7 @@
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
 </data>
  </layer>
- <layer id="5" name="decoration" width="72" height="10">
+ <layer height="10" id="5" name="decoration" width="72">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -48,55 +47,55 @@
 </data>
  </layer>
  <objectgroup id="3" name="objects">
-  <object id="1" name="playerStart" type="playerStart" x="384" y="1024" width="128" height="128"/>
-  <object id="6" name="chest_r0" gid="69" x="2560" y="1152" width="128" height="128"/>
-  <object id="8" name="coin_r1" gid="78" x="3200" y="384" width="128" height="128"/>
-  <object id="13" name="coin_platform_r1" gid="78" x="3328" y="384" width="128" height="128"/>
-  <object id="725" gid="104" x="640" y="640" width="128" height="128">
+  <object height="128" id="1" name="playerStart" type="playerStart" width="128" x="384" y="1024"/>
+  <object gid="69" height="128" id="6" name="chest_r0" width="128" x="2560" y="1152"/>
+  <object gid="78" height="128" id="8" name="coin_r1" width="128" x="3200" y="384"/>
+  <object gid="78" height="128" id="13" name="coin_platform_r1" width="128" x="3328" y="384"/>
+  <object gid="104" height="128" id="725" width="128" x="640" y="640">
    <properties>
-    <property name="amplitudeY" type="int" value="-80"/>
+    <property name="amplitudeY" type="int" value="0"/>
    </properties>
   </object>
-  <object id="739" gid="104" x="1408" y="640" width="128" height="128">
+  <object gid="104" height="128" id="739" width="128" x="1408" y="640">
    <properties>
-    <property name="amplitudeY" type="int" value="80"/>
+    <property name="amplitudeY" type="int" value="0"/>
    </properties>
   </object>
-  <object id="740" gid="91" x="1920" y="384" width="53" height="22"/>
-  <object id="741" gid="92" x="2176" y="384" width="101" height="101"/>
-  <object id="742" gid="93" x="2432" y="384" width="101" height="101"/>
-  <object id="743" gid="94" x="2688" y="384" width="100" height="100"/>
-  <object id="744" name="exitGate" type="exitGate" x="8832" y="256" width="140" height="152">
+  <object gid="91" height="22" id="740" width="53" x="1920" y="384"/>
+  <object gid="92" height="101" id="741" width="101" x="2176" y="384"/>
+  <object gid="93" height="101" id="742" width="101" x="2432" y="384"/>
+  <object gid="94" height="100" id="743" width="100" x="2688" y="384"/>
+  <object height="152" id="744" name="exitGate" type="exitGate" width="140" x="8832" y="256">
    <properties>
     <property name="nextLevel" value="maps/world2/level_10_final.tmx"/>
    </properties>
   </object>
-  <object id="744" gid="79" x="6400" y="384" width="128" height="128"/>
+  <object gid="79" height="128" id="744" width="128" x="6400" y="384"/>
  </objectgroup>
  <objectgroup id="7" name="enemies">
-  <object id="2" name="enemy_r0_knight" gid="98" x="2304" y="1152" width="256" height="256"/>
-  <object id="3" name="enemy_r0_walker" gid="97" x="2048" y="1152" width="128" height="128"/>
-  <object id="7" name="enemy_r1_knight" gid="98" x="3328" y="1152" width="256" height="256"/>
-  <object id="9" name="enemy_r2_shooter" gid="99" x="7424" y="640" width="128" height="128"/>
-  <object id="726" gid="97" x="6528" y="384" width="128" height="128"/>
-  <object id="727" gid="97" x="7296" y="384" width="128" height="128"/>
-  <object id="728" gid="101" x="7168" y="1024" width="128" height="128"/>
-  <object id="729" gid="101" x="5632" y="384" width="128" height="128"/>
-  <object id="730" gid="101" x="4480" y="1024" width="128" height="128"/>
-  <object id="731" gid="100" x="6016" y="1152" width="128" height="128"/>
-  <object id="732" gid="100" x="8320" y="1152" width="128" height="128"/>
-  <object id="733" gid="100" x="7680" y="1152" width="128" height="128"/>
-  <object id="734" gid="97" x="8448" y="768" width="128" height="128"/>
-  <object id="735" gid="97" x="7936" y="768" width="128" height="128"/>
-  <object id="736" gid="97" x="8576" y="384" width="128" height="128"/>
-  <object id="737" gid="97" x="8064" y="384" width="128" height="128"/>
+  <object gid="98" height="256" id="2" name="enemy_r0_knight" width="256" x="2304" y="1152"/>
+  <object gid="97" height="128" id="3" name="enemy_r0_walker" width="128" x="2048" y="1152"/>
+  <object gid="98" height="256" id="7" name="enemy_r1_knight" width="256" x="3328" y="1152"/>
+  <object gid="99" height="128" id="9" name="enemy_r2_shooter" width="128" x="7424" y="640"/>
+  <object gid="97" height="128" id="726" width="128" x="6528" y="384"/>
+  <object gid="97" height="128" id="727" width="128" x="7296" y="384"/>
+  <object gid="101" height="128" id="728" width="128" x="7168" y="1024"/>
+  <object gid="101" height="128" id="729" width="128" x="5632" y="384"/>
+  <object gid="101" height="128" id="730" width="128" x="4480" y="1024"/>
+  <object gid="100" height="128" id="731" width="128" x="6016" y="1152"/>
+  <object gid="100" height="128" id="732" width="128" x="8320" y="1152"/>
+  <object gid="100" height="128" id="733" width="128" x="7680" y="1152"/>
+  <object gid="97" height="128" id="734" width="128" x="8448" y="768"/>
+  <object gid="97" height="128" id="735" width="128" x="7936" y="768"/>
+  <object gid="97" height="128" id="736" width="128" x="8576" y="384"/>
+  <object gid="97" height="128" id="737" width="128" x="8064" y="384"/>
  </objectgroup>
- <objectgroup id="6" name="Rooms" locked="1">
-  <object id="721" name="room0" x="0" y="0" width="3072" height="1280"/>
-  <object id="722" name="room1" x="3072" y="0" width="3072" height="1280"/>
-  <object id="723" name="room2" x="6144" y="0" width="3072" height="1280"/>
+ <objectgroup id="6" locked="1" name="Rooms">
+  <object height="1280" id="721" name="room0" width="3072" x="0" y="0"/>
+  <object height="1280" id="722" name="room1" width="3072" x="3072" y="0"/>
+  <object height="1280" id="723" name="room2" width="3072" x="6144" y="0"/>
  </objectgroup>
- <layer id="8" name="secret_hide" width="72" height="10">
+ <layer height="10" id="8" name="secret_hide" width="72">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
