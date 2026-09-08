@@ -57,6 +57,10 @@ public class EntityFactory {
         context.setUnitScale(unitScale);
     }
 
+    public void setTileDimensions(float tileWidth, float tileHeight) {
+        context.setTileDimensions(tileWidth, tileHeight);
+    }
+
     public Entity createPlayer(float x, float y) {
         return playerFactory.createPlayer(x, y);
     }

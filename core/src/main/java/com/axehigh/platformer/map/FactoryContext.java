@@ -26,6 +26,8 @@ final class FactoryContext {
     final AssetManager assetManager;
     final TextureAtlas originAtlas;
     float unitScale = 1f;
+    float tileWidth = 16f;
+    float tileHeight = 16f;
 
     FactoryContext(AssetManager assetManager) {
         this.assetManager = assetManager;
@@ -34,6 +36,11 @@ final class FactoryContext {
 
     void setUnitScale(float unitScale) {
         this.unitScale = unitScale;
+    }
+
+    void setTileDimensions(float tileWidth, float tileHeight) {
+        this.tileWidth = tileWidth;
+        this.tileHeight = tileHeight;
     }
 
     Texture getTexture(String path) {

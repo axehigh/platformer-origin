@@ -75,6 +75,7 @@ public class LevelManager implements Disposable {
         MapLoader newMapLoader = new MapLoader(tmxPath);
         float newScale = newMapLoader.getTileWidth() / 16f;
         entityFactory.setUnitScale(newScale);
+        entityFactory.setTileDimensions(newMapLoader.getTileWidth(), newMapLoader.getTileHeight());
 
         viewport.setWorldSize(GameConstants.VIRTUAL_WIDTH * newScale, GameConstants.VIRTUAL_HEIGHT * newScale);
         viewport.apply();

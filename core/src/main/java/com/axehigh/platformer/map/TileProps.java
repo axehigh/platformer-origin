@@ -61,6 +61,14 @@ final class TileProps {
         }
     }
 
+    static float getTileXProperty(MapObject object, TiledMapTile tile, String key, float defaultValue, float tileWidth) {
+        return getFloatProperty(object, tile, key, defaultValue) * tileWidth;
+    }
+
+    static float getTileYProperty(MapObject object, TiledMapTile tile, String key, float defaultValue, float tileHeight) {
+        return getFloatProperty(object, tile, key, defaultValue) * tileHeight;
+    }
+
     /** Reads a string property directly from a tile (no map object involved). */
     static String getStringPropertyFromTile(TiledMapTile tile, String key, String defaultValue) {
         if (tile == null) return defaultValue;

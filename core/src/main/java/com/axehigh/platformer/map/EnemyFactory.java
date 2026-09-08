@@ -83,15 +83,11 @@ class EnemyFactory {
         if (!Float.isNaN(speedOverride)) {
             enemyComponent.speed = speedOverride;
         }
-        float patrolRangeOverride = TileProps.getFloatProperty(object, tile, "patrolRange", Float.NaN);
+        float patrolRangeOverride = TileProps.getTileXProperty(object, tile, "patrolRange", Float.NaN, context.tileWidth);
         if (!Float.isNaN(patrolRangeOverride)) {
-            enemyComponent.patrolRange = patrolRangeOverride;
+            enemyComponent.patrolRange = patrolRangeOverride * context.unitScale;
         }
         enemyComponent.speed *= context.unitScale;
-        enemyComponent.patrolRange *= context.unitScale;
-        // Desync the patrol cycle so enemies in the same room don't move/pause in lockstep:
-        // randomize the initial facing (all enemies otherwise spawn walking right) and jitter the
-        // patrol speed ±15%, so each enemy drifts out of phase over time and never re-syncs.
         enemyComponent.direction = MathUtils.randomBoolean() ? 1 : -1;
         enemyComponent.speed *= MathUtils.random(0.85f, 1.15f);
         enemyComponent.health = type.maxHealth;
@@ -168,11 +164,11 @@ class EnemyFactory {
             attack.attackType = EnemyAttackComponent.AttackType.MELEE;
             float intervalOverride = TileProps.getFloatProperty(object, tile, "attackInterval", Float.NaN);
             if (!Float.isNaN(intervalOverride)) attack.attackInterval = intervalOverride;
-            float rangeOverride = TileProps.getFloatProperty(object, tile, "attackRange", Float.NaN);
+            float rangeOverride = TileProps.getTileXProperty(object, tile, "attackRange", Float.NaN, context.tileWidth);
             if (Float.isNaN(rangeOverride)) {
-                rangeOverride = TileProps.getFloatProperty(object, tile, "meleeRange", Float.NaN); // legacy alias
+                rangeOverride = TileProps.getTileXProperty(object, tile, "meleeRange", Float.NaN, context.tileWidth); // legacy alias
             }
-            if (!Float.isNaN(rangeOverride)) attack.attackRange = rangeOverride;
+            if (!Float.isNaN(rangeOverride)) attack.attackRange = rangeOverride * context.unitScale;
             float windUpOverride = TileProps.getFloatProperty(object, tile, "windUpDuration", Float.NaN);
             if (!Float.isNaN(windUpOverride)) attack.windUpDuration = windUpOverride;
             attack.attackCooldown.start(MathUtils.random(0f, attack.attackInterval));
