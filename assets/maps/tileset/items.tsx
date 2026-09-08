@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.2" name="items" tilewidth="128" tileheight="156" tilecount="23" columns="0">
+<tileset version="1.10" tiledversion="1.11.2" name="items" tilewidth="128" tileheight="156" tilecount="24" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
- <tile id="1">
-  <image source="../gfx/items/Apple.png" width="128" height="128"/>
- </tile>
- <tile id="2">
-  <image source="../gfx/items/Bubble.png" width="128" height="128"/>
- </tile>
  <tile id="3" type="chest">
   <image source="../gfx/items/Chest_01_Locked.png" width="128" height="128"/>
  </tile>
@@ -112,5 +106,26 @@
    <property name="type" value="potion"/>
   </properties>
   <image source="../gfx/tiles/items/orange.png" width="100" height="100"/>
+ </tile>
+ <tile id="2">
+  <properties>
+   <property name="potionType" value="Invisibility"/>
+   <property name="type" value="potion"/>
+  </properties>
+  <image source="../gfx/items/Bubble.png" width="128" height="128"/>
+ </tile>
+ <tile id="1">
+  <properties>
+   <property name="potionType" value="Jump"/>
+   <property name="type" value="potion"/>
+  </properties>
+  <image source="../gfx/items/Apple.png" width="128" height="128"/>
+ </tile>
+ <tile id="29">
+  <properties>
+   <property name="potionType" value="FireBreath"/>
+   <property name="type" value="potion"/>
+  </properties>
+  <image source="../gfx/tiles/items/banana.png" width="100" height="100"/>
  </tile>
 </tileset>

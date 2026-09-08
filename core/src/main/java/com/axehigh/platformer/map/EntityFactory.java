@@ -433,12 +433,8 @@ public class EntityFactory {
         entity.add(collisionComponent);
 
         ChestComponent chest = new ChestComponent();
-        if (potionType != null) {
-            try {
-                chest.potionType = PotionType.valueOf(potionType.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                // Unknown potion type — fall back to coin chest
-            }
+        if (potionType != null && !potionType.isEmpty()) {
+            chest.potionType = PotionType.parse(potionType);
         }
         entity.add(chest);
 

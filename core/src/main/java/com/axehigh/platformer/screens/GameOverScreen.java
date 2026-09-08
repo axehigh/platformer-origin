@@ -114,13 +114,13 @@ public class GameOverScreen extends MenuScreen {
                 });
             buttonTable.add(continueButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).padRight(20f);
         } else {
-            TextButton retryButton = createMenuButton(RETRY_WORLD, () -> {
+            TextButton retryButton = createMenuButton(RETRY, () -> {
                 changeScreen(listener.onRetryWorld());
             });
             buttonTable.add(retryButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).padRight(20f);
         }
 
-        TextButton exitButton = createMenuButton(MAIN_MENU, () -> {
+        TextButton exitButton = createMenuButton(MENU, () -> {
             changeScreen(new MainMenuScreen(game));
         });
         buttonTable.add(exitButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT);

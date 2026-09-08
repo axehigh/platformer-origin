@@ -2,8 +2,8 @@ package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.ecs.components.AnimationComponent;
 import com.axehigh.platformer.ecs.components.BuffComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
+import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -55,7 +55,7 @@ public final class PlayerDamageResolver {
      * period. Returns {@code true} if the hit applied.
      */
     static boolean applyHit(Entity playerEntity, PlayerComponent player, MovementComponent movement, int knockbackDirection, float unitScale) {
-        if (player.isDead || player.hitInvulnerability.isActive() || isBuffInvulnerable(playerEntity)) {
+        if (player.isDead || player.hitInvulnerability.isActive() || isBuffInvulnerable(playerEntity) || isBuffInvisible(playerEntity)) {
             return false;
         }
 
@@ -92,6 +92,12 @@ public final class PlayerDamageResolver {
     private static boolean isBuffInvulnerable(Entity playerEntity) {
         BuffComponent buff = BUFF.get(playerEntity);
         return buff != null && buff.isInvulnerabilityActive();
+    }
+
+    /** True while the player's Invisibility potion buff is active (no-op without a buff). */
+    private static boolean isBuffInvisible(Entity playerEntity) {
+        BuffComponent buff = BUFF.get(playerEntity);
+        return buff != null && buff.isInvisibilityActive();
     }
 
     private static void applyStunAndGrace(Entity playerEntity, PlayerComponent player) {

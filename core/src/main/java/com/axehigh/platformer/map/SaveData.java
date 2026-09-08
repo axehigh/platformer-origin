@@ -21,6 +21,9 @@ public class SaveData {
     public int strengthPotions;
     public int speedPotions;
     public int invulnerabilityPotions;
+    public int invisibilityPotions;
+    public int jumpPotions;
+    public int fireBreathPotions;
     public int triesRemaining = 3;
     public int enemiesKilled = 0;
 
@@ -46,6 +49,9 @@ public class SaveData {
         saveData.strengthPotions = player.countPotion(PotionType.STRENGTH);
         saveData.speedPotions = player.countPotion(PotionType.SPEED);
         saveData.invulnerabilityPotions = player.countPotion(PotionType.INVULNERABILITY);
+        saveData.invisibilityPotions = player.countPotion(PotionType.INVISIBILITY);
+        saveData.jumpPotions = player.countPotion(PotionType.JUMP);
+        saveData.fireBreathPotions = player.countPotion(PotionType.FIRE_BREATH);
         return saveData;
     }
 
@@ -63,5 +69,8 @@ public class SaveData {
         player.setPotionCount(PotionType.STRENGTH, strengthPotions);
         player.setPotionCount(PotionType.SPEED, speedPotions);
         player.setPotionCount(PotionType.INVULNERABILITY, invulnerabilityPotions);
+        player.setPotionCount(PotionType.INVISIBILITY, invisibilityPotions);
+        player.setPotionCount(PotionType.JUMP, jumpPotions);
+        player.setPotionCount(PotionType.FIRE_BREATH, fireBreathPotions);
     }
 }

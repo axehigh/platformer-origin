@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="60" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="602">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
- <tileset firstgid="55" source="../tileset/items.tsx"/>
- <tileset firstgid="78" source="../tileset/enemy.tsx"/>
- <tileset firstgid="83" source="../tileset/bg.tsx"/>
- <tileset firstgid="102" source="../tileset/hazards.tsx"/>
-
+ <tileset firstgid="67" source="../tileset/items.tsx"/>
+ <tileset firstgid="97" source="../tileset/enemy.tsx"/>
+ <tileset firstgid="104" source="../tileset/bg.tsx"/>
+ <tileset firstgid="145" source="../tileset/hazards.tsx"/>
  <layer id="1" name="background" width="60" height="10">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -44,7 +43,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,117,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,108,0,0,
+0,0,0,160,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,151,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
@@ -52,13 +51,12 @@
   <object id="1" name="playerStart" type="playerStart" x="384" y="1024" width="128" height="128"/>
   <object id="2" name="exitGate" type="exitGate" x="7348" y="1000" width="140" height="152">
    <properties>
+    <property name="isFinal" value="true"/>
     <property name="nextLevel" value="maps/world3/level_04.tmx"/>
    </properties>
   </object>
  </objectgroup>
- <objectgroup id="7" name="enemies">
-
- </objectgroup>
+ <objectgroup id="7" name="enemies"/>
  <objectgroup id="6" name="Rooms">
   <object id="601" name="room0" x="0" y="0" width="7680" height="1280"/>
  </objectgroup>

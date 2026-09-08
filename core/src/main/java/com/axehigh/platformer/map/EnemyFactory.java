@@ -94,8 +94,8 @@ class EnemyFactory {
         // patrol speed ±15%, so each enemy drifts out of phase over time and never re-syncs.
         enemyComponent.direction = MathUtils.randomBoolean() ? 1 : -1;
         enemyComponent.speed *= MathUtils.random(0.85f, 1.15f);
-        enemyComponent.baseHealth = type.maxHealth;
-        enemyComponent.maxBaseHealth = type.maxHealth;
+        enemyComponent.health = type.maxHealth;
+        enemyComponent.maxHealth = type.maxHealth;
 
         String sizeStr = TileProps.getProperty(object, tile, "size", null);
         if ("medium".equalsIgnoreCase(sizeStr)) {
@@ -103,8 +103,8 @@ class EnemyFactory {
         } else if ("large".equalsIgnoreCase(sizeStr)) {
             enemyComponent.size = LARGE;
         }
-        enemyComponent.baseHealth *= enemyComponent.size.hpMultiplier;
-        enemyComponent.maxBaseHealth *= enemyComponent.size.hpMultiplier;
+        enemyComponent.health *= enemyComponent.size.hpMultiplier;
+        enemyComponent.maxHealth *= enemyComponent.size.hpMultiplier;
 
         switch (type) {
             case FLYER:

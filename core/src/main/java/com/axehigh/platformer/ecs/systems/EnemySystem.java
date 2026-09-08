@@ -183,13 +183,17 @@ public class EnemySystem extends IteratingSystem {
         boolean playerInDetection = false;
         if (attack != null && players.size() > 0) {
             Entity playerEntity = players.first();
-            CollisionComponent playerCollision = COLLISION.get(playerEntity);
-            playerCenterX = playerCollision.worldBounds.x + playerCollision.worldBounds.width / 2f;
-            float pcy = playerCollision.worldBounds.y + playerCollision.worldBounds.height / 2f;
-            float ecx = collision.worldBounds.x + collision.worldBounds.width / 2f;
-            float ecy = collision.worldBounds.y + collision.worldBounds.height / 2f;
-            playerInDetection = Math.abs(playerCenterX - ecx) <= attack.attackRange * 3f * unitScale
-                && Math.abs(pcy - ecy) <= attack.detectionHeight * unitScale / 2f;
+            BuffComponent buff = BUFF.get(playerEntity);
+            boolean playerInvisible = buff != null && buff.isInvisibilityActive();
+            if (!playerInvisible) {
+                CollisionComponent playerCollision = COLLISION.get(playerEntity);
+                playerCenterX = playerCollision.worldBounds.x + playerCollision.worldBounds.width / 2f;
+                float pcy = playerCollision.worldBounds.y + playerCollision.worldBounds.height / 2f;
+                float ecx = collision.worldBounds.x + collision.worldBounds.width / 2f;
+                float ecy = collision.worldBounds.y + collision.worldBounds.height / 2f;
+                playerInDetection = Math.abs(playerCenterX - ecx) <= attack.attackRange * 3f * unitScale
+                    && Math.abs(pcy - ecy) <= attack.detectionHeight * unitScale / 2f;
+            }
         }
 
         boolean wasTurnPaused = enemy.turnPause.isActive();
@@ -287,7 +291,7 @@ public class EnemySystem extends IteratingSystem {
             }
         } else {
             // Default to coins
-            int coinCount = (int) (enemy.maxBaseHealth / COINS_PER_HEALTH);
+            int coinCount = (int) (enemy.maxHealth / COINS_PER_HEALTH);
             if (coinCount > 0) {
                 entityFactory.popCoins(getEngine(), centerX, centerY, coinCount, unitScale, collisionRects);
             }

@@ -82,6 +82,9 @@ public final class GameConstants {
     public static final float[] MESSAGE_COLOR_STRENGTH = {1f, 0.6f, 0f};
     public static final float[] MESSAGE_COLOR_SPEED = {0f, 0.9f, 1f};
     public static final float[] MESSAGE_COLOR_INVULN = {1f, 1f, 1f};
+    public static final float[] MESSAGE_COLOR_INVISIBILITY = {0.7f, 0.3f, 0.9f};
+    public static final float[] MESSAGE_COLOR_JUMP = {0.2f, 0.8f, 1f};
+    public static final float[] MESSAGE_COLOR_FIRE = {1f, 0.4f, 0.1f};
     /** Crystal objective counter / pickup text (cyan). Distinct from the gold coin counter. */
     public static final float[] MESSAGE_COLOR_CRYSTALS = {0.3f, 0.9f, 1f};
 
@@ -122,6 +125,12 @@ public final class GameConstants {
     public static float SPEED_BUFF_DURATION = 15f;
     /** Invulnerability buff duration (seconds). */
     public static float INVULNERABILITY_DURATION = 10f;
+    /** Invisibility buff duration (seconds). */
+    public static float INVISIBILITY_DURATION = 10f;
+    /** Jump buff duration (seconds). */
+    public static float JUMP_BUFF_DURATION = 15f;
+    /** Fire Breath buff duration (seconds). */
+    public static float FIRE_BREATH_DURATION = 15f;
     /** Remaining-buff duration under which the buff halo and HUD icon start blinking (seconds). */
     public static final float BUFF_BLINK_THRESHOLD = 3f;
     /** Toggle interval of the buff-expiry blink, halo alpha phases and HUD icon visibility (seconds). */

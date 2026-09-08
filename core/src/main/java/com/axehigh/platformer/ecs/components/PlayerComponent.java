@@ -27,6 +27,12 @@ public class PlayerComponent implements Component {
     public int speedPotions = 0;
     /** Held Invulnerability potions, capped at {@link GameConstants#POTION_CAP}. */
     public int invulnerabilityPotions = 0;
+    /** Held Invisibility potions, capped at {@link GameConstants#POTION_CAP}. */
+    public int invisibilityPotions = 0;
+    /** Held Jump potions, capped at {@link GameConstants#POTION_CAP}. */
+    public int jumpPotions = 0;
+    /** Held Fire Breath potions, capped at {@link GameConstants#POTION_CAP}. */
+    public int fireBreathPotions = 0;
     /** The potion type the "use potion" action currently targets; cycled by the potion input. */
     public PotionType selectedPotion = PotionType.HEALING;
     /** Short window after drinking a potion during which another drink is ignored. */
@@ -150,6 +156,12 @@ public class PlayerComponent implements Component {
                 return speedPotions;
             case INVULNERABILITY:
                 return invulnerabilityPotions;
+            case INVISIBILITY:
+                return invisibilityPotions;
+            case JUMP:
+                return jumpPotions;
+            case FIRE_BREATH:
+                return fireBreathPotions;
         }
         return 0;
     }
@@ -169,6 +181,15 @@ public class PlayerComponent implements Component {
                 break;
             case INVULNERABILITY:
                 invulnerabilityPotions = clamped;
+                break;
+            case INVISIBILITY:
+                invisibilityPotions = clamped;
+                break;
+            case JUMP:
+                jumpPotions = clamped;
+                break;
+            case FIRE_BREATH:
+                fireBreathPotions = clamped;
                 break;
         }
     }

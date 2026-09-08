@@ -68,6 +68,10 @@ public class EnemyContactSystem extends IteratingSystem {
         }
         Entity playerEntity = players.first();
         PlayerComponent player = PLAYER.get(playerEntity);
+        BuffComponent buff = BUFF.get(playerEntity);
+        if (buff != null && buff.isInvisibilityActive()) {
+            return;
+        }
         TransformComponent playerTransform = TRANSFORM.get(playerEntity);
         CollisionComponent playerCollision = COLLISION.get(playerEntity);
         CollisionComponent enemyCollision = COLLISION.get(enemyEntity);

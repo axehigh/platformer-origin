@@ -197,7 +197,7 @@ public class PlayerInputSystem extends IteratingSystem {
 
         boolean shootPressed = input.isKeyJustPressed(Input.Keys.K) || input.isKeyJustPressed(Input.Keys.Y) || touchShootRequested;
         if (!locked && shootPressed && player.shootCooldown.isDone() && player.ammo > 0) {
-            spawnBullet(transform, collision, player);
+            spawnBullet(entity, transform, collision, player);
             player.ammo--;
             player.shootCooldown.start(SHOOT_COOLDOWN);
         }
@@ -232,18 +232,21 @@ public class PlayerInputSystem extends IteratingSystem {
         return attackDuration;
     }
 
-    private void spawnBullet(TransformComponent playerTransform, CollisionComponent playerCollision, PlayerComponent player) {
+    private void spawnBullet(Entity playerEntity, TransformComponent playerTransform, CollisionComponent playerCollision, PlayerComponent player) {
         Entity bullet = engine.createEntity();
 
-        TextureRegion region = findRegion(assetManager, PLAYER_BULLET_REGION);
-        float bulletScale = unitScale * PLAYER_BULLET_SCALE;
+        boolean fireBreath = BUFF.has(playerEntity) && BUFF.get(playerEntity).isFireBreathActive();
+        String regionName = fireBreath ? "fire1" : PLAYER_BULLET_REGION;
+        TextureRegion region = findRegion(assetManager, regionName);
+        float scaleMult = fireBreath ? 0.3f : PLAYER_BULLET_SCALE;
+        float bulletScale = unitScale * scaleMult;
         // The sprite's on-screen scale drives the render; the collision box is authored per-sprite
         // (BULLET_COLLISION_WIDTH/HEIGHT, scaled by PLAYER_BULLET_SCALE) since the visible blade can
         // be smaller than the full atlas frame. Offsets position the box within the frame.
-        float bulletWidth = BULLET_COLLISION_WIDTH * bulletScale;
-        float bulletHeight = BULLET_COLLISION_HEIGHT * bulletScale;
-        float bulletOffsetX = BULLET_OFFSET_X * bulletScale;
-        float bulletOffsetY = BULLET_OFFSET_Y * bulletScale;
+        float bulletWidth = fireBreath ? (64f * bulletScale) : (BULLET_COLLISION_WIDTH * bulletScale);
+        float bulletHeight = fireBreath ? (64f * bulletScale) : (BULLET_COLLISION_HEIGHT * bulletScale);
+        float bulletOffsetX = fireBreath ? (region.getRegionWidth() * bulletScale - bulletWidth) / 2f : (BULLET_OFFSET_X * bulletScale);
+        float bulletOffsetY = fireBreath ? (region.getRegionHeight() * bulletScale - bulletHeight) / 2f : (BULLET_OFFSET_Y * bulletScale);
         float frameWidth = region.getRegionWidth() * bulletScale;
         // Center the sprite's vertical extent on the player's collision center. The blade sits at
         // a fixed offset within the (tall) atlas frame, so centering the frame keeps the visible
@@ -292,7 +295,7 @@ public class PlayerInputSystem extends IteratingSystem {
         bullet.add(collision);
 
         BulletComponent bulletComponent = engine.createComponent(BulletComponent.class);
-        bulletComponent.damage = BULLET_DAMAGE;
+        bulletComponent.damage = fireBreath ? BULLET_DAMAGE * 2f : BULLET_DAMAGE;
         bulletComponent.lifetime = BULLET_LIFETIME;
         bullet.add(bulletComponent);
         engine.addEntity(bullet);

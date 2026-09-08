@@ -308,6 +308,12 @@ class PickupFactory {
     public Entity createPotionPickup(float x, float y, String potionType) {
         PotionType type = parsePotionType(potionType);
         AtlasRegion region = context.originAtlas.findRegion(type.regionName());
+        if (region == null) {
+            region = context.originAtlas.findRegion("potion_healing");
+        }
+        if (region == null) {
+            region = context.originAtlas.findRegion("potion");
+        }
 
         Entity entity = new Entity();
 
@@ -380,10 +386,6 @@ class PickupFactory {
 
     /** Parses a {@code potionType} map property, defaulting to {@code HEALING} on unknown values. */
     private static PotionType parsePotionType(String potionType) {
-        try {
-            return PotionType.valueOf(potionType.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return PotionType.HEALING;
-        }
+        return PotionType.parse(potionType);
     }
 }

@@ -89,13 +89,24 @@ public class InventoryBarStage extends Stage {
         for (PotionType type : PotionType.values()) {
             TouchButton drinkButton = new TouchButton(skin, "potion", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                     () -> drink(type));
-            TextureRegionDrawable icon = new TextureRegionDrawable(uiAtlas.findRegion(type.regionName()));
-            icon.setMinWidth(ICON_SIZE);
-            icon.setMinHeight(ICON_SIZE);
+            TextureAtlas.AtlasRegion region = uiAtlas.findRegion(type.regionName());
+            if (region == null) {
+                region = uiAtlas.findRegion("potion_healing");
+            }
+            if (region == null) {
+                region = uiAtlas.findRegion("potion");
+            }
+            TextureRegionDrawable icon = region != null ? new TextureRegionDrawable(region) : null;
+            if (icon != null) {
+                icon.setMinWidth(ICON_SIZE);
+                icon.setMinHeight(ICON_SIZE);
+            }
             drinkButton.setDrawable(icon);
             drinkButton.getImage().setScaling(fit);
             drinkButton.getImage().setScale(1.40f); // Reset internal scale
             drinkButton.getImageCell().center();
+            float[] messageColor = type.messageColor();
+            drinkButton.getImage().setColor(messageColor[0], messageColor[1], messageColor[2], 1f);
 
             Label countLabel = new Label("", counterStyle);
             countLabel.setFontScale(tinyFontScale);

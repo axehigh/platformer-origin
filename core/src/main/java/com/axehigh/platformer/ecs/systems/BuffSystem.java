@@ -51,6 +51,9 @@ public class BuffSystem extends IteratingSystem {
         buff.strength.update(deltaTime);
         buff.speed.update(deltaTime);
         buff.invulnerability.update(deltaTime);
+        buff.invisibility.update(deltaTime);
+        buff.jump.update(deltaTime);
+        buff.fireBreath.update(deltaTime);
 
         if (buff.speed.isActive()) {
             if (!buff.speedApplied) {
@@ -58,15 +61,13 @@ public class BuffSystem extends IteratingSystem {
                 buff.speedApplied = true;
             }
             movement.maxSpeedX = buff.speedBaseMaxSpeedX * GameConstants.SPEED_MULTIPLIER;
-            if (player != null) {
-                player.maxJumps = 3;
-            }
         } else if (buff.speedApplied) {
             movement.maxSpeedX = buff.speedBaseMaxSpeedX;
             buff.speedApplied = false;
-            if (player != null) {
-                player.maxJumps = 2;
-            }
+        }
+
+        if (player != null) {
+            player.maxJumps = buff.jump.isActive() ? 3 : 2;
         }
 
         updateHalo(entity, buff, deltaTime);
@@ -89,7 +90,8 @@ public class BuffSystem extends IteratingSystem {
         float green = 0f;
         float blue = 0f;
         PotionType[] contributing = {
-            PotionType.STRENGTH, PotionType.SPEED, PotionType.INVULNERABILITY
+            PotionType.STRENGTH, PotionType.SPEED, PotionType.INVULNERABILITY,
+            PotionType.INVISIBILITY, PotionType.JUMP, PotionType.FIRE_BREATH
         };
         for (PotionType type : contributing) {
             Timer timer = buffTimer(buff, type);
@@ -154,6 +156,12 @@ public class BuffSystem extends IteratingSystem {
                 return buff.speed;
             case INVULNERABILITY:
                 return buff.invulnerability;
+            case INVISIBILITY:
+                return buff.invisibility;
+            case JUMP:
+                return buff.jump;
+            case FIRE_BREATH:
+                return buff.fireBreath;
             default:
                 throw new IllegalArgumentException("No buff timer for " + type);
         }
