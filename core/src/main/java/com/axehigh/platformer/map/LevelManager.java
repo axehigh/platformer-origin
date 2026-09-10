@@ -28,7 +28,7 @@ import static com.axehigh.platformer.ecs.components.Mappers.*;
  * EnemySystem}, {@code CollisionSystem}, {@code DebugRenderSystem}, {@code CameraSystem}, ...)
  * are fed the new level's data in place, so no other system ever needs to be rebuilt or re-wired.
  */
-public class LevelManager implements Disposable {
+public class    LevelManager implements Disposable {
     private final PooledEngine engine;
     private final EntityFactory entityFactory;
     private final OrthographicCamera camera;

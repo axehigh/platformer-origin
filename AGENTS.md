@@ -12,9 +12,9 @@ utilizing the Ashley ECS framework and Tiled maps.
 *   **Framework:** libGDX (Java) with **Ashley ECS (Entity Component System)**.
 *   **Design Pattern:** ECS. Decouple data (Components) completely from logic (Systems).
 *   **Physics/Movement:** Custom AABB grid-based collision handling inside a dedicated Ashley `MovementSystem`. 
-*   **Resolution & Scaling:** The game camera targets a fixed virtual resolution (`VIRTUAL_WIDTH` x `VIRTUAL_HEIGHT`, 480x272), scaled by the tile-size factor and rendered through a `FitViewport` for crisp pixel-art. Set texture filtering to `TextureFilter.Nearest`.
+*   **Resolution & Scaling:** The game camera targets a fixed virtual resolution (`VIRTUAL_WIDTH` x `VIRTUAL_HEIGHT`, 480x272), scaled by the tile-size factor and rendered through an `OffsetFitViewport` for crisp pixel-art. Set texture filtering to `TextureFilter.Nearest`.
 *   **UI Resolution:** All Scene2D UI — menus, HUD, touch controls, and dialogs — renders at `SCREEN_WIDTH` x `SCREEN_HEIGHT` (1980x1080) through an `ExtendViewport`. Keep UI off the small game-camera resolution; menu-style assets (e.g. the 1102x755 `table` window panel) must be scaled uniformly, never squished, so they don't distort.
-*   **Classic Platformer** Suggestions should indicate classic platformer conventions (e.g., Mario, Castlevania, Metroid).
+*   **Classic Platformer Conventions:** When proposing new features, reference classic platformer conventions (Mario, Castlevania, Metroid) for motion feel, enemy behavior, and progression design.
 ---
 
 ## 2. Ashley ECS Component & System Breakdown
@@ -47,11 +47,11 @@ See @resources/docs-ai/ashley-ecs.md for the full, AI-usable overview of every E
 ---
 
 ## 5. Coding Conventions & Best Practices
-*   **Java Import** Never Use qualified imports, unless you have to. Use static import if you can.
+*   **Java Import** Use static import if you can. Never use qualified imports, unless you have to.
 *   **Asset Management:** Use `AssetManager` to load all `TextureAtlas`, `TiledMap`, and audio assets asynchronously.
 *   **Memory Management:** Always explicitly `dispose()` of Textures, SpriteBatches, and TiledMaps when changing screens or shutting down to prevent memory leaks. Pool frequent ECS components if garbage collection spikes occur.
 *   **Frame-Rate Independence:** Always use `Gdx.graphics.getDeltaTime()` inside your Ashley systems' `update` methods.
-*   **Gameplay Documentation Sync:** Any change to gameplay mechanics (movement, combat, traversal abilities, enemy behavior, etc.) MUST be flected with a corresponding update to `resources/docs-ai/gameplay.md`, keeping it as the single source of truth for gameplay design.
+*   **Gameplay Documentation Sync:** Any change to gameplay mechanics (movement, combat, traversal abilities, enemy behavior, etc.) MUST be reflected with a corresponding update to `resources/docs-ai/gameplay.md`, keeping it as the single source of truth for gameplay design.
 *   **ECS Documentation Sync:** Any time an Ashley ECS `Component` or `System` is added, removed, renamed, or has its fields/family/priority/behavior changed, MUST be reflected with a corresponding update to `resources/docs-ai/ashley-ecs.md`, keeping it as the single source of truth for the ECS component/system breakdown.
 *   **Enemy Documentation Sync:** Any time an enemy type is added, removed, renamed, or has its stats/sprite/behavior changed, MUST be reflected with a corresponding update to `resources/docs-ai/enemies.md`, keeping it as the single source of truth for the enemy catalog.
 *   **Timer Convention:** For any new cooldown, countdown, attack-window, or grace-period effect, use the reusable `com.axehigh.platformer.util.Timer` helper (`start()`/`update()`/`isActive()`/`isDone()`) instead of hand-rolling a raw-`float` decrement, matching the existing usage in `PlayerComponent`/`ChestComponent`.
@@ -60,7 +60,7 @@ See @resources/docs-ai/ashley-ecs.md for the full, AI-usable overview of every E
 *   **Grill Before Building:** For any new feature request (new mechanic, enemy type, system, visual behavior, etc.), before implementing, "grill" the requester with focused clarifying/challenging questions about the ambiguous design decisions (e.g. exact motion/behavior shape, tunable defaults, edge cases, how it interacts with existing systems) rather than silently guessing. Only proceed with implementation once those decisions are confirmed.
 
 ## 6. Hybrid Flip-Screen / Dead-Zone Scroll Camera System
-*   **Virtual Screen Dimensions:** Define explicit constants for `VIRTUAL_WIDTH` and `VIRTUAL_HEIGHT` (e.g., 480x270), scaled by the tile-size factor for the game viewport.
+*   **Virtual Screen Dimensions:** Define explicit constants for `VIRTUAL_WIDTH` and `VIRTUAL_HEIGHT` (e.g., 480x272), scaled by the tile-size factor for the game viewport.
 *   **Room Definitions:** Rooms come from the map's `Rooms` object layer (`MapLoader.getRooms()` → `Array<Room>`). A map with no `Rooms` layer is treated as one room covering the whole map. Rooms do NOT have to match the viewport size.
 *   **Camera Modes (per axis):** `CameraSystem` frames the active room per axis. If the room is no bigger than the viewport on an axis — or is forced via the per-room `camera="flip"` Tiled property — the camera locks to the room's center (static flip-screen framing) and snaps instantly when the player enters the room. If the room is bigger than the viewport on an axis — or forced via `camera="scroll"` — the camera uses a dead zone: it stays still while the player roams more than `GameConstants.CAMERA_SCROLL_MARGIN` from a screen edge, and only scrolls once the player crosses that margin, clamped to the room's bounds.
 *   **No Smooth Tracking:** Do NOT smoothly follow the player. Camera movement is either static (flip rooms) or dead-zone-triggered (scroll rooms); room-to-room transitions are instant snaps (no lerp, no input freeze).
