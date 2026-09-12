@@ -1,12 +1,14 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.ecs.components.*;
+import com.axehigh.platformer.util.FeatureFlags;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import static com.axehigh.platformer.PlayerConfig.PLAYER_IDLE_DELAY;
 import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /** Advances the current animation state timer and updates the visible TextureRegion. */
@@ -30,7 +32,7 @@ public class AnimationSystem extends IteratingSystem {
 
         if (PLAYER.has(entity) && MOVEMENT.has(entity)) {
             PlayerComponent player = PLAYER.get(entity);
-            animationComponent.currentState = resolvePlayerState(player, MOVEMENT.get(entity));
+            animationComponent.currentState = resolvePlayerState(player, animationComponent, MOVEMENT.get(entity));
 
             TransformComponent transform = TRANSFORM.get(entity);
             if (transform != null) {
@@ -70,6 +72,11 @@ public class AnimationSystem extends IteratingSystem {
         // before removal. A null region is skipped by RenderSystem, giving the blink effect.
         PlayerComponent player = PLAYER.get(entity);
         EnemyComponent enemy = ENEMY.get(entity);
+        // Tick the idle-entry grace timer (started in resolvePlayerState when the player stops) so
+        // the held run/walk pose actually expires into IDLE after PLAYER_IDLE_DELAY.
+        if (player != null) {
+            player.idleHold.update(deltaTime);
+        }
         boolean blinking = player != null
             ? player.hitInvulnerability.isActive() && !player.hurtTimer.isActive() && !player.isDead
             : enemy != null && enemy.isDead && enemy.deathTimer.isActive()
@@ -84,7 +91,8 @@ public class AnimationSystem extends IteratingSystem {
         }
     }
 
-    private AnimationComponent.State resolvePlayerState(PlayerComponent player, MovementComponent movement) {
+    private AnimationComponent.State resolvePlayerState(PlayerComponent player, AnimationComponent animationComponent,
+                                                        MovementComponent movement) {
         if (player.isDead) {
             return AnimationComponent.State.DEATH;
         }
@@ -100,8 +108,27 @@ public class AnimationSystem extends IteratingSystem {
         if (!movement.grounded) {
             return player.jumpCount >= 2 ? AnimationComponent.State.DOUBLE_JUMPING : AnimationComponent.State.JUMPING;
         }
-        if (Math.abs(movement.velocity.x) > 0.01f) {
-            return Math.abs(movement.velocity.x) < 50f ? AnimationComponent.State.WALKING : AnimationComponent.State.RUNNING;
+        float speedX = Math.abs(movement.velocity.x);
+        if (speedX > 0.01f) {
+            player.idleHold.reset();
+            player.idleHoldArmed = false;
+            return speedX < 50f ? AnimationComponent.State.WALKING : AnimationComponent.State.RUNNING;
+        }
+        // Stopped and grounded: with the soft-stop feature flag ON (FeatureFlags.isSoftStopEnabled()),
+        // instead of snapping to IDLE the instant velocity zeroes, hold the last run/walk pose for
+        // PLAYER_IDLE_DELAY so the character "stops" visibly before easing into idle. The hold arms
+        // exactly once per stop (idleHoldArmed); once the grace elapses the code falls through to
+        // IDLE without re-arming, and a landing that never ran (currentState is JUMPING, not a
+        // movement state) still goes straight to IDLE. When the flag is OFF the player snaps
+        // straight to IDLE the frame velocity zeroes (pre-easing behavior; the idleHold timer is
+        // never armed and ticks harmlessly).
+        AnimationComponent.State last = animationComponent.currentState;
+        if (FeatureFlags.isSoftStopEnabled() && !player.idleHoldArmed) {
+            player.idleHold.start(PLAYER_IDLE_DELAY);
+            player.idleHoldArmed = true;
+        }
+        if (FeatureFlags.isSoftStopEnabled() && player.idleHold.isActive() && (last == AnimationComponent.State.WALKING || last == AnimationComponent.State.RUNNING)) {
+            return last;
         }
         return AnimationComponent.State.IDLE;
     }

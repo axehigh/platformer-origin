@@ -315,7 +315,7 @@ public class LevelSelectScreen extends MenuScreen {
                 completed++;
             }
         }
-        return LevelCatalog.worldName(worldIds.get(currentWorldIndex)) + ": ★ " + completed + "/" + levels.size;
+        return LevelCatalog.worldName(worldIds.get(currentWorldIndex)) + ": " + completed + "/" + levels.size;
     }
 
 }

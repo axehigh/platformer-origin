@@ -137,6 +137,10 @@ public class PauseDialog extends Dialog {
         gameplayContent.add(toggleCheckBox("Wall Climb",
             FeatureFlags::isWallClimbingEnabled,
             FeatureFlags::setWallClimbingEnabled)).row();
+
+        gameplayContent.add(toggleCheckBox("Soft Stop",
+            FeatureFlags::isSoftStopEnabled,
+            FeatureFlags::setSoftStopEnabled)).row();
     }
 
     private void buildDebugTab() {

@@ -3,6 +3,7 @@ package com.axehigh.platformer.ecs.systems;
 import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.particles.ParticleHelper;
+import com.axehigh.platformer.util.FeatureFlags;
 import com.axehigh.platformer.util.PotionEffects;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -148,7 +149,20 @@ public class PlayerInputSystem extends IteratingSystem {
             movement.velocity.x = MOVE_SPEED * unitScale;
             player.facingDirection = 1;
         } else if (!locked) {
-            movement.velocity.x = 0f;
+            // Ground friction (FeatureFlags.isSoftStopEnabled(), default ON): don't snap velocity to
+            // 0 (that made the sprite jump straight from RUNNING to IDLE in one frame). Decelerate
+            // exponentially instead, so the run clip eases through slow-run into WALK below the
+            // AnimationSystem 50 u/s threshold; the last bit snaps to 0 (PLAYER_STOP_EPSILON) to
+            // avoid sub-pixel creep. Duration tuned by PlayerConfig.PLAYER_STOP_DECEL. When the flag
+            // is OFF, restore the pre-easing behavior: velocity snaps to 0 the frame release.
+            if (FeatureFlags.isSoftStopEnabled()) {
+                movement.velocity.x *= (float) Math.exp(-PLAYER_STOP_DECEL * deltaTime);
+                if (Math.abs(movement.velocity.x) < PLAYER_STOP_EPSILON) {
+                    movement.velocity.x = 0f;
+                }
+            } else {
+                movement.velocity.x = 0f;
+            }
         }
 
         boolean jumpPressed = input.isKeyJustPressed(W) || input.isKeyJustPressed(UP) || touchJumpRequested;

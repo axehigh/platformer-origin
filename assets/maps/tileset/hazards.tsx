@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.2" name="hazards" tilewidth="129" tileheight="128" tilecount="5" columns="2">
+<tileset version="1.10" tiledversion="1.12.2" name="hazards" tilewidth="129" tileheight="128" tilecount="6" columns="2">
  <grid orientation="orthogonal" width="128" height="128"/>
  <tile id="2" type="Floating">
   <properties>
@@ -39,5 +39,11 @@
    <property name="crumble" type="bool" value="true"/>
   </properties>
   <image source="../gfx/tiles/lava/platform-one-way.png" width="129" height="128"/>
+ </tile>
+ <tile id="8">
+  <properties>
+   <property name="hazard" type="bool" value="true"/>
+  </properties>
+  <image source="../gfx/tiles/bg/Plague_Town_2D_Platformer_Tileset_Environment - Acid.png" width="128" height="128"/>
  </tile>
 </tileset>

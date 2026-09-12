@@ -35,7 +35,7 @@ executes with `assets/maps/` as CWD):
 ```sh
 ./generate_map.sh --help
 ./generate_map.sh --rooms 3 --seed 42 --tilesets-dir tileset --out world_demo/generated_room.tmx
-./generate_map.sh --grid-cols 2 --grid-rows 2 --no-secret --tilesets-dir tileset \
+./generate_map.sh --grid-cols 2 --grid-rows 2 --tilesets-dir tileset \
     --exit-next maps/world2/level_02.tmx --out world2/generated_level.tmx --seed 42
 ```
 
@@ -53,11 +53,13 @@ Override the interpreter with the `PYTHON` env var (e.g.
 | Option | Default | Meaning |
 |---|---|---|
 | `--rooms N` | `3` | Number of rooms in a linear chain |
-| `--grid-cols / --grid-rows` | chain / `1` | Room grid layout (requires `--no-secret`) |
-| `--no-secret` | off | Omit the secret room (required for grids) |
+| `--grid-cols / --grid-rows` | chain / `1` | Room grid layout (always secret-free; `--secret` on multi-row errors) |
+| `--secret` | off | Append the full-screen secret room (maps are secret-free by default) |
 | `--room-width / --room-height` | `24` / `10` | Room size in tiles (`30x17` = whole-screen desktop rooms) |
-| `--platforms N` | `0` | Floating one-way platform staircases per room (jumpable, with coin) |
-| `--template NAME[,ROOM[,COL]]` | — | Stamp a reusable ASCII-art course (`--template-pick N` picks N at random) |
+| `--template-dir dir` | `templates` | Directory of Tiled-authored template canvas `.tmx` files (section rectangles, `Rooms`/`room`/`sections` layer) |
+| `--section NAME[,ROOM[,COL]]` | — | Floor-anchored-stamp a template section into a room (see `--list-sections`) |
+| `--section-pick N` | `0` | Stamp N distinct random sections into N distinct rooms that fit |
+| `--list-sections` | — | Print available sections (name, size, source canvas) without generating |
 | `--exit-next path` | — | Exit gate with `nextLevel` property pointing at `path` |
 | `--inside-secret` | off | Carve the secret chamber inside the last room instead of appending a room |
 | `--enemy-types walker,flyer,shooter,knight` | all | Comma-separated enemy types to scatter (default includes the 15-HP knight) |

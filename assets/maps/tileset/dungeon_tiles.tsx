@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.2" name="dungeon_tiles" tilewidth="170" tileheight="299" tilecount="54" columns="0">
+<tileset version="1.10" tiledversion="1.12.2" name="dungeon_tiles" tilewidth="170" tileheight="299" tilecount="55" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0" type="Ground">
   <properties>
@@ -70,12 +70,6 @@
  </tile>
  <tile id="22">
   <image source="../gfx/tiles/dungeon/doorwall.png" width="128" height="128"/>
- </tile>
- <tile id="23">
-  <image source="../gfx/tiles/dungeon/ladder.png" width="128" height="128"/>
- </tile>
- <tile id="24">
-  <image source="../gfx/tiles/dungeon/ladder-broken.png" width="128" height="128"/>
  </tile>
  <tile id="25">
   <image source="../gfx/tiles/dungeon/pedestal.png" width="128" height="128"/>
@@ -209,5 +203,14 @@
    <property name="crumble" type="bool" value="true"/>
   </properties>
   <image source="../gfx/tiles/lava/platform-one-way.png" width="129" height="128"/>
+ </tile>
+ <tile id="66">
+  <image source="../gfx/tiles/environment/box.png" width="128" height="128"/>
+ </tile>
+ <tile id="67">
+  <image source="../gfx/tiles/environment/Wooden_Barrel.png" width="128" height="128"/>
+ </tile>
+ <tile id="68">
+  <image source="../gfx/tiles/environment/Cartoon_Medieval_Carpenters_Workshop_Level_Set_Environment - Wooden Barrel.png" width="128" height="128"/>
  </tile>
 </tileset>

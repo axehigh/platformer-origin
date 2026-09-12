@@ -101,6 +101,15 @@ public class PlayerComponent implements Component {
      */
     public Timer dropWindow = new Timer();
 
+    /** Grace window after the player stops moving: holds the last run/walk pose for
+     * {@code PlayerConfig#PLAYER_IDLE_DELAY}s before the IDLE animation starts (driven by
+     * {@code AnimationSystem}; reset whenever the player moves again). */
+    public Timer idleHold = new Timer();
+    /** True once the idle-entry hold has been armed for this stop — set when {@link #idleHold} is
+     * started and cleared when the player moves again. Guards against re-arming the hold the frame
+     * the grace expires (that frame is indistinguishable from a fresh stop by timer state alone). */
+    public boolean idleHoldArmed = false;
+
     /** True from the frame the player leaves the ground until the next grounded frame. */
     public boolean inAir = false;
     /** Highest feet Y (world units) reached while airborne; used to gate landing dust. */

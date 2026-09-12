@@ -94,4 +94,18 @@ public final class PlayerConfig {
     public static final float BULLET_LIFETIME = 300f;
     /** Bullet stacking layer (z), above the player. */
     public static final float BULLET_Z = 8f;
+
+    //------ Animation / feel ------
+    /** How long the player holds the last run/walk pose after movement has fully stopped (seconds)
+     *  before the IDLE animation starts. The short wait (after ground friction has already eased the
+     *  sprite through run &gt; walk) keeps the stop from snapping abruptly into idle. */
+    public static final float PLAYER_IDLE_DELAY = 0.15f;
+    /** Ground-friction e-folding rate (1/s) applied to horizontal velocity while no direction is
+     *  held: the player decelerates instead of stopping instantly, so the run clip eases through
+     *  slow-run into WALK below the {@code AnimationSystem} 50 u/s threshold and only then goes
+     *  idle. Higher = snappier stop (~18 gives a ~0.25s glide from full run speed), lower = floatier. */
+    public static final float PLAYER_STOP_DECEL = 10f;
+    /** Horizontal speed (u/s) below which the decelerating player is snapped to a hard 0, so the
+     *  last bit of friction can't leave a sub-pixel crawl or stall the idle-entry hold. */
+    public static final float PLAYER_STOP_EPSILON = 1f;
 }

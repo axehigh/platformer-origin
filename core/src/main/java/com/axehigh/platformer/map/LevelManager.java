@@ -196,6 +196,8 @@ public class    LevelManager implements Disposable {
             playerComponent.dropRequested = false;
             playerComponent.onDropTile = false;
             playerComponent.dropWindow.reset();
+            playerComponent.idleHold.reset();
+            playerComponent.idleHoldArmed = false;
             playerComponent.squashActive = false;
             playerComponent.squashAmount = 0f;
             playerComponent.inAir = false;

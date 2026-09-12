@@ -1,6 +1,8 @@
 # Plan: Jump envelope + ASCII template system for `generate_tmx.py`
 
-Status: **approved — ready to implement**
+Status: **approved — ready to implement** (historically implemented; the ASCII `.tmpl` system it
+planned has since been **replaced** by Tiled-authored template canvases — see SKILL.md **Sections**
+and the `--section`/`--section-pick`/`--list-sections` CLI. This plan is kept as a record.)
 
 Two changes to the `.junie/skills/tmx-map-generator` skill:
 

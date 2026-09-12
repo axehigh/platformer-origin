@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.2" name="bg" tilewidth="256" tileheight="386" tilecount="20" columns="0">
+<tileset version="1.10" tiledversion="1.12.2" name="bg" tilewidth="256" tileheight="386" tilecount="26" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="5">
   <image source="../gfx/tiles/bg/chains2.png" width="200" height="170"/>
@@ -56,9 +56,27 @@
   <image source="../gfx/tiles/bg/table.png" width="86" height="75"/>
  </tile>
  <tile id="38">
-  <image source="../gfx/tiles/bg/door3.png" width="128" height="138"/>
+  <image source="../gfx/tiles/bg/door3.png" width="175" height="188"/>
  </tile>
  <tile id="40">
   <image source="../gfx/tiles/bg/banner6.png" width="256" height="264"/>
+ </tile>
+ <tile id="41">
+  <image source="../gfx/tiles/bg/Cartoon_Medieval_Armory_Level_Set_Environment - Banner 02.png" width="128" height="128"/>
+ </tile>
+ <tile id="42">
+  <image source="../gfx/tiles/bg/Banner_03.png" width="128" height="128"/>
+ </tile>
+ <tile id="43">
+  <image source="../gfx/tiles/bg/Banner_02.png" width="128" height="128"/>
+ </tile>
+ <tile id="44">
+  <image source="../gfx/tiles/bg/Cartoon_Medieval_Armory_Level_Set_Environment - Banner 01.png" width="128" height="128"/>
+ </tile>
+ <tile id="45">
+  <image source="../gfx/tiles/bg/Banner_01.png" width="128" height="128"/>
+ </tile>
+ <tile id="46">
+  <image source="../gfx/tiles/bg/Cartoon_Medieval_Armory_Level_Set_Building - Wide Door 04.png" width="256" height="256"/>
  </tile>
 </tileset>

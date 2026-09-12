@@ -18,6 +18,7 @@ public final class FeatureFlags {
     private static boolean levelOpen = GamePreferences.DEFAULT_LEVEL_OPEN;
     private static boolean embersEnabled = GamePreferences.DEFAULT_EMBERS_ENABLED;
     private static boolean wallClankEnabled = GamePreferences.DEFAULT_WALL_CLANK_ENABLED;
+    private static boolean softStopEnabled = GamePreferences.DEFAULT_SOFT_STOP_ENABLED;
     private static boolean initialized = false;
 
     private FeatureFlags() {
@@ -35,6 +36,7 @@ public final class FeatureFlags {
         levelOpen = preferences.isLevelOpen();
         embersEnabled = preferences.isEmbersEnabled();
         wallClankEnabled = preferences.isWallClankEnabled();
+        softStopEnabled = preferences.isSoftStopEnabled();
     }
 
     /** Whether wall-climb (wall-slide gravity + wall-jump latch) is enabled. Defaults to {@code true}. */
@@ -126,6 +128,26 @@ public final class FeatureFlags {
             new GamePreferences().setWallClankEnabled(enabled);
         }
     }
+
+    /**
+     * Whether the player's soft ramp-down into idle is enabled. Defaults to {@code true}; gates
+     * the player's friction deceleration in {@code PlayerInputSystem} plus the
+     * {@code PLAYER_IDLE_DELAY} pose hold in {@code AnimationSystem}; when OFF the player stops
+     * and idles instantly. Toggled from the pause dialog's "Soft Stop" button.
+     */
+    public static boolean isSoftStopEnabled() {
+        ensureInitialized();
+        return softStopEnabled;
+    }
+
+    /** Sets whether the player's soft ramp-down into idle is enabled for the whole session and persists the choice. */
+    public static void setSoftStopEnabled(boolean enabled) {
+        softStopEnabled = enabled;
+        initialized = true;
+        if (Gdx.app != null) {
+            new GamePreferences().setSoftStopEnabled(enabled);
+        }
+    }
     static void resetForTests() {
         wallClimbingEnabled = GamePreferences.DEFAULT_WALL_CLIMB_ENABLED;
         squashEnabled = GamePreferences.DEFAULT_SQUASH_ENABLED;
@@ -133,6 +155,7 @@ public final class FeatureFlags {
         levelOpen = GamePreferences.DEFAULT_LEVEL_OPEN;
         embersEnabled = GamePreferences.DEFAULT_EMBERS_ENABLED;
         wallClankEnabled = GamePreferences.DEFAULT_WALL_CLANK_ENABLED;
+        softStopEnabled = GamePreferences.DEFAULT_SOFT_STOP_ENABLED;
         initialized = false;
     }
 }

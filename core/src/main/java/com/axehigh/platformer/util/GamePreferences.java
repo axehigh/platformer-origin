@@ -19,6 +19,7 @@ public class GamePreferences {
     private static final String KEY_LEVEL_OPEN = "levelOpen";
     private static final String KEY_EMBERS_ENABLED = "embersEnabled";
     private static final String KEY_WALL_CLANK_ENABLED = "wallClankEnabled";
+    private static final String KEY_SOFT_STOP_ENABLED = "softStopEnabled";
     private static final String KEY_DEVICE_CLASS = "deviceClass";
     private static final String KEY_LAYOUT_MODE = "layoutMode";
     private static final String KEY_UI_ICON_SCALE = "uiIconScale";
@@ -41,6 +42,8 @@ public class GamePreferences {
     static final boolean DEFAULT_EMBERS_ENABLED = true;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
     static final boolean DEFAULT_WALL_CLANK_ENABLED = false;
+    /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
+    static final boolean DEFAULT_SOFT_STOP_ENABLED = true;
 
     private final Preferences preferences;
 
@@ -160,6 +163,20 @@ public class GamePreferences {
 
     public void setWallClankEnabled(boolean wallClankEnabled) {
         preferences.putBoolean(KEY_WALL_CLANK_ENABLED, wallClankEnabled);
+        preferences.flush();
+    }
+
+    /**
+     * Whether the player's soft ramp-down into idle is enabled (ground-friction deceleration on
+     * direction release + the short {@code PLAYER_IDLE_DELAY} pose hold). A developer feature
+     * flag, toggled from the in-game pause dialog's "Soft Stop" button; see {@code FeatureFlags}.
+     */
+    public boolean isSoftStopEnabled() {
+        return preferences.getBoolean(KEY_SOFT_STOP_ENABLED, DEFAULT_SOFT_STOP_ENABLED);
+    }
+
+    public void setSoftStopEnabled(boolean softStopEnabled) {
+        preferences.putBoolean(KEY_SOFT_STOP_ENABLED, softStopEnabled);
         preferences.flush();
     }
 

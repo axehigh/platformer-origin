@@ -45,6 +45,10 @@ public final class LevelCatalog {
         LEVELS.add(new LevelDefinition(WORLD_2, "world2_level09", "Level 9", "maps/world2/level_09.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_2, "world2_level10", "Level 10", "maps/world2/level_10_final.tmx"));
 
+        //world 3
+        LEVELS.add(new LevelDefinition(WORLD_3, "world3_level01", "Level 1", "maps/world3/level3_01.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_3, "world3_level02", "Level 2", "maps/world3/level3_02.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_3, "world3_level03", "Level 3", "maps/world3/level3_03.tmx"));
 
         //demo
         LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_platforming_24x10", "24x10", "maps/world_demo/platforming_24x10.tmx"));
