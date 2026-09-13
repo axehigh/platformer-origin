@@ -58,9 +58,15 @@
  </tile>
  <tile id="16">
   <image source="../gfx/tiles/dungeon/bridge-3.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="32" y="0" width="64" height="128"/>
+  </objectgroup>
  </tile>
  <tile id="17">
   <image source="../gfx/tiles/dungeon/bridge-4.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="32" y="0" width="64" height="128"/>
+  </objectgroup>
  </tile>
  <tile id="19">
   <image source="../gfx/tiles/dungeon/crystal-bottom-1.png" width="128" height="128"/>
@@ -76,9 +82,15 @@
  </tile>
  <tile id="26">
   <image source="../gfx/tiles/dungeon/platform-float.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="1.19766" y="1.19766" width="125.754" height="63.1766"/>
+  </objectgroup>
  </tile>
  <tile id="27">
   <image source="../gfx/tiles/dungeon/platform-one-way.png" width="129" height="128"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0.898246" y="0.898246" width="127.251" height="25.4503"/>
+  </objectgroup>
  </tile>
  <tile id="28">
   <image source="../gfx/tiles/dungeon/rock.png" width="128" height="128"/>
@@ -169,6 +181,9 @@
  </tile>
  <tile id="57">
   <image source="../gfx/tiles/caves/platform-float.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="1.19766" y="1.19766" width="126.653" height="48.5053"/>
+  </objectgroup>
  </tile>
  <tile id="58">
   <image source="../gfx/tiles/bg/pillar01.png" width="113" height="256"/>
