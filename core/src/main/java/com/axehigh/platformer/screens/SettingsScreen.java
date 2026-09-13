@@ -169,6 +169,17 @@ public class SettingsScreen extends MenuScreen {
                     });
                     tabContent.add(embersCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
 
+                    CheckBox vignetteCheckBox = new CheckBox(" Vignette Effect", skin);
+                    vignetteCheckBox.getLabel().setFontScale(SmallFontScale);
+                    vignetteCheckBox.setChecked(FeatureFlags.isVignetteEnabled());
+                    vignetteCheckBox.addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            FeatureFlags.setVignetteEnabled(vignetteCheckBox.isChecked());
+                        }
+                    });
+                    tabContent.add(vignetteCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
+
                     TextButton clearPlayerButton = createMenuButton("Clear Player", () -> {
                         com.axehigh.platformer.util.SaveManager.clear();
                     });

@@ -20,6 +20,7 @@ public class GamePreferences {
     private static final String KEY_EMBERS_ENABLED = "embersEnabled";
     private static final String KEY_WALL_CLANK_ENABLED = "wallClankEnabled";
     private static final String KEY_SOFT_STOP_ENABLED = "softStopEnabled";
+    private static final String KEY_VIGNETTE_ENABLED = "vignetteEnabled";
     private static final String KEY_DEVICE_CLASS = "deviceClass";
     private static final String KEY_LAYOUT_MODE = "layoutMode";
     private static final String KEY_UI_ICON_SCALE = "uiIconScale";
@@ -44,6 +45,8 @@ public class GamePreferences {
     static final boolean DEFAULT_WALL_CLANK_ENABLED = false;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
     static final boolean DEFAULT_SOFT_STOP_ENABLED = true;
+    /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
+    static final boolean DEFAULT_VIGNETTE_ENABLED = true;
 
     private final Preferences preferences;
 
@@ -177,6 +180,20 @@ public class GamePreferences {
 
     public void setSoftStopEnabled(boolean softStopEnabled) {
         preferences.putBoolean(KEY_SOFT_STOP_ENABLED, softStopEnabled);
+        preferences.flush();
+    }
+
+    /**
+     * Whether the screen-framed vignette (darkened room/map edges) is enabled. A developer
+     * feature flag, toggled from the pause dialog's Debug tab and the Settings screen; see
+     * {@code FeatureFlags}.
+     */
+    public boolean isVignetteEnabled() {
+        return preferences.getBoolean(KEY_VIGNETTE_ENABLED, DEFAULT_VIGNETTE_ENABLED);
+    }
+
+    public void setVignetteEnabled(boolean vignetteEnabled) {
+        preferences.putBoolean(KEY_VIGNETTE_ENABLED, vignetteEnabled);
         preferences.flush();
     }
 

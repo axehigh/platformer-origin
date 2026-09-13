@@ -19,6 +19,7 @@ public final class FeatureFlags {
     private static boolean embersEnabled = GamePreferences.DEFAULT_EMBERS_ENABLED;
     private static boolean wallClankEnabled = GamePreferences.DEFAULT_WALL_CLANK_ENABLED;
     private static boolean softStopEnabled = GamePreferences.DEFAULT_SOFT_STOP_ENABLED;
+    private static boolean vignetteEnabled = GamePreferences.DEFAULT_VIGNETTE_ENABLED;
     private static boolean initialized = false;
 
     private FeatureFlags() {
@@ -37,6 +38,7 @@ public final class FeatureFlags {
         embersEnabled = preferences.isEmbersEnabled();
         wallClankEnabled = preferences.isWallClankEnabled();
         softStopEnabled = preferences.isSoftStopEnabled();
+        vignetteEnabled = preferences.isVignetteEnabled();
     }
 
     /** Whether wall-climb (wall-slide gravity + wall-jump latch) is enabled. Defaults to {@code true}. */
@@ -148,6 +150,26 @@ public final class FeatureFlags {
             new GamePreferences().setSoftStopEnabled(enabled);
         }
     }
+
+    /**
+     * Whether the screen-framed vignette (darkened room/map edges) is enabled. Defaults to
+     * {@code true}; gates {@code VignetteRenderSystem}. Toggled from the pause dialog's Debug tab
+     * and the Settings screen's Debug tab.
+     */
+    public static boolean isVignetteEnabled() {
+        ensureInitialized();
+        return vignetteEnabled;
+    }
+
+    /** Sets whether the screen-framed vignette is enabled for the whole session and persists the choice. */
+    public static void setVignetteEnabled(boolean enabled) {
+        vignetteEnabled = enabled;
+        initialized = true;
+        if (Gdx.app != null) {
+            new GamePreferences().setVignetteEnabled(enabled);
+        }
+    }
+
     static void resetForTests() {
         wallClimbingEnabled = GamePreferences.DEFAULT_WALL_CLIMB_ENABLED;
         squashEnabled = GamePreferences.DEFAULT_SQUASH_ENABLED;
@@ -156,6 +178,7 @@ public final class FeatureFlags {
         embersEnabled = GamePreferences.DEFAULT_EMBERS_ENABLED;
         wallClankEnabled = GamePreferences.DEFAULT_WALL_CLANK_ENABLED;
         softStopEnabled = GamePreferences.DEFAULT_SOFT_STOP_ENABLED;
+        vignetteEnabled = GamePreferences.DEFAULT_VIGNETTE_ENABLED;
         initialized = false;
     }
 }

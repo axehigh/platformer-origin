@@ -154,12 +154,16 @@ public class PauseDialog extends Dialog {
         CheckBox embersDebugBox = toggleCheckBox("Embers",
             FeatureFlags::isEmbersEnabled,
             FeatureFlags::setEmbersEnabled);
+        CheckBox vignetteDebugBox = toggleCheckBox("Vignette",
+            FeatureFlags::isVignetteEnabled,
+            FeatureFlags::setVignetteEnabled);
 
         Table debugRow = new Table();
         debugRow.defaults().pad(ELEMENT_PAD);
         debugRow.add(collisionDebugBox).left();
         debugRow.add(touchDebugBox).left();
         debugRow.add(embersDebugBox).left();
+        debugRow.add(vignetteDebugBox).left();
         debugContent.add(debugRow).left().row();
 
         deviceButton = new TextButton("Device: " + listener.deviceLabel(), getSkin());

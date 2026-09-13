@@ -9,9 +9,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Headless tests for {@code FeatureFlags}: the wall-climb flag defaults to enabled, flips at
@@ -61,6 +59,28 @@ public class FeatureFlagsTest {
         FeatureFlags.setWallClimbingEnabled(false);
 
         verify(preferences).putBoolean("wallClimbEnabled", false);
+        verify(preferences).flush();
+    }
+
+    @Test
+    public void vignetteIsEnabledByDefault() {
+        Gdx.app = null;
+
+        assertTrue(FeatureFlags.isVignetteEnabled());
+    }
+
+    @Test
+    public void persistedVignetteValueSeedsTheStaticOnFirstRead() {
+        when(preferences.getBoolean("vignetteEnabled", true)).thenReturn(false);
+
+        assertFalse(FeatureFlags.isVignetteEnabled());
+    }
+
+    @Test
+    public void disablingVignettePersistsTheChoice() {
+        FeatureFlags.setVignetteEnabled(false);
+
+        verify(preferences).putBoolean("vignetteEnabled", false);
         verify(preferences).flush();
     }
 }

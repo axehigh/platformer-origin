@@ -1,6 +1,7 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.PlayerConfig;
+import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.util.FeatureFlags;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -9,6 +10,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Headless tests for the player's idle-entry grace in {@code AnimationSystem}: after horizontal
