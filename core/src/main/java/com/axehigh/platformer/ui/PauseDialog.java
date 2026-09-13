@@ -8,7 +8,6 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
-import static com.axehigh.platformer.GameConstants.FontScale;
 import static com.axehigh.platformer.GameConstants.SmallFontScale;
 
 /**
@@ -85,7 +84,7 @@ public class PauseDialog extends Dialog {
         super("Paused", skin);
         this.listener = listener;
 
-        getTitleLabel().setFontScale(FontScale);
+        getTitleLabel().setFontScale(SmallFontScale);
         getContentTable().defaults().pad(CONTENT_PAD);
         getButtonTable().defaults().pad(CONTENT_PAD);
 

@@ -18,8 +18,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.Scaling;
 
-import static com.axehigh.platformer.GameConstants.FontScale;
 import static com.axehigh.platformer.GameConstants.SmallFontScale;
+import static com.axehigh.platformer.map.LevelCatalog.WORLD_DEMO;
+import static com.axehigh.platformer.map.LevelCatalog.WORLD_TUTORIAL;
 
 /**
  * Lists the levels of one world (world selectable via tabs above the grid) in a scrollable
@@ -138,7 +139,7 @@ public class LevelSelectScreen extends MenuScreen {
         IntArray worldIds = LevelCatalog.worldIds();
         for (int i = 0; i < worldIds.size; i++) {
             int id = worldIds.get(i);
-            if (id == LevelCatalog.WORLD_TUTORIAL || id == LevelCatalog.WORLD_DEMO) continue;
+            if (id == WORLD_TUTORIAL || id == WORLD_DEMO) continue;
             if (id == worldId) break;
             prev = id;
         }
@@ -164,7 +165,7 @@ public class LevelSelectScreen extends MenuScreen {
             final int worldId = worldIds.get(i);
 
             // Demo/Tutorial only available when LEVEL_OPEN is true
-            if ((worldId == LevelCatalog.WORLD_DEMO || worldId == LevelCatalog.WORLD_TUTORIAL) && !levelOpen) {
+            if ((worldId == WORLD_DEMO || worldId == WORLD_TUTORIAL) && !levelOpen) {
                 continue;
             }
 
@@ -174,7 +175,7 @@ public class LevelSelectScreen extends MenuScreen {
 
             final int tabIndex = worldTabs.size;
             TextButton tab = new TextButton(LevelCatalog.worldName(worldId), skin);
-            tab.getLabel().setFontScale(FontScale);
+            tab.getLabel().setFontScale(SmallFontScale);
 
             if (!unlocked) {
                 tab.setDisabled(true);
@@ -208,7 +209,7 @@ public class LevelSelectScreen extends MenuScreen {
         IntArray activeWorldIds = new IntArray();
         for (int i = 0; i < worldIds.size; i++) {
             int id = worldIds.get(i);
-            if ((id == LevelCatalog.WORLD_DEMO || id == LevelCatalog.WORLD_TUTORIAL) && !levelOpen) continue;
+            if ((id == WORLD_DEMO || id == WORLD_TUTORIAL) && !levelOpen) continue;
             activeWorldIds.add(id);
         }
 
@@ -262,7 +263,7 @@ public class LevelSelectScreen extends MenuScreen {
         } else {
             button = new ImageTextButton(text, skin);
         }
-        button.getLabel().setFontScale(FontScale);
+        button.getLabel().setFontScale(SmallFontScale);
         button.setDisabled(!accessible);
         if (!accessible) {
             button.setColor(0.5f, 0.5f, 0.5f, 0.7f);

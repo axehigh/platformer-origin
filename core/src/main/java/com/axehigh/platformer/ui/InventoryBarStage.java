@@ -146,10 +146,10 @@ public class InventoryBarStage extends Stage {
             btn.getImageCell().center();
         }
         Label countLabel = new Label("", counterStyle);
-        countLabel.setFontScale(FontScale);
+        countLabel.setFontScale(SmallFontScale);
 
         Label titleLabel = new Label(title.toUpperCase(), counterStyle);
-        titleLabel.setFontScale(FontScale * 0.85f);
+        titleLabel.setFontScale(tinyFontScale);
         titleLabel.setAlignment(Align.center);
 
         Table slotTable = new Table();

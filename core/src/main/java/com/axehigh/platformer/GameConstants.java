@@ -188,11 +188,11 @@ public final class GameConstants {
     //UI Menu, everything else.
     public static final float UI_PADDING = 33f;
     public static final float UI_PANEL_ALPHA = 0.7f;
-    public static float FontScale = 1f;
-    public static float TitleFontScale = FontScale * 3f;
-    public static float BodyFontScale = FontScale * 2f;
-    public static float SmallFontScale = FontScale ;
-    public static float tinyFontScale = FontScale * 0.85f;
+    private static final float FontBaseScale = 1f;
+    public static float SmallFontScale = FontBaseScale;
+    public static float TitleFontScale = FontBaseScale * 3f;
+    public static float BodyFontScale = FontBaseScale * 2f;
+    public static float tinyFontScale = FontBaseScale * 0.85f;
 
     public static final String SKIN_TITLE = "title";
 

@@ -1,6 +1,7 @@
 package com.axehigh.platformer.screens;
 
 import com.axehigh.platformer.audio.AudioManager;
+import com.axehigh.platformer.util.FeatureFlags;
 import com.axehigh.platformer.util.GamePreferences;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.Color;
@@ -8,7 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
-import static com.axehigh.platformer.GameConstants.FontScale;
+import static com.axehigh.platformer.GameConstants.SmallFontScale;
 import static com.axehigh.platformer.GameConstants.UI_ICON_SCALE;
 import static com.axehigh.platformer.screens.GameConstantText.*;
 
@@ -19,6 +20,8 @@ public class SettingsScreen extends MenuScreen {
 
     private static final float ELEMENT_PAD = 48f;
     private static final float LABEL_PAD_RIGHT = 48f;
+    private static final float TAB_BUTTON_WIDTH = 300f;
+    private static final float TAB_BUTTON_HEIGHT = 75f;
 
     public SettingsScreen(Game game) {
         super(game);
@@ -36,11 +39,8 @@ public class SettingsScreen extends MenuScreen {
         // Tabs table
         Table tabsTable = new Table();
         TextButton audioTabButton = createMenuButton("Audio & UI", () -> {});
-        audioTabButton.getLabel().setFontScale(FontScale);
         TextButton gameplayTabButton = createMenuButton("GamePlay", () -> {});
-        gameplayTabButton.getLabel().setFontScale(FontScale);
         TextButton debugTabButton = createMenuButton("Debug", () -> {});
-        debugTabButton.getLabel().setFontScale(FontScale);
 
         Table tabContent = new Table();
         tabContent.center();
@@ -56,7 +56,7 @@ public class SettingsScreen extends MenuScreen {
 
                 if (activeTab[0] == 0) {
                     CheckBox musicCheckBox = new CheckBox(" Music", skin);
-                    musicCheckBox.getLabel().setFontScale(FontScale);
+                    musicCheckBox.getLabel().setFontScale(SmallFontScale);
                     musicCheckBox.setChecked(audio.isMusicEnabled());
                     musicCheckBox.addListener(new ChangeListener() {
                         @Override
@@ -68,7 +68,7 @@ public class SettingsScreen extends MenuScreen {
                     tabContent.add(musicCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
 
                     Label musicLabel = new Label(MUSIC_VOLUME, skin);
-                    musicLabel.setFontScale(FontScale);
+                    musicLabel.setFontScale(SmallFontScale);
                     Slider musicSlider = new Slider(0f, 100f, 1f, false, skin);
                     musicSlider.setValue(preferences.getMusicVolume());
                     musicSlider.addListener(new ChangeListener() {
@@ -81,7 +81,7 @@ public class SettingsScreen extends MenuScreen {
                     tabContent.add(musicSlider).padBottom(ELEMENT_PAD).row();
 
                     CheckBox sfxCheckBox = new CheckBox(" Sound Effects", skin);
-                    sfxCheckBox.getLabel().setFontScale(FontScale);
+                    sfxCheckBox.getLabel().setFontScale(SmallFontScale);
                     sfxCheckBox.setChecked(audio.isSfxEnabled());
                     sfxCheckBox.addListener(new ChangeListener() {
                         @Override
@@ -93,7 +93,7 @@ public class SettingsScreen extends MenuScreen {
                     tabContent.add(sfxCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
 
                     Label sfxLabel = new Label(SFX_VOLUME, skin);
-                    sfxLabel.setFontScale(FontScale);
+                    sfxLabel.setFontScale(SmallFontScale);
                     Slider sfxSlider = new Slider(0f, 100f, 1f, false, skin);
                     sfxSlider.setValue(preferences.getSfxVolume());
                     sfxSlider.addListener(new ChangeListener() {
@@ -106,7 +106,7 @@ public class SettingsScreen extends MenuScreen {
                     tabContent.add(sfxSlider).padBottom(ELEMENT_PAD).row();
 
                     Label scaleLabel = new Label(GameConstantText.UI_ICON_SCALE, skin);
-                    scaleLabel.setFontScale(FontScale);
+                    scaleLabel.setFontScale(SmallFontScale);
                     Slider scaleSlider = new Slider(0.5f, 4f, 0.1f, false, skin);
                     scaleSlider.setValue(preferences.getUiIconScale());
                     scaleSlider.addListener(new ChangeListener() {
@@ -119,33 +119,57 @@ public class SettingsScreen extends MenuScreen {
                     tabContent.add(scaleLabel).padRight(LABEL_PAD_RIGHT);
                     tabContent.add(scaleSlider).padBottom(ELEMENT_PAD).row();
                 } else if (activeTab[0] == 1) {
-                    Label placeholder = new Label(GAMEPLAY_SETTINGS, skin);
-                    placeholder.setFontScale(FontScale);
-                    tabContent.add(placeholder).padBottom(ELEMENT_PAD).row();
+                    Label header = new Label(GAMEPLAY_SETTINGS, skin);
+                    header.setFontScale(SmallFontScale);
+                    tabContent.add(header).colspan(2).padBottom(ELEMENT_PAD).row();
+
+                    CheckBox wallClimbCheckBox = new CheckBox(" Wall Climb", skin);
+                    wallClimbCheckBox.getLabel().setFontScale(SmallFontScale);
+                    wallClimbCheckBox.setChecked(FeatureFlags.isWallClimbingEnabled());
+                    wallClimbCheckBox.addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            AudioManager.get().playClick();
+                            FeatureFlags.setWallClimbingEnabled(wallClimbCheckBox.isChecked());
+                        }
+                    });
+                    tabContent.add(wallClimbCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
+
+                    CheckBox softStopCheckBox = new CheckBox(" Soft Stop", skin);
+                    softStopCheckBox.getLabel().setFontScale(SmallFontScale);
+                    softStopCheckBox.setChecked(FeatureFlags.isSoftStopEnabled());
+                    softStopCheckBox.addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            AudioManager.get().playClick();
+                            FeatureFlags.setSoftStopEnabled(softStopCheckBox.isChecked());
+                        }
+                    });
+                    tabContent.add(softStopCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
                 } else if (activeTab[0] == 2) {
                     CheckBox levelOpenCheckBox = new CheckBox(" Level Open", skin);
-                    levelOpenCheckBox.getLabel().setFontScale(FontScale);
-                    levelOpenCheckBox.setChecked(com.axehigh.platformer.util.FeatureFlags.isLevelOpen());
+                    levelOpenCheckBox.getLabel().setFontScale(SmallFontScale);
+                    levelOpenCheckBox.setChecked(FeatureFlags.isLevelOpen());
                     levelOpenCheckBox.addListener(new ChangeListener() {
                         @Override
                         public void changed(ChangeEvent event, Actor actor) {
-                            com.axehigh.platformer.util.FeatureFlags.setLevelOpen(levelOpenCheckBox.isChecked());
+                            FeatureFlags.setLevelOpen(levelOpenCheckBox.isChecked());
                         }
                     });
                     tabContent.add(levelOpenCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
 
                     CheckBox embersCheckBox = new CheckBox(" Embers Effect", skin);
-                    embersCheckBox.getLabel().setFontScale(FontScale);
-                    embersCheckBox.setChecked(com.axehigh.platformer.util.FeatureFlags.isEmbersEnabled());
+                    embersCheckBox.getLabel().setFontScale(SmallFontScale);
+                    embersCheckBox.setChecked(FeatureFlags.isEmbersEnabled());
                     embersCheckBox.addListener(new ChangeListener() {
                         @Override
                         public void changed(ChangeEvent event, Actor actor) {
-                            com.axehigh.platformer.util.FeatureFlags.setEmbersEnabled(embersCheckBox.isChecked());
+                            FeatureFlags.setEmbersEnabled(embersCheckBox.isChecked());
                         }
                     });
                     tabContent.add(embersCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
 
-                    TextButton clearPlayerButton = createMenuButton("Clear Player (Keeps Stars)", () -> {
+                    TextButton clearPlayerButton = createMenuButton("Clear Player", () -> {
                         com.axehigh.platformer.util.SaveManager.clear();
                     });
                     tabContent.add(clearPlayerButton).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).colspan(2).padBottom(ELEMENT_PAD).row();
@@ -178,9 +202,9 @@ public class SettingsScreen extends MenuScreen {
             }
         });
 
-        tabsTable.add(audioTabButton).size(180f, 50f).pad(8f);
-        tabsTable.add(gameplayTabButton).size(180f, 50f).pad(8f);
-        tabsTable.add(debugTabButton).size(180f, 50f).pad(8f);
+        tabsTable.add(audioTabButton).size(TAB_BUTTON_WIDTH, TAB_BUTTON_HEIGHT).pad(10f);
+        tabsTable.add(gameplayTabButton).size(TAB_BUTTON_WIDTH, TAB_BUTTON_HEIGHT).pad(10f);
+        tabsTable.add(debugTabButton).size(TAB_BUTTON_WIDTH, TAB_BUTTON_HEIGHT).pad(10f);
 
         content.add(tabsTable).colspan(2).padBottom(30f).row();
         content.add(tabContent).colspan(2).expand().center().padBottom(30f).row();
