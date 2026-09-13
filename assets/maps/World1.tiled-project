@@ -32,6 +32,18 @@
             ]
         },
         {
+            "id": 5,
+            "name": "EnemySize",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "default",
+                "medium",
+                "large"
+            ],
+            "valuesAsFlags": false
+        },
+        {
             "color": "#ffa0a0a4",
             "drawFill": true,
             "id": 1,

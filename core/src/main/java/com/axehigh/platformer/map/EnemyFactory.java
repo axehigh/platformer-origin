@@ -9,8 +9,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
 
 import static com.axehigh.platformer.ecs.components.AnimationComponent.State.*;
-import static com.axehigh.platformer.ecs.components.EnemyComponent.Size.LARGE;
-import static com.axehigh.platformer.ecs.components.EnemyComponent.Size.MEDIUM;
+import static com.axehigh.platformer.ecs.components.EnemyComponent.Size.*;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.NORMAL;
 
@@ -94,7 +93,9 @@ class EnemyFactory {
         enemyComponent.maxHealth = type.maxHealth;
 
         String sizeStr = TileProps.getProperty(object, tile, "size", null);
-        if ("medium".equalsIgnoreCase(sizeStr)) {
+        if ("default".equalsIgnoreCase(sizeStr)) {
+            enemyComponent.size = DEFAULT;
+        } else if ("medium".equalsIgnoreCase(sizeStr)) {
             enemyComponent.size = MEDIUM;
         } else if ("large".equalsIgnoreCase(sizeStr)) {
             enemyComponent.size = LARGE;

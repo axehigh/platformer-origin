@@ -71,5 +71,9 @@ Turn on and off collision debugging with SHIFT+D (desktop) or the "Collision Deb
 Use ShapeRenderer for debugging (see `DebugRenderSystem`, which outlines every live `CollisionComponent` AABB plus the static map collision rects — and, for melee-capable enemies, their omni-directional attack detection range in magenta and melee strike distance in red).
 The Pause dialog also exposes a "Touch Debug" button that logs every touch to logcat under the `TouchDebug` tag (surface/viewport sizes, raw vs stage-mapped coords, and the hit actor), for diagnosing touch-input misalignment.
 
+## Skill & Workflow Capture
+*   **Codify Repeats:** When the same question, workflow, or multi-step sub-task recurs (asked twice or more, or you find yourself re-running the same procedure), pick it up by codifying it — as a skill under `.opencode/skills/` or `.junie/skills/`, an opencode/junie command, a reusable script, or a docs-ai section — instead of re-explaining or re-running it manually. This applies to recurring debugging procedures, test scaffolding, build/diagnostic steps, and repeated design questions alike.
+*   **Use the lightest existing mechanism that fits:** a skill for behavior/workflow, a script or command for a repeatable multi-step action, a docs-ai bullet for a one-off convention. Only skip codification when an existing artifact already covers it (e.g. an AGENTS.md rule, an existing skill like `ecs-system-testing`, or docs-ai) or when the overhead is clearly not justified.
+
 # Testing and build
 *   **No Need to Build Android APK Every Time:** You can test most changes on the desktop version without rebuilding the Android APK.

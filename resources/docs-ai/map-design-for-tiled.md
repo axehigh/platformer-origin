@@ -303,6 +303,27 @@ Place `enemy` markers on the `enemies` layer (or `objects`). The `enemyType` pro
 
 The `loot` property defines drops (e.g., `"coin:3, ammo:1"`). Supports comma-separated list and `":"` or `"="` delimiters. Valid: `coin:X`, `ammo:X`, `potion:TYPE` (TYPE in `healing`, `strength`, `speed`, `invulnerability`). See `resources/docs-ai/enemies.md` for full details.
 
+**Enemy marker — property quick reference (bullet form):**
+
+*   **Layer:** place the marker anywhere on the **`enemies`** layer (preferred — dedicated layer keeps enemies easy to find) or the **`objects`** layer. Two ways to place it:
+    *   *Rectangle:* draw a rectangle and set its `Type` to `enemy`; add per-marker custom properties (below) to tune it.
+    *   *Tile stamp:* stamp a tile from `enemy.tsx` — those tiles already carry `type="enemy"` and the matching `enemyType` property, so the stamp alone works with zero typing.
+    *   The marker must sit **inside a `Rooms` rectangle**; otherwise the enemy's `roomIndex = -1` and it never freezes/AI-gates with its room.
+*   **`type`** (*string*, **required**) — must be `"enemy"` (the marker discriminator; set on the object or carried by the stamped tile).
+*   **`enemyType`** (*string*, default `"walker"`) — picks the creature: `walker` (goblin, default), `flyer` (mosquito — needs patrol range clear of walls), `shooter` (spider — fires only in its own room), `knight` (15 HP, same logic as walker). Any unknown value falls back to `walker`.
+*   **`aiMode`** (*string*, default `patrol`) — `"side-to-side"` / `"sidetoside"` (case-insensitive) switches to endless walking that turns only on walls/ledges/hazards (ignores `patrolRange`); anything else or absent keeps the origin-bounded `patrol` mode. Flyers ignore the grounded probes, so they always turn on the `patrolRange` bound.
+*   **`speed`** (*float*, default per-type `20`) — patrol-speed override in the same pre-`unitScale` units as the default (on 128px maps `20` ≈ 1.25 map-tiles/s). The spawned enemy's actual speed is jittered ±15% for desync.
+*   **`patrolRange`** (*float*, default `64`) — patrol-limit override. Effective patrol = `value × unitScale` map tiles to each side of spawn (128px maps: `unitScale` = 8, so `1` ≈ 8 tiles, `0.5` ≈ 4 tiles). Only applies in `patrol` mode (`SIDE_TO_SIDE` ignores it).
+*   **`size`** (*string*, default `"default"`) — `"default"` (or blank/absent) → base HP (1×), `"medium"` → 1.5× HP multiplier, `"large"` → 2× HP.
+*   **`loot`** (*string*, default absent) — death-drop definition, e.g. `"coin:3, ammo:1"`. Comma-separated; `":"` or `"="` delimiters. Valid entries: `coin:X`, `ammo:X`, `potion:TYPE` (`TYPE` = `healing`, `strength`, `speed`, `invulnerability`). Absent → the default coin burst sized by max health.
+*   **`attackType`** (*string*, default `"melee"` for non-shooters) — `"melee"` gives the enemy a wind-up melee strike (player detection + chase); any other value, or a shooter, means no attack behavior.
+*   **`attackInterval`** (*float*, default `2.0`) — seconds between committed melee strikes.
+*   **`attackRange`** (*float*, default `24`) — melee strike-commit reach override, in the same tile units as `patrolRange` (`value × unitScale` tiles in front of the enemy; 128px maps: `1` ≈ 8 tiles). Legacy alias **`meleeRange`** still works.
+*   **`windUpDuration`** (*float*, default `0.4`) — seconds of wind-up telegraph before the strike window opens.
+*   **`secretRoom`** (*string*, default absent) — names a `Rooms` rectangle; defers this enemy — it only spawns when that room is revealed (secret rooms, §4.6).
+
+Properties may be authored on the marker object **or** on its tile (object wins); numbers tolerate int/float/string encodings. Full behavior details: `resources/docs-ai/enemies.md`.
+
 ### 5.6 Traps
 
 Traps come in two flavours: **tile-based hazards** (painted in the `collision` layer — see §4.2) and **spawned trap entities** (placed as `type="trap"` objects on the `objects`/`enemies` layer). Both deal 1 HP damage with no knockback and share the 2-second invulnerability grace period.
@@ -477,7 +498,7 @@ All properties are read as `float`/`string`/`boolean` and tolerate being set as 
 | `enemyType` | string | `"walker"` | Picks the enemy variant: `walker` / `flyer` / `shooter` / `knight`. See `enemies.md`. |
 | `aiMode` | string | `"patrol"` | Enemy patrol behavior: `"side-to-side"` (or `"sidetoside"`, case-insensitive) → endless walking that turns only on walls/ledges/hazards; anything else/absent → origin-bounded `patrol`. Flyers ignore it (never grounded). |
 | `speed` | float | per-type default (`20`) | (enemy only) Horizontal patrol speed override, world px/s. Applied before the `unitScale` (tile-size) scaling. |
-| `patrolRange` | float | per-type default (`64`) | (enemy only) Patrol-range override, world px. Only used in `PATROL` mode (`SIDE_TO_SIDE` ignores it). Applied before the `unitScale` scaling. |
+| `patrolRange` | float | per-type default (`64`) | (enemy only) Patrol-range override in **tile units** — effective patrol = `value × unitScale` map tiles to each side of spawn (128px maps: `1` ≈ 8 tiles, `0.5` ≈ 4 tiles). Only used in `PATROL` mode (`SIDE_TO_SIDE` ignores it). |
 | `nextLevel` | string | — | (exitGate only) The next `.tmx` path **relative to the `assets/` folder**, e.g. `maps/world1/level_03.tmx`. Cycles to that map on interaction. |
 | `isFinal` | string | `"false"` | (exitGate only) `"true"` triggers the Victory Screen instead of loading the next level. |
 | `trapType` | string | `"acidDrop"` | (trap only) Trap variant: `"acidDrop"` (spawner + projectiles) or `"flame"` (pulsing fire). |
@@ -489,6 +510,11 @@ All properties are read as `float`/`string`/`boolean` and tolerate being set as 
 | `pulseSpeed` | float | `2.0` | (flame only) Oscillation speed for grow/shrink animation. |
 | `potionType` | string | — | (chest only) If set, the chest drops a potion of this type instead of coins. Valid values: `healing`, `strength`, `speed`, `invulnerability`. Omit for a standard coin chest. |
 | `loot` | string | — | (enemy only) Drop definition, e.g. `"coin:3, ammo:1"`. Supports comma-separated list and `":"` or `"="` delimiters. Valid: `coin:X`, `ammo:X`, `potion:TYPE`. |
+| `size` | string | `"default"` | (enemy only) HP multiplier: `"default"` (or blank) = 1×, `"medium"` = 1.5×, `"large"` = 2×. |
+| `attackType` | string | `"melee"` | (enemy only, non-shooters) `"melee"` gives the enemy a wind-up melee strike (detection + chase); anything else = no attack behavior. |
+| `attackInterval` | float | `2.0` | (enemy only, melee) Seconds between committed melee strikes. |
+| `attackRange` | float | `24` | (enemy only, melee) Strike-commit reach override in tile units (`value × unitScale` tiles in front of the enemy on 128px maps). Legacy alias `meleeRange`. |
+| `windUpDuration` | float | `0.4` | (enemy only, melee) Seconds of wind-up telegraph before the strike window opens. |
 | `secretRoom` | string | — | (object markers only) Defers this marker — it is partitioned out of the normal spawn layers and only spawned when its named room is revealed. Must match a `Rooms` rect name. |
 
 ### Moving Platform Properties

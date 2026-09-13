@@ -5,6 +5,7 @@
   <properties>
    <property name="enemyType" value="walker"/>
    <property name="loot" value=""/>
+   <property name="size" propertytype="EnemySize" value="medium"/>
   </properties>
   <image source="../gfx/enemies/skeleton01_idle1.png" width="128" height="128"/>
  </tile>

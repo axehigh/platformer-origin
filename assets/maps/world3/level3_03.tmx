@@ -51,7 +51,7 @@
   <object id="602" name="playerStart" type="playerStart" x="256" y="384" width="128" height="128"/>
   <object id="603" name="exitGate" type="exitGate" x="7296" y="256" width="128" height="128">
    <properties>
-    <property name="nextLevel" value="maps/world1/level_02.tmx"/>
+    <property name="isFinal" value="true"/>
    </properties>
   </object>
   <object id="610" gid="83" x="128" y="1152" width="128" height="128"/>
