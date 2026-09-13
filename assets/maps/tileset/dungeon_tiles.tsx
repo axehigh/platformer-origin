@@ -179,12 +179,6 @@
  <tile id="60">
   <image source="../gfx/tiles/new2.png" width="128" height="128"/>
  </tile>
- <tile id="61">
-  <image source="../gfx/tiles/dwarf_mine/Wooden_Barrel.png" width="128" height="128"/>
-  <objectgroup draworder="index" id="2">
-   <object id="1" x="9" y="10" width="110" height="117"/>
-  </objectgroup>
- </tile>
  <tile id="63">
   <image source="../gfx/tiles/bg/cart.png" width="128" height="96"/>
   <objectgroup draworder="index" id="2">
@@ -209,6 +203,12 @@
  </tile>
  <tile id="67">
   <image source="../gfx/tiles/environment/Wooden_Barrel.png" width="128" height="128"/>
+ </tile>
+ <tile id="61">
+  <image source="../gfx/tiles/dwarf_mine/Wooden_Barrel.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="9" y="10" width="110" height="117"/>
+  </objectgroup>
  </tile>
  <tile id="68">
   <image source="../gfx/tiles/environment/Cartoon_Medieval_Carpenters_Workshop_Level_Set_Environment - Wooden Barrel.png" width="128" height="128"/>

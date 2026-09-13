@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="17" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="527">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
- <tileset firstgid="71" source="../tileset/items.tsx"/>
- <tileset firstgid="102" source="../tileset/enemy.tsx"/>
- <tileset firstgid="109" name="secret_room_wall" tilewidth="128" tileheight="128" tilecount="1" columns="1">
+ <tileset firstgid="70" source="../tileset/items.tsx"/>
+ <tileset firstgid="101" source="../tileset/enemy.tsx"/>
+ <tileset firstgid="108" name="secret_room_wall" tilewidth="128" tileheight="128" tilecount="1" columns="1">
   <tile id="0">
    <properties>
     <property name="secret" type="bool" value="true"/>
@@ -12,7 +12,7 @@
    <image source="../gfx/tiles/secret_wall.png" width="128" height="128"/>
   </tile>
  </tileset>
- <tileset firstgid="110" source="../tileset/bg.tsx"/>
+ <tileset firstgid="109" source="../tileset/bg.tsx"/>
  <layer id="1" name="background" width="30" height="17">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -23,7 +23,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,7,6,7,0,0,0,0,53,0,0,0,11,10,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,7,0,0,0,0,53,0,0,0,6,6,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,7,0,0,0,0,0,0,0,0,6,6,0,0,
-0,135,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,0,0,
+0,134,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,53,0,0,0,6,6,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,53,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,53,0,0,0,0,0,0,0,
@@ -50,8 +50,8 @@
 2,0,0,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,69,0,0,0,0,0,0,0,3,
 2,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,0,0,0,0,2,
 2,2,2,0,0,2,0,0,0,1,1,0,0,2,2,0,2,2,2,0,0,0,0,0,2,69,0,0,0,2,
-2,0,0,0,0,109,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,0,0,2,
-2,0,0,0,0,109,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+2,0,0,0,0,108,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,0,0,2,
+2,0,0,0,0,108,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,2,2,2,2,2,2,2,2,2,2,3,2,2,2,3,2,2,2,2,2,3,2,2,2,2,2,3,2,2
 </data>
  </layer>
@@ -59,16 +59,16 @@
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,10,0,2147483654,0,0,0,0,0,0,0,0,2147483654,0,0,0,0,0,0,45,45,45,0,0,0,0,0,0,
-0,0,0,8,0,0,0,2147483654,0,0,0,0,8,0,0,0,0,0,0,91,0,47,134,48,0,0,91,0,0,0,
+0,0,0,8,0,0,0,2147483654,0,0,0,0,8,0,0,0,0,0,0,90,0,47,133,48,0,0,90,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,2147483654,7,0,2147483654,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,2147483654,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,8,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2147483654,0,0,0,0,135,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,150,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,132,134,132,0,0,0,0,0,9,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,125,0,0,0,0,0,0,0,0,0,88,0,0,0,
-0,0,0,0,0,0,119,0,0,0,0,18,132,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2147483654,0,0,0,0,134,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,149,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,131,133,131,0,0,0,0,0,90,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,124,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,118,0,0,0,0,18,131,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+90,0,0,0,0,90,0,0,0,0,0,18,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -78,25 +78,25 @@
  </layer>
  <objectgroup id="3" name="objects">
   <object id="1" name="playerStart" type="playerStart" x="152" y="1008" width="128" height="128"/>
-  <object id="4" name="coin_r0" gid="83" x="896" y="376" width="128" height="128"/>
-  <object id="5" name="chest_r0" gid="74" x="1792" y="2048" width="128" height="128"/>
-  <object id="6" name="chest_r0" gid="74" x="516" y="648" width="128" height="128"/>
-  <object id="7" name="chest_secret_room" gid="74" x="128" y="2048" width="128" height="128">
+  <object id="4" name="coin_r0" gid="82" x="896" y="376" width="128" height="128"/>
+  <object id="5" name="chest_r0" gid="73" x="1792" y="2048" width="128" height="128"/>
+  <object id="6" name="chest_r0" gid="73" x="516" y="648" width="128" height="128"/>
+  <object id="7" name="chest_secret_room" gid="73" x="128" y="2048" width="128" height="128">
    <properties>
     <property name="secretRoom" value="secret_room"/>
    </properties>
   </object>
-  <object id="8" name="coin_secret_room" gid="83" x="512" y="2048" width="128" height="128">
+  <object id="8" name="coin_secret_room" gid="82" x="512" y="2048" width="128" height="128">
    <properties>
     <property name="secretRoom" value="secret_room"/>
    </properties>
   </object>
-  <object id="9" name="coin_secret_room" gid="83" x="256" y="2048" width="128" height="128">
+  <object id="9" name="coin_secret_room" gid="82" x="256" y="2048" width="128" height="128">
    <properties>
     <property name="secretRoom" value="secret_room"/>
    </properties>
   </object>
-  <object id="10" name="coin_secret_room" gid="83" x="384" y="2048" width="128" height="128">
+  <object id="10" name="coin_secret_room" gid="82" x="384" y="2048" width="128" height="128">
    <properties>
     <property name="secretRoom" value="secret_room"/>
    </properties>
@@ -106,22 +106,16 @@
     <property name="nextLevel" value="maps/world1/level_09.tmx"/>
    </properties>
   </object>
-  <object id="515" name="coin_r0" gid="83" x="1664" y="768" width="128" height="128"/>
-  <object id="516" name="coin_r0" gid="83" x="1300" y="512" width="128" height="128"/>
-  <object id="517" gid="91" x="640" y="1664" width="128" height="156"/>
-  <object id="518" gid="91" x="640" y="1664" width="128" height="156"/>
-  <object id="519" gid="74" x="128" y="1664" width="128" height="128"/>
-  <object id="520" gid="74" x="512" y="1408" width="128" height="128"/>
-  <object id="521" gid="91" x="2816" y="1664" width="128" height="156"/>
-  <object id="523" gid="91" x="0" y="1664" width="128" height="156"/>
-  <object id="524" gid="91" x="2432" y="1408" width="128" height="156"/>
-  <object id="525" gid="88" x="3391.74" y="970.022" width="128" height="128"/>
-  <object id="526" gid="91" x="3715.19" y="1033.2" width="128" height="156"/>
+  <object id="515" name="coin_r0" gid="82" x="1664" y="768" width="128" height="128"/>
+  <object id="516" name="coin_r0" gid="82" x="1300" y="512" width="128" height="128"/>
+  <object id="519" gid="73" x="128" y="1664" width="128" height="128"/>
+  <object id="520" gid="73" x="512" y="1408" width="128" height="128"/>
+  <object id="525" gid="87" x="3391.74" y="970.022" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="7" name="enemies">
-  <object id="2" name="enemy_r0_shooter" gid="106" x="3328" y="2048" width="128" height="128"/>
-  <object id="3" name="enemy_r0_shooter" gid="106" x="1152" y="2048" width="128" height="128"/>
-  <object id="522" gid="105" x="2432" y="2048" width="256" height="256"/>
+  <object id="2" name="enemy_r0_shooter" gid="105" x="3328" y="2048" width="128" height="128"/>
+  <object id="3" name="enemy_r0_shooter" gid="105" x="1152" y="2048" width="128" height="128"/>
+  <object id="522" gid="104" x="2432" y="2048" width="256" height="256"/>
  </objectgroup>
  <objectgroup id="6" name="Rooms" locked="1">
   <object id="511" name="secret_room" x="0" y="1152" width="768" height="1024"/>

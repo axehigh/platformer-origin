@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="24" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="7" nextobjectid="30">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="24" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="7" nextobjectid="32">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
- <tileset firstgid="67" source="../tileset/enemy.tsx"/>
- <tileset firstgid="74" source="../tileset/bg.tsx"/>
- <tileset firstgid="112" source="../tileset/items.tsx"/>
- <tileset firstgid="141" source="../tileset/hazards.tsx"/>
+ <tileset firstgid="70" source="../tileset/enemy.tsx"/>
+ <tileset firstgid="77" source="../tileset/bg.tsx"/>
+ <tileset firstgid="124" source="../tileset/items.tsx"/>
+ <tileset firstgid="155" source="../tileset/hazards.tsx"/>
  <layer id="1" name="background" width="24" height="10">
   <data encoding="csv">
 0,48,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -26,7 +26,7 @@
 42,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,42,
 42,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,42,42,42,42,42,
 42,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,42,
-44,0,0,0,0,0,0,0,0,0,0,42,66,66,66,66,148,148,42,0,0,0,0,42,
+44,0,0,0,0,0,0,0,0,0,0,42,66,66,66,66,162,162,42,0,0,0,0,42,
 42,0,0,0,0,0,0,0,0,0,0,44,0,0,0,0,0,0,0,0,0,0,0,42,
 42,0,0,0,0,0,0,44,0,0,0,42,0,0,0,0,0,0,0,0,0,0,0,42,
 42,0,0,0,0,0,0,42,0,33,0,42,62,0,0,0,0,0,0,0,0,0,0,42,
@@ -36,14 +36,14 @@
  <layer id="5" name="Decoration" width="24" height="10">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,96,0,0,0,96,0,0,83,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,99,0,0,
+0,0,0,0,0,0,0,0,0,0,0,99,0,0,0,99,0,0,86,0,0,0,0,0,
+0,0,0,0,0,144,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,102,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,96,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,99,0,0,0,0,
+144,0,0,0,0,0,0,0,0,0,0,144,0,0,0,0,0,0,144,0,0,0,0,144,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,99,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,144,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,102,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
@@ -55,16 +55,19 @@
     <property name="nextLevel" value="maps/world1/level_01.tmx"/>
    </properties>
   </object>
-  <object id="12" gid="71" x="2176" y="1152" width="128" height="128"/>
-  <object id="13" gid="69" x="1792" y="1152" width="128" height="128"/>
-  <object id="21" gid="132" x="2944" y="640" width="128" height="156"/>
-  <object id="22" gid="132" x="0" y="640" width="128" height="156"/>
-  <object id="23" gid="132" x="1408" y="768" width="128" height="156"/>
-  <object id="25" gid="69" x="1920" y="640" width="128" height="128"/>
-  <object id="26" gid="69" x="2560" y="384" width="128" height="128"/>
-  <object id="27" gid="69" x="2688" y="1152" width="128" height="128"/>
-  <object id="28" gid="69" x="896" y="896" width="128" height="128"/>
-  <object id="29" gid="72" x="2304" y="640" width="128" height="128"/>
+  <object id="12" gid="74" x="2176" y="1152" width="128" height="128"/>
+  <object id="13" gid="72" x="1792" y="1152" width="128" height="128"/>
+  <object id="25" gid="72" x="1920" y="640" width="128" height="128"/>
+  <object id="26" gid="72" x="2560" y="384" width="128" height="128"/>
+  <object id="27" gid="72" x="2688" y="1152" width="128" height="128"/>
+  <object id="28" gid="72" x="896" y="896" width="128" height="128"/>
+  <object id="29" gid="75" x="2304" y="640" width="128" height="128"/>
+  <object id="30" gid="157" x="1024" y="384" width="128" height="128">
+   <properties>
+    <property name="amplitudeX" type="float" value="2"/>
+   </properties>
+  </object>
+  <object id="31" gid="137" x="640" y="256" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="6" name="enemies"/>
  <objectgroup id="4" name="Rooms" visible="0" locked="1">
