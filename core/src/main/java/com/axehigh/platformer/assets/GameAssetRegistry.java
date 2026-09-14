@@ -14,6 +14,8 @@ public final class GameAssetRegistry {
     public static final String ORIGIN_UI_GFX = "ui/uiskin.atlas";
     public static final String BACKGROUND_FAR = "maps/gfx/background/Background_01.png";
     public static final String BACKGROUND_NEAR = "maps/gfx/background/Background_02.png";
+    /** Standalone crescent sprite for the melee slash-arc VFX (128x128). */
+    public static final String SLASH_ARC_TEXTURE = "gfx/slash_arc.png";
 
     private GameAssetRegistry() {
     }
@@ -34,6 +36,7 @@ public final class GameAssetRegistry {
         assetManager.load("gfx/old/bullet.png", Texture.class);
         assetManager.load("gfx/old/dagger.png", Texture.class);
         assetManager.load("gfx/lava_drop.png", Texture.class);
+        assetManager.load(SLASH_ARC_TEXTURE, Texture.class);
         assetManager.load(BACKGROUND_FAR, Texture.class);
         assetManager.load(BACKGROUND_NEAR, Texture.class);
     }

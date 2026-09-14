@@ -95,6 +95,21 @@ public final class PlayerConfig {
     /** Bullet stacking layer (z), above the player. */
     public static final float BULLET_Z = 8f;
 
+    //------ Slash-arc VFX (cosmetic melee swing feedback) ------
+    /** How long the arc sprite lingers on screen (then it fades out entirely). */
+    public static final float SLASH_ARC_LIFETIME = 0.2f;
+    /** Stacking layer (z) for the arc: above the player (10) but below floating messages (15). */
+    public static final float SLASH_ARC_Z = 11f;
+    /** Scale applied to the 128px arc sprite, matching the hero sprite's own scale
+     *  ({@code SpriteConstants.PlayerScale}) so the crescent sweeps roughly the player's footprint. */
+    public static final float SLASH_ARC_SCALE = PlayerScale;
+    /** Forward shift of the arc center beyond the player's collision center, in the facing
+     *  direction (base world units, before {@code unitScale}). */
+    public static final float SLASH_ARC_OFFSET_X = 2f;
+    /** Upward shift of the arc center toward the player's torso (base world units, before
+     *  {@code unitScale}). */
+    public static final float SLASH_ARC_OFFSET_Y = 6f;
+
     //------ Animation / feel ------
     /** How long the player holds the last run/walk pose after movement has fully stopped (seconds)
      *  before the IDLE animation starts. The short wait (after ground friction has already eased the

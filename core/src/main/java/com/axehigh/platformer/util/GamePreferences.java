@@ -21,6 +21,7 @@ public class GamePreferences {
     private static final String KEY_WALL_CLANK_ENABLED = "wallClankEnabled";
     private static final String KEY_SOFT_STOP_ENABLED = "softStopEnabled";
     private static final String KEY_VIGNETTE_ENABLED = "vignetteEnabled";
+    private static final String KEY_SLASH_ARC_ENABLED = "slashArcEnabled";
     private static final String KEY_DEVICE_CLASS = "deviceClass";
     private static final String KEY_LAYOUT_MODE = "layoutMode";
     private static final String KEY_UI_ICON_SCALE = "uiIconScale";
@@ -47,6 +48,8 @@ public class GamePreferences {
     static final boolean DEFAULT_SOFT_STOP_ENABLED = true;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
     static final boolean DEFAULT_VIGNETTE_ENABLED = true;
+    /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
+    static final boolean DEFAULT_SLASH_ARC_ENABLED = true;
 
     private final Preferences preferences;
 
@@ -194,6 +197,19 @@ public class GamePreferences {
 
     public void setVignetteEnabled(boolean vignetteEnabled) {
         preferences.putBoolean(KEY_VIGNETTE_ENABLED, vignetteEnabled);
+        preferences.flush();
+    }
+
+    /**
+     * Whether the melee slash-arc VFX (cosmetic crescent sprite on each swing) is enabled. A
+     * developer feature flag, default {@code true}; see {@code FeatureFlags}.
+     */
+    public boolean isSlashArcEnabled() {
+        return preferences.getBoolean(KEY_SLASH_ARC_ENABLED, DEFAULT_SLASH_ARC_ENABLED);
+    }
+
+    public void setSlashArcEnabled(boolean slashArcEnabled) {
+        preferences.putBoolean(KEY_SLASH_ARC_ENABLED, slashArcEnabled);
         preferences.flush();
     }
 

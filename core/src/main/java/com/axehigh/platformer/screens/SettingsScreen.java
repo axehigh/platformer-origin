@@ -180,6 +180,17 @@ public class SettingsScreen extends MenuScreen {
                     });
                     tabContent.add(vignetteCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
 
+                    CheckBox slashArcCheckBox = new CheckBox(" Slash Effect", skin);
+                    slashArcCheckBox.getLabel().setFontScale(SmallFontScale);
+                    slashArcCheckBox.setChecked(FeatureFlags.isSlashArcEnabled());
+                    slashArcCheckBox.addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            FeatureFlags.setSlashArcEnabled(slashArcCheckBox.isChecked());
+                        }
+                    });
+                    tabContent.add(slashArcCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
+
                     TextButton clearPlayerButton = createMenuButton("Clear Player", () -> {
                         com.axehigh.platformer.util.SaveManager.clear();
                     });

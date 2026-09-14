@@ -10,16 +10,17 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 
 import static com.axehigh.platformer.PlayerConfig.*;
-import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
-import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_UI_GFX;
+import static com.axehigh.platformer.assets.GameAssetRegistry.*;
 import static com.axehigh.platformer.ecs.components.Mappers.*;
 import static com.badlogic.gdx.Gdx.input;
 import static com.badlogic.gdx.Input.Keys.*;
@@ -37,6 +38,9 @@ public class PlayerInputSystem extends IteratingSystem {
     private static final float DROP_WINDOW_DURATION = 0.25f;
 
     private final AssetManager assetManager;
+
+    /** Lazily wrapped {@code gfx/slash_arc.png} texture region, or {@code null} until loaded. */
+    private TextureRegion slashArcRegion;
 
     private PooledEngine engine;
     private float unitScale = 1f;
@@ -207,6 +211,7 @@ public class PlayerInputSystem extends IteratingSystem {
             player.meleeHitEnemies.clear();
             // Cooldown must be at least as long as the animation to allow it to finish
             player.meleeCooldown.start(Math.max(MELEE_COOLDOWN, attackDuration));
+            spawnSlashArc(entity, transform, collision, player);
         }
 
         boolean shootPressed = input.isKeyJustPressed(Input.Keys.K) || input.isKeyJustPressed(Input.Keys.Y) || touchShootRequested;
@@ -313,6 +318,57 @@ public class PlayerInputSystem extends IteratingSystem {
         bulletComponent.lifetime = BULLET_LIFETIME;
         bullet.add(bulletComponent);
         engine.addEntity(bullet);
+    }
+
+    /**
+     * Spawns the one-shot cosmetic slash-arc VFX, once per swing (called at the end of the melee
+     * start block). Cosmetic only — Transform + Texture + SlashArcComponent, no CollisionComponent,
+     * so RenderSystem's fallback anchor path draws it (negative scale.x flips it for left-facing).
+     */
+    private void spawnSlashArc(Entity playerEntity, TransformComponent playerTransform, CollisionComponent playerCollision, PlayerComponent player) {
+        if (!FeatureFlags.isSlashArcEnabled()) {
+            return;
+        }
+        if (slashArcRegion == null) {
+            if (!assetManager.isLoaded(SLASH_ARC_TEXTURE)) {
+                if (Gdx.app != null) {
+                    Gdx.app.log("SlashArc", "Texture not loaded; skipping arc spawn");
+                }
+                return;
+            }
+            slashArcRegion = new TextureRegion(assetManager.get(SLASH_ARC_TEXTURE, Texture.class));
+        }
+
+        Entity arc = engine.createEntity();
+
+        float arcScale = SLASH_ARC_SCALE * unitScale;
+        float arcWidth = slashArcRegion.getRegionWidth() * arcScale;
+        float arcHeight = slashArcRegion.getRegionHeight() * arcScale;
+
+        // Anchor on the player's collision center (transform.position is the rect's lower-left),
+        // shifted slightly forward in the facing direction and up toward the torso.
+        float anchorX = playerTransform.position.x + playerCollision.bounds.x + playerCollision.bounds.width / 2f;
+        float anchorY = playerTransform.position.y + playerCollision.bounds.y + playerCollision.bounds.height / 2f;
+        float centerX = anchorX + player.facingDirection * SLASH_ARC_OFFSET_X * unitScale;
+        float centerY = anchorY + SLASH_ARC_OFFSET_Y * unitScale;
+
+        TransformComponent transform = engine.createComponent(TransformComponent.class);
+        // Centered on the anchor in both directions: RenderSystem's fallback path (drawX -= min(0,
+        // width)) keeps the visual center at position + |width|/2 regardless of the scale.x sign.
+        transform.position.set(centerX - arcWidth / 2f, centerY - arcHeight / 2f);
+        transform.scale.set(arcScale * player.facingDirection, arcScale);
+        transform.z = SLASH_ARC_Z;
+        arc.add(transform);
+
+        TextureComponent textureComponent = engine.createComponent(TextureComponent.class);
+        textureComponent.region = slashArcRegion;
+        arc.add(textureComponent);
+
+        SlashArcComponent arcComponent = engine.createComponent(SlashArcComponent.class);
+        arcComponent.lifeTime = SLASH_ARC_LIFETIME;
+        arc.add(arcComponent);
+
+        engine.addEntity(arc);
     }
 
     private static TextureAtlas.AtlasRegion findRegion(AssetManager assetManager, String regionName) {

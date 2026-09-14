@@ -157,6 +157,9 @@ public class PauseDialog extends Dialog {
         CheckBox vignetteDebugBox = toggleCheckBox("Vignette",
             FeatureFlags::isVignetteEnabled,
             FeatureFlags::setVignetteEnabled);
+        CheckBox slashDebugBox = toggleCheckBox("Slash",
+            FeatureFlags::isSlashArcEnabled,
+            FeatureFlags::setSlashArcEnabled);
 
         Table debugRow = new Table();
         debugRow.defaults().pad(ELEMENT_PAD);
@@ -164,6 +167,7 @@ public class PauseDialog extends Dialog {
         debugRow.add(touchDebugBox).left();
         debugRow.add(embersDebugBox).left();
         debugRow.add(vignetteDebugBox).left();
+        debugRow.add(slashDebugBox).left();
         debugContent.add(debugRow).left().row();
 
         deviceButton = new TextButton("Device: " + listener.deviceLabel(), getSkin());

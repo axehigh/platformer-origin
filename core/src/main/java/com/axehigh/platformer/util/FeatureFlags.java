@@ -20,6 +20,7 @@ public final class FeatureFlags {
     private static boolean wallClankEnabled = GamePreferences.DEFAULT_WALL_CLANK_ENABLED;
     private static boolean softStopEnabled = GamePreferences.DEFAULT_SOFT_STOP_ENABLED;
     private static boolean vignetteEnabled = GamePreferences.DEFAULT_VIGNETTE_ENABLED;
+    private static boolean slashArcEnabled = GamePreferences.DEFAULT_SLASH_ARC_ENABLED;
     private static boolean initialized = false;
 
     private FeatureFlags() {
@@ -39,6 +40,7 @@ public final class FeatureFlags {
         wallClankEnabled = preferences.isWallClankEnabled();
         softStopEnabled = preferences.isSoftStopEnabled();
         vignetteEnabled = preferences.isVignetteEnabled();
+        slashArcEnabled = preferences.isSlashArcEnabled();
     }
 
     /** Whether wall-climb (wall-slide gravity + wall-jump latch) is enabled. Defaults to {@code true}. */
@@ -170,6 +172,24 @@ public final class FeatureFlags {
         }
     }
 
+    /**
+     * Whether the melee slash-arc VFX (cosmetic crescent sprite spawned on each swing) is enabled.
+     * Defaults to {@code true}; gates the arc spawn in {@code PlayerInputSystem}.
+     */
+    public static boolean isSlashArcEnabled() {
+        ensureInitialized();
+        return slashArcEnabled;
+    }
+
+    /** Enables/disables the melee slash-arc VFX for the whole session and persists the choice. */
+    public static void setSlashArcEnabled(boolean enabled) {
+        slashArcEnabled = enabled;
+        initialized = true;
+        if (Gdx.app != null) {
+            new GamePreferences().setSlashArcEnabled(enabled);
+        }
+    }
+
     static void resetForTests() {
         wallClimbingEnabled = GamePreferences.DEFAULT_WALL_CLIMB_ENABLED;
         squashEnabled = GamePreferences.DEFAULT_SQUASH_ENABLED;
@@ -179,6 +199,7 @@ public final class FeatureFlags {
         wallClankEnabled = GamePreferences.DEFAULT_WALL_CLANK_ENABLED;
         softStopEnabled = GamePreferences.DEFAULT_SOFT_STOP_ENABLED;
         vignetteEnabled = GamePreferences.DEFAULT_VIGNETTE_ENABLED;
+        slashArcEnabled = GamePreferences.DEFAULT_SLASH_ARC_ENABLED;
         initialized = false;
     }
 }

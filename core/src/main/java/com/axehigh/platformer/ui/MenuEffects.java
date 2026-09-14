@@ -23,6 +23,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 
+import static com.badlogic.gdx.math.MathUtils.random;
+
 /**
  * Ambient visual effects for menu screens, all built from one shared runtime-generated radial-glow
  * texture: slow Ken Burns drift on the backdrop, drifting ember motes, an additive pulsing glow
@@ -100,8 +102,8 @@ public class MenuEffects {
     public void addEmbers(Stage stage, int count) {
         for (int i = 0; i < count; i++) {
             EmberActor ember = new EmberActor(glowTexture,
-                MathUtils.random(0f, stage.getWidth()),
-                MathUtils.random(0f, stage.getHeight() * 1.1f));
+                random(0f, stage.getWidth()),
+                random(0f, stage.getHeight() * 1.1f));
             stage.addActor(ember);
         }
     }
@@ -211,15 +213,15 @@ public class MenuEffects {
 
         EmberActor(Texture glowTexture, float startX, float startY) {
             super(textureDrawable(glowTexture));
-            size = MathUtils.random(6f, 14f);
+            size = random(6f, 14f);
             baseX = startX;
-            speed = MathUtils.random(60f, 140f);
-            swayAmplitude = MathUtils.random(10f, 40f);
-            swayFrequency = MathUtils.random(1f, 3f);
-            phase = MathUtils.random(0f, MathUtils.PI2);
-            EmberTint chosen = EmberTint.values()[MathUtils.random(EmberTint.values().length - 1)];
+            speed = random(60f, 140f);
+            swayAmplitude = random(10f, 40f);
+            swayFrequency = random(1f, 3f);
+            phase = random(0f, MathUtils.PI2);
+            EmberTint chosen = EmberTint.values()[random(EmberTint.values().length - 1)];
             tint.set(chosen.color);
-            baseAlpha = MathUtils.random(0.25f, 0.6f);
+            baseAlpha = random(0.25f, 0.6f);
             setSize(size, size);
             setPosition(baseX, startY);
             setTouchable(Touchable.disabled);
@@ -233,7 +235,7 @@ public class MenuEffects {
             Stage stage = getStage();
             if (getY() < -size) {
                 setY(stage.getHeight() + size);
-                baseX = MathUtils.random(0f, stage.getWidth());
+                baseX = random(0f, stage.getWidth());
             }
             // Fade out approaching the bottom so the wrap-around is seamless.
             float fade = MathUtils.clamp(getY() / EMBER_FADE_DISTANCE, 0f, 1f);
