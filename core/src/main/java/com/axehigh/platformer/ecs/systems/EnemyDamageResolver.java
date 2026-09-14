@@ -4,12 +4,15 @@ import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.map.SaveData;
 import com.axehigh.platformer.particles.GlobalParticles;
 import com.axehigh.platformer.particles.ParticleHelper;
+import com.axehigh.platformer.util.FeatureFlags;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import static com.axehigh.platformer.GameConstants.HIT_FLASH_DURATION;
+import static com.axehigh.platformer.ecs.components.Mappers.HIT_FLASH;
 import static com.axehigh.platformer.util.SaveManager.*;
 
 /**
@@ -72,6 +75,11 @@ final class EnemyDamageResolver {
         }
 
         spawnHitSpark(enemyEntity, engine);
+
+        HitFlashComponent flash = HIT_FLASH.get(enemyEntity);
+        if (FeatureFlags.isSlashArcEnabled() && flash != null) {
+            flash.start(HIT_FLASH_DURATION);
+        }
 
         enemy.health -= damage;
         if (enemy.health <= 0f) {

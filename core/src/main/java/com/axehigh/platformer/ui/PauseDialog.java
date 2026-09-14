@@ -157,7 +157,7 @@ public class PauseDialog extends Dialog {
         CheckBox vignetteDebugBox = toggleCheckBox("Vignette",
             FeatureFlags::isVignetteEnabled,
             FeatureFlags::setVignetteEnabled);
-        CheckBox slashDebugBox = toggleCheckBox("Slash",
+        CheckBox slashDebugBox = toggleCheckBox("Combat FX",
             FeatureFlags::isSlashArcEnabled,
             FeatureFlags::setSlashArcEnabled);
 

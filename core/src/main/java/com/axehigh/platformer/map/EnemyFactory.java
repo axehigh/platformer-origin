@@ -122,6 +122,7 @@ class EnemyFactory {
                 break;
         }
         entity.add(enemyComponent);
+        entity.add(new HitFlashComponent());
 
         String lootStr = TileProps.getProperty(object, tile, "loot", null);
         if (lootStr != null) {

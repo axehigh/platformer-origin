@@ -72,6 +72,7 @@ class PlayerFactory {
         playerComponent.ammo = START_BULLETS;
         player.add(playerComponent);
         player.add(new BuffComponent());
+        player.add(new HitFlashComponent());
         attachPlayerAnimations(player, heroAtlas);
 
         return player;

@@ -1,9 +1,7 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.EnemyComponent;
-import com.axehigh.platformer.ecs.components.TextureComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.GameConstants;
+import com.axehigh.platformer.ecs.components.*;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.SortedIteratingSystem;
@@ -100,7 +98,7 @@ public class RenderSystem extends SortedIteratingSystem {
         }
 
         Color oldColor = new Color(batch.getColor());
-        
+
         // Size-based color tinting for enemies
         if (ENEMY.get(entity) != null) {
             EnemyComponent enemy = ENEMY.get(entity);
@@ -115,6 +113,13 @@ public class RenderSystem extends SortedIteratingSystem {
         if (hasAlpha) {
             batch.flush();
             batch.setColor(oldColor.r, oldColor.g, oldColor.b, oldColor.a * transform.alpha);
+        }
+
+        HitFlashComponent flash = HIT_FLASH.get(entity);
+        if (flash != null && flash.isActive()) {
+            batch.flush();
+            Color c = batch.getColor();
+            batch.setColor(GameConstants.HIT_FLASH_COLOR[0], GameConstants.HIT_FLASH_COLOR[1], GameConstants.HIT_FLASH_COLOR[2], c.a);
         }
 
         batch.draw(region,

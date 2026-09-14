@@ -180,7 +180,7 @@ public class SettingsScreen extends MenuScreen {
                     });
                     tabContent.add(vignetteCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
 
-                    CheckBox slashArcCheckBox = new CheckBox(" Slash Effect", skin);
+                    CheckBox slashArcCheckBox = new CheckBox(" Combat Effects", skin);
                     slashArcCheckBox.getLabel().setFontScale(SmallFontScale);
                     slashArcCheckBox.setChecked(FeatureFlags.isSlashArcEnabled());
                     slashArcCheckBox.addListener(new ChangeListener() {

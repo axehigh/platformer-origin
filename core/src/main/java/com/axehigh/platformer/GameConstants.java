@@ -88,6 +88,11 @@ public final class GameConstants {
     /** Crystal objective counter / pickup text (cyan). Distinct from the gold coin counter. */
     public static final float[] MESSAGE_COLOR_CRYSTALS = {0.3f, 0.9f, 1f};
 
+    /** Duration (seconds) of the white hit-flash tint applied to damageable entities. */
+    public static final float HIT_FLASH_DURATION = 0.08f;
+    /** RGB components for the white hit-flash tint (alpha is preserved from the batch). */
+    public static final float[] HIT_FLASH_COLOR = {1f, 1f, 1f};
+
     /** Duration (seconds) of the fade-in/fade-out transition between screens. */
     public static final float SCREEN_FADE_TIMER = 0.5f;
 

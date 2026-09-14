@@ -1,15 +1,13 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.AnimationComponent;
-import com.axehigh.platformer.ecs.components.BuffComponent;
-import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
+import com.axehigh.platformer.ecs.components.*;
+import com.axehigh.platformer.util.FeatureFlags;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-import static com.axehigh.platformer.ecs.components.Mappers.ANIMATION;
-import static com.axehigh.platformer.ecs.components.Mappers.BUFF;
+import static com.axehigh.platformer.GameConstants.HIT_FLASH_DURATION;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
  * Shared player-damage resolution used by {@code EnemyContactSystem} (touch),
@@ -65,6 +63,10 @@ public final class PlayerDamageResolver {
         if (damageListener != null) {
             damageListener.onDamageApplied(playerEntity);
         }
+        HitFlashComponent flash = HIT_FLASH.get(playerEntity);
+        if (FeatureFlags.isSlashArcEnabled() && flash != null) {
+            flash.start(HIT_FLASH_DURATION);
+        }
         return true;
     }
 
@@ -84,6 +86,10 @@ public final class PlayerDamageResolver {
         applyStunAndGrace(playerEntity, player);
         if (damageListener != null) {
             damageListener.onDamageApplied(playerEntity);
+        }
+        HitFlashComponent flash = HIT_FLASH.get(playerEntity);
+        if (FeatureFlags.isSlashArcEnabled() && flash != null) {
+            flash.start(HIT_FLASH_DURATION);
         }
         return true;
     }

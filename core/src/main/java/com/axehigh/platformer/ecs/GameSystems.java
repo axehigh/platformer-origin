@@ -43,6 +43,7 @@ public class GameSystems {
     private static final int PRIORITY_ANIMATION = 10;
     private static final int PRIORITY_CRUMBLE_RENDER = 21;
     private static final int PRIORITY_SQUASH = 25;
+    private static final int PRIORITY_HIT_FLASH = 28;
     private static final int PRIORITY_SLASH_ARC = 29;
     private static final int PRIORITY_MAP_RENDER = 20;
     private static final int PRIORITY_BACKGROUND_RENDER = 19;
@@ -138,6 +139,7 @@ public class GameSystems {
         engine.addSystem(cameraSystem);
         engine.addSystem(new AnimationSystem(PRIORITY_ANIMATION));
         engine.addSystem(new SquashSystem(PRIORITY_SQUASH));
+        engine.addSystem(new HitFlashSystem(PRIORITY_HIT_FLASH));
         engine.addSystem(new SlashArcSystem(PRIORITY_SLASH_ARC));
         engine.addSystem(new ParallaxBackgroundSystem(batch, camera,
             assetManager.get(BACKGROUND_FAR, Texture.class),
