@@ -10,11 +10,14 @@ public class BulletComponent implements Component, Poolable {
     public float lifetime;
     /** Time (seconds) since this bullet was spawned. Used for spawn-frame collision grace. */
     public float elapsed;
+    /** Countdown to the next trail afterimage spawn (decremented each frame by bullet systems). */
+    public float trailTimer;
 
     @Override
     public void reset() {
         damage = 0f;
         lifetime = 0f;
         elapsed = 0f;
+        trailTimer = 0f;
     }
 }

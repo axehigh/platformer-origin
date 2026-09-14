@@ -30,6 +30,7 @@ public class GameSystems {
     private static final int PRIORITY_MOVEMENT = 5;
     private static final int PRIORITY_BOUNDS = 6;
     private static final int PRIORITY_MOVING_PLATFORM = 6;
+    private static final int PRIORITY_AMBIENT = 6;
     private static final int PRIORITY_COLLISION = 7;
     private static final int PRIORITY_MELEE = 8;
     private static final int PRIORITY_SFX = 8;
@@ -45,6 +46,7 @@ public class GameSystems {
     private static final int PRIORITY_SQUASH = 25;
     private static final int PRIORITY_HIT_FLASH = 28;
     private static final int PRIORITY_SLASH_ARC = 29;
+    private static final int PRIORITY_TRAIL = 29;
     private static final int PRIORITY_MAP_RENDER = 20;
     private static final int PRIORITY_BACKGROUND_RENDER = 19;
     private static final int PRIORITY_ENTITY_RENDER = 30;
@@ -109,6 +111,8 @@ public class GameSystems {
         movingPlatformSystem.setUnitScale(unitScale);
         engine.addSystem(movingPlatformSystem);
 
+        engine.addSystem(new AmbientEmberSystem(PRIORITY_AMBIENT));
+
         engine.addSystem(new MusicSystem(AudioManager.get(), PRIORITY_MUSIC));
         SfxSystem sfxSystem = new SfxSystem(AudioManager.get(), PRIORITY_SFX);
         engine.addSystem(sfxSystem);
@@ -141,6 +145,7 @@ public class GameSystems {
         engine.addSystem(new SquashSystem(PRIORITY_SQUASH));
         engine.addSystem(new HitFlashSystem(PRIORITY_HIT_FLASH));
         engine.addSystem(new SlashArcSystem(PRIORITY_SLASH_ARC));
+        engine.addSystem(new TrailSystem(PRIORITY_TRAIL));
         engine.addSystem(new ParallaxBackgroundSystem(batch, camera,
             assetManager.get(BACKGROUND_FAR, Texture.class),
             assetManager.get(BACKGROUND_NEAR, Texture.class),

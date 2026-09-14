@@ -93,6 +93,14 @@ public final class GameConstants {
     /** RGB components for the white hit-flash tint (alpha is preserved from the batch). */
     public static final float[] HIT_FLASH_COLOR = {1f, 1f, 1f};
 
+    //Vignette pulse (damage feedback)
+    /** Duration (seconds) the red vignette pulse lingers after a hit. */
+    public static final float VIGNETTE_PULSE_DURATION = 0.5f;
+    /** Peak alpha strength of the red vignette pulse overlay. */
+    public static final float VIGNETTE_PULSE_STRENGTH = 0.7f;
+    /** RGB components for the red vignette pulse tint. */
+    public static final float[] VIGNETTE_PULSE_COLOR = {0.85f, 0.1f, 0.1f};
+
     /** Death-burst tint (dark red) for organic enemies. */
     public static final float[] DEATH_BURST_COLOR_ORGANIC = {0.55f, 0.08f, 0.08f};
     /** Death-burst tint (spectral blue) for flying enemies. */
@@ -145,6 +153,14 @@ public final class GameConstants {
     public static final float BUFF_BLINK_THRESHOLD = 3f;
     /** Toggle interval of the buff-expiry blink, halo alpha phases and HUD icon visibility (seconds). */
     public static final float BUFF_BLINK_INTERVAL = 0.2f;
+
+    //Ambient ember motes
+    /** Minimum delay (seconds) between ember mote spawns at a single light source. */
+    public static final float AMBIENT_MOTE_MIN_INTERVAL = 0.8f;
+    /** Maximum delay (seconds) between ember mote spawns at a single light source. */
+    public static final float AMBIENT_MOTE_MAX_INTERVAL = 2.5f;
+    /** RGB components for the warm ambient mote tint. */
+    public static final float[] AMBIENT_MOTE_COLOR = {1f, 0.85f, 0.6f};
 
     //Crumbling platforms (shake -> collapse -> respawn, seconds)
     public static final float CRUMBLE_SHAKE_DURATION = 0.5f;

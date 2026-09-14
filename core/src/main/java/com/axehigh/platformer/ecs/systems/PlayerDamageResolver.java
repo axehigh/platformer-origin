@@ -58,6 +58,7 @@ public final class PlayerDamageResolver {
         }
 
         player.health = Math.max(0, player.health - 1);
+        VignetteRenderSystem.triggerPulse();
         movement.velocity.x = KNOCKBACK_SPEED_X * knockbackDirection * unitScale;
         applyStunAndGrace(playerEntity, player);
         if (damageListener != null) {
@@ -83,6 +84,7 @@ public final class PlayerDamageResolver {
         }
 
         player.health = Math.max(0, player.health - 1);
+        VignetteRenderSystem.triggerPulse();
         applyStunAndGrace(playerEntity, player);
         if (damageListener != null) {
             damageListener.onDamageApplied(playerEntity);

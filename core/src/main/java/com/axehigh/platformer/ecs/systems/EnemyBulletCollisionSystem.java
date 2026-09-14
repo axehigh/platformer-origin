@@ -1,11 +1,8 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.BulletComponent;
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.EnemyBulletComponent;
-import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.PlayerConfig;
+import com.axehigh.platformer.ecs.components.*;
+import com.axehigh.platformer.util.FeatureFlags;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -14,11 +11,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
-import static com.axehigh.platformer.ecs.components.Mappers.BULLET;
-import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
-import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
-import static com.axehigh.platformer.ecs.components.Mappers.PLAYER;
-import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
  * Owns enemy-fired bullet movement integration and collision resolution: mirrors
@@ -69,6 +62,14 @@ public class EnemyBulletCollisionSystem extends IteratingSystem {
 
         transform.position.mulAdd(movement.velocity, deltaTime);
         collision.updateWorldBounds(transform.position);
+
+        bullet.trailTimer -= deltaTime;
+        if (bullet.trailTimer <= 0f) {
+            bullet.trailTimer = PlayerConfig.BULLET_TRAIL_INTERVAL;
+            if (FeatureFlags.isSlashArcEnabled()) {
+                TrailSystem.spawnTrail(getEngine(), transform, TEXTURE.get(bulletEntity));
+            }
+        }
 
         if (hitsWall(collision.worldBounds)) {
             getEngine().removeEntity(bulletEntity);

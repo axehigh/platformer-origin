@@ -31,6 +31,7 @@ public final class Mappers {
     public static final ComponentMapper<FloatingMessageComponent> FLOATING_MESSAGE = ComponentMapper.getFor(FloatingMessageComponent.class);
     public static final ComponentMapper<SlashArcComponent> SLASH_ARC = ComponentMapper.getFor(SlashArcComponent.class);
     public static final ComponentMapper<TrapComponent> TRAP = ComponentMapper.getFor(TrapComponent.class);
+    public static final ComponentMapper<TrailComponent> TRAIL = ComponentMapper.getFor(TrailComponent.class);
     public static final ComponentMapper<LootComponent> LOOT = ComponentMapper.getFor(LootComponent.class);
 
     private Mappers() {

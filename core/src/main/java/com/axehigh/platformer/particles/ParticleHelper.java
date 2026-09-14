@@ -1,5 +1,6 @@
 package com.axehigh.platformer.particles;
 
+import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.components.ParticleComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.badlogic.ashley.core.Entity;
@@ -30,6 +31,11 @@ public class ParticleHelper {
     private static final float DEATH_BURST_MAX_LIFETIME = 0.6f;
     /** Scale for the smoke puff spawned alongside the death-burst colored spark. */
     private static final float DEATH_BURST_SMOKE_SCALE = 6.0f;
+
+    /** Scale (fraction of the smoke template's native size) for ambient ember motes. */
+    private static final float AMBIENT_MOTE_SCALE = 0.6f;
+    /** Hard lifetime cap (seconds) for an ambient ember mote. */
+    private static final float AMBIENT_MOTE_MAX_LIFETIME = 2.5f;
 
     /**
      * Loads all particle effects defined in GlobalParticles into the internal template registry.
@@ -260,6 +266,64 @@ public class ParticleHelper {
         pc.delay = 0;
         pc.scale = DEATH_BURST_SCALE;
         pc.maxLifetime = DEATH_BURST_MAX_LIFETIME;
+        particleEntity.add(pc);
+
+        engine.addEntity(particleEntity);
+    }
+
+    /**
+     * Spawns a single ambient ember/dust mote at the given coordinates — a warm-tinted clone of
+     * the {@link GlobalParticles#SMOKE} template (which reads as slow drifting dust), sized down.
+     * Purely decorative; motes self-remove via {@code ParticleSystem}'s hard lifetime cap. Mirrors
+     * {@link #spawnDeathBurst} including its headless dummy branch so tests can count entities.
+     *
+     * @param engine The Ashley ECS engine to add the entity to (nullable; early-return if null).
+     * @param x      X coordinate in world space.
+     * @param y      Y coordinate in world space.
+     */
+    public static void spawnAmbientMote(PooledEngine engine, float x, float y) {
+        if (engine == null) return;
+
+        if (Gdx.gl == null) {
+            // Headless: spawn a single dummy entity so tests can count it.
+            Entity dummy = engine.createEntity();
+            TransformComponent tc = engine.createComponent(TransformComponent.class);
+            tc.position.x = x;
+            tc.position.y = y;
+            dummy.add(tc);
+            ParticleComponent pc = engine.createComponent(ParticleComponent.class);
+            pc.delay = 0;
+            pc.scale = AMBIENT_MOTE_SCALE;
+            pc.maxLifetime = AMBIENT_MOTE_MAX_LIFETIME;
+            dummy.add(pc);
+            engine.addEntity(dummy);
+            return;
+        }
+
+        ParticleEffect template = templates.get(SMOKE);
+        if (template == null) {
+            Gdx.app.error("ParticleHelper", "Particle template not found for path: " + SMOKE);
+            return;
+        }
+
+        ParticleEffect mote = new ParticleEffect(template);
+        float[] emberRgb = GameConstants.AMBIENT_MOTE_COLOR;
+        for (ParticleEmitter emitter : mote.getEmitters()) {
+            emitter.getTint().setColors(new float[]{emberRgb[0], emberRgb[1], emberRgb[2], emberRgb[0], emberRgb[1], emberRgb[2]});
+        }
+
+        Entity particleEntity = engine.createEntity();
+        TransformComponent tc = engine.createComponent(TransformComponent.class);
+        tc.position.x = x;
+        tc.position.y = y;
+        particleEntity.add(tc);
+
+        ParticleComponent pc = engine.createComponent(ParticleComponent.class);
+        pc.effect = mote;
+        pc.effect.scaleEffect(AMBIENT_MOTE_SCALE);
+        pc.delay = 0;
+        pc.scale = AMBIENT_MOTE_SCALE;
+        pc.maxLifetime = AMBIENT_MOTE_MAX_LIFETIME;
         particleEntity.add(pc);
 
         engine.addEntity(particleEntity);

@@ -113,6 +113,19 @@ public class VignetteRenderSystemTest extends SystemTestBase {
     }
 
     @Test
+    public void triggeredPulseStillDrawsSingleFullViewQuad() {
+        VignetteRenderSystem.triggerPulse();
+
+        system.update(DT);
+
+        verify(batch, times(1)).draw(any(Texture.class),
+            anyFloat(), anyFloat(), anyFloat(), anyFloat());
+        verify(batch, times(1)).begin();
+        verify(batch, times(1)).end();
+        verify(batch).setProjectionMatrix(camera.combined);
+    }
+
+    @Test
     public void disabledFlagSkipsBatchEntirely() {
         FeatureFlags.setVignetteEnabled(false);
 

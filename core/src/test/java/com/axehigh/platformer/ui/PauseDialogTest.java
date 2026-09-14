@@ -169,6 +169,35 @@ public class PauseDialogTest {
         assertTrue("Exit callback should be fired", listener.exited);
     }
 
+    @Test
+    public void debugTabShowsAllFeatureFlagTogglesAcrossRows() {
+        PauseDialog dialog = new PauseDialog(skin, listener);
+        TextButton debugTab = findTextButton(dialog, "Debug");
+        assertNotNull("Debug tab button should exist", debugTab);
+        debugTab.toggle();
+
+        Array<CheckBox> checkBoxes = new Array<>();
+        findCheckBoxes(dialog, checkBoxes);
+        assertEquals("Debug tab should show all 5 feature-flag toggles",
+            5, checkBoxes.size);
+    }
+
+    private TextButton findTextButton(com.badlogic.gdx.scenes.scene2d.Group group, String text) {
+        for (com.badlogic.gdx.scenes.scene2d.Actor actor : group.getChildren()) {
+            if (actor instanceof TextButton && !(actor instanceof CheckBox)
+                && text.equals(((TextButton) actor).getText().toString())) {
+                return (TextButton) actor;
+            }
+            if (actor instanceof com.badlogic.gdx.scenes.scene2d.Group) {
+                TextButton found = findTextButton((com.badlogic.gdx.scenes.scene2d.Group) actor, text);
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
+        return null;
+    }
+
     private void findCheckBoxes(com.badlogic.gdx.scenes.scene2d.Group group, Array<CheckBox> result) {
         for (com.badlogic.gdx.scenes.scene2d.Actor actor : group.getChildren()) {
             if (actor instanceof CheckBox) {

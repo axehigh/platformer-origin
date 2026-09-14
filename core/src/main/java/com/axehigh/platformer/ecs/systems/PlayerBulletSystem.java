@@ -1,8 +1,10 @@
 package com.axehigh.platformer.ecs.systems;
 
+import com.axehigh.platformer.PlayerConfig;
 import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.particles.GlobalParticles;
 import com.axehigh.platformer.particles.ParticleHelper;
+import com.axehigh.platformer.util.FeatureFlags;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -66,6 +68,14 @@ public class PlayerBulletSystem extends IteratingSystem {
 
         transform.position.mulAdd(movement.velocity, deltaTime);
         collision.updateWorldBounds(transform.position);
+
+        bullet.trailTimer -= deltaTime;
+        if (bullet.trailTimer <= 0f) {
+            bullet.trailTimer = PlayerConfig.BULLET_TRAIL_INTERVAL;
+            if (FeatureFlags.isSlashArcEnabled()) {
+                TrailSystem.spawnTrail(getEngine(), transform, TEXTURE.get(bulletEntity));
+            }
+        }
 
         // Give a freshly-spawned bullet a short grace window before wall collision applies,
         // so it can move past terrain it happened to spawn overlapping (e.g. a wall directly

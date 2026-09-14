@@ -161,14 +161,11 @@ public class PauseDialog extends Dialog {
             FeatureFlags::isSlashArcEnabled,
             FeatureFlags::setSlashArcEnabled);
 
-        Table debugRow = new Table();
-        debugRow.defaults().pad(ELEMENT_PAD);
-        debugRow.add(collisionDebugBox).left();
-        debugRow.add(touchDebugBox).left();
-        debugRow.add(embersDebugBox).left();
-        debugRow.add(vignetteDebugBox).left();
-        debugRow.add(slashDebugBox).left();
-        debugContent.add(debugRow).left().row();
+        // Three toggles per row: 5 flags don't fit in a single row inside the dialog content width.
+        debugContent.add(toggleRow(
+            collisionDebugBox, touchDebugBox, embersDebugBox)).left().row();
+        debugContent.add(toggleRow(
+            vignetteDebugBox, slashDebugBox)).left().row();
 
         deviceButton = new TextButton("Device: " + listener.deviceLabel(), getSkin());
         deviceButton.getLabel().setFontScale(SmallFontScale);
@@ -213,6 +210,15 @@ public class PauseDialog extends Dialog {
     private void refreshDeviceLayoutLabels() {
         deviceButton.setText("Device: " + listener.deviceLabel());
         layoutButton.setText("Mobile: " + listener.layoutLabel());
+    }
+
+    private Table toggleRow(CheckBox... boxes) {
+        Table row = new Table();
+        row.defaults().pad(ELEMENT_PAD);
+        for (CheckBox box : boxes) {
+            row.add(box).left();
+        }
+        return row;
     }
 
     private TextButton actionButton(String text, Runnable onClick) {

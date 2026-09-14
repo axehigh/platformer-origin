@@ -95,6 +95,12 @@ public final class PlayerConfig {
     /** Bullet stacking layer (z), above the player. */
     public static final float BULLET_Z = 8f;
 
+    //------ Projectile trail afterimages (cosmetic) ------
+    /** Interval (seconds) between successive trail ghost spawns along a bullet's path. */
+    public static final float BULLET_TRAIL_INTERVAL = 0.04f;
+    /** How long each trail ghost lingers on screen before fading out entirely. */
+    public static final float BULLET_TRAIL_LIFETIME = 0.12f;
+
     //------ Slash-arc VFX (cosmetic melee swing feedback) ------
     /** How long the arc sprite lingers on screen (then it fades out entirely). */
     public static final float SLASH_ARC_LIFETIME = 0.2f;

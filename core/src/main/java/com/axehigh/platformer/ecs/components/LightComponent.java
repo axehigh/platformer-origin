@@ -21,6 +21,8 @@ public class LightComponent implements Component, Poolable {
     public float phase = 0f;
     /** Halo center relative to the entity's {@code TransformComponent.position} (world units). */
     public Vector2 offset = new Vector2();
+    /** Countdown to the next ambient ember mote spawn (decremented by AmbientEmberSystem). */
+    public float emberTimer = 0f;
 
     @Override
     public void reset() {
@@ -31,5 +33,6 @@ public class LightComponent implements Component, Poolable {
         flickerSpeed = 6f;
         phase = 0f;
         offset.setZero();
+        emberTimer = 0f;
     }
 }
