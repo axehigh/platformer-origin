@@ -16,7 +16,7 @@ import static com.axehigh.platformer.assets.GameAssetRegistry.BACKGROUND_NEAR;
 
 /**
  * Builds and wires every Ashley system for a live gameplay session, in fixed priority order
- * (see "System wiring &amp; priority order" in {@code resources/docs-ai/ashley-ecs.md}), and
+ * (see "System wiring &amp; priority order" in {@code resources/docs-ai/ashley-ecs-systems.md}), and
  * creates the {@link LevelManager} those systems share. Exposes only the systems the owning
  * screen keeps direct handles on; everything else is reachable through the engine.
  */

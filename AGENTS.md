@@ -18,7 +18,7 @@ utilizing the Ashley ECS framework and Tiled maps.
 ---
 
 ## 2. Ashley ECS Component & System Breakdown
-See @resources/docs-ai/ashley-ecs.md for the full, AI-usable overview of every ECS `Component` and `System`, their fields/family/priority, and how they're wired together in `GameScreen`.
+See @resources/docs-ai/ashley-ecs.md (index, plus its sub-files `ashley-ecs-components.md`/`ashley-ecs-systems.md`/`ashley-ecs-utilities.md`) for the full, AI-usable overview of every ECS `Component` and `System`, their fields/family/priority, and how they're wired together in `GameScreen`.
 
 ---
 
@@ -52,7 +52,7 @@ See @resources/docs-ai/ashley-ecs.md for the full, AI-usable overview of every E
 *   **Memory Management:** Always explicitly `dispose()` of Textures, SpriteBatches, and TiledMaps when changing screens or shutting down to prevent memory leaks. Pool frequent ECS components if garbage collection spikes occur.
 *   **Frame-Rate Independence:** Always use `Gdx.graphics.getDeltaTime()` inside your Ashley systems' `update` methods.
 *   **Gameplay Documentation Sync:** Any change to gameplay mechanics (movement, combat, traversal abilities, enemy behavior, etc.) MUST be reflected with a corresponding update to `resources/docs-ai/gameplay.md`, keeping it as the single source of truth for gameplay design.
-*   **ECS Documentation Sync:** Any time an Ashley ECS `Component` or `System` is added, removed, renamed, or has its fields/family/priority/behavior changed, MUST be reflected with a corresponding update to `resources/docs-ai/ashley-ecs.md`, keeping it as the single source of truth for the ECS component/system breakdown.
+*   **ECS Documentation Sync:** Any time an Ashley ECS `Component` or `System` is added, removed, renamed, or has its fields/family/priority/behavior changed, MUST be reflected with a corresponding update to the ashley-ecs doc set in `resources/docs-ai/` (index `ashley-ecs.md` + `ashley-ecs-components.md` + `ashley-ecs-systems.md` + `ashley-ecs-utilities.md`), keeping it as the single source of truth for the ECS component/system breakdown.
 *   **Enemy Documentation Sync:** Any time an enemy type is added, removed, renamed, or has its stats/sprite/behavior changed, MUST be reflected with a corresponding update to `resources/docs-ai/enemies.md`, keeping it as the single source of truth for the enemy catalog.
 *   **Timer Convention:** For any new cooldown, countdown, attack-window, or grace-period effect, use the reusable `com.axehigh.platformer.util.Timer` helper (`start()`/`update()`/`isActive()`/`isDone()`) instead of hand-rolling a raw-`float` decrement, matching the existing usage in `PlayerComponent`/`ChestComponent`.
 *   **Enum** Use enum if you can.
