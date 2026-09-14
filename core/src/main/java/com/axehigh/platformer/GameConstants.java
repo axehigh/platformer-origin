@@ -156,11 +156,11 @@ public final class GameConstants {
 
     //Ambient ember motes
     /** Minimum delay (seconds) between ember mote spawns at a single light source. */
-    public static final float AMBIENT_MOTE_MIN_INTERVAL = 0.8f;
+    public static final float AMBIENT_MOTE_MIN_INTERVAL = 0.35f;
     /** Maximum delay (seconds) between ember mote spawns at a single light source. */
-    public static final float AMBIENT_MOTE_MAX_INTERVAL = 2.5f;
+    public static final float AMBIENT_MOTE_MAX_INTERVAL = 1.2f;
     /** RGB components for the warm ambient mote tint. */
-    public static final float[] AMBIENT_MOTE_COLOR = {1f, 0.85f, 0.6f};
+    public static final float[] AMBIENT_MOTE_COLOR = {1f, 0.45f, 0.1f};
 
     //Crumbling platforms (shake -> collapse -> respawn, seconds)
     public static final float CRUMBLE_SHAKE_DURATION = 0.5f;

@@ -33,9 +33,9 @@ public class ParticleHelper {
     private static final float DEATH_BURST_SMOKE_SCALE = 6.0f;
 
     /** Scale (fraction of the smoke template's native size) for ambient ember motes. */
-    private static final float AMBIENT_MOTE_SCALE = 0.6f;
+    private static final float AMBIENT_MOTE_SCALE = 1.1f;
     /** Hard lifetime cap (seconds) for an ambient ember mote. */
-    private static final float AMBIENT_MOTE_MAX_LIFETIME = 2.5f;
+    private static final float AMBIENT_MOTE_MAX_LIFETIME = 3.2f;
 
     /**
      * Loads all particle effects defined in GlobalParticles into the internal template registry.
