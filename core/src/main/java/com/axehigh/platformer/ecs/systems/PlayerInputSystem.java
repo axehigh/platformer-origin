@@ -282,12 +282,31 @@ public class PlayerInputSystem extends IteratingSystem {
             ? bulletOffsetX
             : frameWidth - bulletOffsetX - bulletWidth;
 
-        // Launch the bullet from the player: the hitbox's center lands on the player's collision
-        // center, so the blade pokes out half its width in the facing direction (symmetric in both
-        // directions, no gap term needed).
+        // Launch from the player's front collision edge, not the body center: the blade exits the
+        // body in the facing direction, so it never starts overlapping a wall the player is
+        // pressed against. When facing left, the sprite is rendered flipped (scale.x < 0) around
+        // its origin (bottom-left of the local unscaled region). SpriteBatch.draw with a negative width
+        // draws the texture region leftward from drawX (i.e., from drawX - width to drawX).
+        // Therefore, to have the right edge of the sprite (which is the local left edge before flipping)
+        // align with the player's left collision edge, drawX needs to be at the player's left edge,
+        // which means spawnX is simply playerCenterX - playerCollision.bounds.width / 2f (plus bulletOffsetX
+        // adjusted for the flip).
+        // Specifically, for facingDirection < 0, the hitbox is mirrored via collisionOffsetX = frameWidth - bulletOffsetX - bulletWidth.
+        // The sprite visual frame needs to be positioned such that its right edge is at player's left edge, so drawX = playerLeftEdge.
+        // Since SpriteBatch.draw draws from drawX leftwards by frameWidth when width is negative, setting drawX = playerLeftEdge
+        // places the sprite from (playerLeftEdge - frameWidth) to playerLeftEdge. But wait, if drawX = playerLeftEdge,
+        // the sprite occupies [playerLeftEdge - frameWidth, playerLeftEdge], whereas the player is at [playerLeftEdge, playerRightEdge].
+        // The current formula was: playerCenterX - playerCollision.bounds.width / 2f - frameWidth + bulletOffsetX,
+        // which is playerLeftEdge - frameWidth + bulletOffsetX. This placed the sprite 1 tile/frameWidth to the left!
+        // Adjusting it by removing - frameWidth (or correcting it to align with the player's left edge).
         float playerCenterX = playerTransform.position.x + playerCollision.bounds.x
             + playerCollision.bounds.width / 2f;
-        float spawnX = playerCenterX - collisionOffsetX - bulletWidth / 2f;
+        float playerLeftEdge = playerCenterX - playerCollision.bounds.width / 2f;
+        float playerRightEdge = playerCenterX + playerCollision.bounds.width / 2f;
+
+        float spawnX = player.facingDirection > 0
+            ? playerRightEdge - bulletOffsetX
+            : playerLeftEdge;
         TransformComponent transform = engine.createComponent(TransformComponent.class);
         transform.position.set(spawnX, centerY);
         // Negative scale.x when facing left flips the blade horizontally so it points backwards.

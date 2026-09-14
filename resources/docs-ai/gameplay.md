@@ -275,7 +275,7 @@ Empty marker component (`Poolable`), no fields. Tags a bullet entity as enemy-fi
 
 ### A. Projectile Collision Handling
 Create or expand a `PlayerBulletSystem` to handle bullet interactions:
-*   **Wall Impact:** If a bullet entity's bounding box intersects a solid Tiled layer cell, immediately remove the bullet entity from the engine. Exception: a freshly-spawned bullet is exempt from wall culling while `BulletComponent.elapsed < SPAWN_GRACE` (a short grace window), so a bullet that spawns overlapping a wall tile (e.g. firing directly against a wall) gets a frame or two to move clear instead of being removed on its very first frame.
+*   **Wall Impact:** If a bullet entity's bounding box intersects a solid Tiled layer cell, immediately remove the bullet entity from the engine. Bullets spawn at the player's front collision edge (never the body center) and are **never** exempt from wall culling — a bullet that spawns overlapping a wall is a blocked shot, removed on contact. Movement is sub-stepped (`PlayerBulletSystem.MAX_SUBSTEP = 2` world units per integration slice, wall/enemy overlap re-checked after every slice), so a wall can't be skipped at any frame rate.
 *   **Enemy Impact:** If a bullet intersects an enemy entity, apply damage to the enemy's health component and destroy the bullet.
 
 ### B. Memory Optimization

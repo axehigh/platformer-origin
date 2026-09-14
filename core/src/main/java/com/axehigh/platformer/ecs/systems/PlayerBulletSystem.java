@@ -12,6 +12,7 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import static com.axehigh.platformer.ecs.components.Mappers.*;
@@ -22,11 +23,13 @@ import static com.axehigh.platformer.ecs.components.Mappers.*;
  * on enemy impact, and despawns bullets whose lifetime expires.
  */
 public class PlayerBulletSystem extends IteratingSystem {
-    /** Grace window (seconds) during which a freshly-spawned bullet is exempt from wall culling,
-     *  so it can clear the wall it spawned against instead of being removed on its first frame. */
-    private static final float SPAWN_GRACE = 0.12f;
+    /** Maximum world units a bullet moves per integration sub-step. Well under the smallest bullet
+     *  hitbox dimension and tile thickness, so a wall can never be crossed unnoticed even at low
+     *  frame rates. No spawn-grace window: bullets that overlap a wall are blocked shots. */
+    private static final float MAX_SUBSTEP = 2f;
 
     private final Array<Rectangle> collisionRects;
+    private final Vector2 stepVelocity = new Vector2();
     private ImmutableArray<Entity> enemies;
     private PooledEngine engine;
     private float unitScale = 1f;
@@ -66,8 +69,37 @@ public class PlayerBulletSystem extends IteratingSystem {
             return;
         }
 
-        transform.position.mulAdd(movement.velocity, deltaTime);
-        collision.updateWorldBounds(transform.position);
+        // Integrate in sub-steps, checking wall + enemy overlap after every sub-step. No spawn
+        // grace: bullets spawn at the player's front edge (PlayerInputSystem.spawnBullet), so a
+        // bullet that spawns overlapping a wall is a blocked shot and is removed on first contact.
+        float distanceRemaining = movement.velocity.len() * deltaTime;
+        do {
+            float step = Math.min(distanceRemaining, MAX_SUBSTEP);
+            if (step > 0f) {
+                stepVelocity.set(movement.velocity).nor().scl(step);
+                transform.position.add(stepVelocity);
+            }
+            collision.updateWorldBounds(transform.position);
+
+            if (hitsWall(collision.worldBounds)) {
+                spawnImpactSpark(collision.worldBounds);
+                getEngine().removeEntity(bulletEntity);
+                return;
+            }
+
+            Entity hitEnemy = findEnemyHit(collision.worldBounds);
+            if (hitEnemy != null) {
+                EnemyComponent enemy = ENEMY.get(hitEnemy);
+                MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
+                int knockbackDirection = movement.velocity.x >= 0f ? 1 : -1;
+                boolean isFlying = FLYING.get(hitEnemy) != null;
+                EnemyDamageResolver.applyHit(hitEnemy, enemy, enemyMovement, bullet.damage, knockbackDirection, isFlying, unitScale, engine);
+                getEngine().removeEntity(bulletEntity);
+                return;
+            }
+
+            distanceRemaining -= step;
+        } while (distanceRemaining > 0f);
 
         bullet.trailTimer -= deltaTime;
         if (bullet.trailTimer <= 0f) {
@@ -75,27 +107,6 @@ public class PlayerBulletSystem extends IteratingSystem {
             if (FeatureFlags.isSlashArcEnabled()) {
                 TrailSystem.spawnTrail(getEngine(), transform, TEXTURE.get(bulletEntity));
             }
-        }
-
-        // Give a freshly-spawned bullet a short grace window before wall collision applies,
-        // so it can move past terrain it happened to spawn overlapping (e.g. a wall directly
-        // against the player) instead of being culled on its very first frame.
-        if (bullet.elapsed < SPAWN_GRACE) {
-            bullet.elapsed += deltaTime;
-        } else if (hitsWall(collision.worldBounds)) {
-            spawnImpactSpark(collision.worldBounds);
-            getEngine().removeEntity(bulletEntity);
-            return;
-        }
-
-        Entity hitEnemy = findEnemyHit(collision.worldBounds);
-        if (hitEnemy != null) {
-            EnemyComponent enemy = ENEMY.get(hitEnemy);
-            MovementComponent enemyMovement = MOVEMENT.get(hitEnemy);
-            int knockbackDirection = movement.velocity.x >= 0f ? 1 : -1;
-            boolean isFlying = FLYING.get(hitEnemy) != null;
-            EnemyDamageResolver.applyHit(hitEnemy, enemy, enemyMovement, bullet.damage, knockbackDirection, isFlying, unitScale, engine);
-            getEngine().removeEntity(bulletEntity);
         }
     }
 
