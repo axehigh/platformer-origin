@@ -93,6 +93,11 @@ public final class GameConstants {
     /** RGB components for the white hit-flash tint (alpha is preserved from the batch). */
     public static final float[] HIT_FLASH_COLOR = {1f, 1f, 1f};
 
+    /** Death-burst tint (dark red) for organic enemies. */
+    public static final float[] DEATH_BURST_COLOR_ORGANIC = {0.55f, 0.08f, 0.08f};
+    /** Death-burst tint (spectral blue) for flying enemies. */
+    public static final float[] DEATH_BURST_COLOR_FLYER = {0.35f, 0.6f, 1f};
+
     /** Duration (seconds) of the fade-in/fade-out transition between screens. */
     public static final float SCREEN_FADE_TIMER = 0.5f;
 

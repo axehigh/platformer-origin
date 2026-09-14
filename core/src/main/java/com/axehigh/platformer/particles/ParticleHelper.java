@@ -24,6 +24,13 @@ public class ParticleHelper {
     /** Hard lifetime cap (seconds) for the crumble-collapse chip burst. */
     private static final float STONE_CHIPS_MAX_LIFETIME = 0.7f;
 
+    /** Scale for the colored burst spawned on enemy death. */
+    private static final float DEATH_BURST_SCALE = 1.0f;
+    /** Hard lifetime cap (seconds) for the death-burst colored spark. */
+    private static final float DEATH_BURST_MAX_LIFETIME = 0.6f;
+    /** Scale for the smoke puff spawned alongside the death-burst colored spark. */
+    private static final float DEATH_BURST_SMOKE_SCALE = 6.0f;
+
     /**
      * Loads all particle effects defined in GlobalParticles into the internal template registry.
      * Use this when assets are already loaded via AssetManager.
@@ -180,6 +187,79 @@ public class ParticleHelper {
         pc.delay = 0;
         pc.scale = STONE_CHIPS_SCALE;
         pc.maxLifetime = STONE_CHIPS_MAX_LIFETIME;
+        particleEntity.add(pc);
+
+        engine.addEntity(particleEntity);
+    }
+
+    /**
+     * Spawns a death-burst VFX at the given coordinates — a smoke poof plus a short-lived colored
+     * spark burst (cloned from the SPARKS template and tinted to the caller-supplied color).
+     * Mirrors {@link #spawnStoneChips} including its headless dummy branch so tests can count entities.
+     *
+     * @param engine The Ashley ECS engine to add the entities to (nullable; early-return if null).
+     * @param x      X coordinate in world space.
+     * @param y      Y coordinate in world space.
+     * @param color  RGB triplet (3 floats) used as both the start and end tint of the burst.
+     */
+    public static void spawnDeathBurst(PooledEngine engine, float x, float y, float[] color) {
+        if (engine == null) return;
+
+        if (Gdx.gl == null) {
+            // Headless: spawn two dummy entities (smoke + burst) so tests can count them.
+            Entity smokeDummy = engine.createEntity();
+            TransformComponent smokeTc = engine.createComponent(TransformComponent.class);
+            smokeTc.position.x = x;
+            smokeTc.position.y = y;
+            smokeDummy.add(smokeTc);
+            ParticleComponent smokePc = engine.createComponent(ParticleComponent.class);
+            smokePc.delay = 0;
+            smokePc.scale = DEATH_BURST_SMOKE_SCALE;
+            smokePc.maxLifetime = DEATH_BURST_MAX_LIFETIME;
+            smokeDummy.add(smokePc);
+            engine.addEntity(smokeDummy);
+
+            Entity burstDummy = engine.createEntity();
+            TransformComponent burstTc = engine.createComponent(TransformComponent.class);
+            burstTc.position.x = x;
+            burstTc.position.y = y;
+            burstDummy.add(burstTc);
+            ParticleComponent burstPc = engine.createComponent(ParticleComponent.class);
+            burstPc.delay = 0;
+            burstPc.scale = DEATH_BURST_SCALE;
+            burstPc.maxLifetime = DEATH_BURST_MAX_LIFETIME;
+            burstDummy.add(burstPc);
+            engine.addEntity(burstDummy);
+            return;
+        }
+
+        // Smoke poof
+        spawnSmallSmoke(engine, x, y, DEATH_BURST_SMOKE_SCALE);
+
+        // Colored spark burst (recolored SPARKS clone)
+        ParticleEffect template = templates.get(SPARKS);
+        if (template == null) {
+            Gdx.app.error("ParticleHelper", "Particle template not found for path: " + SPARKS);
+            return;
+        }
+
+        ParticleEffect burst = new ParticleEffect(template);
+        for (ParticleEmitter emitter : burst.getEmitters()) {
+            emitter.getTint().setColors(new float[]{color[0], color[1], color[2], color[0], color[1], color[2]});
+        }
+
+        Entity particleEntity = engine.createEntity();
+        TransformComponent tc = engine.createComponent(TransformComponent.class);
+        tc.position.x = x;
+        tc.position.y = y;
+        particleEntity.add(tc);
+
+        ParticleComponent pc = engine.createComponent(ParticleComponent.class);
+        pc.effect = burst;
+        pc.effect.scaleEffect(DEATH_BURST_SCALE);
+        pc.delay = 0;
+        pc.scale = DEATH_BURST_SCALE;
+        pc.maxLifetime = DEATH_BURST_MAX_LIFETIME;
         particleEntity.add(pc);
 
         engine.addEntity(particleEntity);

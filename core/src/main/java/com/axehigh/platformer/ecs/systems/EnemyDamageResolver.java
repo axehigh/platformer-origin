@@ -11,7 +11,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-import static com.axehigh.platformer.GameConstants.HIT_FLASH_DURATION;
+import static com.axehigh.platformer.GameConstants.*;
+import static com.axehigh.platformer.ecs.components.Mappers.FLYING;
 import static com.axehigh.platformer.ecs.components.Mappers.HIT_FLASH;
 import static com.axehigh.platformer.util.SaveManager.*;
 
@@ -86,6 +87,10 @@ final class EnemyDamageResolver {
             enemy.isDead = true;
             movement.velocity.set(0, 0);
 
+            if (FeatureFlags.isSlashArcEnabled()) {
+                spawnDeathBurst(enemyEntity, engine);
+            }
+
             // Track kill in SaveData if save exists or can be updated
             if (Gdx.app != null && hasSave()) {
                 SaveData save = load();
@@ -136,5 +141,22 @@ final class EnemyDamageResolver {
         float centerX = collision.worldBounds.x + collision.worldBounds.width / 2f;
         float centerY = collision.worldBounds.y + collision.worldBounds.height / 2f;
         ParticleHelper.spawnParticle(engine, GlobalParticles.SPARKS, centerX, centerY, 0f, HIT_SPARK_SCALE, HIT_SPARK_MAX_LIFETIME);
+    }
+
+    /** One-shot death burst (smoke poof + colored sparks) at the enemy's collision-center; a no-op without a PooledEngine. */
+    private static void spawnDeathBurst(Entity enemyEntity, PooledEngine engine) {
+        if (engine == null) {
+            return;
+        }
+        CollisionComponent collision = Mappers.COLLISION.get(enemyEntity);
+        if (collision == null) {
+            return;
+        }
+        float centerX = collision.worldBounds.x + collision.worldBounds.width / 2f;
+        float centerY = collision.worldBounds.y + collision.worldBounds.height / 2f;
+        float[] color = FLYING.get(enemyEntity) != null
+                ? DEATH_BURST_COLOR_FLYER
+                : DEATH_BURST_COLOR_ORGANIC;
+        ParticleHelper.spawnDeathBurst(engine, centerX, centerY, color);
     }
 }
