@@ -37,7 +37,7 @@ public final class PlayerConfig {
     /** Starting and maximum player health (hearts). */
     public static final int MAX_HEALTH = 3;
     /** Bullets in the inventory when the player spawns. */
-    public static final int START_BULLETS = 5;
+    public static final int START_AMMO = 500;
 
     //------ Melee strike ------
     /** Minimum delay between two melee swings (seconds). */

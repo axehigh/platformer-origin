@@ -63,8 +63,8 @@ public class EnemyDamageResolverDeathBurstTest extends SystemTestBase {
 
         assertTrue(died);
         assertTrue(enemy.isDead);
-        // 1 hit spark + 2 death burst (smoke + spark) = 3
-        assertEquals("lethal hit must spawn spark + 2 burst particles", 3, countParticles());
+        // 0 hit spark (lethal hits skip it) + 2 death burst (smoke + spark) = 2
+        assertEquals("lethal hit must spawn burst only, no hit spark", 2, countParticles());
     }
 
     // ---- Surviving hit: only spark, no burst ----
@@ -88,8 +88,8 @@ public class EnemyDamageResolverDeathBurstTest extends SystemTestBase {
 
         assertTrue(died);
         assertTrue(enemy.isDead);
-        // 1 hit spark, 0 death burst (flag off) = 1
-        assertEquals("flag off: lethal hit must NOT spawn burst", 1, countParticles());
+        // 0 hit spark on lethal, 0 death burst (flag off) = 0
+        assertEquals("flag off: lethal hit must NOT spawn anything", 0, countParticles());
     }
 
     // ---- Null engine (7-arg overload): no crash ----
@@ -126,8 +126,8 @@ public class EnemyDamageResolverDeathBurstTest extends SystemTestBase {
 
         assertTrue(died);
         assertTrue(FLYING.get(enemyEntity) != null);
-        // 1 spark + 2 burst (flyer color) = 3
-        assertEquals("flyer lethal hit must still spawn death-burst", 3, countParticles());
+        // 0 hit spark on lethal + 2 burst (flyer color) = 2
+        assertEquals("flyer lethal hit must spawn burst only", 2, countParticles());
     }
 
     // ---- Stunned enemy: no hit, no particles ----

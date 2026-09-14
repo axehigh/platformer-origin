@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-import static com.axehigh.platformer.PlayerConfig.START_BULLETS;
+import static com.axehigh.platformer.PlayerConfig.START_AMMO;
 import static com.axehigh.platformer.assets.GameAssetRegistry.HERO_ASSET;
 import static com.axehigh.platformer.ecs.components.AnimationComponent.State.*;
 import static com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP;
@@ -69,7 +69,7 @@ class PlayerFactory {
         player.add(collisionComponent);
 
         PlayerComponent playerComponent = new PlayerComponent();
-        playerComponent.ammo = START_BULLETS;
+        playerComponent.ammo = START_AMMO;
         player.add(playerComponent);
         player.add(new BuffComponent());
         player.add(new HitFlashComponent());

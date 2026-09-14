@@ -68,14 +68,13 @@ final class EnemyDamageResolver {
 
     /**
      * Same as {@link #applyHit(Entity, EnemyComponent, MovementComponent, float, int, boolean, float)}
-     * plus a {@link PooledEngine} used to spawn a spark burst at the enemy on an applied hit.
+     * plus a {@link PooledEngine} used to spawn a spark burst at the enemy on a *surviving* hit
+     * (lethal hits spawn the death-burst instead, see {@link #spawnDeathBurst}).
      */
     static boolean applyHit(Entity enemyEntity, EnemyComponent enemy, MovementComponent movement, float damage, int knockbackDirection, boolean isFlying, float unitScale, PooledEngine engine) {
         if (!canBeHit(enemy)) {
             return false;
         }
-
-        spawnHitSpark(enemyEntity, engine);
 
         HitFlashComponent flash = HIT_FLASH.get(enemyEntity);
         if (FeatureFlags.isSlashArcEnabled() && flash != null) {
@@ -126,6 +125,7 @@ final class EnemyDamageResolver {
         }
         enemy.hitStun.start(stunDuration);
         enemy.postHitIdle.reset();
+        spawnHitSpark(enemyEntity, engine);
         return false;
     }
 
