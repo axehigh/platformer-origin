@@ -242,6 +242,73 @@ public class TouchControlsStageTest {
         assertTrue(isHighlighted(jump));
     }
 
+    @Test
+    public void iconNameFor_jumpVariantsReturnsJumpDrawable() {
+        assertEquals("jump", TouchControlsStage.iconNameFor("jump"));
+        assertEquals("jump", TouchControlsStage.iconNameFor("A"));
+        assertEquals("jump", TouchControlsStage.iconNameFor("J"));
+        assertEquals("jump", TouchControlsStage.iconNameFor("  jump "));
+    }
+
+    @Test
+    public void iconNameFor_attackVariantsReturnsSwordDrawable() {
+        assertEquals("sword", TouchControlsStage.iconNameFor("attack"));
+        assertEquals("sword", TouchControlsStage.iconNameFor("sword"));
+        assertEquals("sword", TouchControlsStage.iconNameFor("B"));
+        assertEquals("sword", TouchControlsStage.iconNameFor("melee"));
+    }
+
+    @Test
+    public void iconNameFor_specialVariantsReturnsDaggersDrawable() {
+        assertEquals("daggers", TouchControlsStage.iconNameFor("special"));
+        assertEquals("daggers", TouchControlsStage.iconNameFor("ranged"));
+        assertEquals("daggers", TouchControlsStage.iconNameFor("Y"));
+        assertEquals("daggers", TouchControlsStage.iconNameFor("dagger"));
+        assertEquals("daggers", TouchControlsStage.iconNameFor("throw"));
+    }
+
+    @Test
+    public void iconNameFor_inventoryVariantsReturnsPotionDrawable() {
+        assertEquals("potion", TouchControlsStage.iconNameFor("inventory"));
+        assertEquals("potion", TouchControlsStage.iconNameFor("bag"));
+        assertEquals("potion", TouchControlsStage.iconNameFor("potion"));
+    }
+
+    @Test
+    public void iconNameFor_leftRightReturnsDpadDrawables() {
+        assertEquals("left", TouchControlsStage.iconNameFor("left"));
+        assertEquals("right", TouchControlsStage.iconNameFor("right"));
+    }
+
+    @Test
+    public void iconNameFor_unknownReturnsNull() {
+        assertNull(TouchControlsStage.iconNameFor("frobnicate"));
+        assertNull(TouchControlsStage.iconNameFor(""));
+        assertNull(TouchControlsStage.iconNameFor(null));
+    }
+
+    @Test
+    public void setHighlightedControl_boostsAlphaWhileActive() {
+        stage.setAlpha(0.4f);
+        stage.setHighlightedControl("jump", 0.5f);
+        assertEquals("root alpha should rise to solid while a highlight is active",
+            0.85f, stage.getAlpha(), 0.0001f);
+    }
+
+    @Test
+    public void setHighlightedControl_clearingRestoresBaseAlpha() {
+        stage.setAlpha(0.4f);
+        stage.setHighlightedControl("jump", 0.5f);
+        stage.setHighlightedControl("", 0f);
+        assertEquals("root alpha should return to base once the highlight clears",
+            0.4f, stage.getAlpha(), 0.0001f);
+
+        stage.setAlpha(0.25f);
+        stage.setHighlightedControl("sword", 0.5f);
+        stage.setHighlightedControl(null, 0f);
+        assertEquals("root alpha should restore the updated base alpha", 0.25f, stage.getAlpha(), 0.0001f);
+    }
+
     // --- helpers -------------------------------------------------------------------------------
 
     private Array<TouchButton> findButtons(Group group) {

@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import static com.axehigh.platformer.GameConstants.SmallFontScale;
@@ -37,6 +38,7 @@ public class TutorialSystem extends IteratingSystem {
     private final GlyphLayout layout = new GlyphLayout();
     private final Rectangle sensorBounds = new Rectangle();
     private final TextureRegionDrawable panelDrawable;
+    private final Skin skin;
     private TouchControlsStage touchControlsStage;
     private float highlightTimer = 0f;
     private float unitScale = 1f;
@@ -50,6 +52,7 @@ public class TutorialSystem extends IteratingSystem {
         super(Family.all(TutorialComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
         this.batch = batch;
         this.camera = camera;
+        this.skin = skin;
         BitmapFont f = skin.getFont("edgeofgalaxy");
         if (f == null) {
             f = skin.get("default", BitmapFont.class);
@@ -98,7 +101,24 @@ public class TutorialSystem extends IteratingSystem {
 
                         float padX = 28f;
                         float padY = 20f;
-                        float boxWidth = layout.width + padX * 2f;
+
+                        // Resolve inline icon from the highlight keyword: the same skin drawable the
+                        // touch controller uses, so the tooltip text maps 1:1 to the button to press.
+                        TextureRegionDrawable iconDrawable = null;
+                        float iconSize = 0f;
+                        if (!tutorial.highlight.isEmpty()) {
+                            String iconName = TouchControlsStage.iconNameFor(tutorial.highlight);
+                            if (iconName != null) {
+                                Drawable d = skin.getDrawable(iconName);
+                                if (d instanceof TextureRegionDrawable) {
+                                    iconDrawable = (TextureRegionDrawable) d;
+                                    iconSize = layout.height;
+                                }
+                            }
+                        }
+
+                        float gap = iconDrawable != null ? 8f : 0f;
+                        float boxWidth = (iconDrawable != null ? iconSize + gap : 0f) + layout.width + padX * 2f;
                         float boxHeight = layout.height + padY * 2f;
 
                         float drawX = collision.worldBounds.x + collision.worldBounds.width / 2f;
@@ -113,10 +133,15 @@ public class TutorialSystem extends IteratingSystem {
                             batch.setColor(Color.WHITE);
                         }
 
+                        float textX = panelX + padX;
+                        if (iconDrawable != null) {
+                            float iconY = panelY + padY + (layout.height - iconSize) / 2f;
+                            iconDrawable.draw(batch, textX, iconY, iconSize, iconSize);
+                            textX += iconSize + gap;
+                        }
+
                         font.setColor(Color.WHITE);
-                        font.draw(batch, tutorial.text,
-                                panelX + padX,
-                                panelY + padY + layout.height);
+                        font.draw(batch, tutorial.text, textX, panelY + padY + layout.height);
                     }
                 }
             }

@@ -31,6 +31,13 @@ public class TouchControlsStage extends Stage {
     private final TouchButton bButton;
     private final TouchButton yButton;
 
+    /**
+     * The overlay alpha set by the current {@code LayoutMode} (transparent overlay vs solid band).
+     * The tutorial highlight temporarily overrides it with {@link GameConstants#UI_BUTTON_ALPHA_SOLID}
+     * while active, and this field restores it when cleared.
+     */
+    private float baseAlpha = UI_BUTTON_ALPHA;
+
     public TouchControlsStage(Viewport viewport, Skin skin, PlayerInputSystem inputSystem,
                               Drawable inventoryIcon, Runnable onInventoryToggle) {
         super(viewport);
@@ -132,7 +139,16 @@ public class TouchControlsStage extends Stage {
 
     /** Sets the opacity of the whole cluster (per-mode: transparent overlay vs solid band). */
     public void setAlpha(float alpha) {
+        this.baseAlpha = alpha;
         root.getColor().a = alpha;
+    }
+
+    /**
+     * Returns the current cluster opacity — either the {@link #setAlpha(float)} base or the
+     * highlight-boosted {@link GameConstants#UI_BUTTON_ALPHA_SOLID} value while active.
+     */
+    public float getAlpha() {
+        return root.getColor().a;
     }
 
     /**
@@ -152,6 +168,35 @@ public class TouchControlsStage extends Stage {
         shootButton.getColor().a = alpha;
     }
 
+    /**
+     * Maps a tutorial highlight keyword (e.g. "jump", "a", "sword") to the matching touch-button
+     * skin drawable name (e.g. "jump", "sword", "daggers"). Returns {@code null} for unknown
+     * keywords; used by both this class and {@link TutorialSystem} for the inline tooltip icon.
+     */
+    public static String iconNameFor(String target) {
+        if (target == null) return null;
+        String t = target.toLowerCase().trim();
+        if (t.equals("jump") || t.equals("a") || t.equals("j")) return "jump";
+        if (t.equals("attack") || t.equals("sword") || t.equals("b") || t.equals("melee")) return "sword";
+        if (t.equals("special") || t.equals("ranged") || t.equals("y") || t.equals("dagger") || t.equals("throw")) return "daggers";
+        if (t.equals("inventory") || t.equals("bag") || t.equals("potion")) return "potion";
+        if (t.equals("left")) return "left";
+        if (t.equals("right")) return "right";
+        return null;
+    }
+
+    private TouchButton buttonForIcon(String icon) {
+        switch (icon) {
+            case "jump":    return aButton;
+            case "sword":   return bButton;
+            case "daggers": return yButton;
+            case "potion":  return inventoryButton;
+            case "left":    return leftButton;
+            case "right":   return rightButton;
+            default:        return null;
+        }
+    }
+
     /** Highlights or resets touch control buttons based on tutorial/prompt state with pulsing glow. */
     public void setHighlightedControl(String target, float timer) {
         aButton.clearHighlightColor();
@@ -161,31 +206,17 @@ public class TouchControlsStage extends Stage {
         leftButton.clearHighlightColor();
         rightButton.clearHighlightColor();
 
-        if (target == null || target.isEmpty()) {
-            return;
+        String icon = iconNameFor(target);
+        if (icon != null) {
+            TouchButton highlight = buttonForIcon(icon);
+            if (highlight != null) {
+                float pulse = 0.75f + 0.25f * (float) Math.sin(timer * 8.0);
+                highlight.setHighlightColor(pulse, pulse, 0.2f);
+            }
         }
 
-        String t = target.toLowerCase();
-        TouchButton highlight = null;
-        if (t.equals("jump") || t.equals("a") || t.equals("j")) {
-            highlight = aButton;
-        } else if (t.equals("attack") || t.equals("sword") || t.equals("b") || t.equals("melee")) {
-            highlight = bButton;
-        } else if (t.equals("special") || t.equals("ranged") || t.equals("y") || t.equals("dagger") || t.equals("throw")) {
-            highlight = yButton;
-        } else if (t.equals("inventory") || t.equals("bag") || t.equals("potion")) {
-            highlight = inventoryButton;
-        } else if (t.equals("left")) {
-            highlight = leftButton;
-        } else if (t.equals("right")) {
-            highlight = rightButton;
-        }
-
-        if (highlight != null) {
-            // Pulse the icon between dim and full-intensity golden-yellow (0.5–1.0 brightness,
-            // blue pinned low); libGDX clamps color channels to [0,1], so keep the range inside it.
-            float pulse = 0.75f + 0.25f * (float) Math.sin(timer * 8.0);
-            highlight.setHighlightColor(pulse, pulse, 0.2f);
-        }
+        // Boost overlay alpha while a highlight is active so the pulsing icon is visible at a
+        // glance; restore the mode-set base alpha when no highlight is active.
+        root.getColor().a = (icon != null) ? UI_BUTTON_ALPHA_SOLID : baseAlpha;
     }
 }
