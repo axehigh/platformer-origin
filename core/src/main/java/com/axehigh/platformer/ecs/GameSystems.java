@@ -62,6 +62,7 @@ public class GameSystems {
     public final LightRenderSystem lightRenderSystem;
     public final VignetteRenderSystem vignetteRenderSystem;
     public final CameraSystem cameraSystem;
+    public final TutorialSystem tutorialSystem;
     public final ChestSystem chestSystem;
     public final LevelManager levelManager;
 
@@ -176,6 +177,7 @@ public class GameSystems {
         TutorialSystem tutorialSystem = new TutorialSystem(batch, camera, skin, PRIORITY_FLOATING_MESSAGE + 1);
         tutorialSystem.setUnitScale(unitScale);
         engine.addSystem(tutorialSystem);
+        this.tutorialSystem = tutorialSystem;
 
         engine.addSystem(new PlayerDeathSystem(onPlayerDeath, killY, PRIORITY_PLAYER_DEATH));
     }

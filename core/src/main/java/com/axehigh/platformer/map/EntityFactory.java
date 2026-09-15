@@ -255,7 +255,8 @@ public class EntityFactory {
                 case "text":
                 case "sign":
                     String message = TileProps.getProperty(object, tile, "text", TileProps.getProperty(object, tile, "message", ""));
-                    engine.addEntity(createTutorialSign(spawnX, spawnY, objectWidth, objectHeight, message, tile));
+                    String highlight = TileProps.getProperty(object, tile, "highlight", "");
+                    engine.addEntity(createTutorialSign(spawnX, spawnY, objectWidth, objectHeight, message, highlight, tile));
                     spawned = true;
                     break;
                 default:
@@ -420,7 +421,7 @@ public class EntityFactory {
         return entity;
     }
 
-    private Entity createTutorialSign(float x, float y, float width, float height, String message, TiledMapTile tile) {
+    private Entity createTutorialSign(float x, float y, float width, float height, String message, String highlight, TiledMapTile tile) {
         Entity entity = new Entity();
 
         TransformComponent transform = new TransformComponent();
@@ -444,6 +445,7 @@ public class EntityFactory {
 
         TutorialComponent tutorial = new TutorialComponent();
         tutorial.text = message;
+        tutorial.highlight = highlight;
         entity.add(tutorial);
 
         return entity;

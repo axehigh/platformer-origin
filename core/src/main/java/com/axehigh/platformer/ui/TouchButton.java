@@ -63,6 +63,20 @@ public class TouchButton extends ImageButton {
     }
 
     /**
+     * Tints the visible icon (the child {@link Image} actor) for the tutorial highlight pulse.
+     * The {@code Button} actor's own color only tints the style's background drawable, which the
+     * "gameplay" style doesn't define — tinting {@code getImage()} is what actually reaches pixels.
+     */
+    public void setHighlightColor(float r, float g, float b) {
+        getImage().setColor(r, g, b, 1f);
+    }
+
+    /** Restores the icon to its untinted white color, clearing any highlight. */
+    public void clearHighlightColor() {
+        getImage().setColor(1f, 1f, 1f, 1f);
+    }
+
+    /**
      * Treats the whole button (plus {@code UI_TOUCH_HIT_PAD} on each side) as a hit target, so
      * taps just outside the drawn button still register.
      */

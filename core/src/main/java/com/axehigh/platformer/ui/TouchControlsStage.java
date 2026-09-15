@@ -21,10 +21,15 @@ import static com.axehigh.platformer.GameConstants.*;
  */
 public class TouchControlsStage extends Stage {
     private final Table root;
+    private final TouchButton leftButton;
+    private final TouchButton rightButton;
     private final TouchButton interactButton;
     private final TouchButton dropButton;
     private final TouchButton inventoryButton;
     private final TouchButton shootButton;
+    private final TouchButton aButton;
+    private final TouchButton bButton;
+    private final TouchButton yButton;
 
     public TouchControlsStage(Viewport viewport, Skin skin, PlayerInputSystem inputSystem,
                               Drawable inventoryIcon, Runnable onInventoryToggle) {
@@ -37,7 +42,7 @@ public class TouchControlsStage extends Stage {
         addActor(root);
 
         Table dpad = new Table();
-        TouchButton leftButton = new TouchButton(skin, "left", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+        leftButton = new TouchButton(skin, "left", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 new TouchButton.Handler() {
                     @Override
                     public void onPress() {
@@ -49,7 +54,7 @@ public class TouchControlsStage extends Stage {
                         inputSystem.setTouchLeft(false);
                     }
                 });
-        TouchButton rightButton = new TouchButton(skin, "right", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+        rightButton = new TouchButton(skin, "right", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 new TouchButton.Handler() {
                     @Override
                     public void onPress() {
@@ -74,13 +79,13 @@ public class TouchControlsStage extends Stage {
         dpad.add(rightButton).size(UI_Button_Move_Size, UI_Button_Move_Size).padRight(UI_PADDING_TOUCH * 2f);
         dpad.add(inventoryButton).size(UI_Button_Contextual_Size, UI_Button_Contextual_Size);
 
-        TouchButton yButton = new TouchButton(skin, "daggers", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+        yButton = new TouchButton(skin, "daggers", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 () -> inputSystem.requestTouchShoot());
         shootButton = yButton;
         yButton.setVisible(USE_BULLET);
-        TouchButton bButton = new TouchButton(skin, "sword", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+        bButton = new TouchButton(skin, "sword", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 () -> inputSystem.requestTouchMelee());
-        TouchButton aButton = new TouchButton(skin, "jump", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+        aButton = new TouchButton(skin, "jump", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 () -> inputSystem.requestTouchJump());
 
         interactButton = new TouchButton(skin, "door", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
@@ -145,5 +150,42 @@ public class TouchControlsStage extends Stage {
     /** Fades the shoot (daggers/Y) button when the player has no ammo. */
     public void setShootAlpha(float alpha) {
         shootButton.getColor().a = alpha;
+    }
+
+    /** Highlights or resets touch control buttons based on tutorial/prompt state with pulsing glow. */
+    public void setHighlightedControl(String target, float timer) {
+        aButton.clearHighlightColor();
+        bButton.clearHighlightColor();
+        yButton.clearHighlightColor();
+        inventoryButton.clearHighlightColor();
+        leftButton.clearHighlightColor();
+        rightButton.clearHighlightColor();
+
+        if (target == null || target.isEmpty()) {
+            return;
+        }
+
+        String t = target.toLowerCase();
+        TouchButton highlight = null;
+        if (t.equals("jump") || t.equals("a") || t.equals("j")) {
+            highlight = aButton;
+        } else if (t.equals("attack") || t.equals("sword") || t.equals("b") || t.equals("melee")) {
+            highlight = bButton;
+        } else if (t.equals("special") || t.equals("ranged") || t.equals("y") || t.equals("dagger") || t.equals("throw")) {
+            highlight = yButton;
+        } else if (t.equals("inventory") || t.equals("bag") || t.equals("potion")) {
+            highlight = inventoryButton;
+        } else if (t.equals("left")) {
+            highlight = leftButton;
+        } else if (t.equals("right")) {
+            highlight = rightButton;
+        }
+
+        if (highlight != null) {
+            // Pulse the icon between dim and full-intensity golden-yellow (0.5–1.0 brightness,
+            // blue pinned low); libGDX clamps color channels to [0,1], so keep the range inside it.
+            float pulse = 0.75f + 0.25f * (float) Math.sin(timer * 8.0);
+            highlight.setHighlightColor(pulse, pulse, 0.2f);
+        }
     }
 }

@@ -166,6 +166,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         touchControlsStage = new TouchControlsStage(touchViewport, skin, systems.playerInputSystem,
                 bagDrawable,
                 this::toggleInventory);
+        systems.tutorialSystem.setTouchControlsStage(touchControlsStage);
 
         inventoryBarStage = new InventoryBarStage(new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT), skin, assetManager, playerComponent, playerEntity);
         inventoryBarStage.setOnTapOutside(this::toggleInventory);

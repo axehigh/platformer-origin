@@ -5,6 +5,7 @@ import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.ecs.components.TutorialComponent;
+import com.axehigh.platformer.ui.TouchControlsStage;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -36,7 +37,13 @@ public class TutorialSystem extends IteratingSystem {
     private final GlyphLayout layout = new GlyphLayout();
     private final Rectangle sensorBounds = new Rectangle();
     private final TextureRegionDrawable panelDrawable;
+    private TouchControlsStage touchControlsStage;
+    private float highlightTimer = 0f;
     private float unitScale = 1f;
+
+    public void setTouchControlsStage(TouchControlsStage touchControlsStage) {
+        this.touchControlsStage = touchControlsStage;
+    }
     private ImmutableArray<Entity> players;
 
     public TutorialSystem(SpriteBatch batch, OrthographicCamera camera, Skin skin, int priority) {
@@ -66,51 +73,66 @@ public class TutorialSystem extends IteratingSystem {
 
     @Override
     public void update(float deltaTime) {
-        for (Entity entity : getEntities()) {
-            TutorialComponent t = TUTORIAL.get(entity);
-            if (t != null) {
-                t.active = false;
-            }
-        }
         super.update(deltaTime);
 
-        // Render tooltips with panel background
+        String activeHighlight = "";
+
+        // Render tooltips with panel background, collect the active highlight, then reset flags in
+        // one pass so highlights (and tooltips) show on the same frame the sensor is entered.
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         for (Entity entity : getEntities()) {
             TutorialComponent tutorial = TUTORIAL.get(entity);
-            if (tutorial != null && tutorial.active && tutorial.text != null && !tutorial.text.isEmpty()) {
-                CollisionComponent collision = COLLISION.get(entity);
-                if (collision != null) {
-                    font.getData().setScale(SmallFontScale);
-                    layout.setText(font, tutorial.text);
+            if (tutorial == null) {
+                continue;
+            }
+            if (tutorial.active) {
+                if (!tutorial.highlight.isEmpty()) {
+                    activeHighlight = tutorial.highlight;
+                }
+                if (!tutorial.text.isEmpty()) {
+                    CollisionComponent collision = COLLISION.get(entity);
+                    if (collision != null) {
+                        font.getData().setScale(SmallFontScale);
+                        layout.setText(font, tutorial.text);
 
-                    float padX = 28f;
-                    float padY = 20f;
-                    float boxWidth = layout.width + padX * 2f;
-                    float boxHeight = layout.height + padY * 2f;
+                        float padX = 28f;
+                        float padY = 20f;
+                        float boxWidth = layout.width + padX * 2f;
+                        float boxHeight = layout.height + padY * 2f;
 
-                    float drawX = collision.worldBounds.x + collision.worldBounds.width / 2f;
-                    float drawY = collision.worldBounds.y + collision.worldBounds.height + 20f * unitScale;
+                        float drawX = collision.worldBounds.x + collision.worldBounds.width / 2f;
+                        float drawY = collision.worldBounds.y + collision.worldBounds.height + 20f * unitScale;
 
-                    float panelX = drawX - boxWidth / 2f;
-                    float panelY = drawY;
+                        float panelX = drawX - boxWidth / 2f;
+                        float panelY = drawY;
 
-                    if (panelDrawable != null) {
-                        batch.setColor(1f, 1f, 1f, GameConstants.UI_PANEL_ALPHA);
-                        panelDrawable.draw(batch, panelX, panelY, boxWidth, boxHeight);
-                        batch.setColor(Color.WHITE);
+                        if (panelDrawable != null) {
+                            batch.setColor(1f, 1f, 1f, GameConstants.UI_PANEL_ALPHA);
+                            panelDrawable.draw(batch, panelX, panelY, boxWidth, boxHeight);
+                            batch.setColor(Color.WHITE);
+                        }
+
+                        font.setColor(Color.WHITE);
+                        font.draw(batch, tutorial.text,
+                                panelX + padX,
+                                panelY + padY + layout.height);
                     }
-
-                    font.setColor(Color.WHITE);
-                    font.draw(batch, tutorial.text,
-                            panelX + padX,
-                            panelY + padY + layout.height);
-                    font.getData().setScale(SmallFontScale);
                 }
             }
+            tutorial.active = false;
         }
         batch.end();
+
+        if (!activeHighlight.isEmpty()) {
+            highlightTimer += deltaTime;
+        } else {
+            highlightTimer = 0f;
+        }
+
+        if (touchControlsStage != null) {
+            touchControlsStage.setHighlightedControl(activeHighlight, highlightTimer);
+        }
     }
 
     @Override
