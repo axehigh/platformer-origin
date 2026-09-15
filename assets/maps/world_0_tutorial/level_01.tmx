@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="60" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="622">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="60" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="623">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
  <tileset firstgid="70" source="../tileset/items.tsx"/>
  <tileset firstgid="101" source="../tileset/enemy.tsx"/>
@@ -71,9 +71,10 @@
     <property name="text" value="You can jump down"/>
    </properties>
   </object>
-  <object id="620" name="s" gid="30" x="3712" y="1024" width="128" height="128">
+  <object id="620" gid="30" x="3712" y="1024" width="128" height="128">
    <properties>
-    <property name="text" value="Attack the chest and pick up the Speed Potion. Use Inventory to drink potion."/>
+    <property name="text">Attack the chest 
+and pick up the Speed Potion. </property>
    </properties>
   </object>
   <object id="621" gid="32" x="832" y="1152" width="128" height="128">
@@ -81,6 +82,12 @@
     <property name="highlight" value="jump"/>
     <property name="text">Collect the coins 
 and avoid the traps</property>
+   </properties>
+  </object>
+  <object id="622" gid="30" x="3264" y="1024" width="128" height="128">
+   <properties>
+    <property name="highlight" value="inventory"/>
+    <property name="text" value="Use Inventory to drink potion."/>
    </properties>
   </object>
  </objectgroup>

@@ -57,7 +57,7 @@ public class FloatingMessageSystem extends IteratingSystem {
 
         float alpha = 1f - (msg.age / msg.lifetime);
         font.setColor(msg.color.r, msg.color.g, msg.color.b, alpha);
-        font.getData().setScale(msg.fontScale);
+        font.getData().setScale(msg.fontScale * GameConstants.FloatingTextFontScale);
         layout.setText(font, msg.text);
         font.draw(batch, msg.text,
                 transform.position.x - layout.width / 2f,

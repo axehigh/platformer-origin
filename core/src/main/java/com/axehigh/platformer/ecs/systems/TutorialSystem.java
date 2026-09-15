@@ -21,7 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
-import static com.axehigh.platformer.GameConstants.SmallFontScale;
+import static com.axehigh.platformer.GameConstants.TutorialFontScale;
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.TUTORIAL;
 
@@ -96,7 +96,7 @@ public class TutorialSystem extends IteratingSystem {
                 if (!tutorial.text.isEmpty()) {
                     CollisionComponent collision = COLLISION.get(entity);
                     if (collision != null) {
-                        font.getData().setScale(SmallFontScale);
+                        font.getData().setScale(TutorialFontScale);
                         layout.setText(font, tutorial.text);
 
                         float padX = 28f;

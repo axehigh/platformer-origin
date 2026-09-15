@@ -219,6 +219,13 @@ public final class GameConstants {
     public static float TitleFontScale = FontBaseScale * 3f;
     public static float BodyFontScale = FontBaseScale * 2f;
     public static float tinyFontScale = FontBaseScale * 0.85f;
+    /** Scale factor for world-space floating text (damage numbers, coin popups, buff messages).
+     *  {@code FloatingMessageSystem} multiplies this into the per-message {@code fontScale}
+     *  (2f ≈ 64 world units on the 32px {@code edgeofgalaxy} font). */
+    public static float FloatingTextFontScale = 2f;
+    /** Scale factor for world-space tutorial tooltip text ({@code TutorialSystem})
+     *  (2f ≈ 64 world units on the 32px {@code edgeofgalaxy} font). */
+    public static float TutorialFontScale = 2f;
 
     public static final String SKIN_TITLE = "title";
 
