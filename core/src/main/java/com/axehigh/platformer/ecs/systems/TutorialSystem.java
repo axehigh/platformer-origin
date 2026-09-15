@@ -1,5 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
+import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
@@ -16,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import static com.axehigh.platformer.GameConstants.SmallFontScale;
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
@@ -24,7 +26,7 @@ import static com.axehigh.platformer.ecs.components.Mappers.TUTORIAL;
 /**
  * Manages tutorial sign proximity and floating world tooltips. When the player walks into
  * the proximity sensor of a tutorial object, its text message is displayed as a floating world
- * tooltip above the object.
+ * tooltip above the object with a panel background.
  */
 public class TutorialSystem extends IteratingSystem {
     private static final float SENSOR_PADDING = 12f;
@@ -33,6 +35,7 @@ public class TutorialSystem extends IteratingSystem {
     private final BitmapFont font;
     private final GlyphLayout layout = new GlyphLayout();
     private final Rectangle sensorBounds = new Rectangle();
+    private final TextureRegionDrawable panelDrawable;
     private float unitScale = 1f;
     private ImmutableArray<Entity> players;
 
@@ -48,6 +51,7 @@ public class TutorialSystem extends IteratingSystem {
             f = new BitmapFont();
         }
         this.font = f;
+        this.panelDrawable = (TextureRegionDrawable) skin.getDrawable("table");
     }
 
     public void setUnitScale(float unitScale) {
@@ -70,7 +74,7 @@ public class TutorialSystem extends IteratingSystem {
         }
         super.update(deltaTime);
 
-        // Render tooltips
+        // Render tooltips with panel background
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         for (Entity entity : getEntities()) {
@@ -78,16 +82,30 @@ public class TutorialSystem extends IteratingSystem {
             if (tutorial != null && tutorial.active && tutorial.text != null && !tutorial.text.isEmpty()) {
                 CollisionComponent collision = COLLISION.get(entity);
                 if (collision != null) {
-                    float drawX = collision.worldBounds.x + collision.worldBounds.width / 2f;
-                    float drawY = collision.worldBounds.y + collision.worldBounds.height + 24f * unitScale;
-
-                    font.setColor(Color.WHITE);
                     font.getData().setScale(SmallFontScale);
                     layout.setText(font, tutorial.text);
 
+                    float padX = 28f;
+                    float padY = 20f;
+                    float boxWidth = layout.width + padX * 2f;
+                    float boxHeight = layout.height + padY * 2f;
+
+                    float drawX = collision.worldBounds.x + collision.worldBounds.width / 2f;
+                    float drawY = collision.worldBounds.y + collision.worldBounds.height + 20f * unitScale;
+
+                    float panelX = drawX - boxWidth / 2f;
+                    float panelY = drawY;
+
+                    if (panelDrawable != null) {
+                        batch.setColor(1f, 1f, 1f, GameConstants.UI_PANEL_ALPHA);
+                        panelDrawable.draw(batch, panelX, panelY, boxWidth, boxHeight);
+                        batch.setColor(Color.WHITE);
+                    }
+
+                    font.setColor(Color.WHITE);
                     font.draw(batch, tutorial.text,
-                            drawX - layout.width / 2f,
-                            drawY);
+                            panelX + padX,
+                            panelY + padY + layout.height);
                     font.getData().setScale(SmallFontScale);
                 }
             }
