@@ -2,6 +2,7 @@ package com.axehigh.platformer.map;
 
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.PotionType;
+import com.axehigh.platformer.util.SaveManager;
 
 /**
  * Plain, JSON-serializable run snapshot of the level path plus a player's core stats. Stars are
@@ -52,6 +53,10 @@ public class SaveData {
         saveData.invisibilityPotions = player.countPotion(PotionType.INVISIBILITY);
         saveData.jumpPotions = player.countPotion(PotionType.JUMP);
         saveData.fireBreathPotions = player.countPotion(PotionType.FIRE_BREATH);
+        if (SaveManager.hasSave()) {
+            SaveData prev = SaveManager.load();
+            saveData.enemiesKilled = prev.enemiesKilled;
+        }
         return saveData;
     }
 
