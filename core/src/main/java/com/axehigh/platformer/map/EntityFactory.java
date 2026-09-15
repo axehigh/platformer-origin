@@ -188,7 +188,12 @@ public class EntityFactory {
 
             String type = TileProps.getProperty(object, tile, "type", null);
             if (type == null) {
-                continue;
+                String textProp = TileProps.getProperty(object, tile, "text", null);
+                if (textProp != null) {
+                    type = "text";
+                } else {
+                    continue;
+                }
             }
 
             switch (type) {
@@ -245,6 +250,12 @@ public class EntityFactory {
                     } else {
                         engine.addEntity(trapFactory.createAcidDropSpawner(spawnX, spawnY, object, tile, trapRoomIndex));
                     }
+                    spawned = true;
+                    break;
+                case "text":
+                case "sign":
+                    String message = TileProps.getProperty(object, tile, "text", TileProps.getProperty(object, tile, "message", ""));
+                    engine.addEntity(createTutorialSign(spawnX, spawnY, objectWidth, objectHeight, message, tile));
                     spawned = true;
                     break;
                 default:
@@ -405,6 +416,35 @@ public class EntityFactory {
             levelExitComponent.isFinalLevel = isFinalLevel;
             entity.add(levelExitComponent);
         }
+
+        return entity;
+    }
+
+    private Entity createTutorialSign(float x, float y, float width, float height, String message, TiledMapTile tile) {
+        Entity entity = new Entity();
+
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(x, y);
+        transform.z = FactoryContext.DECOR_Z;
+        entity.add(transform);
+
+        float w = width > 0f ? width : 32f;
+        float h = height > 0f ? height : 32f;
+        if (tile != null && tile.getTextureRegion() != null) {
+            w = tile.getTextureRegion().getRegionWidth();
+            h = tile.getTextureRegion().getRegionHeight();
+            TextureComponent textureComponent = new TextureComponent();
+            textureComponent.region = tile.getTextureRegion();
+            entity.add(textureComponent);
+        }
+
+        CollisionComponent collisionComponent = new CollisionComponent();
+        collisionComponent.bounds.setSize(w, h);
+        entity.add(collisionComponent);
+
+        TutorialComponent tutorial = new TutorialComponent();
+        tutorial.text = message;
+        entity.add(tutorial);
 
         return entity;
     }

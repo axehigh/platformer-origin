@@ -173,6 +173,10 @@ public class GameSystems {
         exitSystem.setOnTransition(onLevelTransition);
         engine.addSystem(exitSystem);
 
+        TutorialSystem tutorialSystem = new TutorialSystem(batch, camera, skin, PRIORITY_FLOATING_MESSAGE + 1);
+        tutorialSystem.setUnitScale(unitScale);
+        engine.addSystem(tutorialSystem);
+
         engine.addSystem(new PlayerDeathSystem(onPlayerDeath, killY, PRIORITY_PLAYER_DEATH));
     }
 }

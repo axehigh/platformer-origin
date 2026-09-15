@@ -33,6 +33,7 @@ public final class Mappers {
     public static final ComponentMapper<TrapComponent> TRAP = ComponentMapper.getFor(TrapComponent.class);
     public static final ComponentMapper<TrailComponent> TRAIL = ComponentMapper.getFor(TrailComponent.class);
     public static final ComponentMapper<LootComponent> LOOT = ComponentMapper.getFor(LootComponent.class);
+    public static final ComponentMapper<TutorialComponent> TUTORIAL = ComponentMapper.getFor(TutorialComponent.class);
 
     private Mappers() {
     }

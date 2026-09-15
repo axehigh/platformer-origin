@@ -1,11 +1,11 @@
 package com.axehigh.platformer.ecs.systems;
 
+import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.components.FloatingMessageComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -62,6 +62,6 @@ public class FloatingMessageSystem extends IteratingSystem {
         font.draw(batch, msg.text,
                 transform.position.x - layout.width / 2f,
                 transform.position.y + layout.height / 2f);
-        font.getData().setScale(1f);
+        font.getData().setScale(GameConstants.SmallFontScale);
     }
 }

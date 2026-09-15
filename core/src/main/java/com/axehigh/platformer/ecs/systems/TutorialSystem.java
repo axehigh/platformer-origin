@@ -1,0 +1,119 @@
+package com.axehigh.platformer.ecs.systems;
+
+import com.axehigh.platformer.ecs.components.CollisionComponent;
+import com.axehigh.platformer.ecs.components.PlayerComponent;
+import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.components.TutorialComponent;
+import com.badlogic.ashley.core.Engine;
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+
+import static com.axehigh.platformer.GameConstants.SmallFontScale;
+import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
+import static com.axehigh.platformer.ecs.components.Mappers.TUTORIAL;
+
+/**
+ * Manages tutorial sign proximity and floating world tooltips. When the player walks into
+ * the proximity sensor of a tutorial object, its text message is displayed as a floating world
+ * tooltip above the object.
+ */
+public class TutorialSystem extends IteratingSystem {
+    private static final float SENSOR_PADDING = 12f;
+    private final SpriteBatch batch;
+    private final OrthographicCamera camera;
+    private final BitmapFont font;
+    private final GlyphLayout layout = new GlyphLayout();
+    private final Rectangle sensorBounds = new Rectangle();
+    private float unitScale = 1f;
+    private ImmutableArray<Entity> players;
+
+    public TutorialSystem(SpriteBatch batch, OrthographicCamera camera, Skin skin, int priority) {
+        super(Family.all(TutorialComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
+        this.batch = batch;
+        this.camera = camera;
+        BitmapFont f = skin.getFont("edgeofgalaxy");
+        if (f == null) {
+            f = skin.get("default", BitmapFont.class);
+        }
+        if (f == null) {
+            f = new BitmapFont();
+        }
+        this.font = f;
+    }
+
+    public void setUnitScale(float unitScale) {
+        this.unitScale = unitScale;
+    }
+
+    @Override
+    public void addedToEngine(Engine engine) {
+        super.addedToEngine(engine);
+        players = engine.getEntitiesFor(Family.all(PlayerComponent.class, TransformComponent.class, CollisionComponent.class).get());
+    }
+
+    @Override
+    public void update(float deltaTime) {
+        for (Entity entity : getEntities()) {
+            TutorialComponent t = TUTORIAL.get(entity);
+            if (t != null) {
+                t.active = false;
+            }
+        }
+        super.update(deltaTime);
+
+        // Render tooltips
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+        for (Entity entity : getEntities()) {
+            TutorialComponent tutorial = TUTORIAL.get(entity);
+            if (tutorial != null && tutorial.active && tutorial.text != null && !tutorial.text.isEmpty()) {
+                CollisionComponent collision = COLLISION.get(entity);
+                if (collision != null) {
+                    float drawX = collision.worldBounds.x + collision.worldBounds.width / 2f;
+                    float drawY = collision.worldBounds.y + collision.worldBounds.height + 24f * unitScale;
+
+                    font.setColor(Color.WHITE);
+                    font.getData().setScale(SmallFontScale);
+                    layout.setText(font, tutorial.text);
+
+                    font.draw(batch, tutorial.text,
+                            drawX - layout.width / 2f,
+                            drawY);
+                    font.getData().setScale(SmallFontScale);
+                }
+            }
+        }
+        batch.end();
+    }
+
+    @Override
+    protected void processEntity(Entity entity, float deltaTime) {
+        if (players.size() == 0) {
+            return;
+        }
+        TutorialComponent tutorial = TUTORIAL.get(entity);
+        CollisionComponent collision = COLLISION.get(entity);
+        Entity playerEntity = players.first();
+        CollisionComponent playerCollision = COLLISION.get(playerEntity);
+
+        float padding = SENSOR_PADDING * unitScale;
+        sensorBounds.set(
+            collision.worldBounds.x - padding,
+            collision.worldBounds.y - padding,
+            collision.worldBounds.width + padding * 2f,
+            collision.worldBounds.height + padding * 2f);
+
+        if (playerCollision.worldBounds.overlaps(sensorBounds)) {
+            tutorial.active = true;
+        }
+    }
+}
