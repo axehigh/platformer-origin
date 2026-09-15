@@ -78,6 +78,7 @@
   </object>
   <object id="621" gid="32" x="832" y="1152" width="128" height="128">
    <properties>
+    <property name="highlight" value="jump"/>
     <property name="text">Collect the coins 
 and avoid the traps</property>
    </properties>
