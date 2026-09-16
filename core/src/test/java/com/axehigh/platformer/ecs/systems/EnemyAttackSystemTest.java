@@ -1,6 +1,5 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.map.EntityFactory;
 import com.axehigh.platformer.map.Room;
 import com.axehigh.platformer.map.RoomState;
@@ -451,6 +450,24 @@ public class EnemyAttackSystemTest extends SystemTestBase {
         engine.update(DT);
         assertTrue("enemy should start a new attack after recovery", attack.isAttacking);
         assertEquals("enemy still faces the player", 1, enemyComp.direction);
+    }
+
+    @Test
+    public void flyerAttacksWhenInRange() {
+        Entity playerEntity = player(15f, 0f);
+        TransformComponent transform = transform(0f, 0f);
+        CollisionComponent collision = collision(-10f, -20f, 20f, 40f);
+        place(transform, collision, 0f, 0f);
+        EnemyComponent enemyComponent = new EnemyComponent();
+        EnemyAttackComponent attackComponent = new EnemyAttackComponent();
+        Entity enemyEntity = entity(transform, movement(), enemyComponent, attackComponent, collision, new FlyingEnemyComponent());
+        engine.addEntity(enemyEntity);
+
+        engine.update(DT);
+
+        EnemyAttackComponent attack = ENEMY_ATTACK.get(enemyEntity);
+        assertTrue("flyer attack should be active", attack.isAttacking);
+        assertTrue("flyer wind-up should be active", attack.windUp.isActive());
     }
 
     // --- helpers ---

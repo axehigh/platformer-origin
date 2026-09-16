@@ -147,22 +147,34 @@ public class DebugRenderSystem extends EntitySystem implements Disposable {
             EnemyAttackComponent attack = ENEMY_ATTACK.get(entity);
             EnemyComponent enemy = ENEMY.get(entity);
 
-            // Detection box (magenta): centered on the enemy's AABB center, attackRange*3 wide
-            // per side, detectionHeight (1.25 tiles) tall total — opens exactly like the runtime check.
-            float detectWidth = attack.attackRange * 3f * unitScale * 2f;
-            float detectHeight = attack.detectionHeight * unitScale;
             float centerX = collision.worldBounds.x + collision.worldBounds.width / 2f;
             float centerY = collision.worldBounds.y + collision.worldBounds.height / 2f;
-            shapeRenderer.setColor(Color.MAGENTA);
-            shapeRenderer.rect(centerX - detectWidth / 2f, centerY - detectHeight / 2f, detectWidth, detectHeight);
 
-            // Commit distance (green): attackRange wide adjacent to the enemy's facing edge.
-            float commitWidth = attack.attackRange * unitScale;
-            float commitX = enemy.direction > 0
-                ? collision.worldBounds.x + collision.worldBounds.width
-                : collision.worldBounds.x - commitWidth;
-            shapeRenderer.setColor(Color.GREEN);
-            shapeRenderer.rect(commitX, collision.worldBounds.y, commitWidth, collision.worldBounds.height);
+            // Detection bounds: circular detection range for flyers, rectangular box for walkers.
+            if (FLYING.has(entity)) {
+                float detectRadius = attack.attackRange * 2.5f * unitScale;
+                shapeRenderer.setColor(Color.MAGENTA);
+                shapeRenderer.circle(centerX, centerY, detectRadius);
+            } else {
+                float detectWidth = attack.attackRange * 3f * unitScale * 2f;
+                float detectHeight = attack.detectionHeight * unitScale;
+                shapeRenderer.setColor(Color.MAGENTA);
+                shapeRenderer.rect(centerX - detectWidth / 2f, centerY - detectHeight / 2f, detectWidth, detectHeight);
+            }
+
+            // Commit distance / attack bounds (green): attackRange radius circle for flyers, rectangle for walkers.
+            if (FLYING.has(entity)) {
+                float attackRadius = attack.attackRange * unitScale;
+                shapeRenderer.setColor(Color.GREEN);
+                shapeRenderer.circle(centerX, centerY, attackRadius);
+            } else {
+                float commitWidth = attack.attackRange * unitScale;
+                float commitX = enemy.direction > 0
+                    ? collision.worldBounds.x + collision.worldBounds.width
+                    : collision.worldBounds.x - commitWidth;
+                shapeRenderer.setColor(Color.GREEN);
+                shapeRenderer.rect(commitX, collision.worldBounds.y, commitWidth, collision.worldBounds.height);
+            }
 
             // Live strike (red): only while the strike window is active — pulled from
             // EnemyAttackSystem, mirroring the player's live strike.

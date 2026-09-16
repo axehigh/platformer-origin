@@ -9,7 +9,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
@@ -175,11 +174,9 @@ public class EnemySystem extends IteratingSystem {
             return;
         }
 
-        // Detection box (shared with EnemyAttackSystem): center-based, attackRange*3 per side,
-        // detectionHeight(=1.25 tiles) total. Detected = the player is being chased. playerCenterX
-        // is meaningless when attack == null / no player, but the chase branch below only runs when
-        // playerInDetection is true.
+        // Detection: circular detection range for flyers, rectangular box for grounded enemies.
         float playerCenterX = 0f;
+        float playerCenterY = 0f;
         boolean playerInDetection = false;
         if (attack != null && players.size() > 0) {
             Entity playerEntity = players.first();
@@ -188,11 +185,20 @@ public class EnemySystem extends IteratingSystem {
             if (!playerInvisible) {
                 CollisionComponent playerCollision = COLLISION.get(playerEntity);
                 playerCenterX = playerCollision.worldBounds.x + playerCollision.worldBounds.width / 2f;
-                float pcy = playerCollision.worldBounds.y + playerCollision.worldBounds.height / 2f;
+                playerCenterY = playerCollision.worldBounds.y + playerCollision.worldBounds.height / 2f;
                 float ecx = collision.worldBounds.x + collision.worldBounds.width / 2f;
                 float ecy = collision.worldBounds.y + collision.worldBounds.height / 2f;
-                playerInDetection = Math.abs(playerCenterX - ecx) <= attack.attackRange * 3f * unitScale
-                    && Math.abs(pcy - ecy) <= attack.detectionHeight * unitScale / 2f;
+
+                if (flying != null) {
+                    float dx = playerCenterX - ecx;
+                    float dy = playerCenterY - ecy;
+                    float distSq = dx * dx + dy * dy;
+                    float detectRadius = attack.attackRange * 2.5f * unitScale;
+                    playerInDetection = distSq <= detectRadius * detectRadius;
+                } else {
+                    playerInDetection = Math.abs(playerCenterX - ecx) <= attack.attackRange * 3f * unitScale
+                        && Math.abs(playerCenterY - ecy) <= attack.detectionHeight * unitScale / 2f;
+                }
             }
         }
 
@@ -207,11 +213,6 @@ public class EnemySystem extends IteratingSystem {
             return;
         }
 
-        // Right after a turn pause the velocity is still zeroed from standing still; skip the
-        // wall/range checks for exactly one frame so they don't re-trigger a turn (the enemy is
-        // already facing away from whatever made it turn). The same applies right after the room
-        // unfreezes this enemy: the freeze zeroed velocity, so the zero must not be misread as a
-        // wall block (which would flip every unfrozen enemy in the room in unison).
         boolean resumedFromTurnPause = wasTurnPaused;
         boolean resumedFromFreeze = enemy.wasFrozen;
         enemy.wasFrozen = false;
@@ -219,6 +220,108 @@ public class EnemySystem extends IteratingSystem {
         boolean blockedByWall = !resumedFromTurnPause && !resumedFromFreeze && !resumedFromAttack && movement.grounded && movement.velocity.x == 0f;
         boolean atLedge = movement.grounded && !hasGroundAhead(transform, collision, enemy.direction);
         boolean atHazard = movement.grounded && hazardAhead(collision, enemy.direction);
+
+        // Flyer specialized fly-toward-attack-then-fly-back-to-patrol behavior
+        if (flying != null) {
+            flying.retreatTimer.update(deltaTime);
+            float ecx = collision.worldBounds.x + collision.worldBounds.width / 2f;
+            float ecy = collision.worldBounds.y + collision.worldBounds.height / 2f;
+
+            if (flying.flightState == FlyingEnemyComponent.FlightState.RETREAT) {
+                // Fly back toward spawn/patrol origin
+                float targetX = flying.spawnX;
+                float targetY = flying.spawnY;
+                float dx = targetX - ecx;
+                float dy = targetY - ecy;
+                float distSq = dx * dx + dy * dy;
+                if (distSq < 4f * unitScale * unitScale || flying.retreatTimer.isDone()) {
+                    flying.flightState = FlyingEnemyComponent.FlightState.PATROL;
+                } else {
+                    float angle = com.badlogic.gdx.math.MathUtils.atan2(dy, dx);
+                    float spd = enemy.speed * 1.2f; // slightly quicker retreat
+                    movement.velocity.x = spd * com.badlogic.gdx.math.MathUtils.cos(angle);
+                    movement.velocity.y = spd * com.badlogic.gdx.math.MathUtils.sin(angle);
+                    if (Math.abs(movement.velocity.x) > 0.5f) {
+                        enemy.direction = movement.velocity.x > 0 ? 1 : -1;
+                    }
+                    flying.bobTime += deltaTime;
+                    return;
+                }
+            }
+
+            if (playerInDetection && attack != null) {
+                flying.flightState = FlyingEnemyComponent.FlightState.ATTACK_APPROACH;
+                // Check if player is beyond attack range (i.e. fly toward player)
+                float dx = playerCenterX - ecx;
+                float dy = playerCenterY - ecy;
+                float distSq = dx * dx + dy * dy;
+                float attackRadius = attack.attackRange * unitScale;
+
+                if (Math.abs(playerCenterX - ecx) > 1f) {
+                    enemy.direction = playerCenterX > ecx ? 1 : -1;
+                }
+
+                if (distSq > attackRadius * attackRadius) {
+                    // Fly toward player in 2D space with obstacle avoidance ray/steering
+                    float angle = com.badlogic.gdx.math.MathUtils.atan2(dy, dx);
+                    float targetVx = enemy.speed * com.badlogic.gdx.math.MathUtils.cos(angle);
+                    float targetVy = enemy.speed * com.badlogic.gdx.math.MathUtils.sin(angle);
+
+                    // Cast a look-ahead ray/box based strictly on the flyer's own collision bounds
+                    float probeSize = 16f * unitScale;
+                    com.badlogic.gdx.math.Rectangle flyerProbe = new com.badlogic.gdx.math.Rectangle(
+                        targetVx > 0
+                            ? collision.worldBounds.x + collision.worldBounds.width
+                            : collision.worldBounds.x - probeSize,
+                        collision.worldBounds.y,
+                        probeSize,
+                        collision.worldBounds.height
+                    );
+                    boolean obstacleAhead = false;
+                    for (Rectangle rect : collisionRects) {
+                        if (flyerProbe.overlaps(rect)) {
+                            obstacleAhead = true;
+                            break;
+                        }
+                    }
+
+                    if (obstacleAhead) {
+                        // Steer perpendicularly (slide along obstacle vertically or horizontally)
+                        targetVy += (dy >= 0 ? 1f : -1.5f) * enemy.speed;
+                        targetVx *= 0.5f;
+                    }
+
+                    movement.velocity.x = targetVx;
+                    movement.velocity.y = targetVy;
+                } else {
+                    // Within attack range: hover/drift around or hold
+                    movement.velocity.x = 0f;
+                    flying.bobTime += deltaTime;
+                    movement.velocity.y = flying.bobAmplitude * flying.bobFrequency * com.badlogic.gdx.math.MathUtils.cos(flying.bobTime * flying.bobFrequency);
+                }
+                return;
+            } else if (flying.flightState == FlyingEnemyComponent.FlightState.ATTACK_APPROACH) {
+                // Player left detection range -> trigger retreat back to patrol origin
+                flying.flightState = FlyingEnemyComponent.FlightState.RETREAT;
+                flying.retreatTimer.start(3.0f); // max 3 seconds retreat fallback
+            }
+
+            // Normal flyer patrol behavior
+            if (enemy.aiMode == AiMode.PATROL && !resumedFromTurnPause) {
+                if (transform.position.x <= enemy.originX - enemy.patrolRange || transform.position.x >= enemy.originX + enemy.patrolRange) {
+                    turnAround(enemy);
+                }
+            }
+            if (enemy.turnPause.isActive()) {
+                movement.velocity.x = 0;
+                movement.velocity.y = 0;
+            } else {
+                movement.velocity.x = enemy.speed * enemy.direction;
+                flying.bobTime += deltaTime;
+                movement.velocity.y = flying.bobAmplitude * flying.bobFrequency * com.badlogic.gdx.math.MathUtils.cos(flying.bobTime * flying.bobFrequency);
+            }
+            return;
+        }
 
         // Chase: detected player → move toward them using normal movement, but never turn away
         // (a wall/ledge/hazard just holds the enemy in place, still facing the player).
@@ -231,10 +334,6 @@ public class EnemySystem extends IteratingSystem {
                 movement.velocity.x = 0f;
             } else {
                 movement.velocity.x = enemy.speed * enemy.direction;
-            }
-            if (flying != null) {
-                flying.bobTime += deltaTime;
-                movement.velocity.y = flying.bobAmplitude * flying.bobFrequency * MathUtils.cos(flying.bobTime * flying.bobFrequency);
             }
             return;
         }
@@ -249,16 +348,8 @@ public class EnemySystem extends IteratingSystem {
 
         if (enemy.turnPause.isActive()) {
             movement.velocity.x = 0;
-            if (flying != null) {
-                movement.velocity.y = 0;
-            }
         } else {
             movement.velocity.x = enemy.speed * enemy.direction;
-        }
-
-        if (flying != null) {
-            flying.bobTime += deltaTime;
-            movement.velocity.y = flying.bobAmplitude * flying.bobFrequency * MathUtils.cos(flying.bobTime * flying.bobFrequency);
         }
     }
 

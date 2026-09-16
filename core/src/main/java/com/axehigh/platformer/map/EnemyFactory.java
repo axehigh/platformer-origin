@@ -37,7 +37,7 @@ class EnemyFactory {
         AnimationComponent animComp = new AnimationComponent();
         animComp.animations.put(IDLE, context.buildAnimation(FRAME_DURATION, type.atlasPrefix + "_idle", LOOP));
         animComp.animations.put(WALKING, context.buildAnimation(FRAME_DURATION, type.atlasPrefix + "_" + type.walkRegionName, LOOP));
-        animComp.animations.put(ATTACKING, context.buildAnimation(FRAME_DURATION, type.atlasPrefix + "_attack", NORMAL));
+        animComp.animations.put(ATTACKING, context.buildAnimation(FRAME_DURATION, type == EnemyType.FLYER ? type.atlasPrefix + "_attack2" : type.atlasPrefix + "_attack", NORMAL));
         animComp.animations.put(HURT, context.buildAnimation(FRAME_DURATION, type.atlasPrefix + "_hurt", NORMAL));
         animComp.animations.put(DEATH, context.buildAnimation(FRAME_DURATION, type.atlasPrefix + "_death", NORMAL));
         animComp.currentState = IDLE;
@@ -109,6 +109,8 @@ class EnemyFactory {
                 flying.bobAmplitude *= context.unitScale;
                 // Random bob phase so flyers don't flap in unison (they all start at bobTime = 0).
                 flying.bobTime = MathUtils.random(0f, MathUtils.PI2 / flying.bobFrequency);
+                flying.spawnX = x;
+                flying.spawnY = collisionComponent.baseOffsetY + collisionComponent.currentOffsetY;
                 entity.add(flying);
                 break;
             case SHOOTER:

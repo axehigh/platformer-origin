@@ -1,6 +1,5 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.map.EntityFactory;
 import com.axehigh.platformer.map.RoomState;
 import com.badlogic.ashley.core.Engine;
@@ -12,7 +11,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static com.axehigh.platformer.ecs.components.Mappers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -72,6 +72,10 @@ public class EnemySystemChaseTest extends SystemTestBase {
         flying.bobAmplitude = 10f;
         flying.bobFrequency = MathUtils.PI;
         entity.add(flying);
+        EnemyAttackComponent attack = ENEMY_ATTACK.get(entity);
+        if (attack != null) {
+            attack.attackRange = 24f; // 24 * 1.5 = 36 detect radius
+        }
         MOVEMENT.get(entity).grounded = false;
         return entity;
     }
@@ -137,17 +141,30 @@ public class EnemySystemChaseTest extends SystemTestBase {
     }
 
     @Test
-    public void flyerChasesHorizontallyKeepingBob() {
+    public void flyerFliesTowardPlayerIn2DAndRetreats() {
         Entity flyerEntity = flyer(0f, 0f);
-        player(40f, 0f); // within the box (dx=40 <= 72)
+        FlyingEnemyComponent flying = FLYING.get(flyerEntity);
+        flying.spawnX = 0f;
+        flying.spawnY = 0f;
+        Entity playerEntity = player(35f, 20f); // within circular detection range (radius = 24 * 2.5 = 60; dist = sqrt(35^2+20^2) = 40.3 <= 60)
         EnemyComponent enemyComp = ENEMY.get(flyerEntity);
         MovementComponent movement = MOVEMENT.get(flyerEntity);
 
         engine.update(DT);
 
-        assertEquals("flyer should face the player (right)", 1, enemyComp.direction);
-        assertEquals("flyer should move toward the player at full speed", enemyComp.speed, movement.velocity.x, EPSILON);
-        float expectedBob = 10f * MathUtils.PI * MathUtils.cos(MathUtils.PI * DT);
-        assertEquals("flyer keeps its vertical bob while chasing", expectedBob, movement.velocity.y, 0.05f);
+        assertEquals("flyer should approach player in 2D", 1, enemyComp.direction);
+        assertTrue("flyer velocity y should move towards player y (positive)", movement.velocity.y > 0f);
+        assertEquals("flyer should be in ATTACK_APPROACH state", FlyingEnemyComponent.FlightState.ATTACK_APPROACH, flying.flightState);
+
+        // Update with player still inside detection — should remain in ATTACK_APPROACH
+        engine.update(DT);
+        assertEquals("flyer should remain in ATTACK_APPROACH while player is inside detection", FlyingEnemyComponent.FlightState.ATTACK_APPROACH, flying.flightState);
+
+        // Now move player far away so flyer retreats
+        place(TRANSFORM.get(playerEntity), COLLISION.get(playerEntity), 300f, 300f);
+
+        engine.update(DT);
+
+        assertEquals("flyer should enter RETREAT state", FlyingEnemyComponent.FlightState.RETREAT, flying.flightState);
     }
 }

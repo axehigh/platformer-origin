@@ -108,11 +108,24 @@ public class EnemyAttackSystem extends IteratingSystem {
         float enemyCenterX = enemyCollision.worldBounds.x + enemyCollision.worldBounds.width / 2f;
         float enemyCenterY = enemyCollision.worldBounds.y + enemyCollision.worldBounds.height / 2f;
 
-        // Live detection: player CENTER inside the centered box (attackRange*3 wide per side, detectionHeight tall total).
-        float detectHalfX = attack.attackRange * 3f * unitScale;
-        float detectHalfY = attack.detectionHeight * unitScale / 2f;
-        boolean playerInDetection = Math.abs(playerCenterX - enemyCenterX) <= detectHalfX
-            && Math.abs(playerCenterY - enemyCenterY) <= detectHalfY;
+        // Live detection: player center within circular detection range (or rectangular box for walkers/others)
+        boolean playerInDetection = false;
+        if (attack != null) {
+            Entity enemyEntityRef = enemyEntity;
+            FlyingEnemyComponent flying = FLYING.get(enemyEntityRef);
+            if (flying != null) {
+                float dx = playerCenterX - enemyCenterX;
+                float dy = playerCenterY - enemyCenterY;
+                float distSq = dx * dx + dy * dy;
+                float detectRadius = attack.attackRange * 2.5f * unitScale;
+                playerInDetection = distSq <= detectRadius * detectRadius;
+            } else {
+                float detectHalfX = attack.attackRange * 3f * unitScale;
+                float detectHalfY = attack.detectionHeight * unitScale / 2f;
+                playerInDetection = Math.abs(playerCenterX - enemyCenterX) <= detectHalfX
+                    && Math.abs(playerCenterY - enemyCenterY) <= detectHalfY;
+            }
+        }
 
         // Always tick the cooldown (mirrors EnemyShootSystem; idles at done so the enemy is armed).
         attack.attackCooldown.update(deltaTime);
@@ -165,7 +178,7 @@ public class EnemyAttackSystem extends IteratingSystem {
             // Post-strike wind-down: still recovering from the last swing, no new trigger
             // (defense-in-depth — attackCooldown normally blocks this anyway).
             return;
-        } else if (attack.attackCooldown.isDone() && playerInDetection && attackRangeRectOverlaps(enemyCollision, enemy.direction, attack, playerCollision.worldBounds)) {
+        } else if (attack.attackCooldown.isDone() && playerInDetection && attackRangeOverlaps(enemyCollision, enemy.direction, attack, playerCollision.worldBounds, FLYING.has(enemyEntity), playerCenterX, playerCenterY)) {
             // Detected (chasing) player in the front commit rectangle and ready: commit —
             // snap-face the player, lock facing for the wind-up, stop patrol.
             attack.strike.reset();
@@ -177,16 +190,25 @@ public class EnemyAttackSystem extends IteratingSystem {
     }
 
     /**
-     * The strike-commit rectangle: {@code attackRange * unitScale} wide, adjacent to the enemy's
-     * facing edge, collision height tall, aligned to {@code worldBounds}. Overlap with the
-     * player's bounds commits a strike (provided the player is also detected).
+     * The strike-commit check: for flyers, circular attack range (attackRange * unitScale radius);
+     * for grounded enemies, rectangular attack range rect.
      */
-    private boolean attackRangeRectOverlaps(CollisionComponent enemyCollision, int direction, EnemyAttackComponent attack, Rectangle playerBounds) {
-        float rangeW = attack.attackRange * unitScale;
-        float rx = direction > 0
-            ? enemyCollision.worldBounds.x + enemyCollision.worldBounds.width
-            : enemyCollision.worldBounds.x - rangeW;
-        rangeRect.set(rx, enemyCollision.worldBounds.y, rangeW, enemyCollision.worldBounds.height);
-        return rangeRect.overlaps(playerBounds);
+    private boolean attackRangeOverlaps(CollisionComponent enemyCollision, int direction, EnemyAttackComponent attack, Rectangle playerBounds, boolean isFlyer, float playerCenterX, float playerCenterY) {
+        float ecx = enemyCollision.worldBounds.x + enemyCollision.worldBounds.width / 2f;
+        float ecy = enemyCollision.worldBounds.y + enemyCollision.worldBounds.height / 2f;
+        if (isFlyer) {
+            float dx = playerCenterX - ecx;
+            float dy = playerCenterY - ecy;
+            float distSq = dx * dx + dy * dy;
+            float attackRadius = attack.attackRange * unitScale;
+            return distSq <= attackRadius * attackRadius;
+        } else {
+            float rangeW = attack.attackRange * unitScale;
+            float rx = direction > 0
+                ? enemyCollision.worldBounds.x + enemyCollision.worldBounds.width
+                : enemyCollision.worldBounds.x - rangeW;
+            rangeRect.set(rx, enemyCollision.worldBounds.y, rangeW, enemyCollision.worldBounds.height);
+            return rangeRect.overlaps(playerBounds);
+        }
     }
 }

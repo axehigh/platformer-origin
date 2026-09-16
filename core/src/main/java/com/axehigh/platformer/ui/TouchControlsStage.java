@@ -38,6 +38,19 @@ public class TouchControlsStage extends Stage {
      */
     private float baseAlpha = UI_BUTTON_ALPHA;
 
+    /**
+     * Context-driven visibility of the interact/drop buttons, set by {@link #setInteractVisible(boolean)}
+     * / {@link #setDropVisible(boolean)} (e.g. near an exit gate or on a drop-through platform).
+     * Kept separate from render visibility so a tutorial highlight can force-show a hidden contextual
+     * button while its pulse is active; clearing the highlight restores the context-driven state.
+     */
+    private boolean interactContextVisible = false;
+    private boolean dropContextVisible = false;
+
+    /** Tutorial-highlight force-show flags; see the context-visibility fields above. */
+    private boolean interactHighlighted = false;
+    private boolean dropHighlighted = false;
+
     public TouchControlsStage(Viewport viewport, Skin skin, PlayerInputSystem inputSystem,
                               Drawable inventoryIcon, Runnable onInventoryToggle) {
         super(viewport);
@@ -124,7 +137,8 @@ public class TouchControlsStage extends Stage {
      * Shows/hides the contextual interact button, e.g. while the player is near an exit gate.
      */
     public void setInteractVisible(boolean visible) {
-        interactButton.setVisible(visible);
+        interactContextVisible = visible;
+        applyInteractVisibility();
     }
 
     /**
@@ -132,7 +146,16 @@ public class TouchControlsStage extends Stage {
      * drop-through platform.
      */
     public void setDropVisible(boolean visible) {
-        dropButton.setVisible(visible);
+        dropContextVisible = visible;
+        applyDropVisibility();
+    }
+
+    private void applyInteractVisibility() {
+        interactButton.setVisible(interactContextVisible || interactHighlighted);
+    }
+
+    private void applyDropVisibility() {
+        dropButton.setVisible(dropContextVisible || dropHighlighted);
     }
 
     /**
@@ -186,6 +209,8 @@ public class TouchControlsStage extends Stage {
         if (t.equals("attack") || t.equals("sword") || t.equals("b") || t.equals("melee")) return "sword";
         if (t.equals("special") || t.equals("ranged") || t.equals("y") || t.equals("dagger") || t.equals("throw")) return "daggers";
         if (t.equals("inventory") || t.equals("bag") || t.equals("potion")) return "potion";
+        if (t.equals("enter") || t.equals("exit") || t.equals("up") || t.equals("door") || t.equals("interact")) return "door";
+        if (t.equals("down") || t.equals("drop")) return "down";
         if (t.equals("left")) return "left";
         if (t.equals("right")) return "right";
         return null;
@@ -197,6 +222,8 @@ public class TouchControlsStage extends Stage {
             case "sword":   return bButton;
             case "daggers": return yButton;
             case "potion":  return inventoryButton;
+            case "door":    return interactButton;
+            case "down":    return dropButton;
             case "left":    return leftButton;
             case "right":   return rightButton;
             default:        return null;
@@ -211,6 +238,8 @@ public class TouchControlsStage extends Stage {
         inventoryButton.clearHighlightColor();
         leftButton.clearHighlightColor();
         rightButton.clearHighlightColor();
+        interactButton.clearHighlightColor();
+        dropButton.clearHighlightColor();
 
         String icon = iconNameFor(target);
         if (icon != null) {
@@ -220,6 +249,14 @@ public class TouchControlsStage extends Stage {
                 highlight.setHighlightColor(pulse, pulse, 0.2f);
             }
         }
+
+        // A highlighted contextual button is force-shown while its pulse is active, even if the
+        // context (exit gate / drop-through platform) hasn't set it visible; restoring the flags
+        // on clear falls back to the context-driven state. TutorialSystem dispatches every frame.
+        interactHighlighted = "door".equals(icon);
+        dropHighlighted = "down".equals(icon);
+        applyInteractVisibility();
+        applyDropVisibility();
 
         // Boost overlay alpha while a highlight is active so the pulsing icon is visible at a
         // glance; restore the mode-set base alpha when no highlight is active.

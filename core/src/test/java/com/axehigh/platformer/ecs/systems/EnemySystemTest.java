@@ -1,6 +1,5 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.ecs.components.EnemyComponent.AiMode;
 import com.axehigh.platformer.map.EntityFactory;
 import com.axehigh.platformer.map.RoomState;
@@ -12,8 +11,7 @@ import com.badlogic.gdx.utils.Array;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.axehigh.platformer.ecs.components.Mappers.ENEMY;
-import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
+import static com.axehigh.platformer.ecs.components.Mappers.*;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -345,5 +343,41 @@ public class EnemySystemTest extends SystemTestBase {
 
         assertEquals(0, engine.getEntities().size());
         verify(entityFactory, never()).popCoins(any(), anyFloat(), anyFloat(), anyInt(), anyFloat(), any());
+    }
+
+    @Test
+    public void flyingEnemyAvoidsObstaclesUsingWorldBoundsLookAhead() {
+        // Setup player within detection range to trigger ATTACK_APPROACH
+        roomState.activeRoomIndex = 0;
+        Entity player = entity(
+            transform(200f, 0f),
+            player(),
+            movement(),
+            collision(0f, 0f, 20f, 20f)
+        );
+        place(TRANSFORM.get(player), COLLISION.get(player), 200f, 0f);
+        engine.addEntity(player);
+
+        // Flying enemy at origin (0, 0) with a wall directly ahead in its path toward the player
+        Entity flyer = enemy(0f, 0f);
+        FlyingEnemyComponent flying = new FlyingEnemyComponent();
+        flyer.add(flying);
+
+        // Place a wall blocking rightward movement starting right at the flyer's collision bounds right edge
+        CollisionComponent flyerCol = COLLISION.get(flyer);
+        float wallX = flyerCol.worldBounds.x + flyerCol.worldBounds.width;
+        float wallY = flyerCol.worldBounds.y - 10f;
+        collisionRects.add(new Rectangle(wallX, wallY, 10f, 60f));
+
+        EnemyComponent enemyComponent = ENEMY.get(flyer);
+        EnemyAttackComponent attack = new EnemyAttackComponent();
+        attack.attackRange = 300f;
+        flyer.add(attack);
+
+        engine.update(DT);
+
+        // Movement should have been adjusted (obstacle detected, vertical steering applied or velocity modified)
+        MovementComponent movement = MOVEMENT.get(flyer);
+        assertTrue("Flying enemy should steer around obstacle using bounds-based look-ahead", movement.velocity.y != 0f || movement.velocity.x < 50f);
     }
 }

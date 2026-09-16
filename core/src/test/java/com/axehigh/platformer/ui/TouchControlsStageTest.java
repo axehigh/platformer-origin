@@ -296,6 +296,93 @@ public class TouchControlsStageTest {
     }
 
     @Test
+    public void iconNameFor_interactVariantsReturnsDoorDrawable() {
+        for (String variant : new String[]{"enter", "exit", "up", "door", "interact"}) {
+            assertEquals(variant, "door", TouchControlsStage.iconNameFor(variant));
+            assertEquals(variant + " (upper)", "door", TouchControlsStage.iconNameFor(variant.toUpperCase()));
+            assertEquals(variant + " (padded)", "door", TouchControlsStage.iconNameFor("  " + variant + " "));
+        }
+    }
+
+    @Test
+    public void iconNameFor_dropVariantsReturnsDownDrawable() {
+        for (String variant : new String[]{"down", "drop"}) {
+            assertEquals(variant, "down", TouchControlsStage.iconNameFor(variant));
+            assertEquals(variant + " (upper)", "down", TouchControlsStage.iconNameFor(variant.toUpperCase()));
+            assertEquals(variant + " (padded)", "down", TouchControlsStage.iconNameFor("  " + variant + " "));
+        }
+    }
+
+    @Test
+    public void setHighlightedControl_exitOrEnterForceShowsInteractButton() {
+        for (String target : new String[]{"exit", "enter", "door", "interact", "up"}) {
+            stage.setHighlightedControl(target, 0f);
+            assertTrue(target + " should force-show the interact button", findButton("door").isVisible());
+            assertFalse(target + " must NOT force-show the drop button", findButton("down").isVisible());
+        }
+    }
+
+    @Test
+    public void setHighlightedControl_dropOrDownForceShowsDropButton() {
+        for (String target : new String[]{"down", "drop"}) {
+            stage.setHighlightedControl(target, 0f);
+            assertTrue(target + " should force-show the drop button", findButton("down").isVisible());
+            assertFalse(target + " must NOT force-show the interact button", findButton("door").isVisible());
+        }
+    }
+
+    @Test
+    public void setHighlightedControl_nonContextualKeywordKeepsContextualButtonsHidden() {
+        for (String target : new String[]{"jump", "frobnicate"}) {
+            stage.setHighlightedControl(target, 0f);
+            assertFalse(target + " should leave the interact button hidden", findButton("door").isVisible());
+            assertFalse(target + " should leave the drop button hidden", findButton("down").isVisible());
+        }
+    }
+
+    @Test
+    public void setHighlightedControl_unknownAfterInteractHighlightRestoresHiddenContext() {
+        stage.setHighlightedControl("exit", 0f);
+        assertTrue("interact should be force-shown while highlighted", findButton("door").isVisible());
+
+        stage.setHighlightedControl("frobnicate", 0f);
+
+        assertFalse("interact should return to its hidden context state after the highlight clears",
+            findButton("door").isVisible());
+    }
+
+    @Test
+    public void setHighlightedControl_unknownAfterDropHighlightRestoresHiddenContext() {
+        stage.setHighlightedControl("drop", 0f);
+        assertTrue("drop should be force-shown while highlighted", findButton("down").isVisible());
+
+        stage.setHighlightedControl("", 0f);
+
+        assertFalse("drop should return to its hidden context state after the highlight clears",
+            findButton("down").isVisible());
+    }
+
+    @Test
+    public void setInteractVisibleAndDropVisibleStillShowContextualButtons() {
+        stage.setInteractVisible(true);
+        assertTrue("interact button should be visible once the context shows it", findButton("door").isVisible());
+
+        stage.setDropVisible(true);
+        assertTrue("drop button should be visible once the context shows it", findButton("down").isVisible());
+    }
+
+    @Test
+    public void setInteractVisibleAndDropVisible_falseAfterTrueHidesButtons() {
+        stage.setInteractVisible(true);
+        stage.setInteractVisible(false);
+        assertFalse("interact button should hide when the context is cleared", findButton("door").isVisible());
+
+        stage.setDropVisible(true);
+        stage.setDropVisible(false);
+        assertFalse("drop button should hide when the context is cleared", findButton("down").isVisible());
+    }
+
+    @Test
     public void setHighlightedControl_clearingRestoresBaseAlpha() {
         stage.setAlpha(0.4f);
         stage.setHighlightedControl("jump", 0.5f);

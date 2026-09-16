@@ -218,14 +218,39 @@ class PickupFactory {
             float spawnX = x;
             float spawnY = y;
 
-            // If spawn overlaps a collision rect, push upward to the nearest open space
+            // If spawn overlaps a collision rect, push away horizontally or vertically to open space
             if (collisionRects != null) {
                 Rectangle testRect = new Rectangle(spawnX - coinSize / 2f, spawnY - coinSize / 2f, coinSize, coinSize);
                 for (Rectangle rect : collisionRects) {
                     if (testRect.overlaps(rect)) {
-                        spawnY = rect.y + rect.height + coinSize / 2f + 1f;
-                        testRect.setY(spawnY - coinSize / 2f);
-                        break;
+                        // Check if closer to left/right or top/bottom escape, or simply clear the wall
+                        float overlapLeft = (spawnX + coinSize / 2f) - rect.x;
+                        float overlapRight = (rect.x + rect.width) - (spawnX - coinSize / 2f);
+                        float overlapBottom = (spawnY + coinSize / 2f) - rect.y;
+                        float overlapTop = (rect.y + rect.height) - (spawnY - coinSize / 2f);
+
+                        // Find minimum push out
+                        float minOverlapX = Math.min(overlapLeft, overlapRight);
+                        float minOverlapY = Math.min(overlapBottom, overlapTop);
+
+                        if (minOverlapX < minOverlapY) {
+                            if (overlapLeft < overlapRight) {
+                                spawnX = rect.x - coinSize / 2f - 1f;
+                                if (velocityX > 0) velocityX = -velocityX;
+                            } else {
+                                spawnX = rect.x + rect.width + coinSize / 2f + 1f;
+                                if (velocityX < 0) velocityX = -velocityX;
+                            }
+                        } else {
+                            if (overlapBottom < overlapTop) {
+                                spawnY = rect.y - coinSize / 2f - 1f;
+                                if (velocityY > 0) velocityY = -velocityY;
+                            } else {
+                                spawnY = rect.y + rect.height + coinSize / 2f + 1f;
+                                if (velocityY < 0) velocityY = -velocityY;
+                            }
+                        }
+                        testRect.set(spawnX - coinSize / 2f, spawnY - coinSize / 2f, coinSize, coinSize);
                     }
                 }
             }

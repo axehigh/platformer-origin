@@ -18,4 +18,18 @@ public class FlyingEnemyComponent implements Component {
     public float bobFrequency = MathUtils.PI;
     /** Elapsed time accumulator driving the wave's phase; frozen while the enemy is hit-stunned. */
     public float bobTime = 0f;
+    /** Spawn X coordinate where the flyer originated, used for patrol/retreat bounds. */
+    public float spawnX = 0f;
+    /** Spawn Y coordinate (center or bottom) where the flyer originated, used for vertical patrol/retreat center. */
+    public float spawnY = 0f;
+    /** Current flight/patrol state for flyers: PATROL, ATTACK_APPROACH, RETREAT. */
+    public FlightState flightState = FlightState.PATROL;
+    /** Timer managing duration or cooldown of the retreat phase. */
+    public final com.axehigh.platformer.util.Timer retreatTimer = new com.axehigh.platformer.util.Timer();
+
+    public enum FlightState {
+        PATROL,
+        ATTACK_APPROACH,
+        RETREAT
+    }
 }
