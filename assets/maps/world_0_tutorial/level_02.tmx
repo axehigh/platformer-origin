@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="60" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="631">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="60" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="635">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
  <tileset firstgid="70" source="../tileset/items.tsx"/>
  <tileset firstgid="101" source="../tileset/enemy.tsx"/>
@@ -26,7 +26,7 @@
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,60,3,2,5,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,162,162,162,162,162,162,4,0,0,162,162,0,0,0,162,162,0,0,0,0,0,2,
-2,61,3,4,61,3,0,0,2,3,2,2,2,2,0,0,0,130,0,0,0,0,130,0,0,0,0,5,2,2147483650,4,5,3,0,0,0,0,2,33,0,33,0,33,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+2,61,3,4,61,3,0,0,2,3,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,5,2,2147483650,4,5,3,0,0,0,0,2,33,0,33,0,33,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,2,2,2,0,0,0,0,162,2,2,4,5,2,5,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,2,
 2,0,0,0,0,62,67,67,67,64,0,0,0,0,0,0,0,0,0,0,0,0,0,0,67,67,29,33,0,0,0,0,33,0,0,0,64,0,59,0,0,0,0,59,0,0,0,2,2,33,33,33,2,2,0,0,0,0,0,2,
@@ -81,6 +81,24 @@
   <object id="627" gid="82" x="5888" y="1152" width="128" height="128"/>
   <object id="628" gid="82" x="6656" y="896" width="128" height="128"/>
   <object id="629" gid="82" x="6144" y="896" width="128" height="128"/>
+  <object id="631" gid="30" x="832" y="1024" width="128" height="128">
+   <properties>
+    <property name="text" value="Pick up the crystal"/>
+   </properties>
+  </object>
+  <object id="632" gid="73" x="1024" y="1024" width="128" height="128"/>
+  <object id="633" gid="30" x="3968" y="640" width="128" height="128">
+   <properties>
+    <property name="text">Certain tiles 
+will dissappears</property>
+   </properties>
+  </object>
+  <object id="634" gid="30" x="4352" y="1152" width="128" height="128">
+   <properties>
+    <property name="text">Certain tiles 
+will dissappear</property>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="7" name="enemies">
   <object id="630" gid="103" x="1792" y="1152" width="128" height="128">

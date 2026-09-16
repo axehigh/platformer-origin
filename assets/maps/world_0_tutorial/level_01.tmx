@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="60" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="623">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="60" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="632">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
  <tileset firstgid="70" source="../tileset/items.tsx"/>
  <tileset firstgid="101" source="../tileset/enemy.tsx"/>
@@ -65,10 +65,11 @@
   <object id="610" gid="82" x="2688" y="1024" width="128" height="128"/>
   <object id="611" gid="82" x="2816" y="896" width="128" height="128"/>
   <object id="612" gid="82" x="2944" y="768" width="128" height="128"/>
-  <object id="618" gid="75" x="3360" y="1024" width="128" height="128"/>
+  <object id="618" gid="75" x="3456" y="1024" width="128" height="128"/>
   <object id="619" gid="30" x="3584" y="640" width="128" height="128">
    <properties>
-    <property name="text" value="You can jump down"/>
+    <property name="highlight" value="down"/>
+    <property name="text" value="Jump down"/>
    </properties>
   </object>
   <object id="620" gid="30" x="3712" y="1024" width="128" height="128">
@@ -84,15 +85,40 @@ and pick up the Speed Potion. </property>
 and avoid the traps</property>
    </properties>
   </object>
-  <object id="622" gid="30" x="3264" y="1024" width="128" height="128">
+  <object id="622" gid="30" x="3328" y="1024" width="128" height="128">
    <properties>
-    <property name="highlight" value="inventory"/>
-    <property name="text" value="Use Inventory to drink potion."/>
+    <property name="text">Attack the chest 
+and pick up the Speed Potion. </property>
+   </properties>
+  </object>
+  <object id="623" gid="30" x="4864" y="1152" width="128" height="128">
+   <properties>
+    <property name="highlight" value="attack"/>
+    <property name="text" value="Defeat the Goblin"/>
+   </properties>
+  </object>
+  <object id="624" gid="30" x="5760" y="384" width="128" height="128">
+   <properties>
+    <property name="highlight" value="jump"/>
+    <property name="text" value="Use double jump"/>
+   </properties>
+  </object>
+  <object id="625" gid="30" x="7072" y="1152" width="128" height="128">
+   <properties>
+    <property name="highlight" value="exit"/>
+    <property name="text">Enter the door to
+exit this dungeon</property>
    </properties>
   </object>
  </objectgroup>
  <objectgroup id="7" name="enemies">
-  <object id="613" gid="103" x="3712" y="640" width="128" height="128"/>
+  <object id="613" gid="103" x="5376" y="1152" width="128" height="128"/>
+  <object id="626" gid="103" x="6784" y="1152" width="128" height="128"/>
+  <object id="627" gid="82" x="5120" y="512" width="128" height="128"/>
+  <object id="628" gid="82" x="5888" y="384" width="128" height="128"/>
+  <object id="629" gid="82" x="5632" y="384" width="128" height="128"/>
+  <object id="630" gid="82" x="6400" y="384" width="128" height="128"/>
+  <object id="631" gid="82" x="7040" y="384" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="6" name="Rooms" locked="1">
   <object id="601" name="room0" x="0" y="0" width="7680" height="1280"/>

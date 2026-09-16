@@ -99,6 +99,10 @@
   </objectgroup>
  </tile>
  <tile id="29">
+  <properties>
+   <property name="highlight" value=""/>
+   <property name="text" value=""/>
+  </properties>
   <image source="../gfx/tiles/dungeon/signboard.png" width="128" height="128"/>
  </tile>
  <tile id="30">
@@ -187,6 +191,9 @@
  </tile>
  <tile id="58">
   <image source="../gfx/tiles/bg/pillar01.png" width="113" height="256"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="113" height="256"/>
+  </objectgroup>
  </tile>
  <tile id="59">
   <image source="../gfx/tiles/new.png" width="128" height="128"/>
@@ -218,6 +225,9 @@
  </tile>
  <tile id="67">
   <image source="../gfx/tiles/environment/Wooden_Barrel.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="8" y="5" width="112" height="123"/>
+  </objectgroup>
  </tile>
  <tile id="61">
   <image source="../gfx/tiles/dwarf_mine/Wooden_Barrel.png" width="128" height="128"/>
@@ -227,5 +237,8 @@
  </tile>
  <tile id="68">
   <image source="../gfx/tiles/environment/Cartoon_Medieval_Carpenters_Workshop_Level_Set_Environment - Wooden Barrel.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="9" y="9" width="110" height="117"/>
+  </objectgroup>
  </tile>
 </tileset>
