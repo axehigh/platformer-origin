@@ -15,8 +15,8 @@ import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
  * Drives shooter-enemy firing: every {@code shootInterval} seconds, spawns a bullet at the
- * enemy's position traveling horizontally in its current patrol {@code direction} (no
- * player-aiming/aggro). Firing is skipped only during the enemy's initial hit-stun, so a
+ * collision box's vertical center at the enemy's leading edge (in its current patrol {@code
+ * direction}; no player-aiming/aggro). Firing is skipped only during the enemy's initial hit-stun, so a
  * knockback pop isn't interrupted by a shot — it resumes (this is the shooter's "intent"
  * defense against a player hugging it mid-combo) once the enemy enters its post-hit recovery
  * idle. It is also
@@ -83,7 +83,7 @@ public class EnemyShootSystem extends IteratingSystem {
         Entity bullet = engine.createEntity();
 
         float bulletSize = BULLET_SIZE * unitScale;
-        float centerY = enemyTransform.position.y + (enemyCollision.bounds.height - bulletSize) / 2f;
+        float centerY = enemyTransform.position.y + enemyCollision.bounds.y + (enemyCollision.bounds.height - bulletSize) / 2f;
         float spawnX = direction > 0
             ? enemyTransform.position.x + enemyCollision.bounds.width
             : enemyTransform.position.x - bulletSize;

@@ -1,5 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
+import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.map.EntityFactory;
 import com.axehigh.platformer.map.RoomState;
 import com.badlogic.ashley.core.Engine;
@@ -11,8 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static com.axehigh.platformer.ecs.components.Mappers.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 /**

@@ -19,13 +19,25 @@ import static org.mockito.Mockito.when;
 
 /**
  * Headless unit tests for {@code EnemyShootSystem}: the cooldown-triggered firing, the room-activity
- * gate, and the hit-stun suppression — no shots while the shooter is inside its hit-stun, with
- * firing resuming immediately afterwards (the post-hit idle recovery window does NOT gate firing).
+ * gate, the hit-stun suppression — no shots while the shooter is inside its hit-stun, with
+ * firing resuming immediately afterwards (the post-hit idle recovery window does NOT gate firing) —
+ * and the bullet's spawn position at the collision box's vertical center on the enemy's leading
+ * edge (the collision box is offset from the sprite origin via {@code CollisionComponent.bounds.y}).
  * The {@code AssetManager} is mocked so the bullet's texture resolves headless.
  */
 public class EnemyShootSystemTest extends SystemTestBase {
 
     private static final String BULLET_TEXTURE_PATH = "gfx/old/bullet.png";
+
+    /** Mirrors {@code EnemyShootSystem.BULLET_SIZE}; the test system's unitScale stays at the default 1. */
+    private static final float BULLET_SIZE = 4f;
+
+    /** A realistic shooter collision box: 128px sprite scaled to the 16x16 spider at 8x unit scale,
+     *  with the box's local Y offset sitting ~10.28 world units above the sprite origin. */
+    private static final float COLLISION_OFFSET_X = 9.48f;
+    private static final float COLLISION_OFFSET_Y = 10.28f;
+    private static final float COLLISION_WIDTH = 6.64f;
+    private static final float COLLISION_HEIGHT = 6.64f;
 
     private PooledEngine engine;
     private EnemyShootSystem system;
@@ -47,7 +59,7 @@ public class EnemyShootSystemTest extends SystemTestBase {
 
     private Entity shooter(float x, float y) {
         TransformComponent transform = transform(x, y);
-        CollisionComponent collision = collision(0f, 0f, 20f, 40f);
+        CollisionComponent collision = collision(COLLISION_OFFSET_X, COLLISION_OFFSET_Y, COLLISION_WIDTH, COLLISION_HEIGHT);
         place(transform, collision, x, y);
         EnemyComponent enemy = new EnemyComponent();
         enemy.direction = 1;
@@ -110,6 +122,21 @@ public class EnemyShootSystemTest extends SystemTestBase {
 
         assertEquals(2, engine.getEntities().size());
         assertNotNull("active post-hit idle must not gate firing once the cooldown is done", singleBullet());
+    }
+
+    @Test
+    public void bulletSpawnsAtCollisionBoxVerticalCenter() {
+        float x = 40f;
+        float y = 120f;
+        shooter(x, y);
+
+        engine.update(DT);
+
+        Entity bullet = singleBullet();
+        assertNotNull("ready shooter should spawn a bullet", bullet);
+        float expectedCenterY = y + COLLISION_OFFSET_Y + (COLLISION_HEIGHT - BULLET_SIZE) / 2f;
+        assertEquals("bullet must spawn at the collision box's vertical center, not its bottom",
+                expectedCenterY, TRANSFORM.get(bullet).position.y, EPSILON);
     }
 
     @Test
