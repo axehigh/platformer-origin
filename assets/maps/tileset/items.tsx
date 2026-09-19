@@ -3,18 +3,30 @@
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="3" type="chest">
   <image source="../gfx/items/Chest_01_Locked.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="3">
+   <object id="2" x="7" y="40" width="102" height="81"/>
+  </objectgroup>
  </tile>
  <tile id="4" type="chest_open">
   <image source="../gfx/items/Chest_01_Unlocked.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="8" y="39" width="102" height="81"/>
+  </objectgroup>
  </tile>
  <tile id="5" type="chest_elite">
   <properties>
    <property name="potionType" value="speed"/>
   </properties>
   <image source="../gfx/items/Chest_02_Locked.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="7" y="39" width="102" height="81"/>
+  </objectgroup>
  </tile>
  <tile id="6" type="chest_elite_open">
   <image source="../gfx/items/Chest_02_Unlocked.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="7" y="40" width="102" height="81"/>
+  </objectgroup>
  </tile>
  <tile id="7" type="coin">
   <image source="../gfx/items/Coin_01.png" width="128" height="128"/>

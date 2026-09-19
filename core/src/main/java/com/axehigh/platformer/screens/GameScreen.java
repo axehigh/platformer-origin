@@ -362,6 +362,23 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         touchControlsStage.setShootAlpha(playerComponent.ammo > 0 ? 1f : 0.4f);
 
         hudStage.getViewport().apply();
+        boolean debugEnabled = com.axehigh.platformer.ecs.systems.DebugRenderSystem.isDebugEnabled();
+        String currentPath = systems != null ? systems.levelManager.getCurrentLevelPath() : "";
+        String levelName = "";
+        for (com.axehigh.platformer.map.LevelDefinition def : com.axehigh.platformer.map.LevelCatalog.levels()) {
+            if (def.tmxPath.equals(currentPath)) {
+                int worldId = def.worldId;
+                String worldPrefix = worldId == com.axehigh.platformer.map.LevelCatalog.WORLD_TUTORIAL ? "Tutorial" :
+                                     worldId == com.axehigh.platformer.map.LevelCatalog.WORLD_DEMO ? "Demo" :
+                                     "World " + worldId;
+                levelName = worldPrefix + " - " + def.displayName;
+                break;
+            }
+        }
+        if (levelName.isEmpty()) {
+            levelName = currentPath;
+        }
+        hudStage.setDebugInfo(debugEnabled, levelName);
         hudStage.act(delta);
         hudStage.draw();
         if (touchControlsEnabled) {

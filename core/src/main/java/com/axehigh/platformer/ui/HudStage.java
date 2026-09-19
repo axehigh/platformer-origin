@@ -44,6 +44,7 @@ public class HudStage extends Stage {
     private final Image crystalIcon;
     private final Label crystalLabel;
     private final ImageButton pauseButton;
+    private final Label debugLevelLabel;
     private final ObjectMap<PotionType, TextureRegionDrawable> potionDrawables = new ObjectMap<>();
     private final Image[] buffImages;
     private final Label[] buffLabels;
@@ -121,6 +122,11 @@ public class HudStage extends Stage {
         centerGroup.add(buffRow).colspan(2).center().padTop(10f);
 
         Table rightGroup = new Table();
+        debugLevelLabel = new ShadowLabel("", counterStyle);
+        debugLevelLabel.setColor(Color.YELLOW);
+        debugLevelLabel.setVisible(false);
+        rightGroup.add(debugLevelLabel).padRight(15f);
+
         ImageButton.ImageButtonStyle pauseStyle = new ImageButton.ImageButtonStyle(skin.get("gameplay", ImageButton.ImageButtonStyle.class));
         pauseStyle.imageUp = skin.getDrawable("pause");
         pauseStyle.imageDown = skin.getDrawable("pause");
@@ -194,5 +200,12 @@ public class HudStage extends Stage {
 
     public ImageButton getPauseButton() {
         return pauseButton;
+    }
+
+    public void setDebugInfo(boolean debugEnabled, String levelName) {
+        debugLevelLabel.setVisible(debugEnabled);
+        if (debugEnabled && levelName != null) {
+            debugLevelLabel.setText("Level: " + levelName);
+        }
     }
 }

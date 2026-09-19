@@ -201,19 +201,10 @@ public class TouchControlsStage extends Stage {
      * Maps a tutorial highlight keyword (e.g. "jump", "a", "sword") to the matching touch-button
      * skin drawable name (e.g. "jump", "sword", "daggers"). Returns {@code null} for unknown
      * keywords; used by both this class and {@link TutorialSystem} for the inline tooltip icon.
+     * The alias → icon table is defined by {@link TutorialHighlight}; this delegates to it.
      */
     public static String iconNameFor(String target) {
-        if (target == null) return null;
-        String t = target.toLowerCase().trim();
-        if (t.equals("jump") || t.equals("a") || t.equals("j")) return "jump";
-        if (t.equals("attack") || t.equals("sword") || t.equals("b") || t.equals("melee")) return "sword";
-        if (t.equals("special") || t.equals("ranged") || t.equals("y") || t.equals("dagger") || t.equals("throw")) return "daggers";
-        if (t.equals("inventory") || t.equals("bag") || t.equals("potion")) return "potion";
-        if (t.equals("enter") || t.equals("exit") || t.equals("up") || t.equals("door") || t.equals("interact")) return "door";
-        if (t.equals("down") || t.equals("drop")) return "down";
-        if (t.equals("left")) return "left";
-        if (t.equals("right")) return "right";
-        return null;
+        return TutorialHighlight.iconNameFor(target);
     }
 
     private TouchButton buttonForIcon(String icon) {

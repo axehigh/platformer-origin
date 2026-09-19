@@ -102,6 +102,7 @@ public class EnemyAttackSystem extends IteratingSystem {
         CollisionComponent playerCollision = COLLISION.get(playerEntity);
         CollisionComponent enemyCollision = COLLISION.get(enemyEntity);
         MovementComponent enemyMovement = MOVEMENT.get(enemyEntity);
+        FlyingEnemyComponent flying = FLYING.get(enemyEntity);
 
         float playerCenterX = playerCollision.worldBounds.x + playerCollision.worldBounds.width / 2f;
         float playerCenterY = playerCollision.worldBounds.y + playerCollision.worldBounds.height / 2f;
@@ -112,7 +113,6 @@ public class EnemyAttackSystem extends IteratingSystem {
         boolean playerInDetection = false;
         if (attack != null) {
             Entity enemyEntityRef = enemyEntity;
-            FlyingEnemyComponent flying = FLYING.get(enemyEntityRef);
             if (flying != null) {
                 float dx = playerCenterX - enemyCenterX;
                 float dy = playerCenterY - enemyCenterY;
@@ -158,15 +158,31 @@ public class EnemyAttackSystem extends IteratingSystem {
                     attack.attackCooldown.start(attack.attackInterval);
                 } else {
                     // Blade out: live strike bounds = enemy collision width x height, adjacent in front.
+                    // For flyers, dynamically expand forward and slightly downward in the direction it's facing.
                     strikeLive = true;
-                    if (enemy.direction > 0) {
-                        strikeBounds.set(enemyCollision.worldBounds.x + enemyCollision.worldBounds.width,
-                            enemyCollision.worldBounds.y,
-                            enemyCollision.worldBounds.width, enemyCollision.worldBounds.height);
+                    if (flying != null) {
+                        float expandW = enemyCollision.worldBounds.width * 1.5f;
+                        float expandH = enemyCollision.worldBounds.height * 1.2f;
+                        float downwardOffset = enemyCollision.worldBounds.height * 0.2f;
+                        if (enemy.direction > 0) {
+                            strikeBounds.set(enemyCollision.worldBounds.x + enemyCollision.worldBounds.width * 0.5f,
+                                enemyCollision.worldBounds.y - downwardOffset,
+                                expandW, expandH);
+                        } else {
+                            strikeBounds.set(enemyCollision.worldBounds.x - expandW + enemyCollision.worldBounds.width * 0.5f,
+                                enemyCollision.worldBounds.y - downwardOffset,
+                                expandW, expandH);
+                        }
                     } else {
-                        strikeBounds.set(enemyCollision.worldBounds.x - enemyCollision.worldBounds.width,
-                            enemyCollision.worldBounds.y,
-                            enemyCollision.worldBounds.width, enemyCollision.worldBounds.height);
+                        if (enemy.direction > 0) {
+                            strikeBounds.set(enemyCollision.worldBounds.x + enemyCollision.worldBounds.width,
+                                enemyCollision.worldBounds.y,
+                                enemyCollision.worldBounds.width, enemyCollision.worldBounds.height);
+                        } else {
+                            strikeBounds.set(enemyCollision.worldBounds.x - enemyCollision.worldBounds.width,
+                                enemyCollision.worldBounds.y,
+                                enemyCollision.worldBounds.width, enemyCollision.worldBounds.height);
+                        }
                     }
                     if (strikeBounds.overlaps(playerCollision.worldBounds)) {
                         int knockbackDirection = playerCenterX >= enemyCenterX ? 1 : -1;

@@ -48,6 +48,9 @@
    <property name="oneWay" type="bool" value="true"/>
   </properties>
   <image source="../gfx/tiles/dungeon/bridge.png" width="128" height="128"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="1" width="128" height="33"/>
+  </objectgroup>
  </tile>
  <tile id="15">
   <image source="../gfx/tiles/dungeon/bridge-2.png" width="128" height="128"/>
@@ -89,7 +92,7 @@
  <tile id="27">
   <image source="../gfx/tiles/dungeon/platform-one-way.png" width="129" height="128"/>
   <objectgroup draworder="index" id="2">
-   <object id="1" x="0.898246" y="0.898246" width="127.251" height="25.4503"/>
+   <object id="3" x="0" y="1" width="128" height="33"/>
   </objectgroup>
  </tile>
  <tile id="28">

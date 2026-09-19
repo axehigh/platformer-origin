@@ -15,6 +15,7 @@ It complements — but does not replace — `resources/docs-ai/ashley-ecs.md` (E
 3. [Layers — What Goes Where](#3-layers--what-goes-where)
 4. [Tile Behaviors — The Collision Layer Language](#4-tile-behaviors--the-collision-layer-language)
 5. [Object Markers — Things You Can Place](#5-object-markers--things-you-can-place)
+   - [5.8 Tutorial Signs](#58-tutorial-signs)
 6. [Rooms & Camera](#6-rooms--camera)
 7. [Effects & Lighting](#7-effects--lighting)
 8. [Full Property Reference](#8-full-property-reference)
@@ -267,6 +268,7 @@ Two ways to place a marker:
 | `enemy` | Enemy | `enemyType` (string, default `"walker"`), `aiMode` (string), `speed` (float), `patrolRange` (float), `loot` (string) | Put these on the `enemies` layer (or `objects`). Catalog: `walker` (goblin), `flyer` (mosquito), `shooter` (spider), `knight` (15 HP). `loot` defines drop behavior (e.g., `"coin:3, ammo:1"`). See `resources/docs-ai/enemies.md`. |
 | `trap` | Trap | `trapType` (string, default `"acidDrop"`), `direction` (string), `interval` (float), `speed` (float), `damage` (int), `duration` (float), `cooldown` (float), `pulseSpeed` (float) | Place on `objects`/`enemies`. See §5.6. |
 | `platform` | Moving platform | `amplitudeX`, `amplitudeY`, `speed`, `phase`, `axis` (see §5.7) | The object **rectangle size defines both the sprite and collision box**. |
+| `text` or `sign` | Tutorial sign (proximity tooltip + optional button highlight) | `text` (string), `message` (string, alias of `text`), `highlight` (string, optional) | See §5.8 for the full keyword table and a copy-paste example. |
 | (any other) | — | — | Ignored. |
 
 ### 5.2 Coins
@@ -397,6 +399,53 @@ angle += speed * dt        (each frame)
 - The platform only **moves** while its owning room is the active one (`RoomState.activeRoomIndex`); it freezes when you're in another room. The player can still stand on a frozen platform.
 - Place the platform rectangle *inside* a `Rooms` rectangle so it's tied to that room.
 
+### 5.8 Tutorial Signs
+
+A tutorial sign is a **proximity trigger** that shows a floating tooltip above itself while the player stands near it, and can optionally **pulse a matching touch-control button** to teach controls hands-on ("walk up, read one tip, see the button glow"). Text and highlight are independent — a sign can have text only, highlight only, or both.
+
+**Placement:** draw a rectangle (or stamp a tile object) with `type` `"text"` (or `"sign"`) on the `objects` layer or any object layer. The object size defines the **sensor/world bounds** — keep it roughly the size of the sign art so the trigger reads as the sign itself.
+
+**Properties:**
+
+| Property | Type | Description |
+|---|---|---|
+| `text` | string | The tooltip message shown above the sign while the player overlaps its sensor. |
+| `message` | string | Alias of `text` — set either one, not both. |
+| `highlight` | string | Optional. An exact keyword (case-insensitive, whitespace-tolerated) selecting which touch button pulses. See the table below. |
+
+**Keyword cheat table** — each row is one highlightable button; **any one** alias in the left column lights that button:
+
+| `highlight` value (any one) | Highlighted button | Icon drawable |
+|---|---|---|
+| `jump`, `a`, `j` | A (jump) | `jump` |
+| `attack`, `sword`, `b`, `melee` | B (attack) | `sword` |
+| `special`, `ranged`, `y`, `dagger`, `throw` | Y (daggers/special) | `daggers` |
+| `inventory`, `bag`, `potion` | inventory (bag) | `potion` |
+| `left` | D-pad left | `left` |
+| `right` | D-pad right | `right` |
+| `enter`, `exit`, `up`, `door`, `interact` | interact (door) | `door` |
+| `down`, `drop` | drop-through (down) | `down` |
+
+**Notes:**
+
+- An **unknown/empty** `highlight` value means **no highlight** — the buttons stay white (context-driven visibility intact), and the sign shows text only.
+- The `door` and `down` buttons are **contextual** (normally hidden unless an exit gate / drop-through platform is nearby). While a highlight targeting them is active they are **force-shown**, and restored to context-driven visibility when it clears.
+- A sign's `highlight` also renders its **icon inline in the tooltip** (at the left of the panel text), so the tip maps 1:1 to the button to press.
+- Tip: pair the tooltip text with the keyword — `highlight="jump"` with the message "Press A to jump".
+
+**Copy-paste Tiled XML example** (a tutorial sign object with both text and a highlight; see also the signs in `assets/maps/world_0_tutorial/level_01.tmx`):
+
+```xml
+<object id="619" gid="30" x="3584" y="640" width="128" height="128">
+ <properties>
+  <property name="highlight" value="jump"/>
+  <property name="text" value="Press A to jump"/>
+ </properties>
+</object>
+```
+
+**Implementation & source of truth:** authoring is one thing, but the live behavior lives in `gameplay.md` §AF (proximity, tooltip, pulse, force-show), `ashley-ecs-systems.md` (`TutorialSystem`, priority `32`), and `ashley-ecs-components.md` (`TutorialComponent`). The **keyword list above is the single source of truth in the `TutorialHighlight` enum** (`com.axehigh.platformer.ui.TutorialHighlight`) — `TouchControlsStage.iconNameFor(...)` delegates to it, and the dedicated `TutorialHighlightDocsTest` fails if this table and the enum ever disagree.
+
 ---
 
 ## 6. Rooms & Camera
@@ -516,6 +565,9 @@ All properties are read as `float`/`string`/`boolean` and tolerate being set as 
 | `attackRange` | float | `24` | (enemy only, melee) Strike-commit reach override in tile units (`value × unitScale` tiles in front of the enemy on 128px maps). Legacy alias `meleeRange`. |
 | `windUpDuration` | float | `0.4` | (enemy only, melee) Seconds of wind-up telegraph before the strike window opens. |
 | `secretRoom` | string | — | (object markers only) Defers this marker — it is partitioned out of the normal spawn layers and only spawned when its named room is revealed. Must match a `Rooms` rect name. |
+| `text` | string | — | (tutorial sign only) The tooltip message shown above the sign while the player overlaps its sensor (see §5.8). |
+| `message` | string | — | (tutorial sign only) Alias of `text` — set either one, not both (see §5.8). |
+| `highlight` | string | — | (tutorial sign only) Button-highlight keyword for the sign — any alias from the §5.8 keyword table; unknown/empty values silently do nothing (no highlight). |
 
 ### Moving Platform Properties
 
@@ -583,6 +635,7 @@ Checklist when something feels wrong:
 | Secret wall doesn't break | Tile not flagged `secret = true` | Plain solid tiles won't break. Also needs **three** hits (one per swing), and the strike hitbox must reach the wall. |
 | Secret room spawns loot from the start / never reveals | Interior markers missing `secretRoom` object property, or entry wall's tile missing `secretRoom` naming the `Rooms` rect | Markers must carry `secretRoom` to be deferred. The wall's `secretRoom` is a **tile** property read from the tile itself — it can't live on the cell. |
 | Secret room visible through wall before reveal | `secret_hide` doesn't cover full room footprint (or `Rooms` rect bigger than veil) | Veil must tile every cell over the rect and sit at the top of the layer stack. |
+| Tutorial sign doesn't pulse a button | `highlight` value isn't in the §5.8 keyword table | Use an exact keyword from §5.8; unknown values silently do nothing. |
 
 ---
 

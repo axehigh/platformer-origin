@@ -108,8 +108,16 @@
   </object>
   <object id="515" name="coin_r0" gid="82" x="1664" y="768" width="128" height="128"/>
   <object id="516" name="coin_r0" gid="82" x="1300" y="512" width="128" height="128"/>
-  <object id="519" gid="73" x="128" y="1664" width="128" height="128"/>
-  <object id="520" gid="73" x="512" y="1408" width="128" height="128"/>
+  <object id="519" gid="73" x="128" y="1664" width="128" height="128">
+   <properties>
+    <property name="secretRoom" value="secret_room"/>
+   </properties>
+  </object>
+  <object id="520" gid="73" x="512" y="1408" width="128" height="128">
+   <properties>
+    <property name="secretRoom" value="secret_room"/>
+   </properties>
+  </object>
   <object id="525" gid="87" x="3391.74" y="970.022" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="7" name="enemies">
