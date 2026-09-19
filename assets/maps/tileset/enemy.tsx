@@ -12,24 +12,33 @@
  <tile id="3" type="enemy">
   <properties>
    <property name="enemyType" value="knight"/>
+   <property name="loot" value=""/>
+   <property name="size" propertytype="EnemySize" value="medium"/>
   </properties>
   <image source="../gfx/enemies/big_knight01_idle1.png" width="256" height="256"/>
  </tile>
  <tile id="4" type="enemy">
   <properties>
    <property name="enemyType" value="shooter"/>
+   <property name="loot" value=""/>
+   <property name="size" propertytype="EnemySize" value="medium"/>
   </properties>
   <image source="../gfx/enemies/ghost01_idle1.png" width="128" height="128"/>
  </tile>
  <tile id="5" type="enemy">
   <properties>
    <property name="enemyType" value="shooter"/>
+   <property name="loot" value=""/>
+   <property name="patrolRange" type="float" value="2"/>
+   <property name="size" propertytype="EnemySize" value="medium"/>
   </properties>
   <image source="../gfx/enemies/spider_0spider.png" width="128" height="128"/>
  </tile>
  <tile id="6" type="enemy">
   <properties>
    <property name="enemyType" value="flyer"/>
+   <property name="loot" value=""/>
+   <property name="size" propertytype="EnemySize" value="medium"/>
   </properties>
   <image source="../gfx/enemies/mosquito_0mosquito.png" width="128" height="128"/>
  </tile>
