@@ -49,13 +49,13 @@
   </properties>
   <image source="../gfx/tiles/dungeon/bridge.png" width="128" height="128"/>
   <objectgroup draworder="index" id="2">
-   <object id="1" x="0" y="1" width="128" height="33"/>
+   <object id="1" x="0" y="0" width="128" height="33"/>
   </objectgroup>
  </tile>
  <tile id="15">
   <image source="../gfx/tiles/dungeon/bridge-2.png" width="128" height="128"/>
   <objectgroup draworder="index" id="4">
-   <object id="8" x="0" y="1" width="128" height="33"/>
+   <object id="8" x="0" y="0" width="128" height="33"/>
    <object id="9" x="27" y="34" width="75" height="92"/>
   </objectgroup>
  </tile>
@@ -86,13 +86,13 @@
  <tile id="26">
   <image source="../gfx/tiles/dungeon/platform-float.png" width="128" height="128"/>
   <objectgroup draworder="index" id="2">
-   <object id="1" x="1.19766" y="1.19766" width="125.754" height="63.1766"/>
+   <object id="1" x="1.19766" y="0.19766" width="125.754" height="63.1766"/>
   </objectgroup>
  </tile>
  <tile id="27">
   <image source="../gfx/tiles/dungeon/platform-one-way.png" width="129" height="128"/>
   <objectgroup draworder="index" id="2">
-   <object id="3" x="0" y="1" width="128" height="33"/>
+   <object id="3" x="0" y="0" width="128" height="33"/>
   </objectgroup>
  </tile>
  <tile id="28">
@@ -189,7 +189,7 @@
  <tile id="57">
   <image source="../gfx/tiles/caves/platform-float.png" width="128" height="128"/>
   <objectgroup draworder="index" id="2">
-   <object id="1" x="1.19766" y="1.19766" width="126.653" height="48.5053"/>
+   <object id="1" x="1.19766" y="0.19766" width="126.653" height="48.5053"/>
   </objectgroup>
  </tile>
  <tile id="58">
@@ -222,6 +222,9 @@
    <property name="crumble" type="bool" value="true"/>
   </properties>
   <image source="../gfx/tiles/lava/platform-one-way.png" width="129" height="128"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="126.653" height="48.5053"/>
+  </objectgroup>
  </tile>
  <tile id="66">
   <image source="../gfx/tiles/environment/box.png" width="128" height="128"/>

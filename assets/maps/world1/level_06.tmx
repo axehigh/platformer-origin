@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="17" tilewidth="128" tileheight="128" infinite="0" nextlayerid="8" nextobjectid="530">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="17" tilewidth="128" tileheight="128" infinite="0" nextlayerid="8" nextobjectid="538">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
  <tileset firstgid="70" source="../tileset/items.tsx"/>
  <tileset firstgid="101" source="../tileset/enemy.tsx"/>
@@ -78,7 +78,6 @@
    </properties>
   </object>
   <object id="517" name="chest1" type="chest" x="1408" y="1920" width="128" height="128"/>
-  <object id="518" name="coin3" type="coin" x="896" y="1408" width="128" height="128"/>
   <object id="521" name="torch2" type="torch" x="3712" y="1536" width="128" height="128"/>
   <object id="523" gid="157" x="3200" y="1664" width="128" height="128">
    <properties>
@@ -89,6 +88,14 @@
   <object id="527" gid="73" x="3584" y="2048" width="128" height="128"/>
   <object id="528" gid="73" x="3584" y="1664" width="128" height="128"/>
   <object id="529" gid="73" x="2560" y="1152" width="128" height="128"/>
+  <object id="530" gid="82" x="896" y="1536" width="128" height="128"/>
+  <object id="531" gid="82" x="1024" y="1536" width="128" height="128"/>
+  <object id="532" gid="82" x="1152" y="1152" width="128" height="128"/>
+  <object id="533" gid="82" x="1280" y="1152" width="128" height="128"/>
+  <object id="534" gid="82" x="1152" y="384" width="128" height="128"/>
+  <object id="535" gid="82" x="1280" y="384" width="128" height="128"/>
+  <object id="536" gid="82" x="2304" y="512" width="128" height="128"/>
+  <object id="537" gid="82" x="2432" y="512" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="7" name="enemies">
   <object id="2" name="enemy_r0_walker" gid="103" x="2816" y="2048" width="128" height="128"/>
