@@ -1,6 +1,5 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.map.EntityFactory;
 import com.axehigh.platformer.map.RoomState;
 import com.badlogic.ashley.core.Engine;
@@ -12,7 +11,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static com.axehigh.platformer.ecs.components.Mappers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -146,7 +146,7 @@ public class EnemySystemChaseTest extends SystemTestBase {
         FlyingEnemyComponent flying = FLYING.get(flyerEntity);
         flying.spawnX = 0f;
         flying.spawnY = 0f;
-        Entity playerEntity = player(35f, 20f); // within circular detection range (radius = 24 * 2.5 = 60; dist = sqrt(35^2+20^2) = 40.3 <= 60)
+        Entity playerEntity = player(25f, 5f); // within detection range (attackRange 24 * 1.25 * 2.5 = 75 radius), beyond standoff (24 * 1.25 * 0.6 = 18 radius)
         EnemyComponent enemyComp = ENEMY.get(flyerEntity);
         MovementComponent movement = MOVEMENT.get(flyerEntity);
 
@@ -166,5 +166,40 @@ public class EnemySystemChaseTest extends SystemTestBase {
         engine.update(DT);
 
         assertEquals("flyer should enter RETREAT state", FlyingEnemyComponent.FlightState.RETREAT, flying.flightState);
+    }
+
+    @Test
+    public void flyerClosesInCloserAndMaintainsMinimumAltitude() {
+        Entity flyerEntity = flyer(0f, 100f);
+        FlyingEnemyComponent flying = FLYING.get(flyerEntity);
+        flying.spawnX = 0f;
+        flying.spawnY = 100f;
+        // Place player very close horizontally (dx = 5), well within standoff
+        // (max(collision width=20, attackRadius*0.25 = 7.5) = 20).
+        player(5f, 100f);
+        MovementComponent movement = MOVEMENT.get(flyerEntity);
+
+        engine.update(DT);
+
+        assertEquals("flyer should stop or hold when within tight standoff radius", 0f, movement.velocity.x, EPSILON);
+
+        // Test minimum altitude floor probe: place a floor rect right below flyer
+        // Floor rect at y=50, height=10 means top is 60.
+        collisionRects.add(new Rectangle(-50f, 50f, 200f, 10f));
+        CollisionComponent collision = COLLISION.get(flyerEntity);
+        TransformComponent transformComp = TRANSFORM.get(flyerEntity);
+        // The altitude clamp writes transform.position (NOT worldBounds — CollisionBoundsSystem
+        // regenerates worldBounds from the transform every frame). Drop the transform so the
+        // flyer's bottom sits at 55, below the required 60 + 16 = 76.
+        transformComp.position.y = 55f - collision.bounds.y;
+
+        // Move player away so flyer is not in attack approach
+        Entity playerEntity = engine.getEntitiesFor(com.badlogic.ashley.core.Family.all(PlayerComponent.class).get()).first();
+        place(TRANSFORM.get(playerEntity), COLLISION.get(playerEntity), 500f, 500f);
+
+        engine.update(DT);
+
+        assertTrue("flyer transform should be pushed up so its bottom maintains at least 1 tile (16 units) clearance above floor top (60 + 16 = 76)",
+            transformComp.position.y + collision.bounds.y >= 76f);
     }
 }

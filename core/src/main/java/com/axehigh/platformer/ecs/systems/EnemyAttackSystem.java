@@ -109,16 +109,20 @@ public class EnemyAttackSystem extends IteratingSystem {
         float enemyCenterX = enemyCollision.worldBounds.x + enemyCollision.worldBounds.width / 2f;
         float enemyCenterY = enemyCollision.worldBounds.y + enemyCollision.worldBounds.height / 2f;
 
-        // Live detection: player center within circular detection range (or rectangular box for walkers/others)
+        // Live detection: player center within circular detection range (with hysteresis if currently attacking/approaching) or rectangular box for walkers
         boolean playerInDetection = false;
         if (attack != null) {
-            Entity enemyEntityRef = enemyEntity;
             if (flying != null) {
                 float dx = playerCenterX - enemyCenterX;
                 float dy = playerCenterY - enemyCenterY;
                 float distSq = dx * dx + dy * dy;
                 float detectRadius = attack.attackRange * 2.5f * unitScale;
-                playerInDetection = distSq <= detectRadius * detectRadius;
+                float retreatHysteresisRadius = detectRadius * 1.15f;
+                if (flying.flightState == FlyingEnemyComponent.FlightState.ATTACK_APPROACH) {
+                    playerInDetection = distSq <= retreatHysteresisRadius * retreatHysteresisRadius;
+                } else {
+                    playerInDetection = distSq <= detectRadius * detectRadius;
+                }
             } else {
                 float detectHalfX = attack.attackRange * 3f * unitScale;
                 float detectHalfY = attack.detectionHeight * unitScale / 2f;
@@ -158,20 +162,21 @@ public class EnemyAttackSystem extends IteratingSystem {
                     attack.attackCooldown.start(attack.attackInterval);
                 } else {
                     // Blade out: live strike bounds = enemy collision width x height, adjacent in front.
-                    // For flyers, dynamically expand forward and slightly downward in the direction it's facing.
+                    // For flyers, the lunge animation points DOWN-FORWARD from the collision rectangle
+                    // (they hover ~1 tile above ground), so the live box reaches well below the flyer
+                    // and ahead in the facing direction: 2.0x width forward, 2.5x height tall, hanging
+                    // 1.5x the collision height below the flyer's bottom.
                     strikeLive = true;
                     if (flying != null) {
-                        float expandW = enemyCollision.worldBounds.width * 1.5f;
-                        float expandH = enemyCollision.worldBounds.height * 1.2f;
-                        float downwardOffset = enemyCollision.worldBounds.height * 0.2f;
+                        float expandW = enemyCollision.worldBounds.width * 2.0f;
+                        float expandH = enemyCollision.worldBounds.height * 2.5f;
+                        float downwardOverhang = enemyCollision.worldBounds.height * 1.5f;
+                        float anchorX = enemyCollision.worldBounds.x + enemyCollision.worldBounds.width * 0.25f;
+                        float anchorY = enemyCollision.worldBounds.y - downwardOverhang;
                         if (enemy.direction > 0) {
-                            strikeBounds.set(enemyCollision.worldBounds.x + enemyCollision.worldBounds.width * 0.5f,
-                                enemyCollision.worldBounds.y - downwardOffset,
-                                expandW, expandH);
+                            strikeBounds.set(anchorX, anchorY, expandW, expandH);
                         } else {
-                            strikeBounds.set(enemyCollision.worldBounds.x - expandW + enemyCollision.worldBounds.width * 0.5f,
-                                enemyCollision.worldBounds.y - downwardOffset,
-                                expandW, expandH);
+                            strikeBounds.set(anchorX - expandW, anchorY, expandW, expandH);
                         }
                     } else {
                         if (enemy.direction > 0) {
@@ -216,7 +221,8 @@ public class EnemyAttackSystem extends IteratingSystem {
             float dx = playerCenterX - ecx;
             float dy = playerCenterY - ecy;
             float distSq = dx * dx + dy * dy;
-            float attackRadius = attack.attackRange * unitScale;
+            // 1. Increase flyer attack range by 25%
+            float attackRadius = attack.attackRange * 1.25f * unitScale;
             return distSq <= attackRadius * attackRadius;
         } else {
             float rangeW = attack.attackRange * unitScale;

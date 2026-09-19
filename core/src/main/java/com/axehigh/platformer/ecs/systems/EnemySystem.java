@@ -193,8 +193,16 @@ public class EnemySystem extends IteratingSystem {
                     float dx = playerCenterX - ecx;
                     float dy = playerCenterY - ecy;
                     float distSq = dx * dx + dy * dy;
-                    float detectRadius = attack.attackRange * 2.5f * unitScale;
+                // 1. Increase flyer attack range by 25% -> attackRange is multiplied by 1.25. Detection range scales correspondingly.
+                // 2. Add stable hysteresis to detection/retreat border so it doesn't chatter/get stuck near the threshold.
+                float effectiveAttackRange = attack.attackRange * 1.25f;
+                float detectRadius = effectiveAttackRange * 2.5f * unitScale;
+                float retreatHysteresisRadius = detectRadius * 1.15f;
+                if (flying.flightState == FlyingEnemyComponent.FlightState.ATTACK_APPROACH) {
+                    playerInDetection = distSq <= retreatHysteresisRadius * retreatHysteresisRadius;
+                } else {
                     playerInDetection = distSq <= detectRadius * detectRadius;
+                }
                 } else {
                     playerInDetection = Math.abs(playerCenterX - ecx) <= attack.attackRange * 3f * unitScale
                         && Math.abs(playerCenterY - ecy) <= attack.detectionHeight * unitScale / 2f;
@@ -255,13 +263,15 @@ public class EnemySystem extends IteratingSystem {
                 float dx = playerCenterX - ecx;
                 float dy = playerCenterY - ecy;
                 float distSq = dx * dx + dy * dy;
-                float attackRadius = attack.attackRange * unitScale;
+                // 1. Increase flyer attack range by 25% and 2. shorten standoff/hover distance so flyer closes in much closer (tight melee distance: 25% of attack range, or edge of collision bounds)
+                float attackRadius = attack.attackRange * 1.25f * unitScale;
+                float standoffRadius = Math.max(collision.worldBounds.width, attackRadius * 0.25f);
 
                 if (Math.abs(playerCenterX - ecx) > 1f) {
                     enemy.direction = playerCenterX > ecx ? 1 : -1;
                 }
 
-                if (distSq > attackRadius * attackRadius) {
+                if (distSq > standoffRadius * standoffRadius) {
                     // Fly toward player in 2D space with obstacle avoidance ray/steering
                     float angle = com.badlogic.gdx.math.MathUtils.atan2(dy, dx);
                     float targetVx = enemy.speed * com.badlogic.gdx.math.MathUtils.cos(angle);
@@ -294,11 +304,14 @@ public class EnemySystem extends IteratingSystem {
                     movement.velocity.x = targetVx;
                     movement.velocity.y = targetVy;
                 } else {
-                    // Within attack range: hover/drift around or hold
+                    // Within standoff range: hover/drift around or hold
                     movement.velocity.x = 0f;
                     flying.bobTime += deltaTime;
                     movement.velocity.y = flying.bobAmplitude * flying.bobFrequency * com.badlogic.gdx.math.MathUtils.cos(flying.bobTime * flying.bobFrequency);
                 }
+
+                // 3. Enforce a minimum flight altitude (at least one tile / 16px above floor/platform below it, or relative to its spawn height)
+                applyMinimumAltitude(transform, collision, movement, flying);
                 return;
             } else if (flying.flightState == FlyingEnemyComponent.FlightState.ATTACK_APPROACH) {
                 // Player left detection range -> trigger retreat back to patrol origin
@@ -320,6 +333,7 @@ public class EnemySystem extends IteratingSystem {
                 flying.bobTime += deltaTime;
                 movement.velocity.y = flying.bobAmplitude * flying.bobFrequency * com.badlogic.gdx.math.MathUtils.cos(flying.bobTime * flying.bobFrequency);
             }
+            applyMinimumAltitude(transform, collision, movement, flying);
             return;
         }
 
@@ -438,5 +452,67 @@ public class EnemySystem extends IteratingSystem {
             }
         }
         return false;
+    }
+
+    /**
+     * Enforces a minimum flight altitude for flyers: ensures the flyer's bottom is at least
+     * one solid tile (16 units * unitScale) above any floor or platform directly below it,
+     * maintaining solid 1-tile clearance and never pinning or sinking to the floor.
+     * Operates on {@code transform.position} — NOT {@code collision.worldBounds} — because
+     * {@code CollisionBoundsSystem} (priority 6) regenerates worldBounds from the transform
+     * every frame; writing worldBounds directly would be wiped out immediately and the flyer
+     * would sink/hover at the ground.
+     */
+    private void applyMinimumAltitude(TransformComponent transform, CollisionComponent collision, MovementComponent movement, FlyingEnemyComponent flying) {
+        float minTileHeight = 16f * unitScale;
+        float flyerBottom = transform.position.y + collision.bounds.y;
+
+        // Ray/box probe directly beneath the flyer to find any floor or platform below
+        com.badlogic.gdx.math.Rectangle floorProbe = new com.badlogic.gdx.math.Rectangle(
+            transform.position.x + collision.bounds.x + 2f,
+            flyerBottom - 48f * unitScale,
+            Math.max(4f, collision.bounds.width - 4f),
+            48f * unitScale
+        );
+
+        float highestFloorTop = Float.NEGATIVE_INFINITY;
+        for (Rectangle rect : collisionRects) {
+            if (floorProbe.overlaps(rect)) {
+                float top = rect.y + rect.height;
+                if (top > highestFloorTop) {
+                    highestFloorTop = top;
+                }
+            }
+        }
+        for (Rectangle rect : oneWayRects) {
+            if (floorProbe.overlaps(rect)) {
+                float top = rect.y + rect.height;
+                if (top > highestFloorTop) {
+                    highestFloorTop = top;
+                }
+            }
+        }
+
+        if (highestFloorTop != Float.NEGATIVE_INFINITY) {
+            float requiredBottom = highestFloorTop + minTileHeight;
+            if (flyerBottom < requiredBottom) {
+                // Push the flyer's transform up so the clamp persists through MovementSystem
+                // integration and CollisionBoundsSystem's worldBounds recompute
+                float diff = requiredBottom - flyerBottom;
+                transform.position.y += diff;
+                if (movement.velocity.y < 0f) {
+                    movement.velocity.y = Math.abs(movement.velocity.y);
+                }
+            }
+        }
+
+        // Also ensure it never drifts more than a couple tiles below its spawn Y altitude
+        float minSpawnAlt = flying.spawnY - 32f * unitScale;
+        if (flyerBottom < minSpawnAlt) {
+            transform.position.y += minSpawnAlt - flyerBottom;
+            if (movement.velocity.y < 0f) {
+                movement.velocity.y = 0f;
+            }
+        }
     }
 }

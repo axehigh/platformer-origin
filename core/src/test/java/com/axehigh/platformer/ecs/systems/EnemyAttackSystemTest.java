@@ -1,6 +1,5 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.map.EntityFactory;
 import com.axehigh.platformer.map.Room;
 import com.axehigh.platformer.map.RoomState;
@@ -469,6 +468,39 @@ public class EnemyAttackSystemTest extends SystemTestBase {
         EnemyAttackComponent attack = ENEMY_ATTACK.get(enemyEntity);
         assertTrue("flyer attack should be active", attack.isAttacking);
         assertTrue("flyer wind-up should be active", attack.windUp.isActive());
+    }
+
+    @Test
+    public void flyerStrikeBoxExtendsDownwardAndForward() {
+        // Flyers hover ~1 tile above their target, so the lunge must reach DOWNWARD and in the
+        // facing direction (the animation points down-forward from the collision rectangle).
+        // Player ahead-and-below the flyer should get hit by the enlarged live box.
+        Entity playerEntity = player(15f, 0f);
+        TransformComponent transform = transform(0f, 0f);
+        CollisionComponent collision = collision(-10f, -20f, 20f, 40f); // worldBounds (-10,-20,20,40)
+        place(transform, collision, 0f, 0f);
+        EnemyComponent enemyComponent = new EnemyComponent();
+        enemyComponent.direction = 1;
+        EnemyAttackComponent attack = new EnemyAttackComponent();
+        Entity enemyEntity = entity(transform, movement(), enemyComponent, attack, collision, new FlyingEnemyComponent());
+        engine.addEntity(enemyEntity);
+
+        attack.isAttacking = true;
+        attack.windUp.start(attack.windUpDuration);
+        engine.update(attack.windUpDuration - 0.05f); // wind-up still ticking
+        engine.update(0.1f); // strike live
+
+        Rectangle live = system.getActiveStrikeBounds();
+        assertNotNull("flyer strike should be live during the strike window", live);
+        float w = collision.worldBounds.width;
+        float h = collision.worldBounds.height;
+        assertEquals("strike width should be 2x the flyer collision width", w * 2.0f, live.width, EPSILON);
+        assertEquals("strike height should be 2.5x the flyer collision height", h * 2.5f, live.height, EPSILON);
+        assertEquals("strike should hang 1.5x collision height below the flyer's bottom",
+            collision.worldBounds.y - h * 1.5f, live.y, EPSILON);
+        assertTrue("strike should reach ahead of the flyer's facing edge",
+            live.x + live.width >= collision.worldBounds.x + w);
+        assertEquals("below-front player should take damage", 2, PLAYER.get(playerEntity).health);
     }
 
     // --- helpers ---

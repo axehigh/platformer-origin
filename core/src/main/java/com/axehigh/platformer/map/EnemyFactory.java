@@ -109,8 +109,12 @@ class EnemyFactory {
                 flying.bobAmplitude *= context.unitScale;
                 // Random bob phase so flyers don't flap in unison (they all start at bobTime = 0).
                 flying.bobTime = MathUtils.random(0f, MathUtils.PI2 / flying.bobFrequency);
-                flying.spawnX = x;
-                flying.spawnY = collisionComponent.baseOffsetY + collisionComponent.currentOffsetY;
+                // Retreat target = the flyer's WORLD-SPACE collision center at spawn. worldBounds
+                // is recomputed from transform + local bounds every frame, so the center must
+                // include the map x/y plus the base/current offsets and half-dimensions — otherwise
+                // the flyer retreats to a wrong (or ground-level) point.
+                flying.spawnX = x + collisionComponent.baseOffsetX + collisionComponent.bounds.width / 2f;
+                flying.spawnY = y + collisionComponent.baseOffsetY + collisionComponent.currentOffsetY + collisionComponent.bounds.height / 2f;
                 entity.add(flying);
                 break;
             case SHOOTER:

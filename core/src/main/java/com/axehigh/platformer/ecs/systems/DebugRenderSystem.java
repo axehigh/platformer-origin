@@ -152,7 +152,8 @@ public class DebugRenderSystem extends EntitySystem implements Disposable {
 
             // Detection bounds: circular detection range for flyers, rectangular box for walkers.
             if (FLYING.has(entity)) {
-                float detectRadius = attack.attackRange * 2.5f * unitScale;
+                float effectiveAttackRange = attack.attackRange * 1.25f;
+                float detectRadius = effectiveAttackRange * 2.5f * unitScale;
                 shapeRenderer.setColor(Color.MAGENTA);
                 shapeRenderer.circle(centerX, centerY, detectRadius);
             } else {
@@ -164,7 +165,7 @@ public class DebugRenderSystem extends EntitySystem implements Disposable {
 
             // Commit distance / attack bounds (green): attackRange radius circle for flyers, rectangle for walkers.
             if (FLYING.has(entity)) {
-                float attackRadius = attack.attackRange * unitScale;
+                float attackRadius = attack.attackRange * 1.25f * unitScale;
                 shapeRenderer.setColor(Color.GREEN);
                 shapeRenderer.circle(centerX, centerY, attackRadius);
             } else {
