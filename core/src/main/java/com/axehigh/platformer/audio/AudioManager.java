@@ -39,6 +39,17 @@ public class AudioManager {
 
     public static final String SFX_WALL_BREAK = "sfx/Explosion1.mp3";
 
+    // Placeholder SFX: every gameplay event currently maps to the same asset so a real sound can be
+    // dropped in per event by changing just the constant (and nothing else — the wiring is done).
+    public static final String SFX_POTION_PICKUP = "sfx/PowerUp11.mp3";
+    public static final String SFX_POTION_DRINK = "sfx/PowerUp11.mp3";
+    public static final String SFX_SWORD_SWING = "sfx/PowerUp11.mp3";
+    public static final String SFX_SWORD_HIT = "sfx/PowerUp11.mp3";
+    public static final String SFX_SHOOT = "sfx/PowerUp11.mp3";
+    public static final String SFX_AMMO_PICKUP = "sfx/PowerUp11.mp3";
+    public static final String SFX_PLAYER_HURT = "sfx/PowerUp11.mp3";
+    public static final String SFX_PLAYER_HAZARD = "sfx/PowerUp11.mp3";
+
     private Music menuMusic;
     private Music gameMusic;
     private Music gameMusic2;
@@ -48,6 +59,16 @@ public class AudioManager {
     private Sound wallBreakSound;
     private Music currentMusic;
 
+    // Placeholder SFX fields — same asset until a real sound is assigned per constant above.
+    private Sound potionPickupSound;
+    private Sound potionDrinkSound;
+    private Sound swordSwingSound;
+    private Sound swordHitSound;
+    private Sound shootSound;
+    private Sound ammoPickupSound;
+    private Sound playerHurtSound;
+    private Sound playerHazardSound;
+
     private AudioManager() {
         assetManager.load(MUSIC_MENU, Music.class);
         assetManager.load(MUSIC_GAME, Music.class);
@@ -56,6 +77,14 @@ public class AudioManager {
         assetManager.load(SFX_COIN, Sound.class);
         assetManager.load(SFX_CLICK, Sound.class);
         assetManager.load(SFX_WALL_BREAK, Sound.class);
+        assetManager.load(SFX_POTION_PICKUP, Sound.class);
+        assetManager.load(SFX_POTION_DRINK, Sound.class);
+        assetManager.load(SFX_SWORD_SWING, Sound.class);
+        assetManager.load(SFX_SWORD_HIT, Sound.class);
+        assetManager.load(SFX_SHOOT, Sound.class);
+        assetManager.load(SFX_AMMO_PICKUP, Sound.class);
+        assetManager.load(SFX_PLAYER_HURT, Sound.class);
+        assetManager.load(SFX_PLAYER_HAZARD, Sound.class);
         assetManager.finishLoading();
 
         menuMusic = assetManager.get(MUSIC_MENU, Music.class);
@@ -69,6 +98,14 @@ public class AudioManager {
         coinSound = assetManager.get(SFX_COIN, Sound.class);
         clickSound = assetManager.get(SFX_CLICK, Sound.class);
         wallBreakSound = assetManager.get(SFX_WALL_BREAK, Sound.class);
+        potionPickupSound = assetManager.get(SFX_POTION_PICKUP, Sound.class);
+        potionDrinkSound = assetManager.get(SFX_POTION_DRINK, Sound.class);
+        swordSwingSound = assetManager.get(SFX_SWORD_SWING, Sound.class);
+        swordHitSound = assetManager.get(SFX_SWORD_HIT, Sound.class);
+        shootSound = assetManager.get(SFX_SHOOT, Sound.class);
+        ammoPickupSound = assetManager.get(SFX_AMMO_PICKUP, Sound.class);
+        playerHurtSound = assetManager.get(SFX_PLAYER_HURT, Sound.class);
+        playerHazardSound = assetManager.get(SFX_PLAYER_HAZARD, Sound.class);
     }
 
     public static AudioManager get() {
@@ -129,6 +166,38 @@ public class AudioManager {
 
     public void playWallBreak() {
         playSfx(wallBreakSound);
+    }
+
+    public void playPotionPickup() {
+        playSfx(potionPickupSound);
+    }
+
+    public void playPotionDrink() {
+        playSfx(potionDrinkSound);
+    }
+
+    public void playSwordSwing() {
+        playSfx(swordSwingSound);
+    }
+
+    public void playSwordHit() {
+        playSfx(swordHitSound);
+    }
+
+    public void playShoot() {
+        playSfx(shootSound);
+    }
+
+    public void playAmmoPickup() {
+        playSfx(ammoPickupSound);
+    }
+
+    public void playPlayerHurt() {
+        playSfx(playerHurtSound);
+    }
+
+    public void playPlayerHazard() {
+        playSfx(playerHazardSound);
     }
 
     public boolean isMusicEnabled() {

@@ -206,6 +206,9 @@ public class MeleeAttackSystem extends IteratingSystem {
                 // Hit commitment: the strike connected, so dampen the player's forward momentum so
                 // the chase stops for a beat and the player can't run past the target mid-combo.
                 playerMovement.velocity.x *= PLAYER_HIT_MOMENTUM_DAMP;
+                if (sfxSystem != null) {
+                    sfxSystem.playSwordHit();
+                }
             }
             player.meleeHitEnemies.add(hitEnemy);
             player.meleeHasHit = true;

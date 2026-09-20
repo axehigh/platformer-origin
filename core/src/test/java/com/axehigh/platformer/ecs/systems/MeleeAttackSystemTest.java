@@ -1,7 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.assets.SpriteConstants;
-import com.axehigh.platformer.ecs.components.*;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.assets.AssetManager;
@@ -18,8 +17,7 @@ import org.junit.Test;
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
 import static com.axehigh.platformer.ecs.components.Mappers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Headless unit tests for {@code MeleeAttackSystem}: the frame-indexed per-frame reach (windup and
@@ -35,11 +33,13 @@ public class MeleeAttackSystemTest extends SystemTestBase {
 
     private Engine engine;
     private MeleeAttackSystem system;
+    private SfxSystem sfxSystem;
 
     @Before
     public void setUp() {
         engine = newEngine();
-        system = new MeleeAttackSystem(mockAssets());
+        sfxSystem = mock(SfxSystem.class);
+        system = new MeleeAttackSystem(mockAssets(), null, null, null, sfxSystem, 0);
         system.setUnitScale(1f);
         engine.addSystem(system);
     }
@@ -129,6 +129,31 @@ public class MeleeAttackSystemTest extends SystemTestBase {
         playerComponent.meleeAttack.start(0.2f);
         engine.update(DT);
         assertEquals(0, secretRects.size);
+    }
+
+    @Test
+    public void connectedStrikePlaysSwordHitSfxOnce() {
+        Entity player = player(0f, 130f, 1);
+        Entity enemy = enemy(16f, 105f);
+        PLAYER.get(player).meleeAttack.start(0.15f);
+
+        engine.update(0f);
+
+        assertEquals(5f, ENEMY.get(enemy).health, EPSILON);
+        verify(sfxSystem).playSwordHit();
+    }
+
+    @Test
+    public void staggeredStrikePlaysNoSwordHitSfx() {
+        Entity player = player(0f, 130f, 1);
+        Entity enemy = enemy(16f, 105f);
+        // Stunned enemy is immune -> applyHit returns no connection -> no hit SFX.
+        ENEMY.get(enemy).hitStun.start(0.3f);
+        PLAYER.get(player).meleeAttack.start(0.15f);
+
+        engine.update(0f);
+
+        verify(sfxSystem, never()).playSwordHit();
     }
 
     @Test

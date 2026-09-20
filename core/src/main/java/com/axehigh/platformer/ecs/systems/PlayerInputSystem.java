@@ -38,6 +38,7 @@ public class PlayerInputSystem extends IteratingSystem {
     private static final float DROP_WINDOW_DURATION = 0.25f;
 
     private final AssetManager assetManager;
+    private final SfxSystem sfxSystem;
 
     /** Lazily wrapped {@code gfx/slash_arc.png} texture region, or {@code null} until loaded. */
     private TextureRegion slashArcRegion;
@@ -53,12 +54,17 @@ public class PlayerInputSystem extends IteratingSystem {
     private boolean touchDropRequested = false;
 
     public PlayerInputSystem(AssetManager assetManager) {
-        this(assetManager, 0);
+        this(assetManager, null, 0);
     }
 
     public PlayerInputSystem(AssetManager assetManager, int priority) {
+        this(assetManager, null, priority);
+    }
+
+    public PlayerInputSystem(AssetManager assetManager, SfxSystem sfxSystem, int priority) {
         super(Family.all(PlayerComponent.class, MovementComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
         this.assetManager = assetManager;
+        this.sfxSystem = sfxSystem;
     }
 
     /**
@@ -201,6 +207,9 @@ public class PlayerInputSystem extends IteratingSystem {
         if (!player.isDead && potionUsePressed && player.potionCooldown.isDone() && player.consumeSelectedPotion()) {
             PotionEffects.apply(entity, player, player.selectedPotion);
             player.potionCooldown.start(GameConstants.POTION_USE_COOLDOWN);
+            if (sfxSystem != null) {
+                sfxSystem.playPotionDrink();
+            }
         }
 
         boolean meleePressed = input.isKeyJustPressed(Input.Keys.J) || input.isKeyJustPressed(Input.Keys.SPACE) || touchMeleeRequested;
@@ -212,6 +221,9 @@ public class PlayerInputSystem extends IteratingSystem {
             // Cooldown must be at least as long as the animation to allow it to finish
             player.meleeCooldown.start(Math.max(MELEE_COOLDOWN, attackDuration));
             spawnSlashArc(entity, transform, collision, player);
+            if (sfxSystem != null) {
+                sfxSystem.playSwordSwing();
+            }
         }
 
         boolean shootPressed = input.isKeyJustPressed(Input.Keys.K) || input.isKeyJustPressed(Input.Keys.Y) || touchShootRequested;
@@ -219,6 +231,9 @@ public class PlayerInputSystem extends IteratingSystem {
             spawnBullet(entity, transform, collision, player);
             player.ammo--;
             player.shootCooldown.start(SHOOT_COOLDOWN);
+            if (sfxSystem != null) {
+                sfxSystem.playShoot();
+            }
         }
 
         player.interactPressed = input.isKeyJustPressed(Input.Keys.E) || touchInteractRequested;

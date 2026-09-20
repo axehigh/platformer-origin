@@ -27,6 +27,9 @@ public final class PlayerDamageResolver {
 
     private static DamageListener damageListener;
 
+    /** SfxSystem seam for placeholder hurt/hazard sounds; null in unit tests (guarded). */
+    private static SfxSystem sfxSystem;
+
     /** Shortest hit-stun window; extended to cover the HURT animation if that is longer. */
     private static final float HIT_STUN_DURATION = 0.3f;
     /** Small horizontal push applied to the player on a surviving hit (world units/second). */
@@ -39,6 +42,10 @@ public final class PlayerDamageResolver {
 
     public static void setDamageListener(DamageListener listener) {
         damageListener = listener;
+    }
+
+    public static void setSfxSystem(SfxSystem sfxSystem) {
+        PlayerDamageResolver.sfxSystem = sfxSystem;
     }
 
     /**
@@ -59,6 +66,9 @@ public final class PlayerDamageResolver {
 
         player.health = Math.max(0, player.health - 1);
         VignetteRenderSystem.triggerPulse();
+        if (sfxSystem != null) {
+            sfxSystem.playPlayerHurt();
+        }
         movement.velocity.x = KNOCKBACK_SPEED_X * knockbackDirection * unitScale;
         applyStunAndGrace(playerEntity, player);
         if (damageListener != null) {
@@ -85,6 +95,9 @@ public final class PlayerDamageResolver {
 
         player.health = Math.max(0, player.health - 1);
         VignetteRenderSystem.triggerPulse();
+        if (sfxSystem != null) {
+            sfxSystem.playPlayerHazard();
+        }
         applyStunAndGrace(playerEntity, player);
         if (damageListener != null) {
             damageListener.onDamageApplied(playerEntity);

@@ -71,7 +71,9 @@ public class GameSystems {
                        SecretRoomRevealer secretRoomRevealer, EntityFactory entityFactory,
                        OffsetFitViewport viewport, float unitScale, Runnable onPlayerDeath,
                        LevelExitSystem.LevelTransition onLevelTransition, Runnable onVictory, float killY) {
-        playerInputSystem = new PlayerInputSystem(assetManager, PRIORITY_INPUT);
+        SfxSystem sfxSystem = new SfxSystem(AudioManager.get(), PRIORITY_SFX);
+        PlayerDamageResolver.setSfxSystem(sfxSystem);
+        playerInputSystem = new PlayerInputSystem(assetManager, sfxSystem, PRIORITY_INPUT);
         playerInputSystem.setUnitScale(unitScale);
         tiledMapRenderSystem = new TiledMapRenderSystem(mapLoader.getMap(), camera, PRIORITY_MAP_RENDER);
         engine.addSystem(playerInputSystem);
@@ -115,7 +117,6 @@ public class GameSystems {
         engine.addSystem(new AmbientEmberSystem(PRIORITY_AMBIENT));
 
         engine.addSystem(new MusicSystem(AudioManager.get(), PRIORITY_MUSIC));
-        SfxSystem sfxSystem = new SfxSystem(AudioManager.get(), PRIORITY_SFX);
         engine.addSystem(sfxSystem);
 
         MeleeAttackSystem meleeSystem = new MeleeAttackSystem(assetManager, mapLoader.getSecretRects(),

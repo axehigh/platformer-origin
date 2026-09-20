@@ -86,6 +86,9 @@ public class PickupSystem extends IteratingSystem {
             }
             spawnCoinSpark(pickupCollision);
             queueItemMessage(player, daggerPickup.amount);
+            if (sfxSystem != null) {
+                sfxSystem.playAmmoPickup();
+            }
         } else {
             CrystalPickupComponent crystalPickup = CRYSTAL_PICKUP.get(pickupEntity);
             if (crystalPickup != null) {
@@ -102,9 +105,6 @@ public class PickupSystem extends IteratingSystem {
                 } else {
                     CoinPickupComponent coinPickup = COIN_PICKUP.get(pickupEntity);
                     player.coins += coinPickup.amount;
-                    if (sfxSystem != null) {
-                        sfxSystem.playCoin();
-                    }
                     spawnCoinSpark(pickupCollision);
                     queueCoinMessage(player, coinPickup.amount);
                 }
@@ -135,6 +135,9 @@ public class PickupSystem extends IteratingSystem {
         entityFactory.createFloatingMessage(getEngine(),
                 "+" + player.pendingCoinMessage, GameConstants.MESSAGE_COLOR_COINS, players.first());
         player.pendingCoinMessage = 0;
+        if (sfxSystem != null) {
+            sfxSystem.playCoin();
+        }
     }
 
     /** Adds a potion to the player's held count, converting the pickup to coins when at the cap. */
@@ -151,6 +154,9 @@ public class PickupSystem extends IteratingSystem {
             return;
         }
         player.setPotionCount(potionPickup.type, player.countPotion(potionPickup.type) + potionPickup.amount);
+        if (sfxSystem != null) {
+            sfxSystem.playPotionPickup();
+        }
     }
 
     /** One-shot sparkle burst at the picked-up coin; a no-op without a PooledEngine. */

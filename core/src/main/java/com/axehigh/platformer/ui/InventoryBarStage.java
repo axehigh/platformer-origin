@@ -173,7 +173,7 @@ public class InventoryBarStage extends Stage {
         }
         PotionEffects.apply(playerEntity, playerComponent, type);
         playerComponent.potionCooldown.start(GameConstants.POTION_USE_COOLDOWN);
-        AudioManager.get().playClick();
+        AudioManager.get().playPotionDrink();
         refresh();
     }
 
