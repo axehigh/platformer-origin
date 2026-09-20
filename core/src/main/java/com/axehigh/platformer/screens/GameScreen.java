@@ -229,7 +229,14 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
                     return true;
                 }
                 if (keycode == Input.Keys.Q) {
-                    changeScreen(new MainMenuScreen(game));
+                    fadeOverlay.setTouchable(Touchable.enabled);
+                    StylizedTransitionOverlay.TransitionType style = FeatureFlags.getTransitionStyle();
+                    stylizedTransitionOverlay.start(
+                        style,
+                        LEVEL_FADE_TIMER * 2f,
+                        () -> changeScreen(new MainMenuScreen(game)),
+                        () -> fadeOverlay.setTouchable(Touchable.disabled)
+                    );
                     return true;
                 }
                 return false;
@@ -260,7 +267,15 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
             save.fireBreathPotions = playerComponent.countPotion(com.axehigh.platformer.ecs.components.PotionType.FIRE_BREATH);
         }
         SaveManager.save(save);
-        changeScreen(new GameOverScreen(game, this));
+
+        fadeOverlay.setTouchable(Touchable.enabled);
+        StylizedTransitionOverlay.TransitionType style = FeatureFlags.getTransitionStyle();
+        stylizedTransitionOverlay.start(
+            style,
+            LEVEL_FADE_TIMER * 2f,
+            () -> changeScreen(new GameOverScreen(game, this)),
+            () -> fadeOverlay.setTouchable(Touchable.disabled)
+        );
     }
 
     private void onVictory() {
@@ -268,7 +283,14 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         // Determine which world was just completed
         String currentLevelPath = systems.levelManager.getCurrentLevelPath();
         int worldId = LevelCatalog.worldIdForPath(currentLevelPath);
-        changeScreen(new VictoryScreen(game, worldId));
+        fadeOverlay.setTouchable(Touchable.enabled);
+        StylizedTransitionOverlay.TransitionType style = FeatureFlags.getTransitionStyle();
+        stylizedTransitionOverlay.start(
+            style,
+            LEVEL_FADE_TIMER * 2f,
+            () -> changeScreen(new VictoryScreen(game, worldId)),
+            () -> fadeOverlay.setTouchable(Touchable.disabled)
+        );
     }
 
     /**
@@ -312,7 +334,14 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
 
     @Override
     public void onExit() {
-        changeScreen(new MainMenuScreen(game));
+        fadeOverlay.setTouchable(Touchable.enabled);
+        StylizedTransitionOverlay.TransitionType style = FeatureFlags.getTransitionStyle();
+        stylizedTransitionOverlay.start(
+            style,
+            LEVEL_FADE_TIMER * 2f,
+            () -> changeScreen(new MainMenuScreen(game)),
+            () -> fadeOverlay.setTouchable(Touchable.disabled)
+        );
     }
 
     private void togglePause() {

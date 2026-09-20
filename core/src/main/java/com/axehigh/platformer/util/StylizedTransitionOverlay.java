@@ -86,25 +86,24 @@ public class StylizedTransitionOverlay implements Disposable {
         "        }\n" +
         "    } else if (u_type == 1) {\n" +
         "        // PIXELATE\n" +
-        "        float pixels = 10.0 + (1.0 - u_progress) * 100.0;\n" +
-        "        // When progress is 1.0 (fully open), pixelation should be minimal/none\n" +
-        "        float factor = u_progress * u_progress;\n" +
-        "        float p = mix(50.0, 1.0, factor);\n" +
-        "        vec2 grid = floor(uv * p) / p;\n" +
-        "        // Simple vignette or block effect if desired, but pixelate transition\n" +
-        "        // usually covers screen as blocks grow. Let's make it cover at 0 and clear at 1.\n" +
-        "        float alpha = 1.0 - u_progress;\n" +
-        "        col.a = alpha;\n" +
+        "        float pixelCount = mix(80.0, 4.0, u_progress);\n" +
+        "        vec2 gridUV = floor(uv * pixelCount) / pixelCount;\n" +
+        "        float hash = fract(sin(dot(gridUV, vec2(12.9898, 78.233))) * 43758.5453);\n" +
+        "        if (u_progress < hash) {\n" +
+        "            discard;\n" +
+        "        }\n" +
+        "        col.a = 1.0;\n" +
         "    } else if (u_type == 2) {\n" +
         "        // CHECKERBOARD\n" +
         "        vec2 squares = vec2(20.0, 12.0);\n" +
         "        vec2 st = floor(uv * squares);\n" +
         "        float pattern = mod(st.x + st.y, 2.0);\n" +
-        "        float threshold = u_progress * 2.0;\n" +
-        "        if (pattern < 0.5) {\n" +
-        "            if (threshold > 1.0 && (threshold - 1.0) * 2.0 > (uv.x + uv.y) * 0.5) { discard; }\n" +
+        "        float threshold = u_progress * 1.05;\n" +
+        "        float hash = fract(sin(dot(st, vec2(12.9898, 78.233))) * 43758.5453);\n" +
+        "        if (threshold <= hash) {\n" +
+        "            discard;\n" +
         "        }\n" +
-        "        col.a = 1.0 - u_progress;\n" +
+        "        col.a = 1.0;\n" +
         "    } else {\n" +
         "        // FADE\n" +
         "        // u_progress: 0.0 (transparent) to 1.0 (opaque black)\n" +
@@ -220,19 +219,6 @@ public class StylizedTransitionOverlay implements Disposable {
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
-        if (useShader && shader != null && shader.isCompiled()) {
-            // Render full-screen quad with shader
-            // For simplicity and robustness across platforms without full custom mesh setup here,
-            // we can render via a full screen quad or shape renderer fallback if shader batching is complex.
-            // Wait, let's use ShapeRenderer as primary fallback or simple full-screen rect with shader if possible,
-            // or render a full screen quad using Mesh or ShapeRenderer with custom shader.
-            // Actually, ShapeRenderer doesn't support custom shaders easily on all versions,
-            // but we can draw a full screen quad using immediate mode or a standard quad mesh,
-            // OR use ShapeRenderer fallback for all types if shader rendering requires extra boilerplate,
-            // but the prompt explicitly asks for "GLSL shaders and ShapeRenderer / SpriteBatch fallback".
-        }
-
-        // Let's implement robust ShapeRenderer fallback & SpriteBatch/Shader rendering
         renderWithFallback(camera, progress, screenWidth, screenHeight);
     }
 
@@ -254,40 +240,135 @@ public class StylizedTransitionOverlay implements Disposable {
                 break;
 
             case PORTAL_IRIS:
-                // Draw full black screen with a clearing circle cutout using ShapeRenderer approximation or solid blocks
-                shapeRenderer.setColor(0f, 0f, 0f, 1.0f);
-                // If progress is 0 (open), iris radius is max. If progress is 1 (closed), radius is 0.
+                // Draw full black screen with a smooth multi-ring / stepped box iris cutout around (portalX, portalY)
+                // When progress is 0 (open), radius is max. When progress is 1 (closed), radius is 0.
                 float maxRadius = (float) Math.sqrt(vw * vw + vh * vh);
                 float radius = (1.0f - progress) * maxRadius;
 
-                if (radius > 0) {
-                    // Approximate iris ring with bars or multiple sectors, or simple bounding box with corner boxes
-                    // Or simpler: Draw full black rect except circle. Since ShapeRenderer can't punch holes easily,
-                    // we draw 4 surrounding rects around the portal center (portalX, portalY in world space).
-                    float px = minX + portalX * vw;
-                    float py = minY + portalY * vh;
+                float px = minX + portalX * vw;
+                float py = minY + portalY * vh;
 
-                    // Top, Bottom, Left, Right bars enclosing the circle
-                    // Top
-                    shapeRenderer.rect(minX, py + radius, vw, minY + vh - (py + radius));
-                    // Bottom
-                    shapeRenderer.rect(minX, minY, vw, (py - radius) - minY);
-                    // Left
-                    shapeRenderer.rect(minX, py - radius, (px - radius) - minX, radius * 2);
-                    // Right
-                    shapeRenderer.rect(px + radius, py - radius, minX + vw - (px + radius), radius * 2);
-                } else {
-                    // Fully closed
+                if (progress <= 0.001f) {
+                    // Fully open: draw nothing
+                    break;
+                }
+
+                if (progress >= 0.999f) {
+                    // Fully closed: draw full black screen
+                    shapeRenderer.setColor(0f, 0f, 0f, 1.0f);
                     shapeRenderer.rect(minX, minY, vw, vh);
+                    break;
+                }
+
+                // Draw surrounding black bars / frame covering everything outside the iris radius
+                shapeRenderer.setColor(0f, 0f, 0f, 1.0f);
+                
+                // Top bar
+                float topH = minY + vh - (py + radius);
+                if (topH > 0) {
+                    shapeRenderer.rect(minX, py + radius, vw, topH);
+                }
+                // Bottom bar
+                float botH = (py - radius) - minY;
+                if (botH > 0) {
+                    shapeRenderer.rect(minX, minY, vw, botH);
+                }
+                // Left bar (between vertical bounds of iris)
+                float leftW = (px - radius) - minX;
+                if (leftW > 0) {
+                    float bY = Math.max(minY, py - radius);
+                    float bH = Math.min(minY + vh, py + radius) - bY;
+                    if (bH > 0) {
+                        shapeRenderer.rect(minX, bY, leftW, bH);
+                    }
+                }
+                // Right bar (between vertical bounds of iris)
+                float rightW = minX + vw - (px + radius);
+                if (rightW > 0) {
+                    float bY = Math.max(minY, py - radius);
+                    float bH = Math.min(minY + vh, py + radius) - bY;
+                    if (bH > 0) {
+                        shapeRenderer.rect(px + radius, bY, rightW, bH);
+                    }
+                }
+
+                // Add a soft transitional border ring / stepped box layers for smooth fallback iris appearance
+                int steps = 6;
+                for (int i = 0; i < steps; i++) {
+                    float stepProgress = (float) i / steps;
+                    float ringRadius = radius + stepProgress * (vw * 0.15f);
+                    float alpha = 1.0f - ((float) i / steps);
+                    shapeRenderer.setColor(0f, 0f, 0f, alpha * 0.7f);
+                    
+                    // Draw four thin border strips around the ring
+                    float tH = minY + vh - (py + ringRadius);
+                    if (tH > 0 && tH < vh) {
+                        shapeRenderer.rect(minX, py + ringRadius - 2f, vw, 2f);
+                    }
+                    float bH2 = (py - ringRadius) - minY;
+                    if (bH2 > 0 && bH2 < vh) {
+                        shapeRenderer.rect(minX, py - ringRadius, vw, 2f);
+                    }
+                }
+                break;
+
+            case PIXELATE:
+                // Fallback: render pixelation blocks (grid of black squares growing/appearing based on progress)
+                {
+                    int cols = 24;
+                    int rows = 16;
+                    float blockWidth = vw / cols;
+                    float blockHeight = vh / rows;
+
+                    // Fill screen with growing/staggered pixel blocks
+                    for (int x = 0; x < cols; x++) {
+                        for (int y = 0; y < rows; y++) {
+                            // Pseudo-random threshold per block so they appear in a pixelated static/digital pattern
+                            float hash = ((x * 37 + y * 17) % 23) / 23.0f;
+                            if (progress >= hash) {
+                                float blockProgress = Math.min(1.0f, (progress - hash) / (1.0f - hash + 0.0001f));
+                                shapeRenderer.setColor(0f, 0f, 0f, blockProgress);
+                                // Draw a slightly smaller rect with a tiny gap for a crisp pixel grid look, or full block
+                                float gap = 0.5f;
+                                shapeRenderer.rect(
+                                    minX + x * blockWidth + gap,
+                                    minY + y * blockHeight + gap,
+                                    Math.max(1f, blockWidth - gap * 2f),
+                                    Math.max(1f, blockHeight - gap * 2f)
+                                );
+                            }
+                        }
+                    }
                 }
                 break;
 
             case CHECKERBOARD:
-            case PIXELATE:
-            default:
-                // Fallback to stylized box bars or simple alpha fade
-                shapeRenderer.setColor(0f, 0f, 0f, progress);
-                shapeRenderer.rect(minX, minY, vw, vh);
+                // Animated checkerboard wipe fallback using ShapeRenderer with robust complete coverage at progress >= 1.0
+                if (progress >= 0.999f) {
+                    shapeRenderer.setColor(0f, 0f, 0f, 1.0f);
+                    shapeRenderer.rect(minX, minY, vw, vh);
+                    break;
+                }
+
+                {
+                    int cols = 20;
+                    int rows = 12;
+                    float blockWidth = vw / cols;
+                    float blockHeight = vh / rows;
+
+                    for (int x = 0; x < cols; x++) {
+                        for (int y = 0; y < rows; y++) {
+                            // Compute deterministic hash per cell using prime multipliers for even distribution
+                            float hash = (((x * 73 + y * 31 + (x * y * 13)) % 997) / 997.0f);
+                            if (progress >= hash) {
+                                // Fade in each square smoothly or draw solid black once threshold reached
+                                float cellProgress = Math.min(1.0f, (progress - hash) / Math.max(0.001f, 1.0f - hash));
+                                shapeRenderer.setColor(0f, 0f, 0f, cellProgress);
+                                shapeRenderer.rect(minX + x * blockWidth, minY + y * blockHeight, blockWidth + 0.5f, blockHeight + 0.5f);
+                            }
+                        }
+                    }
+                }
                 break;
         }
 

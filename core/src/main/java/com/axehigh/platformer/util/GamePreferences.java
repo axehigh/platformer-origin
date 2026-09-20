@@ -259,8 +259,11 @@ public class GamePreferences {
     }
 
     private <E extends Enum<E>> E enumOrNull(String key, Class<E> enumType) {
+        if (preferences == null) {
+            return null;
+        }
         String name = preferences.getString(key, "");
-        if (name.isEmpty()) {
+        if (name == null || name.isEmpty()) {
             return null;
         }
         try {

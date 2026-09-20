@@ -1,6 +1,7 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.assets.SpriteConstants;
+import com.axehigh.platformer.ecs.components.*;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.assets.AssetManager;
