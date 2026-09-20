@@ -47,7 +47,7 @@ See @resources/docs-ai/ashley-ecs.md (index, plus its sub-files `ashley-ecs-comp
 ---
 
 ## 5. Coding Conventions & Best Practices
-*   **Java Import** Use static import if you can. Never use qualified imports, unless you have to.
+*   **Java Import:** Use static import or wildcard/direct imports where appropriate. Never use fully qualified inline class names (e.g. `com.axehigh.platformer.ecs.components.TransformComponent`) when a standard import or wildcard package import (`import com.axehigh.platformer.ecs.components.*;`) can be used.
 *   **Asset Management:** Use `AssetManager` to load all `TextureAtlas`, `TiledMap`, and audio assets asynchronously.
 *   **Memory Management:** Always explicitly `dispose()` of Textures, SpriteBatches, and TiledMaps when changing screens or shutting down to prevent memory leaks. Pool frequent ECS components if garbage collection spikes occur.
 *   **Frame-Rate Independence:** Always use `Gdx.graphics.getDeltaTime()` inside your Ashley systems' `update` methods.
