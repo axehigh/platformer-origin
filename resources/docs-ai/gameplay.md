@@ -90,8 +90,14 @@ Empty marker component applied to a pickup entity that was launched with an init
 Marks an exit-gate entity as an actual level-transition trigger (as opposed to a purely decorative gate):
 *   `String nextLevelPath = ""` (Target `.tmx` asset path, e.g. `maps/demo_room.tmx`; read from the gate object's `nextLevel` custom Tiled property by `EntityFactory.createExitGate(...)`. An exit-gate object gets no `LevelExitComponent` (and is purely decorative) only when it has neither a `nextLevel` property **nor** `isFinal="true"`.)
 *   `boolean isFinalLevel = false` (When true, interacting with the gate triggers the victory flow — `VictoryScreen` — instead of loading the next level. Set from the `isFinal=true` custom Tiled property on the exit-gate object. A final gate may omit `nextLevel` entirely, as on World 2's `level_10_final`.)
+*   `float fadeProgress = 0` (Normalized fade progress `[0, 1]` driving the door's proximity glow fade-in and fade-out).
 
-See §2.M for the full multi-level progression mechanic built on top of this component.
+**Stylized Door Transition System:** When the player approaches an exit gate, `LevelExitSystem` detects proximity, triggers an amber glow via `LightComponent`, and listens for interact input (keyboard `E` or the contextual touch up-arrow button). Upon activation, the transition follows a stylized multi-stage progression:
+*   **Proximity Glow:** Smoothly fades in an amber `LightComponent` centered on the exit door bounds (rendered additively via `LightRenderSystem`).
+*   **Two-Layer Persistence:** Persists durable star/account progress records and run snapshots prior to changing scenes.
+*   **Screen Fade Wrapper:** Fades the screen out to black (`Actions.fadeIn(LEVEL_FADE_TIMER)`), performs the in-place level swap via `LevelManager.loadLevel(...)`, and fades back in (`Actions.fadeOut(LEVEL_FADE_TIMER)`). Input is locked during the entire 2× `LEVEL_FADE_TIMER` chain (`1.0s` per fade).
+*   **In-Place Swap & Cleanup:** Refills shared collision, one-way platform, hazard, crumbling tile, and room state arrays in place; removes all non-player entities; disposes of the old `MapLoader`; and respawns the new level's objects via `EntityFactory.spawnObjects(...)`.
+*   **Camera Framing:** Repositions the player and invokes `CameraSystem.snapToRoom(...)` to frame the starting room appropriately.
 
 ### F. Extended EnemyComponent
 Adds simple back-and-forth patrol state on top of the existing `float health = 10`:

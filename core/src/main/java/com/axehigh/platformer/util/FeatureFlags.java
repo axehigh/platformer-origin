@@ -21,6 +21,7 @@ public final class FeatureFlags {
     private static boolean softStopEnabled = GamePreferences.DEFAULT_SOFT_STOP_ENABLED;
     private static boolean vignetteEnabled = GamePreferences.DEFAULT_VIGNETTE_ENABLED;
     private static boolean slashArcEnabled = GamePreferences.DEFAULT_SLASH_ARC_ENABLED;
+    private static StylizedTransitionOverlay.TransitionType transitionStyle = GamePreferences.DEFAULT_TRANSITION_STYLE;
     private static boolean initialized = false;
 
     private FeatureFlags() {
@@ -41,6 +42,7 @@ public final class FeatureFlags {
         softStopEnabled = preferences.isSoftStopEnabled();
         vignetteEnabled = preferences.isVignetteEnabled();
         slashArcEnabled = preferences.isSlashArcEnabled();
+        transitionStyle = preferences.getTransitionStyle();
     }
 
     /** Whether wall-climb (wall-slide gravity + wall-jump latch) is enabled. Defaults to {@code true}. */
@@ -190,6 +192,24 @@ public final class FeatureFlags {
         }
     }
 
+    /**
+     * The preferred level transition style (PORTAL_IRIS, PIXELATE, CHECKERBOARD, FADE).
+     * Defaults to PORTAL_IRIS.
+     */
+    public static StylizedTransitionOverlay.TransitionType getTransitionStyle() {
+        ensureInitialized();
+        return transitionStyle;
+    }
+
+    /** Sets the preferred level transition style for the whole session and persists the choice. */
+    public static void setTransitionStyle(StylizedTransitionOverlay.TransitionType style) {
+        transitionStyle = style != null ? style : GamePreferences.DEFAULT_TRANSITION_STYLE;
+        initialized = true;
+        if (Gdx.app != null) {
+            new GamePreferences().setTransitionStyle(transitionStyle);
+        }
+    }
+
     static void resetForTests() {
         wallClimbingEnabled = GamePreferences.DEFAULT_WALL_CLIMB_ENABLED;
         squashEnabled = GamePreferences.DEFAULT_SQUASH_ENABLED;
@@ -200,6 +220,7 @@ public final class FeatureFlags {
         softStopEnabled = GamePreferences.DEFAULT_SOFT_STOP_ENABLED;
         vignetteEnabled = GamePreferences.DEFAULT_VIGNETTE_ENABLED;
         slashArcEnabled = GamePreferences.DEFAULT_SLASH_ARC_ENABLED;
+        transitionStyle = GamePreferences.DEFAULT_TRANSITION_STYLE;
         initialized = false;
     }
 }

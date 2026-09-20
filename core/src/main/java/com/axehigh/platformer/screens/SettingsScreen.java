@@ -3,6 +3,7 @@ package com.axehigh.platformer.screens;
 import com.axehigh.platformer.audio.AudioManager;
 import com.axehigh.platformer.util.FeatureFlags;
 import com.axehigh.platformer.util.GamePreferences;
+import com.axehigh.platformer.util.StylizedTransitionOverlay;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -135,17 +136,23 @@ public class SettingsScreen extends MenuScreen {
                     });
                     tabContent.add(wallClimbCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
 
-                    CheckBox softStopCheckBox = new CheckBox(" Soft Stop", skin);
-                    softStopCheckBox.getLabel().setFontScale(SmallFontScale);
-                    softStopCheckBox.setChecked(FeatureFlags.isSoftStopEnabled());
-                    softStopCheckBox.addListener(new ChangeListener() {
-                        @Override
-                        public void changed(ChangeEvent event, Actor actor) {
-                            AudioManager.get().playClick();
-                            FeatureFlags.setSoftStopEnabled(softStopCheckBox.isChecked());
+                    Label transitionLabel = new Label("Transition Style:", skin);
+                    transitionLabel.setFontScale(SmallFontScale);
+                    final TextButton[] transitionStyleButtonHolder = new TextButton[1];
+                    transitionStyleButtonHolder[0] = createMenuButton(FeatureFlags.getTransitionStyle().name(), () -> {
+                        StylizedTransitionOverlay.TransitionType current = FeatureFlags.getTransitionStyle();
+                        StylizedTransitionOverlay.TransitionType[] values = StylizedTransitionOverlay.TransitionType.values();
+                        StylizedField: for (int i = 0; i < values.length; i++) {
+                            if (values[i] == current) {
+                                StylizedTransitionOverlay.TransitionType next = values[(i + 1) % values.length];
+                                FeatureFlags.setTransitionStyle(next);
+                                transitionStyleButtonHolder[0].setText(next.name());
+                                break StylizedField;
+                            }
                         }
                     });
-                    tabContent.add(softStopCheckBox).colspan(2).padBottom(ELEMENT_PAD).row();
+                    tabContent.add(transitionLabel).padRight(LABEL_PAD_RIGHT);
+                    tabContent.add(transitionStyleButtonHolder[0]).size(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT).padBottom(ELEMENT_PAD).row();
                 } else if (activeTab[0] == 2) {
                     CheckBox levelOpenCheckBox = new CheckBox(" Level Open", skin);
                     levelOpenCheckBox.getLabel().setFontScale(SmallFontScale);

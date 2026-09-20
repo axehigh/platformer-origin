@@ -12,9 +12,7 @@ import com.axehigh.platformer.ecs.systems.CameraSystem;
 import com.axehigh.platformer.map.*;
 import com.axehigh.platformer.particles.ParticleHelper;
 import com.axehigh.platformer.ui.*;
-import com.axehigh.platformer.util.GamePreferences;
-import com.axehigh.platformer.util.SaveManager;
-import com.axehigh.platformer.util.SpawnSafety;
+import com.axehigh.platformer.util.*;
 import com.axehigh.platformer.viewport.OffsetFitViewport;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
@@ -26,7 +24,6 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
@@ -68,6 +65,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
     private boolean gamePaused = false;
     private boolean inventoryOpen = false;
     private boolean debugTouchLogging = false;
+    private final StylizedTransitionOverlay stylizedTransitionOverlay = new StylizedTransitionOverlay();
 
     /** Largest single-step delta allowed for the ECS simulation; prevents tunneling on Android's first-frame hitch. */
     private static final float MAX_FRAME_DELTA = 1f / 30f;
@@ -280,12 +278,13 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
      */
     private void onLevelTransition(String nextLevelPath, Entity playerEntity) {
         fadeOverlay.setTouchable(Touchable.enabled);
-        fadeOverlay.addAction(Actions.sequence(
-            Actions.fadeIn(LEVEL_FADE_TIMER), // fade out to black
-            Actions.run(() -> systems.levelManager.loadLevel(nextLevelPath, playerEntity)),
-            Actions.fadeOut(LEVEL_FADE_TIMER), // fade back in
-            Actions.touchable(Touchable.disabled)
-        ));
+        StylizedTransitionOverlay.TransitionType style = FeatureFlags.getTransitionStyle();
+        stylizedTransitionOverlay.start(
+            style,
+            LEVEL_FADE_TIMER * 2f,
+            () -> systems.levelManager.loadLevel(nextLevelPath, playerEntity),
+            () -> fadeOverlay.setTouchable(Touchable.disabled)
+        );
     }
 
     @Override
@@ -398,6 +397,11 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         // topmost layer after all world/HUD drawing (otherwise the fade would sit underneath and be
         // hidden for the whole transition).
         renderTransition(delta);
+        if (stylizedTransitionOverlay.isActive()) {
+            stylizedTransitionOverlay.update(delta);
+            transitionStage.getViewport().apply();
+            stylizedTransitionOverlay.render((com.badlogic.gdx.graphics.OrthographicCamera) transitionStage.getViewport().getCamera());
+        }
     }
 
     /**
@@ -577,6 +581,9 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
 
     @Override
     public void dispose() {
+        if (stylizedTransitionOverlay != null) {
+            stylizedTransitionOverlay.dispose();
+        }
         super.dispose();
         AudioManager.get().stopMusic();
         ParticleHelper.dispose();

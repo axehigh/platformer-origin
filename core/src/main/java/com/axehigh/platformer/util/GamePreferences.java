@@ -26,6 +26,8 @@ public class GamePreferences {
     private static final String KEY_LAYOUT_MODE = "layoutMode";
     private static final String KEY_UI_ICON_SCALE = "uiIconScale";
 
+    private static final String KEY_TRANSITION_STYLE = "transitionStyle";
+
     private static final float DEFAULT_MUSIC_VOLUME = 100f;
     private static final float DEFAULT_SFX_VOLUME = 100f;
     private static final boolean DEFAULT_MUSIC_ENABLED = true;
@@ -50,6 +52,8 @@ public class GamePreferences {
     static final boolean DEFAULT_VIGNETTE_ENABLED = true;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
     static final boolean DEFAULT_SLASH_ARC_ENABLED = true;
+    /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
+    static final StylizedTransitionOverlay.TransitionType DEFAULT_TRANSITION_STYLE = StylizedTransitionOverlay.TransitionType.PORTAL_IRIS;
 
     private final Preferences preferences;
 
@@ -243,6 +247,15 @@ public class GamePreferences {
     public void setUiIconScale(float scale) {
         preferences.putFloat(KEY_UI_ICON_SCALE, scale);
         preferences.flush();
+    }
+
+    public StylizedTransitionOverlay.TransitionType getTransitionStyle() {
+        StylizedTransitionOverlay.TransitionType val = enumOrNull(KEY_TRANSITION_STYLE, StylizedTransitionOverlay.TransitionType.class);
+        return val != null ? val : DEFAULT_TRANSITION_STYLE;
+    }
+
+    public void setTransitionStyle(StylizedTransitionOverlay.TransitionType transitionStyle) {
+        putEnum(KEY_TRANSITION_STYLE, transitionStyle);
     }
 
     private <E extends Enum<E>> E enumOrNull(String key, Class<E> enumType) {
