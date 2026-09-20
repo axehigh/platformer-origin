@@ -1,5 +1,6 @@
 package com.axehigh.platformer.common;
 
+import com.axehigh.platformer.audio.AudioManager;
 import com.axehigh.platformer.ui.SkinFactory;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -79,6 +80,8 @@ public class BaseScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        AudioManager.get().update(Math.min(delta, 1 / 30f));
+
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 

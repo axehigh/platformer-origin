@@ -95,7 +95,7 @@ Foreground decor that draws on top of everything. Stamp tiles with `effect="ligh
 
 ### 6. Place Enemies on the `enemies` Layer
 
-Place `enemy` markers (stamp from `enemy.tsx` or draw rectangles + `enemyType`). Refer to `enemies.md` for behavior tuning (flyers need patrol range clear of walls, shooters only fire in their own room).
+Place `enemy` markers (stamp from `enemy.tsx` or draw rectangles + `enemyType`). Refer to `enemies.md` for behavior tuning (flyers need patrol range clear of walls, shooters commit shots only in their own room and within their `shootRange`/`detectionRange`).
 
 ### 7. Draw Room Boundaries on the `Rooms` Layer
 
@@ -300,7 +300,7 @@ Place `enemy` markers on the `enemies` layer (or `objects`). The `enemyType` pro
 |---|---|---|
 | `walker` (default) | Goblin | Ground-based patrol enemy |
 | `flyer` | Mosquito | Flies; needs patrol range clear of walls |
-| `shooter` | Spider | Fires projectiles; only fires in its own room |
+| `shooter` | Spider | Fires projectiles; commits shots only in its own room and while the player's center is within its `detectionRange` (see `shootRange`/`detectionRange` below) |
 | `knight` | Knight | 15 HP, tough melee enemy |
 
 The `loot` property defines drops (e.g., `"coin:3, ammo:1"`). Supports comma-separated list and `":"` or `"="` delimiters. Valid: `coin:X`, `ammo:X`, `potion:TYPE` (TYPE in `healing`, `strength`, `speed`, `invulnerability`). See `resources/docs-ai/enemies.md` for full details.
@@ -312,7 +312,7 @@ The `loot` property defines drops (e.g., `"coin:3, ammo:1"`). Supports comma-sep
     *   *Tile stamp:* stamp a tile from `enemy.tsx` — those tiles already carry `type="enemy"` and the matching `enemyType` property, so the stamp alone works with zero typing.
     *   The marker must sit **inside a `Rooms` rectangle**; otherwise the enemy's `roomIndex = -1` and it never freezes/AI-gates with its room.
 *   **`type`** (*string*, **required**) — must be `"enemy"` (the marker discriminator; set on the object or carried by the stamped tile).
-*   **`enemyType`** (*string*, default `"walker"`) — picks the creature: `walker` (goblin, default), `flyer` (mosquito — needs patrol range clear of walls), `shooter` (spider — fires only in its own room), `knight` (15 HP, same logic as walker). Any unknown value falls back to `walker`.
+*   **`enemyType`** (*string*, default `"walker"`) — picks the creature: `walker` (goblin, default), `flyer` (mosquito — needs patrol range clear of walls), `shooter` (spider — commits shots only in its own room and within its `detectionRange`), `knight` (15 HP, same logic as walker). Any unknown value falls back to `walker`.
 *   **`aiMode`** (*string*, default `patrol`) — `"side-to-side"` / `"sidetoside"` (case-insensitive) switches to endless walking that turns only on walls/ledges/hazards (ignores `patrolRange`); anything else or absent keeps the origin-bounded `patrol` mode. Flyers ignore the grounded probes, so they always turn on the `patrolRange` bound.
 *   **`speed`** (*float*, default per-type `20`) — patrol-speed override in the same pre-`unitScale` units as the default (on 128px maps `20` ≈ 1.25 map-tiles/s). The spawned enemy's actual speed is jittered ±15% for desync.
 *   **`patrolRange`** (*float*, default `64`) — patrol-limit override. Effective patrol = `value × unitScale` map tiles to each side of spawn (128px maps: `unitScale` = 8, so `1` ≈ 8 tiles, `0.5` ≈ 4 tiles). Only applies in `patrol` mode (`SIDE_TO_SIDE` ignores it).
@@ -321,6 +321,9 @@ The `loot` property defines drops (e.g., `"coin:3, ammo:1"`). Supports comma-sep
 *   **`attackType`** (*string*, default `"melee"` for non-shooters) — `"melee"` gives the enemy a wind-up melee strike (player detection + chase); any other value, or a shooter, means no attack behavior.
 *   **`attackInterval`** (*float*, default `2.0`) — seconds between committed melee strikes.
 *   **`attackRange`** (*float*, default `24`) — melee strike-commit reach override, in the same tile units as `patrolRange` (`value × unitScale` tiles in front of the enemy; 128px maps: `1` ≈ 8 tiles). Legacy alias **`meleeRange`** still works.
+*   **`shootRange`** (*float*, default `8`, shooter only) — how far the shooter's bullet travels before despawning, in **tiles** (converted to world units at spawn via `× tileWidth`, NO extra × `unitScale`): the bullet despawns after flying exactly `shootRange` tiles (`8` → `128u` on 16px tiles). Tune lower to make dodges easier.
+*   **`detectionRange`** (*float*, default `8`, shooter only) — the shooter's horizontal shot-commit reach, in the same tile units as `shootRange`: the player's collision *center* must be within `detectionRange` tiles **ahead** of the shooter's current facing (and within `detectionRange` — half — **behind** it), and on a `±1`-tile vertical band of the shooter's center, before a shot commits. No line-of-sight. The shooter snap-faces the player on commit, so cancels during the wind-up/turn-idle effectively use the full range.
+*   **`windUp`** (*float*, default `0.5`, shooter only) — the shooter's wind-up telegraph duration in **seconds** — real time, deliberately NOT a tile count, so the factory reads it via `getFloatProperty` (never `getTileXProperty`, which multiplies by `tileWidth`); matches the melee `windUpDuration` raw-seconds convention. Effective charge = `max(windUp, ATTACKING clip duration)`, so a longer attack clip can extend but never shorten the telegraph. During the charge the shooter plants in place (velocity zeroed each frame) and pulses its `ATTACKING` pose (looping).
 *   **`windUpDuration`** (*float*, default `0.4`) — seconds of wind-up telegraph before the strike window opens.
 *   **`secretRoom`** (*string*, default absent) — names a `Rooms` rectangle; defers this enemy — it only spawns when that room is revealed (secret rooms, §4.6).
 
@@ -563,6 +566,9 @@ All properties are read as `float`/`string`/`boolean` and tolerate being set as 
 | `attackType` | string | `"melee"` | (enemy only, non-shooters) `"melee"` gives the enemy a wind-up melee strike (detection + chase); anything else = no attack behavior. |
 | `attackInterval` | float | `2.0` | (enemy only, melee) Seconds between committed melee strikes. |
 | `attackRange` | float | `24` | (enemy only, melee) Strike-commit reach override in tile units (`value × unitScale` tiles in front of the enemy on 128px maps). Legacy alias `meleeRange`. |
+| `shootRange` | float | `8` | (enemy only, shooter) Bullet travel range in **tiles** — converted at spawn to world units via `× tileWidth` (NO extra × `unitScale`), so `8` = `128u` on 16px tiles. The spawned bullet despawns after flying exactly `shootRange` tiles. |
+| `detectionRange` | float | `8` | (enemy only, shooter) Shot-commit horizontal reach in the same tile units as `shootRange`: the player's collision center must be within `detectionRange` tiles horizontally (per side) and a `±1`-tile vertical band of the shooter's center to commit a shot. |
+| `windUp` | float | `0.5` | (enemy only, shooter) Wind-up telegraph duration in **seconds** — real time, deliberately not a tile count (read via `getFloatProperty`, not `getTileXProperty`). Effective charge = `max(windUp, ATTACKING clip duration)`; the shooter plants in place with the `ATTACKING` pose looping for the whole charge. |
 | `windUpDuration` | float | `0.4` | (enemy only, melee) Seconds of wind-up telegraph before the strike window opens. |
 | `secretRoom` | string | — | (object markers only) Defers this marker — it is partitioned out of the normal spawn layers and only spawned when its named room is revealed. Must match a `Rooms` rect name. |
 | `text` | string | — | (tutorial sign only) The tooltip message shown above the sign while the player overlaps its sensor (see §5.8). |

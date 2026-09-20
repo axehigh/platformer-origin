@@ -52,8 +52,13 @@ public class EnemySystem extends IteratingSystem {
     private static final float HAZARD_PROBE_AHEAD = 16f;
     /** How high above the enemy's feet the hazard probe reaches. */
     private static final float HAZARD_PROBE_HEIGHT = 40f;
-    /** How long an enemy stands still after turning around. */
-    private static final float TURN_PAUSE_DURATION = 0.3f;
+    /**
+     * How long an enemy stands still after turning around. Also reused by {@code EnemyShootSystem}
+     * (same package) as the shooter's pre-wind-up turn-idle: the stand-still a shooter holds after
+     * snap-turning toward the player on a commit that required a facing change, so both turnaround
+     * pauses feel identical.
+     */
+    static final float TURN_PAUSE_DURATION = 0.1f;
     /** Coins dropped per full {@code EnemyComponent.maxHealth} pool on death. */
     private static final float COINS_PER_HEALTH = 5f;
 

@@ -113,6 +113,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
 
         EntityFactory entityFactory = new EntityFactory(assetManager);
         entityFactory.setUnitScale(scale);
+        entityFactory.setTileDimensions(mapLoader.getTileWidth(), mapLoader.getTileHeight());
 
         RoomState roomState = new RoomState();
         roomState.rooms.addAll(mapLoader.getRooms());

@@ -73,7 +73,11 @@
   <object id="290" gid="106" x="1152" y="512" width="128" height="128"/>
   <object id="291" gid="106" x="1408" y="512" width="128" height="128"/>
   <object id="292" gid="106" x="1152" y="896" width="128" height="128"/>
-  <object id="293" gid="106" x="3328" y="512" width="128" height="128"/>
+  <object id="293" gid="106" x="3328" y="512" width="128" height="128">
+   <properties>
+    <property name="detectionRange" type="float" value="3"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="6" name="Rooms" locked="1">
   <object id="271" name="room0" x="0" y="0" width="3840" height="1152"/>

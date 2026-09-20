@@ -27,9 +27,11 @@
  </tile>
  <tile id="5" type="enemy">
   <properties>
+   <property name="detectionRange" type="float" value="3"/>
    <property name="enemyType" value="shooter"/>
    <property name="loot" value=""/>
    <property name="patrolRange" type="float" value="2"/>
+   <property name="shootRange" type="float" value="4"/>
    <property name="size" propertytype="EnemySize" value="medium"/>
   </properties>
   <image source="../gfx/enemies/spider_0spider.png" width="128" height="128"/>

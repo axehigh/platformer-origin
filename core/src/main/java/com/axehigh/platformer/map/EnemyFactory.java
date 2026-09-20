@@ -119,6 +119,18 @@ class EnemyFactory {
                 break;
             case SHOOTER:
                 EnemyShooterComponent shooter = new EnemyShooterComponent();
+                // Per-marker shoot/detection range overrides. The Tiled values are TILE COUNTS
+                // (e.g. 8 = 8 tiles); getTileXProperty converts to world units (× tileWidth).
+                // Unlike patrolRange/attackRange there is deliberately NO extra × unitScale —
+                // shootRange/detectionRange = tile count × tileWidth, per the agreed design.
+                // (tileWidth must reflect the active map's real tile size — GameScreen and
+                // LevelManager both push it via setTileDimensions; the 16f default is a base only.)
+                shooter.shootRange = TileProps.getTileXProperty(object, tile, "shootRange", shooter.shootRange, context.tileWidth);
+                shooter.detectionRange = TileProps.getTileXProperty(object, tile, "detectionRange", shooter.detectionRange, context.tileWidth);
+                // Per-marker wind-up telegraph: a TIME in REAL SECONDS (default 0.5), deliberately
+                // NOT a tile count — read via getFloatProperty, never getTileXProperty (that would
+                // multiply by tileWidth). Matches the melee windUpDuration raw-seconds convention.
+                shooter.windUpSeconds = TileProps.getFloatProperty(object, tile, "windUp", shooter.windUpSeconds);
                 // Stagger the first shot across the interval so shooters don't all fire the same
                 // frame the player enters their room.
                 shooter.shootCooldown.start(MathUtils.random(0f, shooter.shootInterval));

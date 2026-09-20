@@ -4,28 +4,45 @@ import com.axehigh.platformer.util.GamePreferences;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.math.MathUtils;
 
 /**
  * App-scoped audio service: owns the music and sound assets, the currently playing music track,
  * and the volume/enabled state persisted via {@link GamePreferences}. Screens reach it through
  * {@link #get()}; the in-game ECS routes playback through this class via {@code MusicSystem} /
  * {@code SfxSystem}.
+ *
+ * <p>Track changes crossfade (no silent gap) through {@link MusicFadeController} over
+ * {@link MusicFadeController#MUSIC_FADE_DURATION}: the new track ramps up while the old ramps
+ * down, then the old stops. The crossfade is frame-driven — call {@link #update(float)} once per
+ * frame (see {@code BaseScreen.render}).
  */
 public class AudioManager {
-
-    public static final String MUSIC_MENU = "music/Game-Menu_Looping.mp3";
-    public static final String MUSIC_GAME = "music/Dark-Things.ogg";
-    public static final String SFX_COIN = "sfx/Creepy1.mp3";
-    public static final String SFX_CLICK = "sfx/Clank_8.mp3";
-    public static final String SFX_WALL_BREAK = "sfx/Explosion1.mp3";
 
     private static AudioManager instance;
 
     private final AssetManager assetManager = new AssetManager();
     private final GamePreferences preferences = new GamePreferences();
+    private final MusicFadeController musicFade = new MusicFadeController();
+
+    public static final String GAME_OVER_MUSIC = "music/Game-Menu_Looping.mp3";
+    public static final String MUSIC_MENU = "music/Tower-Defense_Looping.mp3";
+
+    public static final String MUSIC_GAME = "music/Scary-Things-Ahead.mp3";
+    public static final String MUSIC_GAME_2 = "music/Sewer-Monsters-Town-Hall-Meeting_Looping.mp3";
+
+
+    public static final String SFX_COIN = "sfx/Creepy1.mp3";
+    public static final String SFX_CLICK = "sfx/Clank_8.mp3";
+    public static final String SFX_POWERUP_11 = "sfx/PowerUp11.mp3";
+    public static final String SFX_POWERUP_29 = "sfx/PowerUp29.mp3";
+
+    public static final String SFX_WALL_BREAK = "sfx/Explosion1.mp3";
 
     private Music menuMusic;
     private Music gameMusic;
+    private Music gameMusic2;
+    private Music gameOverMusic;
     private Sound coinSound;
     private Sound clickSound;
     private Sound wallBreakSound;
@@ -34,6 +51,8 @@ public class AudioManager {
     private AudioManager() {
         assetManager.load(MUSIC_MENU, Music.class);
         assetManager.load(MUSIC_GAME, Music.class);
+        assetManager.load(MUSIC_GAME_2, Music.class);
+        assetManager.load(GAME_OVER_MUSIC, Music.class);
         assetManager.load(SFX_COIN, Sound.class);
         assetManager.load(SFX_CLICK, Sound.class);
         assetManager.load(SFX_WALL_BREAK, Sound.class);
@@ -41,8 +60,12 @@ public class AudioManager {
 
         menuMusic = assetManager.get(MUSIC_MENU, Music.class);
         gameMusic = assetManager.get(MUSIC_GAME, Music.class);
+        gameMusic2 = assetManager.get(MUSIC_GAME_2, Music.class);
+        gameOverMusic = assetManager.get(GAME_OVER_MUSIC, Music.class);
         menuMusic.setLooping(true);
         gameMusic.setLooping(true);
+        gameMusic2.setLooping(true);
+        gameOverMusic.setLooping(true);
         coinSound = assetManager.get(SFX_COIN, Sound.class);
         clickSound = assetManager.get(SFX_CLICK, Sound.class);
         wallBreakSound = assetManager.get(SFX_WALL_BREAK, Sound.class);
@@ -64,15 +87,32 @@ public class AudioManager {
         instance = manager;
     }
 
+    /**
+     * Advances the music crossfade ({@code MusicFadeController}) by {@code deltaTime}. Call once
+     * per frame — {@code BaseScreen.render} drives it for every screen.
+     */
+    public void update(float deltaTime) {
+        musicFade.update(deltaTime);
+    }
+
     public void playMenuMusic() {
         switchMusic(menuMusic);
     }
 
+    public void playGameOverMusic() {
+        switchMusic(gameOverMusic);
+    }
+
+    /**
+     * Starts a random in-game track: one of {@link #MUSIC_GAME} or {@link #MUSIC_GAME_2},
+     * picked per call (per game session, since {@code MusicSystem} calls this once per engine).
+     */
     public void playGameMusic() {
-        switchMusic(gameMusic);
+        switchMusic(MathUtils.randomBoolean() ? gameMusic : gameMusic2);
     }
 
     public void stopMusic() {
+        musicFade.cancel();
         if (currentMusic != null) {
             currentMusic.stop();
             currentMusic = null;
@@ -101,8 +141,11 @@ public class AudioManager {
             if (currentMusic != null) {
                 currentMusic.play();
             }
-        } else if (currentMusic != null) {
-            currentMusic.pause();
+        } else {
+            musicFade.cancel();
+            if (currentMusic != null) {
+                currentMusic.pause();
+            }
         }
     }
 
@@ -140,14 +183,17 @@ public class AudioManager {
         if (currentMusic == music) {
             return;
         }
-        if (currentMusic != null) {
-            currentMusic.stop();
+        if (preferences.isMusicEnabled()) {
+            // Crossfade over currentMusic → music: new track ramps up, old ramps down and stops.
+            musicFade.start(currentMusic, music, preferences.getMusicVolume() / 100f);
+        } else {
+            // Music disabled: skip the fade, stop the old track, don't play the new one.
+            musicFade.cancel();
+            if (currentMusic != null) {
+                currentMusic.stop();
+            }
         }
         currentMusic = music;
-        if (preferences.isMusicEnabled()) {
-            currentMusic.setVolume(preferences.getMusicVolume() / 100f);
-            currentMusic.play();
-        }
     }
 
     private void playSfx(Sound sound) {

@@ -71,6 +71,15 @@ public class EnemyBulletCollisionSystem extends IteratingSystem {
             }
         }
 
+        // Travel-range despawn: enemy shots die after flying exactly their maxTravelDistance
+        // (world units, set from EnemyShooterComponent.shootRange). Player bullets keep the
+        // default 0 = unlimited, so this never applies to them.
+        bullet.traveledDistance += Math.abs(movement.velocity.x) * deltaTime;
+        if (bullet.maxTravelDistance > 0f && bullet.traveledDistance >= bullet.maxTravelDistance) {
+            getEngine().removeEntity(bulletEntity);
+            return;
+        }
+
         if (hitsWall(collision.worldBounds)) {
             getEngine().removeEntity(bulletEntity);
             return;

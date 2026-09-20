@@ -57,9 +57,15 @@ public class AnimationSystem extends IteratingSystem {
 
         Animation<TextureRegion> animation = animationComponent.animations.get(animationComponent.currentState);
         if (animation != null) {
+            // ATTACKING loops only for a shooter mid-wind-up (the spider visibly pulses its attack
+            // pose for the whole charge, whose duration is max(windUpSeconds, clip) and can exceed
+            // the clip); every other ATTACKING use — player melee, enemy melee, shooter outside the
+            // wind-up — stays non-looping, as do HURT/DEATH/SPLASHING.
+            EnemyShooterComponent shooter = ENEMY_SHOOTER.get(entity);
+            boolean shooterCharging = shooter != null && shooter.windUp.isActive();
             boolean looping = animationComponent.currentState != AnimationComponent.State.HURT &&
                              animationComponent.currentState != AnimationComponent.State.DEATH &&
-                             animationComponent.currentState != AnimationComponent.State.ATTACKING &&
+                             (animationComponent.currentState != AnimationComponent.State.ATTACKING || shooterCharging) &&
                              animationComponent.currentState != AnimationComponent.State.SPLASHING;
             textureComponent.region = animation.getKeyFrame(animationComponent.stateTime, looping);
         }
@@ -145,6 +151,12 @@ public class AnimationSystem extends IteratingSystem {
         }
         EnemyAttackComponent attack = ENEMY_ATTACK.get(entity);
         if (attack != null && attack.isAttacking) {
+            return AnimationComponent.State.ATTACKING;
+        }
+        // Shooter wind-up: while the pre-fire telegraph is running, play the ATTACKING clip
+        // (non-looping; the bullet fires when it completes). Melee wins if both exist.
+        EnemyShooterComponent shooter = ENEMY_SHOOTER.get(entity);
+        if (shooter != null && shooter.windUp.isActive()) {
             return AnimationComponent.State.ATTACKING;
         }
         if (Math.abs(movement.velocity.x) > 0.01f) {

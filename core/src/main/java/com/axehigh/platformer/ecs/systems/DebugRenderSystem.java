@@ -1,9 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.EnemyAttackComponent;
-import com.axehigh.platformer.ecs.components.EnemyComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.map.RoomState;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -37,10 +34,15 @@ import static com.axehigh.platformer.ecs.components.Mappers.*;
  * height tall), and its live strike hitbox (red, enemy collision width × height, only while the
  * strike window is active — pulled from {@code EnemyAttackSystem#getActiveStrikeBounds()}, resolved
  * once in {@code addedToEngine}, mirroring the player's live strike) so trigger/commit/strike
- * distances are visible alongside the AABBs. The toggle is static so it survives level reloads
- * within a session. Disabled by default; drawing is skipped entirely while off, so there's no
- * per-frame cost in normal play. Must run after {@code RenderSystem} so its {@code ShapeRenderer}
- * block never overlaps the {@code SpriteBatch} block (the two can never be open at the same time).
+ * distances are visible alongside the AABBs. For shooter enemies it draws the shot-detection
+ * rule (magenta, sized exactly like {@code EnemyShootSystem}'s rule: {@code detectionRange} per
+ * horizontal side, {@code EnemyShootSystem.DETECTION_VERTICAL_BAND × unitScale} per vertical side,
+ * centered on the AABB center) and the bullet travel range (white line, from the box's leading
+ * edge in the current facing direction, {@code shootRange} long). The toggle is static so it
+ * survives level reloads within a session. Disabled by default; drawing is skipped entirely while
+ * off, so there's no per-frame cost in normal play. Must run after {@code RenderSystem} so its
+ * {@code ShapeRenderer} block never overlaps the {@code SpriteBatch} block (the two can never be
+ * open at the same time).
  */
 public class DebugRenderSystem extends EntitySystem implements Disposable {
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
@@ -51,6 +53,7 @@ public class DebugRenderSystem extends EntitySystem implements Disposable {
     private final RoomState roomState;
     private ImmutableArray<Entity> collidables;
     private ImmutableArray<Entity> enemyAttackers;
+    private ImmutableArray<Entity> enemyShooters;
     private MeleeAttackSystem meleeAttackSystem;
     private EnemyAttackSystem enemyAttackSystem;
     private static boolean debugEnabled = false;
@@ -87,6 +90,7 @@ public class DebugRenderSystem extends EntitySystem implements Disposable {
         meleeAttackSystem = engine.getSystem(MeleeAttackSystem.class);
         enemyAttackSystem = engine.getSystem(EnemyAttackSystem.class);
         enemyAttackers = engine.getEntitiesFor(Family.all(EnemyComponent.class, EnemyAttackComponent.class, CollisionComponent.class).get());
+        enemyShooters = engine.getEntitiesFor(Family.all(EnemyComponent.class, EnemyShooterComponent.class, CollisionComponent.class).get());
     }
 
     @Override
@@ -184,6 +188,35 @@ public class DebugRenderSystem extends EntitySystem implements Disposable {
                 shapeRenderer.setColor(Color.RED);
                 shapeRenderer.rect(live.x, live.y, live.width, live.height);
             }
+        }
+
+        // Per shooter enemy: shot-detection rule (magenta) + bullet travel range (white line),
+        // sized exactly like EnemyShootSystem's runtime checks.
+        for (Entity entity : enemyShooters) {
+            CollisionComponent collision = COLLISION.get(entity);
+            EnemyShooterComponent shooter = ENEMY_SHOOTER.get(entity);
+            EnemyComponent enemy = ENEMY.get(entity);
+
+            float centerX = collision.worldBounds.x + collision.worldBounds.width / 2f;
+            float centerY = collision.worldBounds.y + collision.worldBounds.height / 2f;
+
+            // Detection rule: detectionRange ahead, detectionRange × REAR_DETECTION_SCALE behind
+            // (per current facing), ±1 tile (16 × unitScale) per vertical side.
+            float frontReach = shooter.detectionRange;
+            float rearReach = shooter.detectionRange * EnemyShootSystem.REAR_DETECTION_SCALE;
+            float leftReach = enemy.direction > 0 ? rearReach : frontReach;
+            float rightReach = enemy.direction > 0 ? frontReach : rearReach;
+            float detectWidth = leftReach + rightReach;
+            float detectHeight = EnemyShootSystem.DETECTION_VERTICAL_BAND * unitScale * 2f;
+            shapeRenderer.setColor(Color.MAGENTA);
+            shapeRenderer.rect(centerX - leftReach, centerY - detectHeight / 2f, detectWidth, detectHeight);
+
+            // Bullet travel range: from the box's leading edge in the current facing direction.
+            float startX = enemy.direction > 0
+                ? collision.worldBounds.x + collision.worldBounds.width
+                : collision.worldBounds.x;
+            shapeRenderer.setColor(Color.WHITE);
+            shapeRenderer.line(startX, centerY, startX + enemy.direction * shooter.shootRange, centerY);
         }
 
         shapeRenderer.end();

@@ -68,7 +68,7 @@ See @resources/docs-ai/ashley-ecs.md (index, plus its sub-files `ashley-ecs-comp
 
 ## Debugging
 Turn on and off collision debugging with SHIFT+D (desktop) or the "Collision Debug" button in the in-game Pause dialog (all platforms; the toggle persists across level reloads within a session).
-Use ShapeRenderer for debugging (see `DebugRenderSystem`, which outlines every live `CollisionComponent` AABB plus the static map collision rects — and, for melee-capable enemies, their omni-directional attack detection range in magenta and melee strike distance in red).
+Use ShapeRenderer for debugging (see `DebugRenderSystem`, which outlines every live `CollisionComponent` AABB plus the static map collision rects — and, for melee-capable enemies, their omni-directional attack detection range in magenta and melee strike distance in red; for shooter enemies, their shot-detection rule in magenta and bullet travel range as a white line).
 The Pause dialog also exposes a "Touch Debug" button that logs every touch to logcat under the `TouchDebug` tag (surface/viewport sizes, raw vs stage-mapped coords, and the hit actor), for diagnosing touch-input misalignment.
 
 ## Skill & Workflow Capture

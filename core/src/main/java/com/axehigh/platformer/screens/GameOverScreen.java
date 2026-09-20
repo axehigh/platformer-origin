@@ -58,7 +58,7 @@ public class GameOverScreen extends MenuScreen {
 
         menuEffects.applyKenBurns(stage, bg);
 
-        AudioManager.get().playMenuMusic();
+        AudioManager.get().playGameOverMusic();
 
         Table root = new Table();
         root.setFillParent(true);
