@@ -12,6 +12,7 @@ public class SpriteConstants {
     public static float PlayerOffsetRight = -16f;
     public static float PlayerOffsetLeft = -16f;
     public static float PlayerOffsetY = -24f;
+    public static float PlayerDeathOffsetY = -16f;
 
     //Chest atlas regions (gfx/origin-game.atlas): closed sprite on spawn, swapped to the
     //matching open sprite when a chest is melee-struck (see MeleeAttackSystem).

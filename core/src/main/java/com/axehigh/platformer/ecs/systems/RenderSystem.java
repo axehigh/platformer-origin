@@ -1,6 +1,7 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.GameConstants;
+import com.axehigh.platformer.assets.SpriteConstants;
 import com.axehigh.platformer.ecs.components.*;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -78,6 +79,12 @@ public class RenderSystem extends SortedIteratingSystem {
 
             float frameAnchorX = frameCenterX - (atlasRegion.originalWidth / 2f) * absScaleX;
             float frameAnchorY = frameCenterY - (atlasRegion.originalHeight / 2f) * absScaleY;
+
+            // Tall death frames (256x256 vs 128x128 standard) need a vertical adjustment
+            // so the corpse sits flush on the ground rather than floating.
+            if (atlasRegion.originalHeight >= 256 && PLAYER.get(entity) != null) {
+                frameAnchorY += SpriteConstants.PlayerDeathOffsetY * absScaleY;
+            }
 
             if (transform.scale.x >= 0) {
                 drawX = frameAnchorX + atlasRegion.offsetX * absScaleX;
