@@ -79,6 +79,12 @@ public class RenderSystem extends SortedIteratingSystem {
             float frameAnchorX = frameCenterX - (atlasRegion.originalWidth / 2f) * absScaleX;
             float frameAnchorY = frameCenterY - (atlasRegion.originalHeight / 2f) * absScaleY;
 
+            // Tall death frames (256x256 vs 128x128 standard) need a vertical adjustment
+            // so the corpse sits flush on the ground rather than floating.
+            if (atlasRegion.originalHeight >= 256) {
+                frameAnchorY -= ((atlasRegion.originalHeight - 128f) / 4f) * absScaleY;
+            }
+
             if (transform.scale.x >= 0) {
                 drawX = frameAnchorX + atlasRegion.offsetX * absScaleX;
             } else {
