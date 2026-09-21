@@ -6,204 +6,218 @@ filter: Linear, Linear
 repeat: none
 edgeofgalaxy
   rotate: false
-  xy: 1, 268
+  xy: 642, 290
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 moria-citadel
   rotate: false
-  xy: 515, 268
+  xy: 1105, 1021
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 sansserif
   rotate: false
-  xy: 1105, 1513
+  xy: 1105, 1535
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 button
   rotate: false
-  xy: 1105, 1423
+  xy: 970, 200
   size: 81, 46
   orig: 81, 46
   offset: 0, 0
   index: -1
 button_empty
   rotate: false
-  xy: 1619, 1850
+  xy: 642, 71
   size: 326, 175
   orig: 326, 175
   offset: 0, 0
   index: -1
 button_off
   rotate: false
-  xy: 1, 203
+  xy: 940, 1227
   size: 131, 63
   orig: 131, 63
   offset: 0, 0
   index: -1
 button_on
   rotate: false
-  xy: 940, 1205
+  xy: 642, 6
   size: 131, 63
   orig: 131, 63
   offset: 0, 0
   index: -1
 daggers
   rotate: false
-  xy: 1947, 1945
+  xy: 1619, 1022
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 door
   rotate: false
-  xy: 1, 121
+  xy: 1921, 1355
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 down
   rotate: false
-  xy: 940, 1123
+  xy: 940, 1145
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 inventory
   rotate: false
-  xy: 1105, 1341
+  xy: 970, 118
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 bag
   rotate: false
-  xy: 1105, 1341
+  xy: 970, 118
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 jump
   rotate: false
-  xy: 1947, 1863
+  xy: 1701, 1022
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 left
   rotate: false
-  xy: 1, 39
+  xy: 1921, 1273
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 pause
   rotate: false
-  xy: 1105, 1259
+  xy: 1921, 1109
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 potion
   rotate: false
-  xy: 940, 1041
+  xy: 940, 1063
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 right
   rotate: false
-  xy: 940, 959
+  xy: 1783, 1022
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 sword
   rotate: false
-  xy: 940, 877
+  xy: 1921, 1191
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 sword-power
   rotate: false
-  xy: 940, 795
+  xy: 940, 981
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 potion_healing
   rotate: false
-  xy: 83, 169
+  xy: 775, 37
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 potion_invulnerability
   rotate: false
-  xy: 1022, 1171
+  xy: 1053, 214
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 potion_speed
   rotate: false
-  xy: 1, 5
+  xy: 1022, 1193
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 potion_strength
   rotate: false
-  xy: 1579, 1479
+  xy: 970, 84
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 rope_big
   rotate: false
-  xy: 1921, 1376
+  xy: 2003, 963
   size: 40, 472
   orig: 40, 472
   offset: 0, 0
   index: -1
 rope_big_horisontal
   rotate: false
-  xy: 1105, 1471
+  xy: 642, 248
   size: 472, 40
   orig: 472, 40
   offset: 0, 0
   index: -1
 star
   rotate: false
-  xy: 134, 228
+  xy: 1116, 250
   size: 38, 38
   orig: 38, 38
   offset: 0, 0
   index: -1
 scroll_info
   rotate: false
-  xy: 1619, 1517
+  xy: 1619, 1104
   size: 300, 331
   orig: 300, 331
   offset: 0, 0
   index: -1
 scroll_large
   rotate: false
-  xy: 1, 782
+  xy: 1, 804
   size: 937, 486
   orig: 937, 486
   offset: 0, 0
   index: -1
 table
   rotate: false
-  xy: 1, 1270
+  xy: 1, 1292
   size: 1102, 755
   orig: 1102, 755
+  offset: 0, 0
+  index: -1
+table_tall_border
+  rotate: false
+  xy: 1, 1
+  size: 639, 801
+  orig: 639, 801
+  offset: 0, 0
+  index: -1
+window_tall_line_border
+  rotate: false
+  xy: 1619, 1437
+  size: 400, 610
+  orig: 400, 610
   offset: 0, 0
   index: -1

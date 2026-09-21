@@ -1,6 +1,5 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
@@ -22,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import static com.axehigh.platformer.GameConstants.TutorialFontScale;
+import static com.axehigh.platformer.GameConstants.UI_PANEL_ALPHA;
 import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
 import static com.axehigh.platformer.ecs.components.Mappers.TUTORIAL;
 
@@ -61,7 +61,23 @@ public class TutorialSystem extends IteratingSystem {
             f = new BitmapFont();
         }
         this.font = f;
-        this.panelDrawable = (TextureRegionDrawable) skin.getDrawable("table");
+        TextureRegionDrawable drawable = null;
+        try {
+            Drawable d = skin.getDrawable("table_tall_border");
+            if (d instanceof TextureRegionDrawable) {
+                drawable = (TextureRegionDrawable) d;
+            }
+        } catch (Exception ignored) {}
+        if (drawable == null) {
+            drawable = (TextureRegionDrawable) skin.getDrawable("scroll_large");
+        }
+        if (drawable == null) {
+            drawable = (TextureRegionDrawable) skin.getDrawable("scroll");
+        }
+        if (drawable == null) {
+            drawable = (TextureRegionDrawable) skin.getDrawable("table");
+        }
+        this.panelDrawable = drawable;
     }
 
     public void setUnitScale(float unitScale) {
@@ -99,8 +115,8 @@ public class TutorialSystem extends IteratingSystem {
                         font.getData().setScale(TutorialFontScale);
                         layout.setText(font, tutorial.text);
 
-                        float padX = 28f;
-                        float padY = 20f;
+                        float padX = 64f;
+                        float padY = 36f;
 
                         // Resolve inline icon from the highlight keyword: the same skin drawable the
                         // touch controller uses, so the tooltip text maps 1:1 to the button to press.
@@ -128,7 +144,7 @@ public class TutorialSystem extends IteratingSystem {
                         float panelY = drawY;
 
                         if (panelDrawable != null) {
-                            batch.setColor(1f, 1f, 1f, GameConstants.UI_PANEL_ALPHA);
+                            batch.setColor(1f, 1f, 1f, UI_PANEL_ALPHA);
                             panelDrawable.draw(batch, panelX, panelY, boxWidth, boxHeight);
                             batch.setColor(Color.WHITE);
                         }

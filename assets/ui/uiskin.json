@@ -68,7 +68,7 @@ com.badlogic.gdx.scenes.scene2d.ui.CheckBox$CheckBoxStyle: {
 		checkboxOn: button_on
 		checkboxOff: button_off
 		font: edgeofgalaxy
-		fontColor: GRAY
+		fontColor: GREEN
 	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.ImageButton$ImageButtonStyle: {
@@ -95,7 +95,7 @@ com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton$ImageTextButtonStyle: {
 com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	default: {
 		font: edgeofgalaxy
-		fontColor: GRAY
+		fontColor: GREEN
 	}
 	title: {
 		font: moria-citadel
@@ -146,6 +146,11 @@ com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
 		background: table
 		titleFont: edgeofgalaxy
 		titleFontColor: BLACK
+	}
+	scroll_large: {
+		titleFont: moria-citadel
+		titleFontColor: RED
+		stageBackground: table_tall_border
 	}
 }
 }

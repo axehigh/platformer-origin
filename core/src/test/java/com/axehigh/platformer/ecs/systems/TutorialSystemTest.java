@@ -49,8 +49,7 @@ public class TutorialSystemTest extends SystemTestBase {
         pageRegions.add(new TextureRegion());
         BitmapFont font = new BitmapFont(fontData, pageRegions, true);
         skin.add("edgeofgalaxy", font);
-        // Registered under Drawable.class so skin.getDrawable("table") resolves it; Skin keys
-        // resources by the registered type class and getDrawable() looks up under Drawable.class.
+        skin.add("scroll_large", new TextureRegionDrawable(new TextureRegion()), Drawable.class);
         skin.add("table", new TextureRegionDrawable(new TextureRegion()), Drawable.class);
 
         system = new TutorialSystem(batch, camera, skin, 0);
