@@ -12,6 +12,9 @@ import com.badlogic.gdx.utils.Array;
 import org.junit.Before;
 import org.junit.Test;
 
+import static com.axehigh.platformer.ecs.components.Mappers.CHEST;
+import static com.axehigh.platformer.ecs.components.Mappers.COLLISION;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -33,13 +36,17 @@ public class ChestSystemTest extends SystemTestBase {
     }
 
     private Entity chest(float x, float y, PotionType potionType) {
+        return chest(x, y, potionType, true);
+    }
+
+    private Entity chest(float x, float y, PotionType potionType, boolean opened) {
         TransformComponent transform = transform(x, y);
         CollisionComponent collision = collision(0f, 0f, 128f, 128f);
         place(transform, collision, x, y);
 
         ChestComponent chest = new ChestComponent();
         chest.potionType = potionType;
-        chest.opened = true;
+        chest.opened = opened;
         chest.disappearTimer.start(0.3f);
 
         Entity entity = entity(transform, chest, collision);
@@ -128,5 +135,133 @@ public class ChestSystemTest extends SystemTestBase {
 
         verify(entityFactory, never()).popCoins(any(), anyFloat(), anyFloat(), anyInt(), anyFloat(), any());
         verify(entityFactory, never()).popPotion(any(), anyFloat(), anyFloat(), anyString(), anyFloat(), any());
+    }
+
+    @Test
+    public void closedChest_addsWorldBoundsToCollisionRects() {
+        Entity e = chest(100f, 50f, null, false);
+
+        engine.update(DT);
+
+        assertEquals(1, collisionRects.size);
+        assertSame(COLLISION.get(e).worldBounds, collisionRects.get(0));
+    }
+
+    @Test
+    public void closedChest_repeatedUpdates_noDuplicateRects() {
+        Entity e = chest(100f, 50f, null, false);
+
+        for (int i = 0; i < 5; i++) {
+            engine.update(DT);
+        }
+
+        assertEquals(1, collisionRects.size);
+        assertSame(COLLISION.get(e).worldBounds, collisionRects.get(0));
+    }
+
+    @Test
+    public void openedChest_removedFromCollisionRects() {
+        Entity e = chest(100f, 50f, null, false);
+        engine.update(DT);
+        assertEquals(1, collisionRects.size);
+
+        CHEST.get(e).opened = true;
+        engine.update(DT);
+
+        assertEquals(0, collisionRects.size);
+    }
+
+    @Test
+    public void openedChest_staysRemovedAcrossUpdates() {
+        Entity e = chest(100f, 50f, null, false);
+        engine.update(DT);
+        assertEquals(1, collisionRects.size);
+
+        CHEST.get(e).opened = true;
+        engine.update(DT);
+
+        for (int i = 0; i < 5; i++) {
+            engine.update(DT);
+        }
+        assertEquals(0, collisionRects.size);
+    }
+
+    @Test
+    public void toggleClosedToOpenedAndBack_reconcilesRects() {
+        Entity e = chest(100f, 50f, null, false);
+        engine.update(DT);
+        assertEquals(1, collisionRects.size);
+
+        // Open → rect removed
+        CHEST.get(e).opened = true;
+        engine.update(DT);
+        assertEquals(0, collisionRects.size);
+
+        // Re-close (self-heal across reloads) → rect re-added
+        CHEST.get(e).opened = false;
+        engine.update(DT);
+        assertEquals(1, collisionRects.size);
+        assertSame(COLLISION.get(e).worldBounds, collisionRects.get(0));
+    }
+
+    @Test
+    public void chestWithoutCollisionComponent_skipsSolidityWithoutNpe() {
+        TransformComponent transform = transform(100f, 50f);
+        ChestComponent chest = new ChestComponent();
+        chest.opened = false;
+        Entity entity = entity(transform, chest);
+        engine.addEntity(entity);
+
+        for (int i = 0; i < 3; i++) {
+            engine.update(DT);
+        }
+
+        assertEquals(0, collisionRects.size);
+    }
+
+    @Test
+    public void chestWithoutCollisionComponent_opened_stillDropsLoot() {
+        TransformComponent transform = transform(100f, 50f);
+        ChestComponent chest = new ChestComponent();
+        chest.opened = true;
+        chest.disappearTimer.start(0.3f);
+        Entity entity = entity(transform, chest);
+        engine.addEntity(entity);
+
+        for (int i = 0; i < 20; i++) {
+            engine.update(DT);
+        }
+
+        // No collision component → centers on transform.position
+        verify(entityFactory).popCoins(eq(engine), eq(100f), eq(50f), anyInt(), anyFloat(), eq(collisionRects));
+        assertEquals(0, collisionRects.size);
+    }
+
+    @Test
+    public void nullCollisionRects_noNpeForOpenOrClosedChests() {
+        system.setCollisionRects(null);
+
+        chest(100f, 50f, null, false);
+        chest(200f, 50f, null, true);
+
+        for (int i = 0; i < 5; i++) {
+            engine.update(DT);
+        }
+        // No exception thrown is the assertion.
+    }
+
+    @Test
+    public void coinChest_setsCoinsDroppedAfterTimer() {
+        Entity e = chest(100f, 50f, null);
+
+        for (int i = 0; i < 20; i++) {
+            engine.update(DT);
+        }
+
+        assertTrue(CHEST.get(e).coinsDropped);
+        verify(entityFactory).popCoins(eq(engine), anyFloat(), anyFloat(), anyInt(), anyFloat(), eq(collisionRects));
+
+        engine.update(DT);
+        verify(entityFactory).popCoins(eq(engine), anyFloat(), anyFloat(), anyInt(), anyFloat(), eq(collisionRects));
     }
 }

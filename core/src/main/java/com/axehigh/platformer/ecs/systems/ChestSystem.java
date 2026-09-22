@@ -18,8 +18,10 @@ import static com.axehigh.platformer.ecs.components.Mappers.*;
  * dropped), loot pops out of its position. If the chest has a {@code potionType}, a single potion
  * pickup is spawned; otherwise, a random number of coin pickups pop out, each with a random upward +
  * horizontal launch velocity, before gravity/collision (via {@code MovementSystem}) pulls them back
- * down to rest nearby. The chest entity itself stays in the world with its open sprite as
- * decoration.
+ * down to rest nearby. Also reconciles chest solidity every frame against the shared static
+ * collision list: a closed chest is solid — its AABB blocks the player and enemies like a static
+ * wall (too tall to jump over) — and becomes fully passable the moment it is opened. The chest
+ * entity itself stays in the world with its open sprite as decoration.
  */
 public class ChestSystem extends IteratingSystem {
     private static final int MIN_COIN_DROPS = 2;
@@ -49,6 +51,20 @@ public class ChestSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         ChestComponent chest = CHEST.get(entity);
+        CollisionComponent collision = COLLISION.get(entity);
+
+        // Solid-while-closed: a closed chest blocks every mover (player and enemies alike) like a
+        // static wall; an open chest is fully passable. Reconcile against the shared static
+        // collisionRects list every frame — idempotent, and self-heals across level reloads and
+        // entity removal.
+        if (collisionRects != null && collision != null) {
+            if (chest.opened) {
+                collisionRects.removeValue(collision.worldBounds, true);
+            } else if (!collisionRects.contains(collision.worldBounds, true)) {
+                collisionRects.add(collision.worldBounds);
+            }
+        }
+
         if (!chest.opened) {
             return;
         }
@@ -59,7 +75,6 @@ public class ChestSystem extends IteratingSystem {
         }
 
         TransformComponent transform = TRANSFORM.get(entity);
-        CollisionComponent collision = COLLISION.get(entity);
         float centerX = transform.position.x;
         float centerY = transform.position.y;
         if (collision != null) {

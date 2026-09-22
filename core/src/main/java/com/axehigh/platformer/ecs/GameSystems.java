@@ -11,8 +11,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
-import static com.axehigh.platformer.assets.GameAssetRegistry.BACKGROUND_FAR;
-import static com.axehigh.platformer.assets.GameAssetRegistry.BACKGROUND_NEAR;
+import static com.axehigh.platformer.assets.GameAssetRegistry.*;
 
 /**
  * Builds and wires every Ashley system for a live gameplay session, in fixed priority order
@@ -175,7 +174,10 @@ public class GameSystems {
         exitSystem.setOnTransition(onLevelTransition);
         engine.addSystem(exitSystem);
 
-        TutorialSystem tutorialSystem = new TutorialSystem(batch, camera, skin, PRIORITY_FLOATING_MESSAGE + 1);
+        TutorialSystem tutorialSystem = new TutorialSystem(batch, camera, skin,
+            assetManager.get(TUTORIAL_PLAQUE, Texture.class),
+            assetManager.get(TUTORIAL_TAIL, Texture.class),
+            PRIORITY_FLOATING_MESSAGE + 1);
         tutorialSystem.setUnitScale(unitScale);
         engine.addSystem(tutorialSystem);
         this.tutorialSystem = tutorialSystem;

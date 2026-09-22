@@ -52,7 +52,8 @@ public class TutorialSystemTest extends SystemTestBase {
         skin.add("scroll_large", new TextureRegionDrawable(new TextureRegion()), Drawable.class);
         skin.add("table", new TextureRegionDrawable(new TextureRegion()), Drawable.class);
 
-        system = new TutorialSystem(batch, camera, skin, 0);
+        // null textures → the skin-based fallback panel chain, mirroring the pre-plaque behavior.
+        system = new TutorialSystem(batch, camera, skin, null, null, 0);
         stage = mock(TouchControlsStage.class);
         system.setTouchControlsStage(stage);
 

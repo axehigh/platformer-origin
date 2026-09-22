@@ -12,12 +12,13 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import static com.axehigh.platformer.GameConstants.TutorialFontScale;
@@ -28,16 +29,21 @@ import static com.axehigh.platformer.ecs.components.Mappers.TUTORIAL;
 /**
  * Manages tutorial sign proximity and floating world tooltips. When the player walks into
  * the proximity sensor of a tutorial object, its text message is displayed as a floating world
- * tooltip above the object with a panel background.
+ * tooltip above the object, on a 9-patch parchment plaque (with a down-pointing tail toward the
+ * sign) when the dedicated plaque/tail textures are available — otherwise the skin's classic
+ * scroll/table panel drawable is used as the background.
  */
 public class TutorialSystem extends IteratingSystem {
+    /** Border thickness (px) of {@code gfx/tutorial_plaque.png} — the NinePatch split size. */
+    private static final int PLAQUE_BORDER = 16;
     private static final float SENSOR_PADDING = 12f;
     private final SpriteBatch batch;
     private final OrthographicCamera camera;
     private final BitmapFont font;
     private final GlyphLayout layout = new GlyphLayout();
     private final Rectangle sensorBounds = new Rectangle();
-    private final TextureRegionDrawable panelDrawable;
+    private final Drawable panelDrawable;
+    private final TextureRegion tailRegion;
     private final Skin skin;
     private TouchControlsStage touchControlsStage;
     private float highlightTimer = 0f;
@@ -48,7 +54,7 @@ public class TutorialSystem extends IteratingSystem {
     }
     private ImmutableArray<Entity> players;
 
-    public TutorialSystem(SpriteBatch batch, OrthographicCamera camera, Skin skin, int priority) {
+    public TutorialSystem(SpriteBatch batch, OrthographicCamera camera, Skin skin, Texture plaqueTexture, Texture tailTexture, int priority) {
         super(Family.all(TutorialComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
         this.batch = batch;
         this.camera = camera;
@@ -61,13 +67,24 @@ public class TutorialSystem extends IteratingSystem {
             f = new BitmapFont();
         }
         this.font = f;
-        TextureRegionDrawable drawable = null;
-        try {
-            Drawable d = skin.getDrawable("table_tall_border");
-            if (d instanceof TextureRegionDrawable) {
-                drawable = (TextureRegionDrawable) d;
-            }
-        } catch (Exception ignored) {}
+        Drawable drawable = null;
+        TextureRegion tail = null;
+        if (plaqueTexture != null && tailTexture != null) {
+            // Purpose-built in-world plaque + pointer: 9-patch so it stretches to the text box
+            // without distortion; tail drawn centered under the panel. Nearest filtering (pixel art).
+            plaqueTexture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+            tailTexture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+            drawable = new NinePatchDrawable(new NinePatch(new TextureRegion(plaqueTexture), PLAQUE_BORDER, PLAQUE_BORDER, PLAQUE_BORDER, PLAQUE_BORDER));
+            tail = new TextureRegion(tailTexture);
+        }
+        if (drawable == null) {
+            try {
+                Drawable d = skin.getDrawable("table_tall_border");
+                if (d instanceof TextureRegionDrawable) {
+                    drawable = (TextureRegionDrawable) d;
+                }
+            } catch (Exception ignored) {}
+        }
         if (drawable == null) {
             drawable = (TextureRegionDrawable) skin.getDrawable("scroll_large");
         }
@@ -78,6 +95,7 @@ public class TutorialSystem extends IteratingSystem {
             drawable = (TextureRegionDrawable) skin.getDrawable("table");
         }
         this.panelDrawable = drawable;
+        this.tailRegion = tail;
     }
 
     public void setUnitScale(float unitScale) {
@@ -146,6 +164,12 @@ public class TutorialSystem extends IteratingSystem {
                         if (panelDrawable != null) {
                             batch.setColor(1f, 1f, 1f, UI_PANEL_ALPHA);
                             panelDrawable.draw(batch, panelX, panelY, boxWidth, boxHeight);
+                            // Down-pointing pointer under the plaque, centered on the panel, toward the sign.
+                            if (tailRegion != null) {
+                                float tailW = tailRegion.getRegionWidth();
+                                float tailH = tailRegion.getRegionHeight();
+                                batch.draw(tailRegion, panelX + (boxWidth - tailW) / 2f, panelY - tailH, tailW, tailH);
+                            }
                             batch.setColor(Color.WHITE);
                         }
 
