@@ -3,6 +3,7 @@
   "skills": [".junie/skills"],
   "default_agent": "game-developer",
   "agents": {
+    "game-designer": { "mode": "subagent", "description": "Game-design discussion partner — talks through new features (mechanics, balance, feel) from a player-experience point of view, no code. Use when the user wants a design opinion like \"double or triple jump?\", difficulty tuning, rewards, pacing, or any feature-shape question." },
     "game-developer": { "mode": "primary", "description": "Lead game developer for this libGDX platformer — orchestrates planning, research, implementation, and testing through the libgdx subagents." },
     "libgdx-developer": { "mode": "subagent", "description": "Implements libGDX game features — ECS systems, components, rendering, map integration, and gameplay mechanics." },
     "libgdx-explorer": { "mode": "subagent", "description": "Read-only codebase research for this libGDX platformer — finds ECS architecture, system wiring, component usage, map structure, and gameplay patterns without making changes." },

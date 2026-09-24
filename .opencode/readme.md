@@ -12,28 +12,22 @@ This directory is used by the `@opencode-ai/plugin` npm package for plugin funct
   skills/           # symlink to .junie/skills/
 ```
 
-## Known Issue: Agent Detection
+## Agent Registration
 
-Project-level agents defined as markdown files in `.opencode/agents/` are **not detected** by opencode. This appears to be because:
+Both mechanisms are active, so keep them in sync:
 
-1. The `.opencode/` directory already exists as a plugin directory (contains `package.json` with `@opencode-ai/plugin`)
-2. opencode may treat `.opencode/` as a plugin directory and skip agent discovery from `.opencode/agents/`
-3. The `.gitignore` confirms this — it ignores plugin files but NOT the agents directory:
-   ```
-   /.opencode/node_modules
-   /.opencode/skills
-   /.opencode/package.json
-   /.opencode/package-lock.json
-   ```
+1. Project-level agents are defined as markdown files in `.opencode/agents/` (full instructions live here).
+2. Minimal agent entries (name + mode + description) are mirrored in the project-level `opencode.json` under the `"agents"` key.
+3. `.opencode/commands/` drives agents directly (e.g. `design.md` runs as the `game-designer` subagent).
 
-## Workaround
-
-Define the libGDX agents in the project-level `opencode.json` under the `"agent"` key. This bypasses directory scanning entirely.
+These must stay consistent: no agent file without a matching `opencode.json` entry (and vice versa).
 
 ## Agent Files (reference)
 
-The markdown files in `.opencode/agents/` remain as documentation and for manual copy/paste:
+The markdown files in `.opencode/agents/` hold the full agent instructions:
 
+- `game-developer.md` — Primary/lead agent; orchestrates planning, research, implementation, testing
+- `game-designer.md` — Design discussion partner (no code)
 - `libgdx-developer.md` — Implements game features (ECS, rendering, maps)
 - `libgdx-explorer.md` — Read-only codebase research
 - `libgdx-planner.md` — Plans features, drafts GitHub issues

@@ -11,8 +11,9 @@ This is a retro 2D side-scrolling platformer built with:
 - **Framework:** libGDX (Java) with **Ashley ECS**
 - **Physics:** Custom AABB grid-based collision in a dedicated `MovementSystem`
 - **Maps:** Tiled `.tmx` maps parsed via `TmxMapLoader`
-- **Resolution:** Virtual 480x272 game camera (`FitViewport`), 1980x1080 UI (`ExtendViewport`)
+- **Resolution:** Virtual 480x272 game camera (`OffsetFitViewport`), 1980x1080 UI (`ExtendViewport`)
 - **Theme:** Medieval dungeon (stone walls, torches, wooden platforms)
+- **Identity:** Medieval **hack-and-slash action platformer** — strike-based melee sword combat, ammo-gated ranged attacks, potions, and upgrade shopping. Judge every feature/enemy against this identity, not Mario-style bounce/stomp platforming.
 
 ## Core Rules
 

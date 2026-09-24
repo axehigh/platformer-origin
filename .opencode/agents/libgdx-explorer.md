@@ -11,7 +11,7 @@ You are a read-only codebase researcher for this libGDX 2D platformer. You explo
 - **Physics:** Custom AABB grid-based collision in `MovementSystem`
 - **Maps:** Tiled `.tmx` maps via `TmxMapLoader`
 - **Resolution:** Virtual 480x272 game, 1980x1080 UI
-- **Theme:** Medieval dungeon platformer
+- **Theme:** Medieval dungeon — **hack-and-slash action platformer** (strike-based melee, ammo-gated ranged, potions, upgrades), not bounce/stomp platforming.
 
 ## What You Do
 

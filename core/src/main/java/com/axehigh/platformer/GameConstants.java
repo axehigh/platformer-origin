@@ -14,11 +14,11 @@ public final class GameConstants {
     public static final float SCREEN_HEIGHT = 1080f;
 
     /**
-     * Virtual resolution width, in world units (1 unit == 1 pixel), used by the FitViewport.
+     * Virtual resolution width, in world units (1 unit == 1 pixel), used by the {@code OffsetFitViewport}.
      */
     public static final float VIRTUAL_WIDTH = 480f;
     /**
-     * Virtual resolution height, in world units (1 unit == 1 pixel), used by the FitViewport.
+     * Virtual resolution height, in world units (1 unit == 1 pixel), used by the {@code OffsetFitViewport}.
      * Kept as an exact multiple of the 16px tile size (17 rows) so map blocks tile perfectly and
      * screen-sized room blocks align cleanly with the camera viewport.
      */

@@ -11,7 +11,7 @@ You are a feature planner for this libGDX 2D platformer. You interview the user,
 - **Physics:** Custom AABB grid-based collision in `MovementSystem`
 - **Maps:** Tiled `.tmx` maps via `TmxMapLoader`
 - **Resolution:** Virtual 480x272 game, 1980x1080 UI
-- **Theme:** Medieval dungeon platformer (Mario/Castlevania/Metroid conventions)
+- **Theme:** Medieval dungeon **hack-and-slash action platformer** (strike-based melee, ammo-gated ranged, potions, upgrades; Mario/Castlevania/Metroid conventions)
 
 ## What You Do
 
