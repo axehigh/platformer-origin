@@ -26,6 +26,10 @@ import static java.lang.Boolean.TRUE;
  */
 public class MainMenuScreen extends MenuScreen {
 
+    /** Buttons in the New Game confirm dialog — smaller than the standard menu buttons. */
+    private static final float DIALOG_BUTTON_WIDTH = 160f;
+    private static final float DIALOG_BUTTON_HEIGHT = 60f;
+
     public MainMenuScreen(Game game) {
         super(game);
     }
@@ -97,6 +101,8 @@ public class MainMenuScreen extends MenuScreen {
                 confirmDialog.getContentTable().add(new Label(ASK_NEW_GAME, skin) {{
                     setFontScale(SmallFontScale);
                 }});
+                confirmDialog.getButtonTable().defaults().pad(UI_PADDING)
+                    .size(DIALOG_BUTTON_WIDTH, DIALOG_BUTTON_HEIGHT);
                 confirmDialog.button(YES, true);
                 confirmDialog.button(NO, false);
                 confirmDialog.background(skin.getDrawable("table"));

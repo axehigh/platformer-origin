@@ -78,7 +78,7 @@ public class VictoryScreen extends MenuScreen {
             root.add(wonLabel).padBottom(40f).row();
         } else {
             // Title
-            addMenuTitle(root, String.format(WORLD_COMPLETE, worldId));
+            addMenuTitle(root, String.format(DUNGEON_COMPLETE, worldId));
 
             Label subtitleLabel = new Label(CONQUERED_DUNGEONS + LevelCatalog.worldName(worldId) + ".", skin);
             subtitleLabel.setFontScale(BodyFontScale);

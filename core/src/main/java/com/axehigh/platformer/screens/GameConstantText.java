@@ -25,7 +25,7 @@ public class GameConstantText {
     public static final String RETRY = "Retry";
     public static final String MENU = "Menu";
     public static final String YOU_WON = "YOU WON THE GAME";
-    public static final String WORLD_COMPLETE = "WORLD %d COMPLETE!";
+    public static final String DUNGEON_COMPLETE = "Dungeon %d COMPLETE!";
     public static final String CONQUERED_DUNGEONS = "You have conquered the dungeons of ";
     public static final String ORIGIN_TITLE = "ORIGIN";
     public static final String LEAD_DEV = "Lead Game Developer";

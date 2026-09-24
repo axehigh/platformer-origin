@@ -95,7 +95,7 @@ public final class LevelCatalog {
     public static String worldName(int worldId) {
         if (worldId == WORLD_TUTORIAL) return "Tutorial";
         if (worldId == WORLD_DEMO) return "Demo";
-        return "World " + worldId;
+        return "Dungeon " + worldId;
     }
 
     /** True when {@code worldId} is the last real world in the catalog (i.e. beating it wins the game).

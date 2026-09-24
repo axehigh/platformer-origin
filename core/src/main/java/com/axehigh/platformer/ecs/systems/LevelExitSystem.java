@@ -195,7 +195,7 @@ public class LevelExitSystem extends IteratingSystem {
         String currentLevelPath = levelManager.getCurrentLevelPath();
         for (LevelDefinition level : LevelCatalog.levels()) {
             if (level.tmxPath.equals(currentLevelPath)) {
-                String worldKey = "world" + level.worldId;
+                String worldKey = "dungeon" + level.worldId;
                 if (!completedWorldIds.contains(worldKey, false)) {
                     completedWorldIds.add(worldKey);
                 }
