@@ -6,10 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -26,87 +23,93 @@ public class DeviceClassTest {
 
     @After
     public void tearDown() {
-        DeviceClass.setSimulated(null);
+        com.axehigh.platformer.ui.DeviceClass.setSimulated(null);
         Gdx.app = null;
     }
 
     @Test
     public void noSimulationFallsBackToRealPlatformDetection() {
         when(Gdx.app.getType()).thenReturn(Application.ApplicationType.Android);
-        assertTrue(LayoutMode.isTouchDevice());
+        assertTrue(com.axehigh.platformer.ui.LayoutMode.isTouchDevice());
+        assertFalse(com.axehigh.platformer.ui.LayoutMode.isDesktop());
 
         when(Gdx.app.getType()).thenReturn(Application.ApplicationType.Desktop);
-        assertFalse(LayoutMode.isTouchDevice());
+        assertFalse(com.axehigh.platformer.ui.LayoutMode.isTouchDevice());
+        assertTrue(com.axehigh.platformer.ui.LayoutMode.isDesktop());
+
+        when(Gdx.app.getType()).thenReturn(Application.ApplicationType.WebGL);
+        assertFalse(com.axehigh.platformer.ui.LayoutMode.isTouchDevice());
+        assertTrue(com.axehigh.platformer.ui.LayoutMode.isDesktop());
     }
 
     @Test
     public void realPlatformDetectionDefaultsToBandZoom() {
-        assertEquals(LayoutMode.BAND_ZOOM, LayoutMode.defaultForDevice());
+        assertEquals(com.axehigh.platformer.ui.LayoutMode.BAND_ZOOM, com.axehigh.platformer.ui.LayoutMode.defaultForDevice());
     }
 
     @Test
     public void phoneSimulationEnablesTouchAndDefaultsToBandZoom() {
-        DeviceClass.setSimulated(DeviceClass.PHONE);
+        com.axehigh.platformer.ui.DeviceClass.setSimulated(com.axehigh.platformer.ui.DeviceClass.PHONE);
 
-        assertTrue(DeviceClass.isSimulating());
-        assertTrue(LayoutMode.isTouchDevice());
-        assertEquals(LayoutMode.BAND_ZOOM, LayoutMode.defaultForDevice());
+        assertTrue(com.axehigh.platformer.ui.DeviceClass.isSimulating());
+        assertTrue(com.axehigh.platformer.ui.LayoutMode.isTouchDevice());
+        assertEquals(com.axehigh.platformer.ui.LayoutMode.BAND_ZOOM, com.axehigh.platformer.ui.LayoutMode.defaultForDevice());
     }
 
     @Test
     public void tabletSimulationEnablesTouchAndDefaultsToBandZoom() {
-        DeviceClass.setSimulated(DeviceClass.TABLET);
+        com.axehigh.platformer.ui.DeviceClass.setSimulated(com.axehigh.platformer.ui.DeviceClass.TABLET);
 
-        assertTrue(LayoutMode.isTouchDevice());
-        assertEquals(LayoutMode.BAND_ZOOM, LayoutMode.defaultForDevice());
+        assertTrue(com.axehigh.platformer.ui.LayoutMode.isTouchDevice());
+        assertEquals(com.axehigh.platformer.ui.LayoutMode.BAND_ZOOM, com.axehigh.platformer.ui.LayoutMode.defaultForDevice());
     }
 
     @Test
     public void desktopSimulationDisablesTouchButDefaultsToBandZoom() {
-        DeviceClass.setSimulated(DeviceClass.DESKTOP);
+        com.axehigh.platformer.ui.DeviceClass.setSimulated(com.axehigh.platformer.ui.DeviceClass.DESKTOP);
 
-        assertFalse(LayoutMode.isTouchDevice());
-        assertEquals(LayoutMode.BAND_ZOOM, LayoutMode.defaultForDevice());
+        assertFalse(com.axehigh.platformer.ui.LayoutMode.isTouchDevice());
+        assertEquals(com.axehigh.platformer.ui.LayoutMode.BAND_ZOOM, com.axehigh.platformer.ui.LayoutMode.defaultForDevice());
     }
 
     @Test
     public void onlyDesktopReportsNonTouch() {
-        assertTrue(DeviceClass.PHONE.isTouch());
-        assertTrue(DeviceClass.TABLET.isTouch());
-        assertFalse(DeviceClass.DESKTOP.isTouch());
+        assertTrue(com.axehigh.platformer.ui.DeviceClass.PHONE.isTouch());
+        assertTrue(com.axehigh.platformer.ui.DeviceClass.TABLET.isTouch());
+        assertFalse(com.axehigh.platformer.ui.DeviceClass.DESKTOP.isTouch());
     }
 
     @Test
     public void nextCyclesInOrderAndWraps() {
-        assertEquals(DeviceClass.PHONE, DeviceClass.DESKTOP.next());
-        assertEquals(DeviceClass.TABLET, DeviceClass.PHONE.next());
-        assertEquals(DeviceClass.DESKTOP, DeviceClass.TABLET.next());
+        assertEquals(com.axehigh.platformer.ui.DeviceClass.PHONE, com.axehigh.platformer.ui.DeviceClass.DESKTOP.next());
+        assertEquals(com.axehigh.platformer.ui.DeviceClass.TABLET, com.axehigh.platformer.ui.DeviceClass.PHONE.next());
+        assertEquals(com.axehigh.platformer.ui.DeviceClass.DESKTOP, com.axehigh.platformer.ui.DeviceClass.TABLET.next());
     }
 
     @Test
     public void nextWithAutoCyclesThroughNullForAuto() {
-        assertEquals(DeviceClass.DESKTOP, DeviceClass.nextWithAuto(null));
-        assertEquals(DeviceClass.PHONE, DeviceClass.nextWithAuto(DeviceClass.DESKTOP));
-        assertEquals(DeviceClass.TABLET, DeviceClass.nextWithAuto(DeviceClass.PHONE));
-        assertNull(DeviceClass.nextWithAuto(DeviceClass.TABLET));
+        assertEquals(com.axehigh.platformer.ui.DeviceClass.DESKTOP, com.axehigh.platformer.ui.DeviceClass.nextWithAuto(null));
+        assertEquals(com.axehigh.platformer.ui.DeviceClass.PHONE, com.axehigh.platformer.ui.DeviceClass.nextWithAuto(com.axehigh.platformer.ui.DeviceClass.DESKTOP));
+        assertEquals(com.axehigh.platformer.ui.DeviceClass.TABLET, com.axehigh.platformer.ui.DeviceClass.nextWithAuto(com.axehigh.platformer.ui.DeviceClass.PHONE));
+        assertNull(com.axehigh.platformer.ui.DeviceClass.nextWithAuto(com.axehigh.platformer.ui.DeviceClass.TABLET));
     }
 
     @Test
     public void nextWithAutoWrapsBackToAutoAfterTablet() {
-        DeviceClass current = null;
-        current = DeviceClass.nextWithAuto(current);
-        current = DeviceClass.nextWithAuto(current);
-        current = DeviceClass.nextWithAuto(current);
-        current = DeviceClass.nextWithAuto(current);
+        com.axehigh.platformer.ui.DeviceClass current = null;
+        current = com.axehigh.platformer.ui.DeviceClass.nextWithAuto(current);
+        current = com.axehigh.platformer.ui.DeviceClass.nextWithAuto(current);
+        current = com.axehigh.platformer.ui.DeviceClass.nextWithAuto(current);
+        current = com.axehigh.platformer.ui.DeviceClass.nextWithAuto(current);
         assertNull(current);
     }
 
     @Test
     public void clearingSimulationRestoresNull() {
-        DeviceClass.setSimulated(DeviceClass.PHONE);
-        DeviceClass.setSimulated(null);
+        com.axehigh.platformer.ui.DeviceClass.setSimulated(com.axehigh.platformer.ui.DeviceClass.PHONE);
+        com.axehigh.platformer.ui.DeviceClass.setSimulated(null);
 
-        assertFalse(DeviceClass.isSimulating());
-        assertNull(DeviceClass.simulated());
+        assertFalse(com.axehigh.platformer.ui.DeviceClass.isSimulating());
+        assertNull(com.axehigh.platformer.ui.DeviceClass.simulated());
     }
 }

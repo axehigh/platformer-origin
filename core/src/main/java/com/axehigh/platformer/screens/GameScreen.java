@@ -239,6 +239,10 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
                     );
                     return true;
                 }
+                if (keycode == Input.Keys.P) {
+                    ScreenshotManager.request();
+                    return true;
+                }
                 return false;
             }
         });
@@ -378,6 +382,9 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         viewport.apply();
 
         if (!gameOverActive && !gamePaused) {
+            if (systems.playerInputSystem != null) {
+                systems.playerInputSystem.setClickOnUi(isClickOnUi());
+            }
             engine.update(Math.min(Gdx.graphics.getDeltaTime(), MAX_FRAME_DELTA));
         }
 
@@ -431,6 +438,12 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
             transitionStage.getViewport().apply();
             stylizedTransitionOverlay.render((com.badlogic.gdx.graphics.OrthographicCamera) transitionStage.getViewport().getCamera());
         }
+
+        // Last thing in the frame: a screenshot must contain everything above, HUD and touch
+        // overlay included, so the framebuffer readback is armed (P key / Pause dialog) rather
+        // than taken here - a request made during this frame's input or UI act still lands in
+        // the shot, while the Pause dialog hides itself first so it never shows up in one.
+        ScreenshotManager.captureIfPending(levelName);
     }
 
     /**
@@ -549,6 +562,11 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
     }
 
     @Override
+    public void onScreenshot() {
+        ScreenshotManager.request();
+    }
+
+    @Override
     public boolean isTouchDebugOn() {
         return debugTouchLogging;
     }
@@ -606,6 +624,24 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         CameraSystem.snapToRoom(camera, roomState,
             TRANSFORM.get(playerEntity).position.x, TRANSFORM.get(playerEntity).position.y,
             layoutMode == LayoutMode.BAND_ZOOM);
+    }
+
+    private boolean isClickOnUi() {
+        if (!Gdx.input.isButtonJustPressed(com.badlogic.gdx.Input.Buttons.LEFT)) return false;
+        float mouseX = Gdx.input.getX();
+        float mouseY = Gdx.input.getY();
+        return isHitOnStage(stage, mouseX, mouseY) ||
+               isHitOnStage(inventoryBarStage, mouseX, mouseY) ||
+               isHitOnStage(hudStage, mouseX, mouseY) ||
+               isHitOnStage(touchControlsStage, mouseX, mouseY);
+    }
+
+    private boolean isHitOnStage(com.badlogic.gdx.scenes.scene2d.Stage s, float screenX, float screenY) {
+        if (s == null) return false;
+        com.badlogic.gdx.math.Vector2 stageCoords = new com.badlogic.gdx.math.Vector2(screenX, screenY);
+        s.getViewport().unproject(stageCoords);
+        com.badlogic.gdx.scenes.scene2d.Actor hit = s.hit(stageCoords.x, stageCoords.y, true);
+        return hit != null && hit != s.getRoot();
     }
 
     @Override

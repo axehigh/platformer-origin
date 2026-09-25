@@ -52,6 +52,11 @@ public class PlayerInputSystem extends IteratingSystem {
     private boolean touchShootRequested = false;
     private boolean touchInteractRequested = false;
     private boolean touchDropRequested = false;
+    private boolean clickOnUi = false;
+
+    public void setClickOnUi(boolean clickOnUi) {
+        this.clickOnUi = clickOnUi;
+    }
 
     public PlayerInputSystem(AssetManager assetManager) {
         this(assetManager, null, 0);
@@ -212,7 +217,8 @@ public class PlayerInputSystem extends IteratingSystem {
             }
         }
 
-        boolean meleePressed = input.isKeyJustPressed(Input.Keys.J) || input.isKeyJustPressed(Input.Keys.SPACE) || touchMeleeRequested;
+        boolean mouseAttack = !clickOnUi && input.isButtonJustPressed(Input.Buttons.LEFT);
+        boolean meleePressed = input.isKeyJustPressed(Input.Keys.J) || input.isKeyJustPressed(Input.Keys.SPACE) || mouseAttack || touchMeleeRequested;
         if (!locked && meleePressed && player.meleeCooldown.isDone()) {
             float attackDuration = findAttackDuration(entity);
             player.meleeAttack.start(attackDuration);
@@ -226,7 +232,9 @@ public class PlayerInputSystem extends IteratingSystem {
             }
         }
 
-        boolean shootPressed = input.isKeyJustPressed(Input.Keys.K) || input.isKeyJustPressed(Input.Keys.Y) || touchShootRequested;
+        boolean shootPressed = input.isKeyJustPressed(Input.Keys.K) || input.isKeyJustPressed(Input.Keys.Y)
+            || input.isKeyJustPressed(Input.Keys.SHIFT_LEFT) || input.isKeyJustPressed(Input.Keys.SHIFT_RIGHT)
+            || touchShootRequested;
         if (!locked && shootPressed && player.shootCooldown.isDone() && player.ammo > 0) {
             spawnBullet(entity, transform, collision, player);
             player.ammo--;
@@ -236,7 +244,7 @@ public class PlayerInputSystem extends IteratingSystem {
             }
         }
 
-        player.interactPressed = input.isKeyJustPressed(Input.Keys.E) || touchInteractRequested;
+        player.interactPressed = input.isKeyJustPressed(Input.Keys.E) || input.isKeyJustPressed(Input.Keys.ENTER) || touchInteractRequested;
 
         boolean dropPressed = input.isKeyJustPressed(Input.Keys.S)
             || input.isKeyJustPressed(Input.Keys.DOWN)

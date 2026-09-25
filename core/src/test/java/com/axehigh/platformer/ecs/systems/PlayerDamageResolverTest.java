@@ -2,6 +2,7 @@ package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
+import com.axehigh.platformer.util.FeatureFlags;
 import com.badlogic.ashley.core.Entity;
 import org.junit.After;
 import org.junit.Before;
@@ -21,12 +22,12 @@ public class PlayerDamageResolverTest extends SystemTestBase {
     private Entity playerEntity;
     private PlayerComponent player;
     private MovementComponent movement;
-    private SfxSystem sfxSystem;
+    private com.axehigh.platformer.ecs.systems.SfxSystem sfxSystem;
 
     @Before
     public void setUp() {
-        sfxSystem = mock(SfxSystem.class);
-        PlayerDamageResolver.setSfxSystem(sfxSystem);
+        sfxSystem = mock(com.axehigh.platformer.ecs.systems.SfxSystem.class);
+        com.axehigh.platformer.ecs.systems.PlayerDamageResolver.setSfxSystem(sfxSystem);
         player = new PlayerComponent();
         movement = movement();
         playerEntity = entity(player, movement);
@@ -34,7 +35,7 @@ public class PlayerDamageResolverTest extends SystemTestBase {
 
     @After
     public void tearDown() {
-        PlayerDamageResolver.setSfxSystem(null);
+        com.axehigh.platformer.ecs.systems.PlayerDamageResolver.setSfxSystem(null);
     }
 
     @Test
@@ -42,7 +43,7 @@ public class PlayerDamageResolverTest extends SystemTestBase {
         int before = player.health;
         assertFalse("precondition: grace window must be done", player.hitInvulnerability.isActive());
 
-        boolean applied = PlayerDamageResolver.applyHit(playerEntity, player, movement, 1, 1f);
+        boolean applied = com.axehigh.platformer.ecs.systems.PlayerDamageResolver.applyHit(playerEntity, player, movement, 1, 1f);
 
         assertTrue(applied);
         assertEquals(before - 1, player.health);
@@ -55,7 +56,7 @@ public class PlayerDamageResolverTest extends SystemTestBase {
         player.hitInvulnerability.start(2f);
         int before = player.health;
 
-        boolean applied = PlayerDamageResolver.applyHit(playerEntity, player, movement, 1, 1f);
+        boolean applied = com.axehigh.platformer.ecs.systems.PlayerDamageResolver.applyHit(playerEntity, player, movement, 1, 1f);
 
         assertFalse("grace window must block the hit", applied);
         assertEquals(before, player.health);
@@ -66,7 +67,7 @@ public class PlayerDamageResolverTest extends SystemTestBase {
     public void applyHitWithoutKnockback_playsHazardSfxOnceAndDecrementsHealth() {
         int before = player.health;
 
-        boolean applied = PlayerDamageResolver.applyHitWithoutKnockback(playerEntity, player);
+        boolean applied = com.axehigh.platformer.ecs.systems.PlayerDamageResolver.applyHitWithoutKnockback(playerEntity, player);
 
         assertTrue(applied);
         assertEquals(before - 1, player.health);
@@ -78,7 +79,7 @@ public class PlayerDamageResolverTest extends SystemTestBase {
         player.hitInvulnerability.start(2f);
         int before = player.health;
 
-        boolean applied = PlayerDamageResolver.applyHitWithoutKnockback(playerEntity, player);
+        boolean applied = com.axehigh.platformer.ecs.systems.PlayerDamageResolver.applyHitWithoutKnockback(playerEntity, player);
 
         assertFalse(applied);
         assertEquals(before, player.health);
@@ -87,16 +88,44 @@ public class PlayerDamageResolverTest extends SystemTestBase {
 
     @Test
     public void seamUnset_nullSfxSystem_noCrashAndHitStillApplies() {
-        PlayerDamageResolver.setSfxSystem(null);
+        com.axehigh.platformer.ecs.systems.PlayerDamageResolver.setSfxSystem(null);
         int before = player.health;
 
-        boolean hurtApplied = PlayerDamageResolver.applyHit(playerEntity, player, movement, 1, 1f);
+        boolean hurtApplied = com.axehigh.platformer.ecs.systems.PlayerDamageResolver.applyHit(playerEntity, player, movement, 1, 1f);
         // The first hit starts the 2s grace window; clear it so the second hit can land.
         player.hitInvulnerability.reset();
-        boolean hazardApplied = PlayerDamageResolver.applyHitWithoutKnockback(playerEntity, player);
+        boolean hazardApplied = com.axehigh.platformer.ecs.systems.PlayerDamageResolver.applyHitWithoutKnockback(playerEntity, player);
 
         assertTrue("hit still applies without the SFX seam", hurtApplied);
         assertTrue("hazard hit still applies without the SFX seam", hazardApplied);
         assertEquals(before - 2, player.health);
+    }
+
+    @Test
+    public void applyHit_whenGodModeEnabled_blocksDamageAndSfx() {
+        FeatureFlags.setGodModeEnabled(true);
+        try {
+            int before = player.health;
+            boolean applied = com.axehigh.platformer.ecs.systems.PlayerDamageResolver.applyHit(playerEntity, player, movement, 1, 1f);
+            assertFalse(applied);
+            assertEquals(before, player.health);
+            verify(sfxSystem, never()).playPlayerHurt();
+        } finally {
+            FeatureFlags.setGodModeEnabled(false);
+        }
+    }
+
+    @Test
+    public void applyHitWithoutKnockback_whenGodModeEnabled_blocksDamageAndSfx() {
+        FeatureFlags.setGodModeEnabled(true);
+        try {
+            int before = player.health;
+            boolean applied = com.axehigh.platformer.ecs.systems.PlayerDamageResolver.applyHitWithoutKnockback(playerEntity, player);
+            assertFalse(applied);
+            assertEquals(before, player.health);
+            verify(sfxSystem, never()).playPlayerHazard();
+        } finally {
+            FeatureFlags.setGodModeEnabled(false);
+        }
     }
 }

@@ -14,26 +14,33 @@ package com.axehigh.platformer.ui;
  * them as "no button to pulse" (all touch buttons stay white/context-driven).
  */
 public enum TutorialHighlight {
-    JUMP    ("jump",    "jump", "a", "j"),
-    ATTACK  ("sword",   "attack", "sword", "b", "melee"),
-    SPECIAL ("daggers", "special", "ranged", "y", "dagger", "throw"),
-    INVENTORY("potion", "inventory", "bag", "potion"),
-    LEFT    ("left",    "left"),
-    RIGHT   ("right",   "right"),
-    INTERACT("door",    "enter", "exit", "up", "door", "interact"),
-    DROP    ("down",    "down", "drop");
+    JUMP    ("jump",    "W", "jump", "a", "j"),
+    ATTACK  ("sword",   "J / Click", "attack", "sword", "b", "melee"),
+    SPECIAL ("daggers", "Shift", "special", "ranged", "y", "dagger", "throw"),
+    INVENTORY("potion", "C", "inventory", "bag", "potion"),
+    LEFT    ("left",    "A", "left"),
+    RIGHT   ("right",   "D", "right"),
+    INTERACT("door",    "Enter", "enter", "exit", "up", "door", "interact"),
+    DROP    ("down",    "S", "down", "drop");
 
     private final String icon;
+    private final String desktopKey;
     private final String[] keywords;
 
-    TutorialHighlight(String icon, String... keywords) {
+    TutorialHighlight(String icon, String desktopKey, String... keywords) {
         this.icon = icon;
+        this.desktopKey = desktopKey;
         this.keywords = keywords;
     }
 
     /** The skin drawable name of the touch button this highlight pulses (e.g. {@code "jump"}). */
     public String icon() {
         return icon;
+    }
+
+    /** The desktop key label for this highlight (e.g. {@code "W"} or {@code "Enter"}). */
+    public String desktopKey() {
+        return desktopKey;
     }
 
     /** All authorable alias keywords for this highlight (case-insensitive, whitespace-tolerated). */

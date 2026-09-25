@@ -1,0 +1,6 @@
+# ORIGIN — www.olona.no/origin
+User-agent: *
+Allow: /
+Disallow: /play/
+
+Sitemap: https://www.olona.no/origin/sitemap.xml

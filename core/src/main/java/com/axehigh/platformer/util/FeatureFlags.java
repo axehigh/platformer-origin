@@ -21,6 +21,7 @@ public final class FeatureFlags {
     private static boolean softStopEnabled = GamePreferences.DEFAULT_SOFT_STOP_ENABLED;
     private static boolean vignetteEnabled = GamePreferences.DEFAULT_VIGNETTE_ENABLED;
     private static boolean slashArcEnabled = GamePreferences.DEFAULT_SLASH_ARC_ENABLED;
+    private static boolean godModeEnabled = GamePreferences.DEFAULT_GOD_MODE;
     private static StylizedTransitionOverlay.TransitionType transitionStyle = GamePreferences.DEFAULT_TRANSITION_STYLE;
     private static boolean initialized = false;
 
@@ -42,6 +43,7 @@ public final class FeatureFlags {
         softStopEnabled = preferences.isSoftStopEnabled();
         vignetteEnabled = preferences.isVignetteEnabled();
         slashArcEnabled = preferences.isSlashArcEnabled();
+        godModeEnabled = preferences.isGodModeEnabled();
         transitionStyle = preferences.getTransitionStyle();
     }
 
@@ -193,9 +195,21 @@ public final class FeatureFlags {
     }
 
     /**
-     * The preferred level transition style (PORTAL_IRIS, PIXELATE, CHECKERBOARD, FADE).
-     * Defaults to PORTAL_IRIS.
+     * Whether God Mode (player invincibility) is enabled. Defaults to {@code false}.
      */
+    public static boolean isGodModeEnabled() {
+        ensureInitialized();
+        return godModeEnabled;
+    }
+
+    /** Enables/disables God Mode for the whole session and persists the choice. */
+    public static void setGodModeEnabled(boolean enabled) {
+        godModeEnabled = enabled;
+        initialized = true;
+        if (Gdx.app != null) {
+            new GamePreferences().setGodModeEnabled(enabled);
+        }
+    }
     public static StylizedTransitionOverlay.TransitionType getTransitionStyle() {
         ensureInitialized();
         return transitionStyle;
@@ -220,6 +234,7 @@ public final class FeatureFlags {
         softStopEnabled = GamePreferences.DEFAULT_SOFT_STOP_ENABLED;
         vignetteEnabled = GamePreferences.DEFAULT_VIGNETTE_ENABLED;
         slashArcEnabled = GamePreferences.DEFAULT_SLASH_ARC_ENABLED;
+        godModeEnabled = GamePreferences.DEFAULT_GOD_MODE;
         transitionStyle = GamePreferences.DEFAULT_TRANSITION_STYLE;
         initialized = false;
     }

@@ -3,6 +3,7 @@ package com.axehigh.platformer.screens;
 import com.axehigh.platformer.audio.AudioManager;
 import com.axehigh.platformer.map.LevelCatalog;
 import com.axehigh.platformer.map.SaveData;
+import com.axehigh.platformer.util.NumFormat;
 import com.axehigh.platformer.util.SaveManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -78,7 +79,7 @@ public class VictoryScreen extends MenuScreen {
             root.add(wonLabel).padBottom(40f).row();
         } else {
             // Title
-            addMenuTitle(root, String.format(DUNGEON_COMPLETE, worldId));
+            addMenuTitle(root, NumFormat.format(DUNGEON_COMPLETE, worldId));
 
             Label subtitleLabel = new Label(CONQUERED_DUNGEONS + LevelCatalog.worldName(worldId) + ".", skin);
             subtitleLabel.setFontScale(BodyFontScale);
