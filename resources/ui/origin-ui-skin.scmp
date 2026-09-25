@@ -693,7 +693,7 @@ jsonData: {
 						type: com.badlogic.gdx.graphics.Color
 						name: fontColor
 						optional: true
-						value: GREEN
+						value: GRAY
 					}
 					background: {
 						type: com.badlogic.gdx.scenes.scene2d.utils.Drawable
@@ -1554,7 +1554,7 @@ jsonData: {
 						type: com.badlogic.gdx.graphics.Color
 						name: fontColor
 						optional: true
-						value: GREEN
+						value: GRAY
 					}
 					downFontColor: {
 						type: com.badlogic.gdx.graphics.Color
