@@ -49,7 +49,13 @@
  <tile id="9">
   <image source="../gfx/hazards/axe1.png" width="256" height="256"/>
  </tile>
- <tile id="10">
+ <tile id="10" type="trap">
+  <properties>
+   <property name="amplitudeX" type="float" value="0"/>
+   <property name="amplitudeY" type="float" value="2"/>
+   <property name="speed" type="float" value="1"/>
+   <property name="trapType" value="blade"/>
+  </properties>
   <image source="../gfx/hazards/blade1.png" width="128" height="128"/>
  </tile>
 </tileset>

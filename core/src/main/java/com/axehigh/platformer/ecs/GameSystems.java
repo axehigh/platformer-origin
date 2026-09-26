@@ -139,6 +139,7 @@ public class GameSystems {
         engine.addSystem(enemyAttackSystem);
         engine.addSystem(new HazardSystem(mapLoader.getHazardRects(), PRIORITY_ENEMY_CONTACT));
         TrapContactSystem trapContactSystem = new TrapContactSystem(roomState, PRIORITY_TRAP_CONTACT);
+        trapContactSystem.setUnitScale(unitScale);
         engine.addSystem(trapContactSystem);
         cameraSystem = new CameraSystem(camera, roomState, PRIORITY_CAMERA);
         engine.addSystem(cameraSystem);

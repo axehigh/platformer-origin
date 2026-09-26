@@ -77,4 +77,6 @@ public class SpriteConstants {
     public static float FlameTrapScale = 0.15f;
     public static float FlameTrapCollisionWidth = 24f;
     public static float FlameTrapCollisionHeight = 48f;
+
+    public static final String BLADE_REGION = "blade";
 }
