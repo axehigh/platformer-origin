@@ -492,8 +492,9 @@ Tiles carrying an `effect` property spawn a runtime effect entity at that positi
 
 1. **Tile layer path (torches):** Stamp a tile with `effect="light"` on any tile layer (`background`, `decoration`, `collision`, etc.). The tile's own sprite is rendered by the Tiled map renderer; the effect entity carries **no texture** — only the effect component (e.g. `LightComponent`). What you paint in Tiled is what renders in-game (WYSIWYG).
 2. **Object-layer path (standalone lights):** Place a tile-object marker on the `objects` layer using a tile that carries `effect="light"` and `render=false` (e.g. `items.tsx` id 30). libGDX never draws `MapLayer` objects — the marker renders nothing in-game, but is visible in the Tiled editor as a placement guide. A light-only entity spawns at the object's x/y position.
-3. At level load, `MapLoader.scanEffectLayers()` iterates every tile layer **and** object layer in the map, reads the `effect` property from each cell (tile layers) or tile-object marker (object layers), and records world positions.
-4. `EntityFactory.spawnEffects()` creates minimal effect entities at those positions.
+3. **Collectible pickups own their light:** A tile-object marker whose resolved `type` is a pickup (`crystal`, `coin`, `potion`, or `dagger`) **never** gets a standalone effect entity — `MapLoader.scanEffectLayers()` skips it, and `EntityFactory.spawnObjects()` attaches the `LightComponent` **directly onto the pickup entity** (only when the tile carries `effect="light"`), so the halo disappears together with the item the moment it's collected. Torch/chest/standalone decor lights (`render=false` markers with no collectible `type`) keep the standalone effect-entity path below.
+4. At level load, `MapLoader.scanEffectLayers()` iterates every tile layer **and** object layer in the map, reads the `effect` property from each cell (tile layers) or tile-object marker (object layers), and records world positions.
+5. `EntityFactory.spawnEffects()` creates minimal effect entities at those positions.
 
 ### Supported Effect Types
 

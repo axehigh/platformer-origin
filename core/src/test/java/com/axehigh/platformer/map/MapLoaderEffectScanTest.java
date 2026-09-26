@@ -2,6 +2,7 @@ package com.axehigh.platformer.map;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapLayer;
+import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
@@ -19,6 +20,12 @@ import static org.mockito.Mockito.when;
  * Headless tests for {@link MapLoader#scanEffectLayers()} verifying that both tile layers and
  * object layers carrying an {@code effect} tile property produce {@link MapLoader.EffectSpawn}
  * entries at the correct world positions.
+ * <p>
+ * Object-layer tile-object markers are subject to a collectible exemption: markers whose resolved
+ * {@code type} is a pickup ({@code crystal}/{@code coin}/{@code potion}/{@code dagger}) are
+ * skipped, because {@code EntityFactory.spawnObjects} attaches its own {@code LightComponent} to
+ * the pickup entity — the light dies with the pickup. The exemption applies to object layers only;
+ * tile-layer effect cells always spawn regardless of {@code type}.
  */
 public class MapLoaderEffectScanTest {
 
@@ -29,27 +36,53 @@ public class MapLoaderEffectScanTest {
 
     @Before
     public void setUp() {
-        map = new TiledMap();
-        map.getProperties().put("width", 10);
-        map.getProperties().put("height", 10);
-        map.getProperties().put("tilewidth", TILE);
-        map.getProperties().put("tileheight", TILE);
+        map = newTestMap();
 
         effectTile = new StaticTiledMapTile(new TextureRegion());
         effectTile.setId(1);
         effectTile.getProperties().put("effect", "light");
     }
 
+    private TiledMap newTestMap() {
+        TiledMap m = new TiledMap();
+        m.getProperties().put("width", 10);
+        m.getProperties().put("height", 10);
+        m.getProperties().put("tilewidth", TILE);
+        m.getProperties().put("tileheight", TILE);
+        return m;
+    }
+
+    /** An {@code effect}-carrying tile with an additional {@code type} property (e.g. a collectible pickup). */
+    private StaticTiledMapTile effectTileWithType(String type) {
+        StaticTiledMapTile tile = new StaticTiledMapTile(new TextureRegion());
+        tile.setId(1);
+        tile.getProperties().put("effect", "light");
+        tile.getProperties().put("type", type);
+        return tile;
+    }
+
+    /** Adds the mandatory "collision" tile layer and an object layer holding one tile-object marker. */
+    private void addObjectLayerMarker(TiledMapTileMapObject tileObj) {
+        TiledMapTileLayer collisionLayer = new TiledMapTileLayer(10, 10, TILE, TILE);
+        collisionLayer.setName("collision");
+        map.getLayers().add(collisionLayer);
+
+        MapLayer objectLayer = new MapLayer();
+        objectLayer.getObjects().add(tileObj);
+        map.getLayers().add(objectLayer);
+    }
+
     private MapLoader loader() {
         return new MapLoader(map, "test.tmx");
     }
 
-    /** Creates a mocked TiledMapTileMapObject (no GL context needed). */
+    /** Creates a mocked TiledMapTileMapObject (no GL context needed). Real objects always carry MapProperties. */
     private TiledMapTileMapObject mockTileObject(StaticTiledMapTile tile, float x, float y) {
         TiledMapTileMapObject obj = Mockito.mock(TiledMapTileMapObject.class);
         when(obj.getTile()).thenReturn(tile);
         when(obj.getX()).thenReturn(x);
         when(obj.getY()).thenReturn(y);
+        when(obj.getProperties()).thenReturn(new MapProperties());
         return obj;
     }
 
@@ -140,5 +173,61 @@ public class MapLoaderEffectScanTest {
         Array<MapLoader.EffectSpawn> spawns = loader().getEffectSpawns();
 
         assertEquals("non-effect tile should be skipped", 0, spawns.size);
+    }
+
+    @Test
+    public void objectLayer_collectibleTileObjectWithEffect_producesNoEffectSpawn() {
+        addObjectLayerMarker(mockTileObject(effectTileWithType("crystal"), 256f, 128f));
+
+        Array<MapLoader.EffectSpawn> spawns = loader().getEffectSpawns();
+
+        assertEquals("collectible pickups own their light — no standalone effect entity", 0, spawns.size);
+    }
+
+    @Test
+    public void objectLayer_effectTileWithNonCollectibleType_stillSpawns() {
+        addObjectLayerMarker(mockTileObject(effectTileWithType("torch"), 256f, 128f));
+
+        Array<MapLoader.EffectSpawn> spawns = loader().getEffectSpawns();
+
+        assertEquals("non-collectible type markers should spawn effects", 1, spawns.size);
+        MapLoader.EffectSpawn spawn = spawns.first();
+        assertEquals("light", spawn.effectType);
+        assertEquals(256f, spawn.x, 0f);
+        assertEquals(128f, spawn.y, 0f);
+    }
+
+    @Test
+    public void objectLayer_allCollectibleTypesSkipped() {
+        for (String collectible : new String[]{"crystal", "coin", "potion", "dagger"}) {
+            map = newTestMap();
+            addObjectLayerMarker(mockTileObject(effectTileWithType(collectible), 64f, 64f));
+
+            Array<MapLoader.EffectSpawn> spawns = loader().getEffectSpawns();
+
+            assertEquals("type=" + collectible + " should be skipped", 0, spawns.size);
+        }
+    }
+
+    @Test
+    public void tileLayer_effectTileWithCollectibleType_stillSpawns() {
+        TiledMapTileLayer collisionLayer = new TiledMapTileLayer(10, 10, TILE, TILE);
+        collisionLayer.setName("collision");
+        map.getLayers().add(collisionLayer);
+
+        TiledMapTileLayer effectLayer = new TiledMapTileLayer(10, 10, TILE, TILE);
+        effectLayer.setName("decoration");
+        TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
+        cell.setTile(effectTileWithType("crystal"));
+        effectLayer.setCell(3, 5, cell);
+        map.getLayers().add(effectLayer);
+
+        Array<MapLoader.EffectSpawn> spawns = loader().getEffectSpawns();
+
+        assertEquals("tile layers keep effect spawns — exemption is object-layer only", 1, spawns.size);
+        MapLoader.EffectSpawn spawn = spawns.first();
+        assertEquals("light", spawn.effectType);
+        assertEquals(3 * TILE, spawn.x, 0f);
+        assertEquals(5 * TILE, spawn.y, 0f);
     }
 }
