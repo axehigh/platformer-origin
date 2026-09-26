@@ -70,6 +70,18 @@ final class FactoryContext {
         }
 
         if (regions.size == 0) {
+            // Flexible prefix + keyword search (handles skeleton04_walk1, ghost05_walk1, etc.)
+            String prefix = regionName.contains("_") ? regionName.substring(0, regionName.indexOf('_')) : regionName;
+            String action = regionName.contains("_") ? regionName.substring(regionName.indexOf('_') + 1) : "";
+            for (AtlasRegion region : originAtlas.getRegions()) {
+                if (region.name.startsWith(prefix) && (action.isEmpty() || region.name.contains(action))) {
+                    regions.add(region);
+                }
+            }
+            regions.sort((r1, r2) -> r1.name.compareTo(r2.name));
+        }
+
+        if (regions.size == 0) {
             // Emergency fallback: just find the first region that starts with the prefix
             for (AtlasRegion region : originAtlas.getRegions()) {
                 if (region.name.startsWith(regionName)) {

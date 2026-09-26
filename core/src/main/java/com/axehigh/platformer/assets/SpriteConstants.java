@@ -47,6 +47,18 @@ public class SpriteConstants {
     public static float EnemyKnightCollisionHeight = 140 * EnemyKnightScale;
     public static float EnemyKnightOffsetY = 10f * EnemyKnightScale;
 
+    public static String EnemySkeletonSprite = "skeleton";
+    public static float EnemySkeletonScale = 0.3f;
+    public static float EnemySkeletonCollisionWidth = 80f * EnemySkeletonScale;
+    public static float EnemySkeletonCollisionHeight = 140f * EnemySkeletonScale;
+    public static float EnemySkeletonOffsetY = 0f;
+
+    public static String EnemyGhostSprite = "ghost";
+    public static float EnemyGhostScale = 0.25f;
+    public static float EnemyGhostCollisionWidth = 100f * EnemyGhostScale;
+    public static float EnemyGhostCollisionHeight = 100f * EnemyGhostScale;
+    public static float EnemyGhostOffsetY = 0f;
+
     //Acid atlas region prefixes (gfx/origin-game.atlas)
     /** Dispatcher tube animation — 64px sprites, scaled to fill a full 128px tile. */
     public static final String ACID_TUBE_REGION = "acid_tube";

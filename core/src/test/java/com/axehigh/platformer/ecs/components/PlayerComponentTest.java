@@ -6,8 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /** Headless tests for the potion-count bookkeeping on {@link PlayerComponent}. */
 public class PlayerComponentTest {
