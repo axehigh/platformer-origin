@@ -22,6 +22,7 @@ import com.badlogic.gdx.math.MathUtils;
 import static com.axehigh.platformer.PlayerConfig.*;
 import static com.axehigh.platformer.assets.GameAssetRegistry.*;
 import static com.axehigh.platformer.ecs.components.Mappers.*;
+import static com.axehigh.platformer.util.FeatureFlags.isGodModeEnabled;
 import static com.badlogic.gdx.Gdx.input;
 import static com.badlogic.gdx.Input.Keys.*;
 
@@ -235,9 +236,13 @@ public class PlayerInputSystem extends IteratingSystem {
         boolean shootPressed = input.isKeyJustPressed(Input.Keys.K) || input.isKeyJustPressed(Input.Keys.Y)
             || input.isKeyJustPressed(Input.Keys.SHIFT_LEFT) || input.isKeyJustPressed(Input.Keys.SHIFT_RIGHT)
             || touchShootRequested;
-        if (!locked && shootPressed && player.shootCooldown.isDone() && player.ammo > 0) {
+
+        boolean hasAmmo = isGodModeEnabled() || player.ammo > 0;
+        if (!locked && shootPressed && player.shootCooldown.isDone() && hasAmmo) {
             spawnBullet(entity, transform, collision, player);
-            player.ammo--;
+            if (!isGodModeEnabled()) {
+                player.ammo--;
+            }
             player.shootCooldown.start(SHOOT_COOLDOWN);
             if (sfxSystem != null) {
                 sfxSystem.playShoot();
