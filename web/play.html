@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>
+  // Dark mode flash prevention: apply theme class before body renders
+  (function() {
+    var theme = localStorage.getItem('origin_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Play Origin — Controls &amp; Game</title>
+<meta name="description" content="Review the controls and play Origin, a 2D pixel-art medieval dungeon hack-and-slash, free in your browser.">
+<meta name="author" content="The Oddbear / Axehigh Games">
+<meta name="theme-color" content="#0b0a09">
+<link rel="canonical" href="https://www.olona.no/origin/play.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Origin">
+<meta property="og:title" content="Play Origin — Controls &amp; Game">
+<meta property="og:description" content="Review the controls and descend the dungeon. Play free in your browser.">
+<meta property="og:url" content="https://www.olona.no/origin/play.html">
+<meta property="og:image" content="https://www.olona.no/origin/assets/art/splash2.jpg">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="favicon.svg">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="torch-glow" aria-hidden="true"></div>
+
+<header class="site-header" id="top">
+  <div class="wrap header-inner">
+    <a class="logo" href="index.html" aria-label="Origin home" style="font-family: var(--font-display); font-weight: 700; font-size: 1.4rem; color: var(--text); letter-spacing: .08em; text-decoration: none; text-transform: uppercase;">
+      Origin
+    </a>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="index.html#game">Home</a>
+      <a href="index.html#bestiary">Bestiary</a>
+      <a href="index.html#gallery">Gallery</a>
+      <a class="btn btn-ghost nav-cta" href="play/index.html">Play free</a>
+    </nav>
+    <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============================ PLAY LAUNCH & CONTROLS ============================ -->
+  <section class="section" id="play-launch" style="padding-top: 4rem;">
+    <div class="wrap controls-wrap">
+      <header class="section-head reveal" style="text-align: center; max-width: 700px; margin: 0 auto 3rem;">
+        <p class="kicker">Ready to descend</p>
+        <h1 style="font-family: var(--font-display); font-weight: 700; font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: .06em; color: var(--text); text-transform: uppercase; margin: 0 0 1rem;">Play Origin</h1>
+        <p class="section-sub" style="margin-bottom: 2rem;">Review your controls below, then press Play to launch the game directly in your browser.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <a class="btn btn-primary btn-lg" href="play/index.html">▶ Play Game Now</a>
+          <a class="btn btn-ghost btn-lg" href="index.html">← Back to Home</a>
+        </div>
+      </header>
+
+      <div class="controls-grid" style="margin-top: 3rem;">
+        <div class="keymap reveal" role="table" aria-label="Keyboard controls">
+          <h3 style="margin-bottom: 1rem; font-family: var(--font-display); font-size: 1.2rem; color: var(--text);">Keyboard &amp; Mouse</h3>
+          <div class="keymap-row" role="row"><span role="cell"><kbd>A</kbd><kbd>D</kbd> / <kbd>←</kbd><kbd>→</kbd></span><span role="cell">Move</span></div>
+          <div class="keymap-row" role="row"><span role="cell"><kbd>W</kbd> / <kbd>↑</kbd></span><span role="cell">Jump · climb up · double jump</span></div>
+          <div class="keymap-row" role="row"><span role="cell"><kbd>S</kbd> / <kbd>↓</kbd></span><span role="cell">Drop through platform · use</span></div>
+          <div class="keymap-row" role="row"><span role="cell"><kbd>J</kbd> / <kbd>Space</kbd> / <kbd>LMB</kbd></span><span role="cell">Sword <span class="muted">(B on touch)</span></span></div>
+          <div class="keymap-row" role="row"><span role="cell"><kbd>K</kbd> / <kbd>Shift</kbd></span><span role="cell">Throw dagger <span class="muted">(Y on touch)</span></span></div>
+          <div class="keymap-row" role="row"><span role="cell"><kbd>E</kbd> / <kbd>Enter</kbd></span><span role="cell">Interact — doors, chests, exits</span></div>
+          <div class="keymap-row" role="row"><span role="cell"><kbd>Z</kbd></span><span role="cell">Next potion in the bar</span></div>
+          <div class="keymap-row" role="row"><span role="cell"><kbd>C</kbd></span><span role="cell">Drink the selected potion</span></div>
+          <div class="keymap-row" role="row"><span role="cell"><kbd>P</kbd></span><span role="cell">Save a screenshot</span></div>
+          <div class="keymap-row" role="row"><span role="cell"><kbd>Esc</kbd></span><span role="cell">Pause</span></div>
+        </div>
+        <div class="touchmap reveal" aria-label="Touch control layout">
+          <h3 style="margin-bottom: 1rem; font-family: var(--font-display); font-size: 1.2rem; color: var(--text);">Mobile Touch Overlay</h3>
+          <div class="touch-device">
+            <div class="touch-pad" aria-hidden="true"><span class="tbtn tbtn-left">◀</span><span class="tbtn tbtn-right">▶</span></div>
+            <div class="touch-actions" aria-hidden="true">
+              <span class="tbtn tbtn-up">▲</span>
+              <span class="tbtn tbtn-a">A</span>
+              <span class="tbtn tbtn-b">B</span>
+              <span class="tbtn tbtn-y">Y</span>
+            </div>
+          </div>
+          <ul class="touch-legend">
+            <li><b>A</b> jump &amp; double jump</li>
+            <li><b>B</b> sword strike</li>
+            <li><b>Y</b> throw dagger</li>
+            <li><b>▲</b> interact · climb · up</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 4rem;">
+        <a class="btn btn-primary btn-lg" href="play/index.html">▶ Play Game Now</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============================ FOOTER ============================ -->
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <span style="font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; color: var(--text); letter-spacing: .08em; text-transform: uppercase;">Origin</span>
+      <p>Made by The Oddbear. Music by Eric Matayas. Art from craftpix.net. Built with libGDX.</p>
+    </div>
+    <nav class="footer-links" aria-label="Footer">
+      <a href="play/index.html">Play in browser</a>
+      <a href="index.html#game">Home</a>
+      <a href="index.html#bestiary">Bestiary</a>
+      <a href="index.html#gallery">Gallery</a>
+      <a href="play.html">Controls &amp; Play</a>
+    </nav>
+  </div>
+  <p class="wrap copyright">© <span id="year">2026</span> Axehigh Games · <a href="https://www.olona.no/">olona.no</a></p>
+</footer>
+
+<script src="js/main.js" defer></script>
+</body>
+</html>

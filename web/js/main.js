@@ -72,6 +72,7 @@
     { file: 'origin_tutorial_level_2_002.png', caption: 'Tutorial - Level 2', device: 'desktop' },
     { file: 'origin_tutorial_level_3_003.png', caption: 'Tutorial - Level 3', device: 'desktop' },
     { file: 'origin_tutorial_level_3_004.png', caption: 'Tutorial - Level 3', device: 'desktop' },
+    { file: 'origin_world_1_level_2_003.png', caption: 'Dungeon 1 - Level 2', device: 'desktop' },
     { file: 'origin_menu.png',          caption: 'Main menu',             device: 'desktop' },
     { file: 'origin_phone-1.png',       caption: 'On a phone',            device: 'phone' },
     { file: 'origin_phone-2.png',       caption: 'Touch controls',        device: 'phone' },

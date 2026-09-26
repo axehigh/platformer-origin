@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<script>
+  var d = document.documentElement;
+  d.className = 'js';
+  setTimeout(function () {
+    if (!d.hasAttribute('data-reveal-ready')) { d.className = 'no-js'; }
+  }, 2500);
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Origin — 2D Pixel-Art Medieval Dungeon Hack-and-Slash</title>
+<meta name="description" content="Origin is a 2D pixel-art medieval dungeon hack-and-slash built with libGDX and Ashley ECS. Descend the dungeon, swing your sword, defeat enemies, and collect loot. Play free in your browser.">
+<meta name="author" content="The Oddbear / Axehigh Games">
+<meta name="theme-color" content="#0b0a09">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="torch-glow" aria-hidden="true"></div>
+
+<header class="site-header" id="top">
+  <div class="wrap header-inner">
+    <a class="logo" href="#top" aria-label="Origin home" style="font-family: var(--font-display); font-weight: 700; font-size: 1.4rem; color: var(--text); letter-spacing: .08em; text-decoration: none; text-transform: uppercase;">
+      Origin
+    </a>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="#game">Play</a>
+      <a href="#features">Features</a>
+      <a href="#gallery">Gallery</a>
+      <a href="https://www.olona.no/origin/index.html" target="_blank" class="btn btn-ghost nav-cta">Play in Browser</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============================ HERO ============================ -->
+  <section class="hero" id="game">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="wrap hero-inner">
+      <p class="eyebrow">A Pixel-Art Medieval Hack-and-Slash Action Platformer</p>
+      <h1 class="hero-title" style="font-family: var(--font-display); font-weight: 700; font-size: clamp(2.5rem, 6vw, 4.5rem); letter-spacing: .06em; color: var(--text); text-transform: uppercase; margin: 0 0 .6rem; text-shadow: 0 4px 16px rgba(0,0,0,.8);">
+        Origin
+      </h1>
+      <p class="tagline">Descend the dungeon. Swing the sword. Get out alive.</p>
+      <p class="lede">
+        One knight, three hearts, and <strong>27 hand-built rooms</strong> of stone, torches,
+        and dangerous enemies. Master melee combat, ammo-gated daggers, and potion upgrades.
+      </p>
+      <div class="cta-row" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin: 2rem 0;">
+        <a class="btn btn-primary btn-lg" href="https://www.olona.no/origin/index.html" target="_blank" rel="noopener">▶ Play Game in Browser</a>
+      </div>
+
+      <!-- Playable Web Embed Option / Preview Notice -->
+      <div class="browser-play-notice" style="background: rgba(20,18,16,0.85); border: 1px solid var(--border); padding: 1.5rem; border-radius: 8px; max-width: 700px; margin: 2rem auto; text-align: center;">
+        <h3 style="color: var(--gold); margin-bottom: 0.5rem; font-family: var(--font-display);">Play Now</h3>
+        <p style="color: var(--text-dim); margin-bottom: 1rem;">Experience the full medieval dungeon adventure directly in your browser window.</p>
+        <a href="https://www.olona.no/origin/index.html" target="_blank" rel="noopener" class="btn btn-ghost" style="display: inline-block;">Launch Game Window &rarr;</a>
+      </div>
+
+      <dl class="stat-strip">
+        <div><dt>3</dt><dd>dungeons</dd></div>
+        <div><dt>27</dt><dd>rooms</dd></div>
+        <div><dt>4</dt><dd>enemy types</dd></div>
+        <div><dt>7</dt><dd>potions</dd></div>
+      </dl>
+    </div>
+    <div class="hero-fade" aria-hidden="true"></div>
+  </section>
+
+  <!-- ============================ FEATURES ============================ -->
+  <section class="section" id="features">
+    <div class="wrap">
+      <header class="section-head">
+        <h2>Dungeon Mechanics & Combat</h2>
+        <p>Built on libGDX and Ashley ECS with precise AABB collision and tactical action.</p>
+      </header>
+      <div class="grid features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+        <div class="feature-card" style="background: rgba(26,23,20,0.8); border: 1px solid var(--border); padding: 2rem; border-radius: 8px;">
+          <h3 style="color: var(--gold); margin-bottom: 0.75rem; font-family: var(--font-display);">Sword & Melee Combat</h3>
+          <p style="color: var(--text-dim);">Strike-based medieval combat where timing and spacing decide victory against dungeon foes.</p>
+        </div>
+        <div class="feature-card" style="background: rgba(26,23,20,0.8); border: 1px solid var(--border); padding: 2rem; border-radius: 8px;">
+          <h3 style="color: var(--gold); margin-bottom: 0.75rem; font-family: var(--font-display);">Ammo-Gated Daggers</h3>
+          <p style="color: var(--text-dim);">Ranged attacks when melee isn't enough. Manage your daggers carefully across rooms.</p>
+        </div>
+        <div class="feature-card" style="background: rgba(26,23,20,0.8); border: 1px solid var(--border); padding: 2rem; border-radius: 8px;">
+          <h3 style="color: var(--gold); margin-bottom: 0.75rem; font-family: var(--font-display);">Flip-Screen & Scroll Camera</h3>
+          <p style="color: var(--text-dim);">Hybrid camera system supporting static flip-room framing and dead-zone scrolling.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ GALLERY ============================ -->
+  <section class="section" id="gallery" style="background: rgba(14,12,10,0.6);">
+    <div class="wrap">
+      <header class="section-head">
+        <h2>Screenshots & GFX</h2>
+        <p>Captured directly from live gameplay sessions.</p>
+      </header>
+      <div class="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+        <div class="shot-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden;">
+          <img src="img/shots/origin_tutorial_level_2_000.png" alt="Tutorial Level Screenshot 1" style="width: 100%; display: block; aspect-ratio: 16/9; object-fit: cover;">
+          <div style="padding: 1rem;"><p style="color: var(--text-dim); font-size: 0.9rem;">Tutorial Level - Dungeon Entrance</p></div>
+        </div>
+        <div class="shot-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden;">
+          <img src="img/shots/origin_tutorial_level_2_001.png" alt="Tutorial Level Screenshot 2" style="width: 100%; display: block; aspect-ratio: 16/9; object-fit: cover;">
+          <div style="padding: 1rem;"><p style="color: var(--text-dim); font-size: 0.9rem;">Dungeon Hallways & Platforms</p></div>
+        </div>
+        <div class="shot-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden;">
+          <img src="img/shots/origin_tutorial_level_3_003.png" alt="Tutorial Level Screenshot 3" style="width: 100%; display: block; aspect-ratio: 16/9; object-fit: cover;">
+          <div style="padding: 1rem;"><p style="color: var(--text-dim); font-size: 0.9rem;">Combat Encounter & Action</p></div>
+        </div>
+        <div class="shot-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden;">
+          <img src="img/shots/origin_world_1_level_2_003.png" alt="World 1 Screenshot" style="width: 100%; display: block; aspect-ratio: 16/9; object-fit: cover;">
+          <div style="padding: 1rem;"><p style="color: var(--text-dim); font-size: 0.9rem;">World 1 - Deep Dungeons</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer" style="padding: 3rem 0; text-align: center; border-top: 1px solid var(--border); color: var(--text-dim);">
+  <div class="wrap">
+    <p>&copy; The Oddbear / Axehigh Games. Built with libGDX & Ashley ECS.</p>
+    <p style="margin-top: 0.5rem;"><a href="https://www.olona.no/origin/index.html" target="_blank" style="color: var(--gold);">Play Origin in Browser</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
