@@ -29,11 +29,11 @@ public class GameConstantText {
     public static final String CONQUERED_DUNGEONS = "You have conquered the dungeons of ";
     public static final String ORIGIN_TITLE = "ORIGIN";
     public static final String LEAD_DEV = "Lead Game Developer";
-    public static final String AXEHIGH_GAMES = "AxeHigh Games";
-    public static final String ENGINE_FRAMEWORK = "Engine & Framework";
-    public static final String LIBGDX_ASHLEY = "libGDX & Ashley ECS";
-    public static final String ART_MUSIC = "Art & Music";
-    public static final String MEDIEVAL_DUNGEON_PACK = "Medieval Dungeon Pixel Art Pack";
+    public static final String AXEHIGH_GAMES = "The Oddbear";
+    public static final String MUSIC_CREDIT_HEADER = "Music";
+    public static final String MUSIC_CREDIT = "Eric Matayas (soundimage.org)";
+    public static final String ART_CREDIT_HEADER = "Art";
+    public static final String ART_CREDIT = "craftpix.net";
     public static final String MUSIC_VOLUME = "Music Volume";
     public static final String SFX_VOLUME = "SFX Volume";
     public static final String UI_ICON_SCALE = "UI Icon Scale";

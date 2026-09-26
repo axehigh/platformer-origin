@@ -12,8 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
-import static com.axehigh.platformer.GameConstants.SmallFontScale;
-import static com.axehigh.platformer.GameConstants.UI_PADDING;
+import static com.axehigh.platformer.GameConstants.*;
 import static com.axehigh.platformer.screens.GameConstantText.*;
 import static com.axehigh.platformer.ui.DialogPanelFitter.sizeToPanel;
 import static java.lang.Boolean.TRUE;
@@ -99,9 +98,9 @@ public class MainMenuScreen extends MenuScreen {
                     }
                 };
                 confirmDialog.getContentTable().add(new Label(ASK_NEW_GAME, skin) {{
-                    setFontScale(SmallFontScale);
+                    setFontScale(BodyFontScale);
                 }});
-                confirmDialog.getButtonTable().defaults().pad(UI_PADDING)
+                confirmDialog.getButtonTable().defaults().pad(UI_PADDING_LARGE)
                     .size(DIALOG_BUTTON_WIDTH, DIALOG_BUTTON_HEIGHT);
                 confirmDialog.button(YES, true);
                 confirmDialog.button(NO, false);

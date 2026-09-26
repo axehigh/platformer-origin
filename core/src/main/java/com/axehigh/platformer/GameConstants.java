@@ -61,18 +61,26 @@ public final class GameConstants {
     public static final float MAX_WORLD_ASPECT = 21f / 9f;
 
     //Parallax background
-    /** Scroll speed of the far background layer ({@code Background_01}) relative to the world:
-     * 0 = glued to the camera (skybox), 1 = world-locked. Kept below the near layer so it recedes. */
+    /**
+     * Scroll speed of the far background layer ({@code Background_01}) relative to the world:
+     * 0 = glued to the camera (skybox), 1 = world-locked. Kept below the near layer so it recedes.
+     */
     public static final float PARALLAX_BG_FAR = 0.25f;
-    /** Scroll speed of the near background layer ({@code Background_02}) relative to the world. */
+    /**
+     * Scroll speed of the near background layer ({@code Background_02}) relative to the world.
+     */
     public static final float PARALLAX_BG_NEAR = 0.5f;
-    /** Height of one tile in world units (VIRTUAL_HEIGHT / 17 rows), used to offset parallax
-     *  layers so they don't waste imagery behind the collision ground layer. */
+    /**
+     * Height of one tile in world units (VIRTUAL_HEIGHT / 17 rows), used to offset parallax
+     * layers so they don't waste imagery behind the collision ground layer.
+     */
     public static final float PARALLAX_TILE_HEIGHT = 16f;
 
-    /** Maximum overshoot (world units) of an oversized tile beyond its grid cell. A 256px tile
-     *  in a 16px grid protrudes 240px past its cell edge — the renderer must keep the tile's
-     *  cell in the culling range until the visual is fully off-screen. */
+    /**
+     * Maximum overshoot (world units) of an oversized tile beyond its grid cell. A 256px tile
+     * in a 16px grid protrudes 240px past its cell edge — the renderer must keep the tile's
+     * cell in the culling range until the visual is fully off-screen.
+     */
     public static final float TILE_MAX_OVERSHOOT = 240f;
 
     //Floating message colors
@@ -85,32 +93,52 @@ public final class GameConstants {
     public static final float[] MESSAGE_COLOR_INVISIBILITY = {0.7f, 0.3f, 0.9f};
     public static final float[] MESSAGE_COLOR_JUMP = {0.2f, 0.8f, 1f};
     public static final float[] MESSAGE_COLOR_FIRE = {1f, 0.4f, 0.1f};
-    /** Crystal objective counter / pickup text (cyan). Distinct from the gold coin counter. */
+    /**
+     * Crystal objective counter / pickup text (cyan). Distinct from the gold coin counter.
+     */
     public static final float[] MESSAGE_COLOR_CRYSTALS = {0.3f, 0.9f, 1f};
 
-    /** Duration (seconds) of the white hit-flash tint applied to damageable entities. */
+    /**
+     * Duration (seconds) of the white hit-flash tint applied to damageable entities.
+     */
     public static final float HIT_FLASH_DURATION = 0.08f;
-    /** RGB components for the white hit-flash tint (alpha is preserved from the batch). */
+    /**
+     * RGB components for the white hit-flash tint (alpha is preserved from the batch).
+     */
     public static final float[] HIT_FLASH_COLOR = {1f, 1f, 1f};
 
     //Vignette pulse (damage feedback)
-    /** Duration (seconds) the red vignette pulse lingers after a hit. */
+    /**
+     * Duration (seconds) the red vignette pulse lingers after a hit.
+     */
     public static final float VIGNETTE_PULSE_DURATION = 0.5f;
-    /** Peak alpha strength of the red vignette pulse overlay. */
+    /**
+     * Peak alpha strength of the red vignette pulse overlay.
+     */
     public static final float VIGNETTE_PULSE_STRENGTH = 0.7f;
-    /** RGB components for the red vignette pulse tint. */
+    /**
+     * RGB components for the red vignette pulse tint.
+     */
     public static final float[] VIGNETTE_PULSE_COLOR = {0.85f, 0.1f, 0.1f};
 
-    /** Death-burst tint (dark red) for organic enemies. */
+    /**
+     * Death-burst tint (dark red) for organic enemies.
+     */
     public static final float[] DEATH_BURST_COLOR_ORGANIC = {0.55f, 0.08f, 0.08f};
-    /** Death-burst tint (spectral blue) for flying enemies. */
+    /**
+     * Death-burst tint (spectral blue) for flying enemies.
+     */
     public static final float[] DEATH_BURST_COLOR_FLYER = {0.35f, 0.6f, 1f};
 
-    /** Duration (seconds) of the fade-in/fade-out transition between screens. */
+    /**
+     * Duration (seconds) of the fade-in/fade-out transition between screens.
+     */
     public static final float SCREEN_FADE_TIMER = 0.5f;
 
-    /** Duration (seconds) of the fade-in/fade-out for an in-place level swap (exit gate). Slower than
-     *  the generic screen fade so the "fade to black / fade in from black" reads clearly. */
+    /**
+     * Duration (seconds) of the fade-in/fade-out for an in-place level swap (exit gate). Slower than
+     * the generic screen fade so the "fade to black / fade in from black" reads clearly.
+     */
     public static final float LEVEL_FADE_TIMER = 1.0f;
 
     //Movement MaxSpeedX/Y
@@ -119,47 +147,87 @@ public final class GameConstants {
 
     //Enemy Stats
     public static int EnemyBaseHealth = 5;
-    /** Feature flag for displaying equipment slots in the inventory bar. */
+    /**
+     * Feature flag for displaying equipment slots in the inventory bar.
+     */
     public static boolean ENABLE_INVENTORY_EQUIPMENT = false;
-    /** Feature flag for enabling bullet mechanics and shooting controls. */
+    /**
+     * Feature flag for enabling bullet mechanics and shooting controls.
+     */
     public static boolean USE_BULLET = true;
-    /** How many of each potion type the player can hold at once. */
+    /**
+     * How many of each potion type the player can hold at once.
+     */
     public static int POTION_CAP = 5;
-    /** Coins granted instead of a potion pickup when the player is already at {@link #POTION_CAP}. */
+    /**
+     * Coins granted instead of a potion pickup when the player is already at {@link #POTION_CAP}.
+     */
     public static int POTION_OVERFLOW_COINS = 5;
-    /** Hearts restored by one Healing potion (capped at maxHealth). */
+    /**
+     * Hearts restored by one Healing potion (capped at maxHealth).
+     */
     public static int HEALING_POTION_HEAL = 1;
-    /** Minimum delay between two potion drinks (seconds), preventing consumption spam. */
+    /**
+     * Minimum delay between two potion drinks (seconds), preventing consumption spam.
+     */
     public static float POTION_USE_COOLDOWN = 0.4f;
-    /** Debounce window for batching coin-pickup floating messages (seconds). */
+    /**
+     * Debounce window for batching coin-pickup floating messages (seconds).
+     */
     public static float COIN_MESSAGE_COOLDOWN = 0.3f;
-    /** Strength buff multiplier: doubles base sword damage while active. */
+    /**
+     * Strength buff multiplier: doubles base sword damage while active.
+     */
     public static int STRENGTH_DAMAGE_MULTIPLIER = 2;
-    /** Strength buff duration (seconds). */
+    /**
+     * Strength buff duration (seconds).
+     */
     public static float STRENGTH_BUFF_DURATION = 20f;
-    /** Speed buff: horizontal move-speed multiplier while active. */
+    /**
+     * Speed buff: horizontal move-speed multiplier while active.
+     */
     public static float SPEED_MULTIPLIER = 1.5f;
-    /** Speed buff duration (seconds). */
+    /**
+     * Speed buff duration (seconds).
+     */
     public static float SPEED_BUFF_DURATION = 15f;
-    /** Invulnerability buff duration (seconds). */
+    /**
+     * Invulnerability buff duration (seconds).
+     */
     public static float INVULNERABILITY_DURATION = 10f;
-    /** Invisibility buff duration (seconds). */
+    /**
+     * Invisibility buff duration (seconds).
+     */
     public static float INVISIBILITY_DURATION = 10f;
-    /** Jump buff duration (seconds). */
+    /**
+     * Jump buff duration (seconds).
+     */
     public static float JUMP_BUFF_DURATION = 15f;
-    /** Fire Breath buff duration (seconds). */
+    /**
+     * Fire Breath buff duration (seconds).
+     */
     public static float FIRE_BREATH_DURATION = 15f;
-    /** Remaining-buff duration under which the buff halo and HUD icon start blinking (seconds). */
+    /**
+     * Remaining-buff duration under which the buff halo and HUD icon start blinking (seconds).
+     */
     public static final float BUFF_BLINK_THRESHOLD = 3f;
-    /** Toggle interval of the buff-expiry blink, halo alpha phases and HUD icon visibility (seconds). */
+    /**
+     * Toggle interval of the buff-expiry blink, halo alpha phases and HUD icon visibility (seconds).
+     */
     public static final float BUFF_BLINK_INTERVAL = 0.2f;
 
     //Ambient ember motes
-    /** Minimum delay (seconds) between ember mote spawns at a single light source. */
+    /**
+     * Minimum delay (seconds) between ember mote spawns at a single light source.
+     */
     public static final float AMBIENT_MOTE_MIN_INTERVAL = 0.35f;
-    /** Maximum delay (seconds) between ember mote spawns at a single light source. */
+    /**
+     * Maximum delay (seconds) between ember mote spawns at a single light source.
+     */
     public static final float AMBIENT_MOTE_MAX_INTERVAL = 1.2f;
-    /** RGB components for the warm ambient mote tint. */
+    /**
+     * RGB components for the warm ambient mote tint.
+     */
     public static final float[] AMBIENT_MOTE_COLOR = {1f, 0.45f, 0.1f};
 
     //Crumbling platforms (shake -> collapse -> respawn, seconds)
@@ -167,13 +235,17 @@ public final class GameConstants {
     public static final float CRUMBLE_RESPAWN_DURATION = 2.5f;
     public static final float CRUMBLE_LANDING_GRACE = 0.1f;
     public static final float CRUMBLE_SETTLE_GRACE = 0.5f;
-    /** Max pixel offset of the visible shake jitter while a crumble tile is {@code SHAKING};
-     *  decays linearly to 1px as the shake runs out so the jitter stays crisp at pixel scale. */
+    /**
+     * Max pixel offset of the visible shake jitter while a crumble tile is {@code SHAKING};
+     * decays linearly to 1px as the shake runs out so the jitter stays crisp at pixel scale.
+     */
     public static final float CRUMBLE_SHAKE_MAX_JITTER = 3f;
 
     //UI
 
-    /** Scale factor for touch control button images. Set to 2f for double size icons. */
+    /**
+     * Scale factor for touch control button images. Set to 2f for double size icons.
+     */
     public static float UI_ICON_SCALE = 2f;
 
     //UI Only for touch control
@@ -213,18 +285,24 @@ public final class GameConstants {
 
     //UI Menu, everything else.
     public static final float UI_PADDING = 33f;
+    public static final float UI_PADDING_LARGE = UI_PADDING * 2;
     public static final float UI_PANEL_ALPHA = 0.7f;
+    public static final float UI_CHECKBOX_SCALE = 1.5f;
     private static final float FontBaseScale = 1f;
     public static float SmallFontScale = FontBaseScale;
     public static float TitleFontScale = FontBaseScale * 3f;
     public static float BodyFontScale = FontBaseScale * 2f;
     public static float tinyFontScale = FontBaseScale * 0.85f;
-    /** Scale factor for world-space floating text (damage numbers, coin popups, buff messages).
-     *  {@code FloatingMessageSystem} multiplies this into the per-message {@code fontScale}
-     *  (2f ≈ 64 world units on the 32px {@code edgeofgalaxy} font). */
+    /**
+     * Scale factor for world-space floating text (damage numbers, coin popups, buff messages).
+     * {@code FloatingMessageSystem} multiplies this into the per-message {@code fontScale}
+     * (2f ≈ 64 world units on the 32px {@code edgeofgalaxy} font).
+     */
     public static float FloatingTextFontScale = 2f;
-    /** Scale factor for world-space tutorial tooltip text ({@code TutorialSystem})
-     *  (2f ≈ 64 world units on the 32px {@code edgeofgalaxy} font). */
+    /**
+     * Scale factor for world-space tutorial tooltip text ({@code TutorialSystem})
+     * (2f ≈ 64 world units on the 32px {@code edgeofgalaxy} font).
+     */
     public static float TutorialFontScale = 2f;
 
     public static final String SKIN_TITLE = "title";

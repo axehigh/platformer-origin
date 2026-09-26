@@ -39,14 +39,14 @@ public class CreditsScreen extends MenuScreen {
         addCreditLine(creditsContent, AXEHIGH_GAMES, BodyFontScale, Color.WHITE);
         creditsContent.row().padBottom(ELEMENT_PAD);
 
-        addCreditLine(creditsContent, ENGINE_FRAMEWORK, SmallFontScale, Color.LIGHT_GRAY);
+        addCreditLine(creditsContent, ART_CREDIT_HEADER, SmallFontScale, Color.LIGHT_GRAY);
         creditsContent.row();
-        addCreditLine(creditsContent, LIBGDX_ASHLEY, BodyFontScale, Color.WHITE);
+        addCreditLine(creditsContent, ART_CREDIT, BodyFontScale, Color.WHITE);
         creditsContent.row().padBottom(ELEMENT_PAD);
 
-        addCreditLine(creditsContent, ART_MUSIC, SmallFontScale, Color.LIGHT_GRAY);
+        addCreditLine(creditsContent, MUSIC_CREDIT_HEADER, SmallFontScale, Color.LIGHT_GRAY);
         creditsContent.row();
-        addCreditLine(creditsContent, MEDIEVAL_DUNGEON_PACK, BodyFontScale, Color.WHITE);
+        addCreditLine(creditsContent, MUSIC_CREDIT, BodyFontScale, Color.WHITE);
         creditsContent.row().padBottom(ELEMENT_PAD);
 
         content.add(creditsContent).colspan(2).expand().center().padBottom(30f).row();
