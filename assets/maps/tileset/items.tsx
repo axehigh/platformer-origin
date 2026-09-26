@@ -55,6 +55,9 @@
   </animation>
  </tile>
  <tile id="13" type="crystal">
+  <properties>
+   <property name="effect" value="light"/>
+  </properties>
   <image source="../gfx/items/Diamond.png" width="128" height="128"/>
  </tile>
  <tile id="14" type="key">
@@ -144,7 +147,7 @@
  <tile id="30">
   <properties>
    <property name="effect" value="light"/>
-   <property name="render" value="false"/>
+   <property name="render" type="bool" value="false"/>
   </properties>
   <image source="../gfx/items/Light.png" width="128" height="128"/>
   <objectgroup draworder="index" id="3">

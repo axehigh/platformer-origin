@@ -146,7 +146,9 @@ public class EntityFactory {
     /**
      * Spawns decorative entities (coin, chest, torch, exit gate, enemy) found in the object layer.
      * {@code roomState} is used to assign each spawned enemy to whichever Room rectangle contains
-     * its spawn point (see {@code EnemyComponent.roomIndex}).
+     * its spawn point (see {@code EnemyComponent.roomIndex}). Pickups whose tile carries
+     * {@code effect="light"} get their {@code LightComponent} attached directly to the pickup
+     * entity here, so the halo is removed together with the pickup on collection.
      */
     public void spawnObjects(Engine engine, MapObjects objects, RoomState roomState) {
         Array<MapObject> toRemove = new Array<>();
@@ -198,11 +200,15 @@ public class EntityFactory {
 
             switch (type) {
                 case "coin":
-                    engine.addEntity(pickupFactory.createCoinPickup(spawnX, spawnY, objectWidth, objectHeight));
+                    Entity coinEntity = pickupFactory.createCoinPickup(spawnX, spawnY, objectWidth, objectHeight);
+                    attachPickupLight(coinEntity, object, tile, spawnX, spawnY, objectWidth, objectHeight);
+                    engine.addEntity(coinEntity);
                     spawned = true;
                     break;
                 case "crystal":
-                    engine.addEntity(pickupFactory.createCrystalPickup(spawnX, spawnY, objectWidth, objectHeight));
+                    Entity crystalEntity = pickupFactory.createCrystalPickup(spawnX, spawnY, objectWidth, objectHeight);
+                    attachPickupLight(crystalEntity, object, tile, spawnX, spawnY, objectWidth, objectHeight);
+                    engine.addEntity(crystalEntity);
                     spawned = true;
                     break;
                 case "chest":
@@ -223,12 +229,16 @@ public class EntityFactory {
                     spawned = true;
                     break;
                 case "dagger":
-                    engine.addEntity(pickupFactory.createDaggerPickup(spawnX, spawnY, object, tile));
+                    Entity daggerEntity = pickupFactory.createDaggerPickup(spawnX, spawnY, object, tile);
+                    attachPickupLight(daggerEntity, object, tile, spawnX, spawnY, objectWidth, objectHeight);
+                    engine.addEntity(daggerEntity);
                     spawned = true;
                     break;
                 case "potion":
                     String potionType = TileProps.getProperty(object, tile, "potionType", "healing");
-                    engine.addEntity(pickupFactory.createPotionPickup(spawnX, spawnY, potionType));
+                    Entity potionEntity = pickupFactory.createPotionPickup(spawnX, spawnY, potionType);
+                    attachPickupLight(potionEntity, object, tile, spawnX, spawnY, objectWidth, objectHeight);
+                    engine.addEntity(potionEntity);
                     spawned = true;
                     break;
                 case "enemy":
@@ -347,6 +357,69 @@ public class EntityFactory {
         entity.add(light);
 
         return entity;
+    }
+
+    /**
+     * Attaches a {@code LightComponent} halo onto a pickup entity whose tile carries an
+     * {@code effect="light"} property, so the halo rides the pickup and is removed together with
+     * it on collection (the marker is skipped by {@code MapLoader.scanEffectLayers}, which would
+     * otherwise spawn an orphaned standalone light). Property reads and the light-center position
+     * mirror {@link #createLightEffect}: the collision-editor shape center when one exists,
+     * otherwise the tile center — or the marker rect center for a rect marker with the effect
+     * property placed on the object itself.
+     */
+    private void attachPickupLight(Entity entity, MapObject object, TiledMapTile tile, float spawnX, float spawnY, float objectWidth, float objectHeight) {
+        String effect = TileProps.getProperty(object, tile, "effect", null);
+        if (!"light".equals(effect)) {
+            return;
+        }
+
+        TransformComponent transform = entity.getComponent(TransformComponent.class);
+        if (transform == null) {
+            return;
+        }
+
+        LightComponent light = new LightComponent();
+        light.radius = TileProps.getFloatPropertyFromTile(tile, "lightRadius", DEFAULT_TORCH_LIGHT_RADIUS);
+        light.phase = MathUtils.random(MathUtils.PI2);
+
+        // World position of the light center, mirroring createLightEffect's tile-local reads.
+        float worldLightX;
+        float worldLightY;
+        if (tile != null && tile.getObjects().getCount() > 0) {
+            MapObject shape = tile.getObjects().get(0);
+            Rectangle bounds = MapLoader.shapeBounds(shape);
+            if (bounds != null) {
+                worldLightX = spawnX + bounds.x + bounds.width / 2f;
+                worldLightY = spawnY + bounds.y + bounds.height / 2f;
+            } else {
+                // Unsupported shape type — fall through to the tile center.
+                worldLightX = spawnX + tile.getTextureRegion().getRegionWidth() / 2f;
+                worldLightY = spawnY + tile.getTextureRegion().getRegionHeight() / 2f;
+            }
+        } else if (tile != null) {
+            // No shape — default to the tile center.
+            worldLightX = spawnX + tile.getTextureRegion().getRegionWidth() / 2f;
+            worldLightY = spawnY + tile.getTextureRegion().getRegionHeight() / 2f;
+        } else {
+            // Rect marker carrying the effect property itself — marker center.
+            worldLightX = spawnX + objectWidth / 2f;
+            worldLightY = spawnY + objectHeight / 2f;
+        }
+
+        // Pickup factories center the sprite within the marker rect, so for the common
+        // single-tile case this yields a halo centered on the item art.
+        light.offset.set(worldLightX - transform.position.x, worldLightY - transform.position.y);
+
+        String colorStr = TileProps.getStringPropertyFromTile(tile, "lightColor", null);
+        if (colorStr != null) {
+            light.color = TileProps.parseColor(colorStr, light.color);
+        }
+        float flickerSpeed = TileProps.getFloatPropertyFromTile(tile, "lightFlickerSpeed", Float.NaN);
+        if (!Float.isNaN(flickerSpeed)) {
+            light.flickerSpeed = flickerSpeed;
+        }
+        entity.add(light);
     }
 
     private Entity createDecoration(float x, float y, String texturePath) {

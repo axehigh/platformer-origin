@@ -48,6 +48,12 @@ public class MapLoader implements Disposable {
     private static final String PROPERTY_SECRET_ROOM = "secretRoom";
     /** Tile property naming a visual effect to attach at this tile's position (e.g. {@code "light"}, {@code "particle"}, {@code "sound"}). */
     private static final String PROPERTY_EFFECT = "effect";
+    /** Pickup types whose object-layer tile-object markers own their own light: the pickup entity spawned by {@code EntityFactory.spawnObjects} carries its {@code LightComponent}, so {@link #scanEffectLayers()} skips them (no standalone effect entity). */
+    private static final ObjectSet<String> COLLECTIBLE_EFFECT_OWNERS = new ObjectSet<>();
+
+    static {
+        COLLECTIBLE_EFFECT_OWNERS.addAll("crystal", "coin", "potion", "dagger");
+    }
 
     private final TiledMap map;
     private final Array<Rectangle> collisionRects = new Array<>();
@@ -133,8 +139,11 @@ public class MapLoader implements Disposable {
      * instances): each {@link TiledMapTileMapObject} whose tile has a non-empty {@code effect}
      * property spawns at the object's own x/y — libGDX already flips object Y to world-up
      * coordinates when loading (identical to how {@code EntityFactory.spawnObjects} uses
-     * {@code tileObj.getX()/getY()}). {@link MapGroupLayer} instances are ignored (project maps
-     * are flat).
+     * {@code tileObj.getX()/getY()}). Object-layer tile-object markers whose resolved {@code type}
+     * is a collectible pickup ({@code crystal}/{@code coin}/{@code potion}/{@code dagger}) are
+     * skipped here — their light is attached to the pickup entity by
+     * {@code EntityFactory.spawnObjects} instead, so it disappears when the item is collected.
+     * {@link MapGroupLayer} instances are ignored (project maps are flat).
      */
     private void scanEffectLayers() {
         for (MapLayer rawLayer : map.getLayers()) {
@@ -177,6 +186,14 @@ public class MapLoader implements Disposable {
                     }
                     String effect = tile.getProperties().get(PROPERTY_EFFECT, String.class);
                     if (effect == null || effect.isEmpty()) {
+                        continue;
+                    }
+                    // Collectible tile-object markers (crystal/coin/potion/dagger) own their light:
+                    // the pickup entity spawned by EntityFactory.spawnObjects carries its own
+                    // LightComponent, so removing the pickup on collection removes the halo too.
+                    // Skipping the standalone effect entity here avoids a second, orphaned light.
+                    String type = TileProps.getProperty(obj, tile, "type", null);
+                    if (type != null && COLLECTIBLE_EFFECT_OWNERS.contains(type)) {
                         continue;
                     }
                     EffectSpawn spawn = new EffectSpawn();
