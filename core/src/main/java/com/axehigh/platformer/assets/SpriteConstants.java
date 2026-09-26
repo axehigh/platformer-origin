@@ -41,17 +41,17 @@ public class SpriteConstants {
     public static float EnemyShooterCollisionHeight = 166f * EnemyShooterScale;
     public static float EnemyShooterOffsetY = 4f;
 
-    public static String EnemyKnightSprite = "goblin";
-    public static float EnemyKnightScale = 0.40f;
-    public static float EnemyKnightCollisionWidth = 80f * EnemyKnightScale;
-    public static float EnemyKnightCollisionHeight = 140 * EnemyKnightScale;
-    public static float EnemyKnightOffsetY = 10f * EnemyKnightScale;
+    public static String EnemyGoblinBruteSprite = "goblin";
+    public static float EnemyGoblinBruteScale = 0.40f;
+    public static float EnemyGoblinBruteCollisionWidth = 80f * EnemyGoblinBruteScale;
+    public static float EnemyGoblinBruteCollisionHeight = 140 * EnemyGoblinBruteScale;
+    public static float EnemyGoblinBruteOffsetY = 10f * EnemyGoblinBruteScale;
 
     public static String EnemySkeletonSprite = "skeleton";
     public static float EnemySkeletonScale = 0.3f;
     public static float EnemySkeletonCollisionWidth = 80f * EnemySkeletonScale;
     public static float EnemySkeletonCollisionHeight = 140f * EnemySkeletonScale;
-    public static float EnemySkeletonOffsetY = 0f;
+    public static float EnemySkeletonOffsetY = -10f;
 
     public static String EnemyGhostSprite = "ghost";
     public static float EnemyGhostScale = 0.25f;

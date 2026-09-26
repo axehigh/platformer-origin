@@ -14,9 +14,9 @@ public enum EnemyType {
     WALKER(EnemyWalkerSprite, EnemyBaseHealth * 2, "walk", EnemyWalkerScale, EnemyWalkerCollisionWidth, EnemyWalkerCollisionHeight, EnemyWalkerOffsetY),
     FLYER(EnemyFlyerSprite, EnemyBaseHealth, "flight", EnemyFlyerScale, EnemyFlyerCollisionWidth, EnemyFlyerCollisionHeight, EnemyFlyerOffsetY),
     SHOOTER(EnemyShooterSprite, EnemyBaseHealth * 2, "walk", EnemyShooterScale, EnemyShooterCollisionWidth, EnemyShooterCollisionHeight, EnemyShooterOffsetY),
-    KNIGHT(EnemyKnightSprite, EnemyBaseHealth * 3, "walk", EnemyKnightScale, EnemyKnightCollisionWidth, EnemyKnightCollisionHeight, EnemyKnightOffsetY),
-    SKELETON(EnemySkeletonSprite, EnemyBaseHealth * 2, "walk", EnemySkeletonScale, EnemySkeletonCollisionWidth, EnemySkeletonCollisionHeight, EnemySkeletonOffsetY),
-    GHOST(EnemyGhostSprite, EnemyBaseHealth, "walk", EnemyGhostScale, EnemyGhostCollisionWidth, EnemyGhostCollisionHeight, EnemyGhostOffsetY);
+    GOBLIN_BRUTE(EnemyGoblinBruteSprite, EnemyBaseHealth * 3, "walk", EnemyGoblinBruteScale, EnemyGoblinBruteCollisionWidth, EnemyGoblinBruteCollisionHeight, EnemyGoblinBruteOffsetY),
+    SKELETON(EnemySkeletonSprite, EnemyBaseHealth * 4, "walk", EnemySkeletonScale, EnemySkeletonCollisionWidth, EnemySkeletonCollisionHeight, EnemySkeletonOffsetY),
+    GHOST(EnemyGhostSprite, EnemyBaseHealth * 2, "walk", EnemyGhostScale, EnemyGhostCollisionWidth, EnemyGhostCollisionHeight, EnemyGhostOffsetY);
 
     final String atlasPrefix;
     final String walkRegionName;
@@ -49,8 +49,8 @@ public enum EnemyType {
                 return FLYER;
             case "shooter":
                 return SHOOTER;
-            case "knight":
-                return KNIGHT;
+            case "goblin_brute":
+                return GOBLIN_BRUTE;
             case "skeleton":
                 return SKELETON;
             case "ghost":

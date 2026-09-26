@@ -1,11 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="60" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="635">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<map height="10" infinite="0" nextlayerid="9" nextobjectid="635" orientation="orthogonal" renderorder="right-down" tiledversion="1.12.2" tileheight="128" tilewidth="128" version="1.10" width="60">
+  
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
+  
  <tileset firstgid="70" source="../tileset/items.tsx"/>
+  
  <tileset firstgid="101" source="../tileset/enemy.tsx"/>
+  
  <tileset firstgid="108" source="../tileset/bg.tsx"/>
+  
  <tileset firstgid="155" source="../tileset/hazards.tsx"/>
- <layer id="1" name="background" width="60" height="10">
+  
+ <layer height="10" id="1" name="background" width="60">
+    
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,45,45,45,45,45,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,6,6,6,6,6,6,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,0,
@@ -18,8 +25,11 @@
 0,6,6,6,6,6,0,0,0,0,0,7,2147483654,6,0,0,0,0,6,6,6,6,0,0,0,0,0,0,0,46,46,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
+   
  </layer>
- <layer id="2" name="collision" width="60" height="10">
+  
+ <layer height="10" id="2" name="collision" width="60">
+    
   <data encoding="csv">
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,51,51,0,2,4,2,4,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
@@ -32,8 +42,11 @@
 2,0,0,0,0,62,67,67,67,64,0,0,0,0,0,0,0,0,0,0,0,0,0,0,67,67,29,33,0,0,0,0,33,0,0,0,64,0,59,0,0,0,0,59,0,0,0,2,2,33,33,33,2,2,0,0,0,0,0,2,
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
 </data>
+   
  </layer>
- <layer id="5" name="decoration" width="60" height="10">
+  
+ <layer height="10" id="5" name="decoration" width="60">
+    
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,61,0,0,0,0,60,0,0,0,0,0,0,61,0,0,0,60,0,0,0,0,0,0,61,60,0,0,0,0,60,0,0,0,0,0,
 61,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,18,0,0,0,0,18,0,0,0,0,153,0,0,0,0,0,0,153,0,0,0,0,0,0,0,0,0,0,0,18,0,0,0,
@@ -46,70 +59,133 @@
 0,154,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,67,0,62,139,0,68,0,62,0,0,0,0,0,0,0,0,0,0,0,18,154,0,0,
 0,0,0,0,0,0,0,60,0,0,0,0,60,0,0,0,61,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
+   
  </layer>
+  
  <objectgroup id="3" name="objects">
-  <object id="1" name="playerStart" type="playerStart" x="256" y="1024" width="128" height="128"/>
-  <object id="2" name="exitGate" type="exitGate" x="7348" y="1000" width="140" height="152">
+    
+  <object height="128" id="1" name="playerStart" type="playerStart" width="128" x="256" y="1024"/>
+    
+  <object height="152" id="2" name="exitGate" type="exitGate" width="140" x="7348" y="1000">
+      
    <properties>
+        
     <property name="nextLevel" value="maps/world_0_tutorial/level_03_final.tmx"/>
+       
    </properties>
+     
   </object>
-  <object id="602" gid="82" x="128" y="640" width="128" height="128"/>
-  <object id="603" gid="82" x="256" y="640" width="128" height="128"/>
-  <object id="604" gid="82" x="384" y="640" width="128" height="128"/>
-  <object id="605" gid="82" x="512" y="640" width="128" height="128"/>
-  <object id="606" gid="82" x="640" y="640" width="128" height="128"/>
-  <object id="607" gid="82" x="1152" y="640" width="128" height="128"/>
-  <object id="608" gid="82" x="1408" y="512" width="128" height="128"/>
-  <object id="609" gid="82" x="1664" y="384" width="128" height="128"/>
-  <object id="610" gid="82" x="2304" y="512" width="128" height="128"/>
-  <object id="611" gid="82" x="2688" y="512" width="128" height="128"/>
-  <object id="613" gid="83" x="384" y="384" width="128" height="128"/>
-  <object id="615" gid="103" x="4480" y="1152" width="128" height="128"/>
-  <object id="616" gid="103" x="3712" y="640" width="128" height="128"/>
-  <object id="617" gid="103" x="2560" y="512" width="128" height="128"/>
-  <object id="618" gid="82" x="4992" y="768" width="128" height="128"/>
-  <object id="619" gid="82" x="5248" y="768" width="128" height="128"/>
-  <object id="620" gid="82" x="5504" y="768" width="128" height="128"/>
-  <object id="621" gid="82" x="6016" y="512" width="128" height="128"/>
-  <object id="622" gid="82" x="6144" y="512" width="128" height="128"/>
-  <object id="623" gid="82" x="6656" y="512" width="128" height="128"/>
-  <object id="624" gid="82" x="6784" y="512" width="128" height="128"/>
-  <object id="625" gid="82" x="5632" y="1024" width="128" height="128"/>
-  <object id="626" gid="82" x="5760" y="1152" width="128" height="128"/>
-  <object id="627" gid="82" x="5888" y="1152" width="128" height="128"/>
-  <object id="628" gid="82" x="6656" y="896" width="128" height="128"/>
-  <object id="629" gid="82" x="6144" y="896" width="128" height="128"/>
-  <object id="631" gid="30" x="832" y="1024" width="128" height="128">
+    
+  <object gid="82" height="128" id="602" width="128" x="128" y="640"/>
+    
+  <object gid="82" height="128" id="603" width="128" x="256" y="640"/>
+    
+  <object gid="82" height="128" id="604" width="128" x="384" y="640"/>
+    
+  <object gid="82" height="128" id="605" width="128" x="512" y="640"/>
+    
+  <object gid="82" height="128" id="606" width="128" x="640" y="640"/>
+    
+  <object gid="82" height="128" id="607" width="128" x="1152" y="640"/>
+    
+  <object gid="82" height="128" id="608" width="128" x="1408" y="512"/>
+    
+  <object gid="82" height="128" id="609" width="128" x="1664" y="384"/>
+    
+  <object gid="82" height="128" id="610" width="128" x="2304" y="512"/>
+    
+  <object gid="82" height="128" id="611" width="128" x="2688" y="512"/>
+    
+  <object gid="83" height="128" id="613" width="128" x="384" y="384"/>
+    
+  <object gid="108" height="128" id="615" width="128" x="4480" y="1152"/>
+    
+  <object gid="108" height="128" id="616" width="128" x="3712" y="640"/>
+    
+  <object gid="108" height="128" id="617" width="128" x="2560" y="512"/>
+    
+  <object gid="82" height="128" id="618" width="128" x="4992" y="768"/>
+    
+  <object gid="82" height="128" id="619" width="128" x="5248" y="768"/>
+    
+  <object gid="82" height="128" id="620" width="128" x="5504" y="768"/>
+    
+  <object gid="82" height="128" id="621" width="128" x="6016" y="512"/>
+    
+  <object gid="82" height="128" id="622" width="128" x="6144" y="512"/>
+    
+  <object gid="82" height="128" id="623" width="128" x="6656" y="512"/>
+    
+  <object gid="82" height="128" id="624" width="128" x="6784" y="512"/>
+    
+  <object gid="82" height="128" id="625" width="128" x="5632" y="1024"/>
+    
+  <object gid="82" height="128" id="626" width="128" x="5760" y="1152"/>
+    
+  <object gid="82" height="128" id="627" width="128" x="5888" y="1152"/>
+    
+  <object gid="82" height="128" id="628" width="128" x="6656" y="896"/>
+    
+  <object gid="82" height="128" id="629" width="128" x="6144" y="896"/>
+    
+  <object gid="30" height="128" id="631" width="128" x="832" y="1024">
+      
    <properties>
+        
     <property name="text" value="Pick up the crystal"/>
+       
    </properties>
+     
   </object>
-  <object id="632" gid="73" x="1024" y="1024" width="128" height="128"/>
-  <object id="633" gid="30" x="3968" y="640" width="128" height="128">
+    
+  <object gid="73" height="128" id="632" width="128" x="1024" y="1024"/>
+    
+  <object gid="30" height="128" id="633" width="128" x="3968" y="640">
+      
    <properties>
+        
     <property name="text">Certain tiles 
 will dissappears</property>
+       
    </properties>
+     
   </object>
-  <object id="634" gid="30" x="4352" y="1152" width="128" height="128">
+    
+  <object gid="30" height="128" id="634" width="128" x="4352" y="1152">
+      
    <properties>
+        
     <property name="text">Certain tiles 
 will dissappear</property>
+       
    </properties>
+     
   </object>
+   
  </objectgroup>
+  
  <objectgroup id="7" name="enemies">
-  <object id="630" gid="103" x="1792" y="1152" width="128" height="128">
+    
+  <object gid="108" height="128" id="630" width="128" x="1792" y="1152">
+      
    <properties>
+        
     <property name="size" propertytype="EnemySize" value="medium"/>
+       
    </properties>
+     
   </object>
+   
  </objectgroup>
- <objectgroup id="6" name="Rooms" locked="1">
-  <object id="601" name="room0" x="0" y="0" width="7680" height="1280"/>
+  
+ <objectgroup id="6" locked="1" name="Rooms">
+    
+  <object height="1280" id="601" name="room0" width="7680" x="0" y="0"/>
+   
  </objectgroup>
- <layer id="8" name="secret_hide" width="60" height="10">
+  
+ <layer height="10" id="8" name="secret_hide" width="60">
+    
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -122,5 +198,7 @@ will dissappear</property>
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
+   
  </layer>
+ 
 </map>
