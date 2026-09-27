@@ -69,6 +69,14 @@ public class PickupSystem extends IteratingSystem {
         if (players.size() == 0) {
             return;
         }
+        PoppedItemComponent popped = POPPED_ITEM.get(pickupEntity);
+        if (popped != null) {
+            popped.collectionDelay.update(deltaTime);
+            if (popped.collectionDelay.isActive()) {
+                return;
+            }
+        }
+
         Entity playerEntity = players.first();
         PlayerComponent player = PLAYER.get(playerEntity);
         CollisionComponent playerCollision = COLLISION.get(playerEntity);
@@ -154,6 +162,10 @@ public class PickupSystem extends IteratingSystem {
             return;
         }
         player.setPotionCount(potionPickup.type, player.countPotion(potionPickup.type) + potionPickup.amount);
+        if (entityFactory != null) {
+            entityFactory.createFloatingMessage(getEngine(),
+                    potionPickup.type.pickupMessage(), potionPickup.type.messageColor(), players.first());
+        }
         if (sfxSystem != null) {
             sfxSystem.playPotionPickup();
         }

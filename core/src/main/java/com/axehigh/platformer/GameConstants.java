@@ -215,6 +215,11 @@ public final class GameConstants {
      * Toggle interval of the buff-expiry blink, halo alpha phases and HUD icon visibility (seconds).
      */
     public static final float BUFF_BLINK_INTERVAL = 0.2f;
+    /**
+     * Grace period duration (seconds) after popped loot spawns (chests/enemies) during which
+     * the player cannot collect it, letting the drop arc and physics settle visibly first.
+     */
+    public static final float LOOT_COLLECTION_DELAY = 1f;
 
     //Ambient ember motes
     /**

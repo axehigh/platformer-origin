@@ -1,7 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.GameConstants;
-import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.map.EntityFactory;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -27,22 +26,22 @@ import static org.mockito.Mockito.*;
 public class PickupSystemTest extends SystemTestBase {
 
     private Engine engine;
-    private PickupSystem system;
-    private SfxSystem sfxSystem;
+    private com.axehigh.platformer.ecs.systems.PickupSystem system;
+    private com.axehigh.platformer.ecs.systems.SfxSystem sfxSystem;
     private EntityFactory entityFactory;
 
     @Before
     public void setUp() {
-        sfxSystem = mock(SfxSystem.class);
+        sfxSystem = mock(com.axehigh.platformer.ecs.systems.SfxSystem.class);
         entityFactory = mock(EntityFactory.class);
-        system = new PickupSystem(sfxSystem, entityFactory, 0);
+        system = new com.axehigh.platformer.ecs.systems.PickupSystem(sfxSystem, entityFactory, 0);
         engine = newEngine();
         engine.addSystem(system);
     }
 
     private Entity player(float x, float y) {
-        TransformComponent transform = transform(x, y);
-        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = transform(x, y);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
         place(transform, collision, x, y);
         Entity entity = entity(transform, player(), collision);
         engine.addEntity(entity);
@@ -50,32 +49,44 @@ public class PickupSystemTest extends SystemTestBase {
     }
 
     private Entity coin(float x, float y, int amount) {
-        TransformComponent transform = transform(x, y);
-        CollisionComponent collision = collision(-5f, -5f, 10f, 10f);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = transform(x, y);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = collision(-5f, -5f, 10f, 10f);
         place(transform, collision, x, y);
-        CoinPickupComponent coin = new CoinPickupComponent();
+        com.axehigh.platformer.ecs.components.CoinPickupComponent coin = new com.axehigh.platformer.ecs.components.CoinPickupComponent();
         coin.amount = amount;
         Entity entity = entity(transform, collision, coin);
         engine.addEntity(entity);
         return entity;
     }
 
-    private Entity dagger(float x, float y, int amount) {
-        TransformComponent transform = transform(x, y);
-        CollisionComponent collision = collision(-5f, -5f, 10f, 10f);
+    private Entity poppedCoin(float x, float y, int amount) {
+        com.axehigh.platformer.ecs.components.TransformComponent transform = transform(x, y);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = collision(-5f, -5f, 10f, 10f);
         place(transform, collision, x, y);
-        DaggerPickupComponent dagger = new DaggerPickupComponent();
+        com.axehigh.platformer.ecs.components.CoinPickupComponent coin = new com.axehigh.platformer.ecs.components.CoinPickupComponent();
+        coin.amount = amount;
+        com.axehigh.platformer.ecs.components.PoppedItemComponent popped = new com.axehigh.platformer.ecs.components.PoppedItemComponent();
+        Entity entity = entity(transform, collision, coin, popped);
+        engine.addEntity(entity);
+        return entity;
+    }
+
+    private Entity dagger(float x, float y, int amount) {
+        com.axehigh.platformer.ecs.components.TransformComponent transform = transform(x, y);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = collision(-5f, -5f, 10f, 10f);
+        place(transform, collision, x, y);
+        com.axehigh.platformer.ecs.components.DaggerPickupComponent dagger = new com.axehigh.platformer.ecs.components.DaggerPickupComponent();
         dagger.amount = amount;
         Entity entity = entity(transform, collision, dagger);
         engine.addEntity(entity);
         return entity;
     }
 
-    private Entity potion(float x, float y, PotionType type) {
-        TransformComponent transform = transform(x, y);
-        CollisionComponent collision = collision(-5f, -5f, 10f, 10f);
+    private Entity potion(float x, float y, com.axehigh.platformer.ecs.components.PotionType type) {
+        com.axehigh.platformer.ecs.components.TransformComponent transform = transform(x, y);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = collision(-5f, -5f, 10f, 10f);
         place(transform, collision, x, y);
-        PotionPickupComponent potion = new PotionPickupComponent();
+        com.axehigh.platformer.ecs.components.PotionPickupComponent potion = new com.axehigh.platformer.ecs.components.PotionPickupComponent();
         potion.type = type;
         potion.amount = 1;
         Entity entity = entity(transform, collision, potion);
@@ -97,7 +108,7 @@ public class PickupSystemTest extends SystemTestBase {
     @Test
     public void coinsWithinCooldownWindowCoalesceIntoSingleFlushChirp() {
         Entity player = player(0f, 130f);
-        PlayerComponent playerComponent = PLAYER.get(player);
+        com.axehigh.platformer.ecs.components.PlayerComponent playerComponent = PLAYER.get(player);
 
         // Frame 0: first coin, cooldown fresh -> immediate message + chirp #1, cooldown armed.
         coin(0f, 130f, 1);
@@ -125,7 +136,7 @@ public class PickupSystemTest extends SystemTestBase {
     public void coinPickupWithoutEntityFactoryPlaysNoCoinSfx() {
         // No-factory path: spawnCoinMessage early-returns, so no message and no chirp.
         engine.removeSystem(system);
-        engine.addSystem(new PickupSystem(sfxSystem, null, 0));
+        engine.addSystem(new com.axehigh.platformer.ecs.systems.PickupSystem(sfxSystem, null, 0));
         Entity player = player(0f, 130f);
         coin(0f, 130f, 1);
 
@@ -149,25 +160,35 @@ public class PickupSystemTest extends SystemTestBase {
     @Test
     public void underCapPotionPickupPlaysPotionPickupSfx() {
         Entity player = player(0f, 130f);
-        potion(0f, 130f, PotionType.HEALING);
+        potion(0f, 130f, com.axehigh.platformer.ecs.components.PotionType.HEALING);
 
         engine.update(DT);
 
-        assertEquals(1, PLAYER.get(player).countPotion(PotionType.HEALING));
+        assertEquals(1, PLAYER.get(player).countPotion(com.axehigh.platformer.ecs.components.PotionType.HEALING));
         verify(sfxSystem).playPotionPickup();
         verify(sfxSystem, never()).playCoin();
     }
 
     @Test
+    public void potionPickupSpawnsFloatingMessage() {
+        Entity player = player(0f, 130f);
+        potion(0f, 130f, com.axehigh.platformer.ecs.components.PotionType.SPEED);
+
+        engine.update(DT);
+
+        verify(entityFactory).createFloatingMessage(eq(engine), eq("Speed potion"), eq(com.axehigh.platformer.ecs.components.PotionType.SPEED.messageColor()), eq(player));
+    }
+
+    @Test
     public void overCapPotionPickupConvertsToCoinsAndPlaysCoinSfx() {
         Entity player = player(0f, 130f);
-        PLAYER.get(player).setPotionCount(PotionType.HEALING, GameConstants.POTION_CAP);
-        potion(0f, 130f, PotionType.HEALING);
+        PLAYER.get(player).setPotionCount(com.axehigh.platformer.ecs.components.PotionType.HEALING, GameConstants.POTION_CAP);
+        potion(0f, 130f, com.axehigh.platformer.ecs.components.PotionType.HEALING);
 
         engine.update(DT);
 
         assertEquals(GameConstants.POTION_OVERFLOW_COINS, PLAYER.get(player).coins);
-        assertEquals(GameConstants.POTION_CAP, PLAYER.get(player).countPotion(PotionType.HEALING));
+        assertEquals(GameConstants.POTION_CAP, PLAYER.get(player).countPotion(com.axehigh.platformer.ecs.components.PotionType.HEALING));
         verify(sfxSystem).playCoin();
         verify(sfxSystem, never()).playPotionPickup();
     }
@@ -176,7 +197,7 @@ public class PickupSystemTest extends SystemTestBase {
     public void coinPickupIncrementsCoinsAndIsRemoved() {
         Entity player = player(0f, 130f);
         coin(0f, 130f, 3);
-        PlayerComponent playerComponent = PLAYER.get(player);
+        com.axehigh.platformer.ecs.components.PlayerComponent playerComponent = PLAYER.get(player);
 
         engine.update(DT);
 
@@ -187,7 +208,7 @@ public class PickupSystemTest extends SystemTestBase {
     @Test
     public void daggerPickupIncrementsItemsCappedAtMax() {
         Entity player = player(0f, 130f);
-        PlayerComponent playerComponent = PLAYER.get(player);
+        com.axehigh.platformer.ecs.components.PlayerComponent playerComponent = PLAYER.get(player);
         playerComponent.ammo = 9;
         dagger(0f, 130f, 5);
 
@@ -211,12 +232,38 @@ public class PickupSystemTest extends SystemTestBase {
     public void nonOverlappingPickupIsLeftUntouched() {
         Entity player = player(0f, 130f);
         coin(500f, 500f, 1);
-        PlayerComponent playerComponent = PLAYER.get(player);
+        com.axehigh.platformer.ecs.components.PlayerComponent playerComponent = PLAYER.get(player);
 
         engine.update(DT);
 
         assertEquals(0, playerComponent.coins);
         assertEquals(2, engine.getEntities().size());
         verifyNoInteractions(sfxSystem);
+    }
+
+    @Test
+    public void poppedItemCannotBeCollectedDuringGracePeriod() {
+        Entity player = player(0f, 130f);
+        poppedCoin(0f, 130f, 1);
+        com.axehigh.platformer.ecs.components.PlayerComponent playerComponent = PLAYER.get(player);
+
+        // Update with tiny delta (well within 0.35s grace period)
+        engine.update(0.1f);
+
+        assertEquals(0, playerComponent.coins);
+        assertEquals(2, engine.getEntities().size()); // player + popped coin remain
+    }
+
+    @Test
+    public void poppedItemCanBeCollectedAfterGracePeriod() {
+        Entity player = player(0f, 130f);
+        poppedCoin(0f, 130f, 1);
+        com.axehigh.platformer.ecs.components.PlayerComponent playerComponent = PLAYER.get(player);
+
+        // Advance past grace period (1.1s > 1.0s)
+        engine.update(1.1f);
+
+        assertEquals(1, playerComponent.coins);
+        assertEquals(1, engine.getEntities().size()); // only player remains
     }
 }
