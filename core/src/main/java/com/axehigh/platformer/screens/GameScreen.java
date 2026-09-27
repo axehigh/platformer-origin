@@ -65,6 +65,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
     private boolean gamePaused = false;
     private boolean inventoryOpen = false;
     private boolean debugTouchLogging = false;
+    private PauseDialog activePauseDialog;
     private final StylizedTransitionOverlay stylizedTransitionOverlay = new StylizedTransitionOverlay();
 
     /** Largest single-step delta allowed for the ECS simulation; prevents tunneling on Android's first-frame hitch. */
@@ -355,6 +356,8 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         gamePaused = !gamePaused;
         if (gamePaused) {
             showPauseDialog();
+        } else {
+            hidePauseDialog();
         }
     }
 
@@ -367,9 +370,20 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
     }
 
     private void showPauseDialog() {
-        PauseDialog dialog = new PauseDialog(skin, this);
-        dialog.show(stage);
-        DialogPanelFitter.fitToPanel(skin, stage, dialog);
+        if (activePauseDialog != null) {
+            activePauseDialog.remove();
+        }
+        activePauseDialog = new PauseDialog(skin, this);
+        activePauseDialog.show(stage);
+        DialogPanelFitter.fitToPanel(skin, stage, activePauseDialog);
+    }
+
+    private void hidePauseDialog() {
+        if (activePauseDialog != null) {
+            activePauseDialog.hide();
+            activePauseDialog.remove();
+            activePauseDialog = null;
+        }
     }
 
     @Override
@@ -559,6 +573,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
     @Override
     public void onResume() {
         gamePaused = false;
+        hidePauseDialog();
     }
 
     @Override
