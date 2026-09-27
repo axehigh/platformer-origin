@@ -69,6 +69,22 @@
             ]
         },
         {
+            "id": 6,
+            "name": "Potion",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "healing",
+                "invisibility",
+                "invulnerability",
+                "jump",
+                "strength",
+                "fire",
+                "speed"
+            ],
+            "valuesAsFlags": false
+        },
+        {
             "color": "#ffa0a0a4",
             "drawFill": true,
             "id": 4,

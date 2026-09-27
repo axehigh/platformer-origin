@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="48" height="20" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="1006">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="48" height="20" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="1008">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
  <tileset firstgid="70" source="../tileset/items.tsx"/>
  <tileset firstgid="101" source="../tileset/enemy.tsx"/>
  <tileset firstgid="110" source="../tileset/bg.tsx"/>
+ <tileset firstgid="157" source="../tileset/hazards.tsx"/>
  <layer id="1" name="background" width="48" height="20">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -110,10 +111,14 @@
   </object>
   <object id="994" gid="23" x="3712" y="256" width="128" height="128"/>
   <object id="1005" gid="73" x="4992" y="2432" width="128" height="128"/>
+  <object id="1007" gid="167" x="5632" y="2048" width="128" height="128">
+   <properties>
+    <property name="amplitudeY" type="float" value="1"/>
+    <property name="speed" type="float" value="0.5"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="7" name="enemies">
-  <object id="5" name="enemy_r2_shooter" gid="105" x="3840" y="1792" width="128" height="128"/>
-  <object id="8" name="enemy_r3_shooter" gid="105" x="5888" y="2432" width="128" height="128"/>
   <object id="982" gid="107" x="2048" y="640" width="128" height="128"/>
   <object id="983" gid="107" x="768" y="384" width="128" height="128"/>
   <object id="984" gid="107" x="1408" y="384" width="128" height="128"/>
@@ -128,6 +133,7 @@
   <object id="1002" gid="108" x="1280" y="1152" width="128" height="104"/>
   <object id="1003" gid="109" x="3072" y="1152" width="198" height="161"/>
   <object id="1004" gid="109" x="1792" y="1152" width="198" height="161"/>
+  <object id="1006" gid="106" x="5760" y="2432" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="6" name="Rooms"/>
  <layer id="8" name="secret_hide" width="48" height="20">

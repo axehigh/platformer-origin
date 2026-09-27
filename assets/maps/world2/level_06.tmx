@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="96" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="1023">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="96" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="1024">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
  <tileset firstgid="70" source="../tileset/items.tsx"/>
  <tileset firstgid="101" source="../tileset/enemy.tsx"/>
@@ -89,7 +89,6 @@
   <object id="1009" gid="83" x="5888" y="384" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="7" name="enemies">
-  <object id="7" name="enemy_r1_shooter" gid="105" x="5376" y="1152" width="128" height="128"/>
   <object id="979" gid="106" x="4480" y="384" width="128" height="128"/>
   <object id="980" gid="106" x="5248" y="384" width="128" height="128"/>
   <object id="981" gid="106" x="3328" y="1152" width="128" height="128"/>
@@ -115,6 +114,7 @@
   <object id="1020" gid="108" x="9856" y="384" width="128" height="104"/>
   <object id="1021" gid="108" x="11008" y="1152" width="128" height="104"/>
   <object id="1022" gid="108" x="11520" y="1152" width="128" height="104"/>
+  <object id="1023" gid="106" x="5632" y="1152" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="6" name="Rooms" locked="1">
   <object id="961" name="room0" x="0" y="0" width="3072" height="1280"/>
