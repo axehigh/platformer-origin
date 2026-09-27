@@ -21,6 +21,7 @@ public final class FeatureFlags {
     private static boolean softStopEnabled = GamePreferences.DEFAULT_SOFT_STOP_ENABLED;
     private static boolean vignetteEnabled = GamePreferences.DEFAULT_VIGNETTE_ENABLED;
     private static boolean slashArcEnabled = GamePreferences.DEFAULT_SLASH_ARC_ENABLED;
+    private static boolean visualEffectsEnabled = GamePreferences.DEFAULT_VISUAL_EFFECTS_ENABLED;
     private static boolean godModeEnabled = GamePreferences.DEFAULT_GOD_MODE;
     private static StylizedTransitionOverlay.TransitionType transitionStyle = GamePreferences.DEFAULT_TRANSITION_STYLE;
     private static boolean initialized = false;
@@ -43,6 +44,7 @@ public final class FeatureFlags {
         softStopEnabled = preferences.isSoftStopEnabled();
         vignetteEnabled = preferences.isVignetteEnabled();
         slashArcEnabled = preferences.isSlashArcEnabled();
+        visualEffectsEnabled = preferences.isVisualEffectsEnabled();
         godModeEnabled = preferences.isGodModeEnabled();
         transitionStyle = preferences.getTransitionStyle();
     }
@@ -62,7 +64,7 @@ public final class FeatureFlags {
         }
     }
 
-    /** Whether the player landing squash pulse is enabled. Defaults to {@code false} (disabled for now). */
+    /** Whether the player landing squash pulse is enabled. Defaults to {@code true}. */
     public static boolean isSquashEnabled() {
         ensureInitialized();
         return squashEnabled;
@@ -195,6 +197,24 @@ public final class FeatureFlags {
     }
 
     /**
+     * Whether visual effects (such as smoke particle effects when starting to move) are enabled.
+     * Defaults to {@code true}.
+     */
+    public static boolean isVisualEffectsEnabled() {
+        ensureInitialized();
+        return visualEffectsEnabled;
+    }
+
+    /** Enables/disables visual effects for the whole session and persists the choice. */
+    public static void setVisualEffectsEnabled(boolean enabled) {
+        visualEffectsEnabled = enabled;
+        initialized = true;
+        if (Gdx.app != null) {
+            new GamePreferences().setVisualEffectsEnabled(enabled);
+        }
+    }
+
+    /**
      * Whether God Mode (player invincibility) is enabled. Defaults to {@code false}.
      */
     public static boolean isGodModeEnabled() {
@@ -234,6 +254,7 @@ public final class FeatureFlags {
         softStopEnabled = GamePreferences.DEFAULT_SOFT_STOP_ENABLED;
         vignetteEnabled = GamePreferences.DEFAULT_VIGNETTE_ENABLED;
         slashArcEnabled = GamePreferences.DEFAULT_SLASH_ARC_ENABLED;
+        visualEffectsEnabled = GamePreferences.DEFAULT_VISUAL_EFFECTS_ENABLED;
         godModeEnabled = GamePreferences.DEFAULT_GOD_MODE;
         transitionStyle = GamePreferences.DEFAULT_TRANSITION_STYLE;
         initialized = false;

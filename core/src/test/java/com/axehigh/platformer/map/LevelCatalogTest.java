@@ -31,24 +31,24 @@ public class LevelCatalogTest {
     }
 
     @Test
-    public void world2_elevenLevels_chainCatchesUpToFinalFile() {
+    public void world2_tenLevels_chainCatchesUpToFinalFile() {
         Array<com.axehigh.platformer.map.LevelDefinition> world2 = com.axehigh.platformer.map.LevelCatalog.levelsForWorld(com.axehigh.platformer.map.LevelCatalog.WORLD_2);
-        assertEquals(11, world2.size);
+        assertEquals(10, world2.size);
         com.axehigh.platformer.map.LevelDefinition last = world2.peek();
         assertEquals("maps/world2/level_10_final.tmx", last.tmxPath);
         // level_09 is the penultimate entry, chaining into the final.
-        assertEquals("maps/world2/level_09.tmx", world2.get(9).tmxPath);
+        assertEquals("maps/world2/level_09.tmx", world2.get(8).tmxPath);
     }
 
     @Test
-    public void world3_threeLevels_chainCatchesUpToFinalFile() {
+    public void world3_sixLevels_chainCatchesUpToFinalFile() {
         Array<com.axehigh.platformer.map.LevelDefinition> world3 = com.axehigh.platformer.map.LevelCatalog.levelsForWorld(com.axehigh.platformer.map.LevelCatalog.WORLD_3);
-        assertEquals(3, world3.size);
+        assertEquals(6, world3.size);
         assertEquals("maps/world3/level3_01.tmx", world3.first().tmxPath);
         com.axehigh.platformer.map.LevelDefinition last = world3.peek();
-        assertEquals("maps/world3/level3_03.tmx", last.tmxPath);
-        // level3_02 is the penultimate entry, chaining into the final.
-        assertEquals("maps/world3/level3_02.tmx", world3.get(1).tmxPath);
+        assertEquals("maps/world3/level3_06.tmx", last.tmxPath);
+        // level3_05 is the penultimate entry, chaining into the final.
+        assertEquals("maps/world3/level3_05.tmx", world3.get(4).tmxPath);
     }
 
     @Test
@@ -62,6 +62,6 @@ public class LevelCatalogTest {
         assertEquals(com.axehigh.platformer.map.LevelCatalog.WORLD_3,
             com.axehigh.platformer.map.LevelCatalog.worldIdForPath("maps/world3/level3_01.tmx"));
         assertEquals(com.axehigh.platformer.map.LevelCatalog.WORLD_3,
-            com.axehigh.platformer.map.LevelCatalog.worldIdForPath("maps/world3/level3_03.tmx"));
+            com.axehigh.platformer.map.LevelCatalog.worldIdForPath("maps/world3/level3_06.tmx"));
     }
 }

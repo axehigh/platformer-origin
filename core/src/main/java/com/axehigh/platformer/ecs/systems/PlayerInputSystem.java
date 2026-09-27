@@ -158,12 +158,23 @@ public class PlayerInputSystem extends IteratingSystem {
         boolean hurt = player.hurtTimer.isActive();
         boolean locked = hurt || player.isDead;
 
-        if (!locked && left && !right) {
-            movement.velocity.x = -MOVE_SPEED * unitScale;
-            player.facingDirection = -1;
-        } else if (!locked && right && !left) {
-            movement.velocity.x = MOVE_SPEED * unitScale;
-            player.facingDirection = 1;
+        float targetVx = 0f;
+        if (!locked) {
+            if (left && !right) {
+                targetVx = -MOVE_SPEED * unitScale;
+                player.facingDirection = -1;
+            } else if (right && !left) {
+                targetVx = MOVE_SPEED * unitScale;
+                player.facingDirection = 1;
+            }
+        }
+
+        if (targetVx != 0f) {
+            if (FeatureFlags.isSoftStopEnabled()) {
+                movement.velocity.x = MathUtils.lerp(movement.velocity.x, targetVx, 1f - (float) Math.exp(-PLAYER_ACCEL * deltaTime));
+            } else {
+                movement.velocity.x = targetVx;
+            }
         } else if (!locked) {
             // Ground friction (FeatureFlags.isSoftStopEnabled(), default ON): don't snap velocity to
             // 0 (that made the sprite jump straight from RUNNING to IDLE in one frame). Decelerate
@@ -179,6 +190,16 @@ public class PlayerInputSystem extends IteratingSystem {
             } else {
                 movement.velocity.x = 0f;
             }
+        }
+
+        boolean movingInput = (targetVx != 0f);
+        if (movingInput && movement.grounded && !player.wasMoving) {
+            if (FeatureFlags.isVisualEffectsEnabled()) {
+                spawnJumpSmoke(transform, collision);
+            }
+            player.wasMoving = true;
+        } else if (!movingInput) {
+            player.wasMoving = false;
         }
 
         boolean jumpPressed = input.isKeyJustPressed(W) || input.isKeyJustPressed(UP) || touchJumpRequested;

@@ -184,8 +184,8 @@ public class PauseDialogTest {
 
         Array<CheckBox> checkBoxes = new Array<>();
         findCheckBoxes(dialog, checkBoxes);
-        assertEquals("Debug tab should show all 5 feature-flag toggles",
-            5, checkBoxes.size);
+        assertEquals("Debug tab should show all 6 feature-flag toggles",
+            6, checkBoxes.size);
     }
 
     @Test

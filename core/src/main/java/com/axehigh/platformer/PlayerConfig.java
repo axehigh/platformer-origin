@@ -129,4 +129,7 @@ public final class PlayerConfig {
     /** Horizontal speed (u/s) below which the decelerating player is snapped to a hard 0, so the
      *  last bit of friction can't leave a sub-pixel crawl or stall the idle-entry hold. */
     public static final float PLAYER_STOP_EPSILON = 1f;
+    /** Ground-acceleration e-folding rate (1/s) applied to horizontal velocity when starting movement:
+     *  quick ramp-up (~0.08s to reach full speed). */
+    public static final float PLAYER_ACCEL = 15f;
 }

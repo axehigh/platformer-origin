@@ -22,6 +22,7 @@ public class GamePreferences {
     private static final String KEY_SOFT_STOP_ENABLED = "softStopEnabled";
     private static final String KEY_VIGNETTE_ENABLED = "vignetteEnabled";
     private static final String KEY_SLASH_ARC_ENABLED = "slashArcEnabled";
+    private static final String KEY_VISUAL_EFFECTS_ENABLED = "visualEffectsEnabled";
     private static final String KEY_GOD_MODE = "godMode";
     private static final String KEY_DEVICE_CLASS = "deviceClass";
     private static final String KEY_LAYOUT_MODE = "layoutMode";
@@ -38,7 +39,7 @@ public class GamePreferences {
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
     static final boolean DEFAULT_WALL_CLIMB_ENABLED = true;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
-    static final boolean DEFAULT_SQUASH_ENABLED = false;
+    static final boolean DEFAULT_SQUASH_ENABLED = true;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
     static final boolean DEFAULT_SELECT_LEVEL_ENABLED = true;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
@@ -53,6 +54,8 @@ public class GamePreferences {
     static final boolean DEFAULT_VIGNETTE_ENABLED = true;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
     static final boolean DEFAULT_SLASH_ARC_ENABLED = true;
+    /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
+    static final boolean DEFAULT_VISUAL_EFFECTS_ENABLED = true;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
     static final boolean DEFAULT_GOD_MODE = false;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
@@ -217,6 +220,15 @@ public class GamePreferences {
 
     public void setSlashArcEnabled(boolean slashArcEnabled) {
         preferences.putBoolean(KEY_SLASH_ARC_ENABLED, slashArcEnabled);
+        preferences.flush();
+    }
+
+    public boolean isVisualEffectsEnabled() {
+        return preferences.getBoolean(KEY_VISUAL_EFFECTS_ENABLED, DEFAULT_VISUAL_EFFECTS_ENABLED);
+    }
+
+    public void setVisualEffectsEnabled(boolean visualEffectsEnabled) {
+        preferences.putBoolean(KEY_VISUAL_EFFECTS_ENABLED, visualEffectsEnabled);
         preferences.flush();
     }
 

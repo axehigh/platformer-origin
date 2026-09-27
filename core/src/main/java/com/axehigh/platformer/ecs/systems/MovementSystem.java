@@ -166,7 +166,7 @@ public class MovementSystem extends IteratingSystem {
         float feetY = transform.position.y + collision.bounds.y;
         float fallDistance = player.maxAirHeight - feetY;
         if (fallDistance > LANDING_DUST_MIN_FALL * unitScale) {
-            spawnLandingSmoke(engine, transform, collision, fallSpeed, maxSpeedY);
+            spawnLandingSmoke(engine, transform, collision, fallSpeed, maxSpeedY, fallDistance, unitScale);
         }
         if (player.jumpCount > 0 && FeatureFlags.isSquashEnabled()) {
             SquashSystem.trigger(player, transform, false);
@@ -178,10 +178,10 @@ public class MovementSystem extends IteratingSystem {
      * Spawns a smoke puff at a random spot under the player's feet when landing from a jump.
      * Only fires on the exact landing frame: {@code player.jumpCount > 0} proves a jump happened,
      * so walking off a ledge and falling back down spawns nothing. The puff scales up with impact
-     * speed (a proxy for fall duration): small for short hops, larger for long falls.
+     * speed and fall distance: small for short hops, larger for long falls.
      */
-    private void spawnLandingSmoke(TransformComponent transform, CollisionComponent collision, float fallSpeed, float maxSpeedY) {
-        spawnLandingSmoke(engine, transform, collision, fallSpeed, maxSpeedY);
+    private void spawnLandingSmoke(TransformComponent transform, CollisionComponent collision, float fallSpeed, float maxSpeedY, float fallDistance) {
+        spawnLandingSmoke(engine, transform, collision, fallSpeed, maxSpeedY, fallDistance, unitScale);
     }
 
     /**
@@ -190,14 +190,16 @@ public class MovementSystem extends IteratingSystem {
      * Requires a {@link PooledEngine} (particle spawns use it); a no-op under a plain {@code
      * Engine} (e.g. headless tests).
      */
-    static void spawnLandingSmoke(PooledEngine engine, TransformComponent transform, CollisionComponent collision, float fallSpeed, float maxSpeedY) {
+    static void spawnLandingSmoke(PooledEngine engine, TransformComponent transform, CollisionComponent collision, float fallSpeed, float maxSpeedY, float fallDistance, float unitScale) {
         if (engine == null) {
             return;
         }
         float feetX = transform.position.x + collision.bounds.x + MathUtils.random(collision.bounds.width);
         float feetY = transform.position.y + collision.bounds.y;
         float fallRatio = (maxSpeedY > 0f) ? MathUtils.clamp(Math.abs(fallSpeed) / maxSpeedY, 0f, 1f) : 0f;
-        float scale = LANDING_SMOKE_BASE_SCALE + fallRatio * LANDING_SMOKE_EXTRA_SCALE;
+        float distanceRatio = MathUtils.clamp(fallDistance / (120f * unitScale), 0f, 1f);
+        float combinedRatio = Math.max(fallRatio, distanceRatio);
+        float scale = LANDING_SMOKE_BASE_SCALE + combinedRatio * LANDING_SMOKE_EXTRA_SCALE;
         ParticleHelper.spawnSmallSmoke(engine, feetX, feetY, scale);
     }
 

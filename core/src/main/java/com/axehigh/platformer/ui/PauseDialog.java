@@ -178,12 +178,15 @@ public class PauseDialog extends Dialog {
         CheckBox slashDebugBox = toggleCheckBox("Combat FX",
             FeatureFlags::isSlashArcEnabled,
             FeatureFlags::setSlashArcEnabled);
+        CheckBox visualEffectsBox = toggleCheckBox("Visual FX",
+            FeatureFlags::isVisualEffectsEnabled,
+            FeatureFlags::setVisualEffectsEnabled);
 
-        // Three toggles per row: 5 flags don't fit in a single row inside the dialog content width.
+        // Three toggles per row: 6 flags fit in 2 rows of 3.
         debugContent.add(toggleRow(
             collisionDebugBox, touchDebugBox, embersDebugBox)).left().row();
         debugContent.add(toggleRow(
-            vignetteDebugBox, slashDebugBox)).left().row();
+            vignetteDebugBox, slashDebugBox, visualEffectsBox)).left().row();
 
         deviceButton = new TextButton("Device: " + listener.deviceLabel(), getSkin());
         deviceButton.getLabel().setFontScale(SmallFontScale);

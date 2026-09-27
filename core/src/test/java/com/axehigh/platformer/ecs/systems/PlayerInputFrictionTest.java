@@ -28,14 +28,14 @@ import static org.mockito.Mockito.when;
  */
 public class PlayerInputFrictionTest extends SystemTestBase {
     private PooledEngine engine;
-    private PlayerInputSystem system;
+    private com.axehigh.platformer.ecs.systems.PlayerInputSystem system;
     private MovementComponent movement;
 
     @Before
     public void setUp() {
         Gdx.input = mock(Input.class);
         FeatureFlags.setSoftStopEnabled(true);
-        system = new PlayerInputSystem(new AssetManager());
+        system = new com.axehigh.platformer.ecs.systems.PlayerInputSystem(new AssetManager());
         engine = new PooledEngine();
         engine.addSystem(system);
 
@@ -84,12 +84,25 @@ public class PlayerInputFrictionTest extends SystemTestBase {
 
     @Test
     public void holdingDirectionIgnoresFriction() {
+        FeatureFlags.setSoftStopEnabled(false);
         when(Gdx.input.isKeyPressed(Input.Keys.RIGHT)).thenReturn(true);
         movement.velocity.x = 0f;
 
         engine.update(DT);
 
         assertEquals(90f, movement.velocity.x, EPSILON);
+    }
+
+    @Test
+    public void startingAccelerationRampsUpWhenSoftStopEnabled() {
+        FeatureFlags.setSoftStopEnabled(true);
+        when(Gdx.input.isKeyPressed(Input.Keys.RIGHT)).thenReturn(true);
+        movement.velocity.x = 0f;
+
+        engine.update(DT);
+
+        assertTrue("velocity should ramp up from 0", movement.velocity.x > 0f);
+        assertTrue("velocity should not instantly snap to max", movement.velocity.x < 90f);
     }
 
     @Test
