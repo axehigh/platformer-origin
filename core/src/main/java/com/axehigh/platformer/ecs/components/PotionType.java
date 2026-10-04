@@ -9,13 +9,14 @@ import static com.axehigh.platformer.GameConstants.*;
  * {@code BuffComponent} / {@code GameConstants} (see the potion &amp; buff constants).
  */
 public enum PotionType {
-    HEALING("Healing", "Restores 1 heart", "+1 HP", MESSAGE_COLOR_HEAL),
-    STRENGTH("Strength", "Extra melee damage for 20s", "Double strength!!", MESSAGE_COLOR_STRENGTH),
-    SPEED("Speed", "Move faster for 15s", "Speed up!", MESSAGE_COLOR_SPEED),
-    INVULNERABILITY("Invulnerability", "Take no damage for 10s", "Invulnerable!", MESSAGE_COLOR_INVULN),
-    INVISIBILITY("Invisibility", "Walk through monsters for 10s", "Invisible!", MESSAGE_COLOR_INVISIBILITY),
-    JUMP("Jump", "Grants triple jump for 15s", "Triple jump!", MESSAGE_COLOR_JUMP),
-    FIRE_BREATH("Fire Breath", "Shoot fireballs for 15s", "Fire Breath!", MESSAGE_COLOR_FIRE);
+    FIRE_BREATH("Fire Breath", "Shoot fireballs for 15s", "Fire Breath potion", MESSAGE_COLOR_FIRE),
+    HEALING("Healing", "Restores 1 heart", "Healing potion", MESSAGE_COLOR_HEAL),
+    INVISIBILITY("Invisibility", "Walk through monsters for 10s", "Invisibility potion", MESSAGE_COLOR_INVISIBILITY),
+    INVULNERABILITY("Invulnerability", "Take no damage for 10s", "Invulnerability potion", MESSAGE_COLOR_INVULN),
+    JUMP("Jump", "Grants triple jump for 15s", "Jump potion", MESSAGE_COLOR_JUMP),
+    STRENGTH("Strength", "Extra melee damage for 20s", "Strength potion", MESSAGE_COLOR_STRENGTH),
+    SPEED("Speed", "Move faster for 15s", "Speed potion", MESSAGE_COLOR_SPEED)
+    ;
 
     private final String displayName;
     private final String description;

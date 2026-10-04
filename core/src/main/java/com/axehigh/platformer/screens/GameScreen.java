@@ -65,6 +65,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
     private boolean gamePaused = false;
     private boolean inventoryOpen = false;
     private boolean debugTouchLogging = false;
+    private PauseDialog activePauseDialog;
     private final StylizedTransitionOverlay stylizedTransitionOverlay = new StylizedTransitionOverlay();
 
     /** Largest single-step delta allowed for the ECS simulation; prevents tunneling on Android's first-frame hitch. */
@@ -239,6 +240,10 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
                     );
                     return true;
                 }
+                if (keycode == Input.Keys.P) {
+                    ScreenshotManager.request();
+                    return true;
+                }
                 return false;
             }
         });
@@ -351,6 +356,8 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         gamePaused = !gamePaused;
         if (gamePaused) {
             showPauseDialog();
+        } else {
+            hidePauseDialog();
         }
     }
 
@@ -363,9 +370,20 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
     }
 
     private void showPauseDialog() {
-        PauseDialog dialog = new PauseDialog(skin, this);
-        dialog.show(stage);
-        DialogPanelFitter.fitToPanel(skin, stage, dialog);
+        if (activePauseDialog != null) {
+            activePauseDialog.remove();
+        }
+        activePauseDialog = new PauseDialog(skin, this);
+        activePauseDialog.show(stage);
+        DialogPanelFitter.fitToPanel(skin, stage, activePauseDialog);
+    }
+
+    private void hidePauseDialog() {
+        if (activePauseDialog != null) {
+            activePauseDialog.hide();
+            activePauseDialog.remove();
+            activePauseDialog = null;
+        }
     }
 
     @Override
@@ -378,6 +396,9 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         viewport.apply();
 
         if (!gameOverActive && !gamePaused) {
+            if (systems.playerInputSystem != null) {
+                systems.playerInputSystem.setClickOnUi(isClickOnUi());
+            }
             engine.update(Math.min(Gdx.graphics.getDeltaTime(), MAX_FRAME_DELTA));
         }
 
@@ -431,6 +452,12 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
             transitionStage.getViewport().apply();
             stylizedTransitionOverlay.render((com.badlogic.gdx.graphics.OrthographicCamera) transitionStage.getViewport().getCamera());
         }
+
+        // Last thing in the frame: a screenshot must contain everything above, HUD and touch
+        // overlay included, so the framebuffer readback is armed (P key / Pause dialog) rather
+        // than taken here - a request made during this frame's input or UI act still lands in
+        // the shot, while the Pause dialog hides itself first so it never shows up in one.
+        ScreenshotManager.captureIfPending(levelName);
     }
 
     /**
@@ -546,6 +573,12 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
     @Override
     public void onResume() {
         gamePaused = false;
+        hidePauseDialog();
+    }
+
+    @Override
+    public void onScreenshot() {
+        ScreenshotManager.request();
     }
 
     @Override
@@ -606,6 +639,24 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         CameraSystem.snapToRoom(camera, roomState,
             TRANSFORM.get(playerEntity).position.x, TRANSFORM.get(playerEntity).position.y,
             layoutMode == LayoutMode.BAND_ZOOM);
+    }
+
+    private boolean isClickOnUi() {
+        if (!Gdx.input.isButtonJustPressed(com.badlogic.gdx.Input.Buttons.LEFT)) return false;
+        float mouseX = Gdx.input.getX();
+        float mouseY = Gdx.input.getY();
+        return isHitOnStage(stage, mouseX, mouseY) ||
+               isHitOnStage(inventoryBarStage, mouseX, mouseY) ||
+               isHitOnStage(hudStage, mouseX, mouseY) ||
+               isHitOnStage(touchControlsStage, mouseX, mouseY);
+    }
+
+    private boolean isHitOnStage(com.badlogic.gdx.scenes.scene2d.Stage s, float screenX, float screenY) {
+        if (s == null) return false;
+        com.badlogic.gdx.math.Vector2 stageCoords = new com.badlogic.gdx.math.Vector2(screenX, screenY);
+        s.getViewport().unproject(stageCoords);
+        com.badlogic.gdx.scenes.scene2d.Actor hit = s.hit(stageCoords.x, stageCoords.y, true);
+        return hit != null && hit != s.getRoot();
     }
 
     @Override

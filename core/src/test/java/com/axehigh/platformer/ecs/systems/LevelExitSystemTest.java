@@ -1,6 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.*;
+import com.axehigh.platformer.ecs.components.LightComponent;
 import com.axehigh.platformer.map.LevelManager;
 import com.axehigh.platformer.map.ProgressData;
 import com.axehigh.platformer.map.SaveData;
@@ -51,8 +51,8 @@ public class LevelExitSystemTest extends SystemTestBase {
     }
 
     private Entity player(float x, float y) {
-        TransformComponent transform = transform(x, y);
-        CollisionComponent collision = collision(0f, 0f, 20f, 40f);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = transform(x, y);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = collision(0f, 0f, 20f, 40f);
         place(transform, collision, x, y);
         Entity entity = entity(transform, movement(), player(), collision);
         engine.addEntity(entity);
@@ -60,10 +60,10 @@ public class LevelExitSystemTest extends SystemTestBase {
     }
 
     private Entity gate(float x, float y, float width, float height, String nextLevelPath) {
-        TransformComponent transform = transform(x, y);
-        CollisionComponent collision = collision(0f, 0f, width, height);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = transform(x, y);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = collision(0f, 0f, width, height);
         place(transform, collision, x, y);
-        LevelExitComponent exit = new LevelExitComponent();
+        com.axehigh.platformer.ecs.components.LevelExitComponent exit = new com.axehigh.platformer.ecs.components.LevelExitComponent();
         exit.nextLevelPath = nextLevelPath;
         Entity entity = entity(transform, collision, exit);
         engine.addEntity(entity);
@@ -72,7 +72,7 @@ public class LevelExitSystemTest extends SystemTestBase {
 
     private Entity finalGate(float x, float y, float width, float height, String nextLevelPath) {
         Entity entity = gate(x, y, width, height, nextLevelPath);
-        entity.getComponent(LevelExitComponent.class).isFinalLevel = true;
+        entity.getComponent(com.axehigh.platformer.ecs.components.LevelExitComponent.class).isFinalLevel = true;
         return entity;
     }
 
@@ -84,8 +84,8 @@ public class LevelExitSystemTest extends SystemTestBase {
         // Step 1 frame
         engine.update(DT);
 
-        PlayerComponent player = PLAYER.get(playerEntity);
-        LevelExitComponent exit = gateEntity.getComponent(LevelExitComponent.class);
+        com.axehigh.platformer.ecs.components.PlayerComponent player = PLAYER.get(playerEntity);
+        com.axehigh.platformer.ecs.components.LevelExitComponent exit = gateEntity.getComponent(com.axehigh.platformer.ecs.components.LevelExitComponent.class);
         assertTrue("Player should be marked nearExit", player.nearExit);
         assertTrue("Gate should have LightComponent when fading in", LIGHT.has(gateEntity));
         assertTrue("Fade progress should start increasing", exit.fadeProgress > 0f && exit.fadeProgress < 1f);
@@ -129,7 +129,7 @@ public class LevelExitSystemTest extends SystemTestBase {
         }
         assertFalse("Player should not be marked nearExit", PLAYER.get(playerEntity).nearExit);
         assertTrue("Gate LightComponent should still exist while fading out", LIGHT.has(gateEntity));
-        LevelExitComponent exit = gateEntity.getComponent(LevelExitComponent.class);
+        com.axehigh.platformer.ecs.components.LevelExitComponent exit = gateEntity.getComponent(com.axehigh.platformer.ecs.components.LevelExitComponent.class);
         assertTrue("Fade progress should be between 0 and 1", exit.fadeProgress > 0f && exit.fadeProgress < 1f);
 
         // Complete fade-out
@@ -144,7 +144,7 @@ public class LevelExitSystemTest extends SystemTestBase {
     public void continuousReversalMidFade() {
         Entity gateEntity = gate(100f, 50f, 32f, 48f, "maps/level2.tmx");
         Entity playerEntity = player(100f, 50f);
-        LevelExitComponent exit = gateEntity.getComponent(LevelExitComponent.class);
+        com.axehigh.platformer.ecs.components.LevelExitComponent exit = gateEntity.getComponent(com.axehigh.platformer.ecs.components.LevelExitComponent.class);
 
         // Fade in partially (9 frames ~= 0.15s, progress ~= 0.5)
         for (int i = 0; i < 9; i++) {
@@ -173,7 +173,7 @@ public class LevelExitSystemTest extends SystemTestBase {
     public void interactTriggersLevelTransition() {
         Entity gateEntity = gate(100f, 50f, 32f, 48f, "maps/level2.tmx");
         Entity playerEntity = player(100f, 50f);
-        PlayerComponent player = PLAYER.get(playerEntity);
+        com.axehigh.platformer.ecs.components.PlayerComponent player = PLAYER.get(playerEntity);
         player.interactPressed = true;
 
         engine.update(DT);
@@ -215,14 +215,14 @@ public class LevelExitSystemTest extends SystemTestBase {
 
         Entity gateEntity = finalGate(100f, 50f, 32f, 48f, "maps/world2/level_01.tmx");
         Entity playerEntity = player(100f, 50f);
-        PlayerComponent player = PLAYER.get(playerEntity);
+        com.axehigh.platformer.ecs.components.PlayerComponent player = PLAYER.get(playerEntity);
         player.interactPressed = true;
 
         engine.update(DT);
 
         assertTrue("Victory callback should fire on a final gate", victoryFired.get());
         assertFalse("interactPressed should be reset after victory trigger", player.interactPressed);
-        assertNotNull("Gate should still have its LevelExitComponent after victory", gateEntity.getComponent(LevelExitComponent.class));
+        assertNotNull("Gate should still have its LevelExitComponent after victory", gateEntity.getComponent(com.axehigh.platformer.ecs.components.LevelExitComponent.class));
         verify(levelManager, never()).loadLevel(any(), any());
         verify(preferences).putString(eq("save"), anyString());
     }
@@ -236,7 +236,7 @@ public class LevelExitSystemTest extends SystemTestBase {
 
         Entity gateEntity = gate(100f, 50f, 32f, 48f, "maps/level2.tmx");
         Entity playerEntity = player(100f, 50f);
-        PlayerComponent player = PLAYER.get(playerEntity);
+        com.axehigh.platformer.ecs.components.PlayerComponent player = PLAYER.get(playerEntity);
         player.interactPressed = true;
 
         engine.update(DT);
@@ -275,7 +275,7 @@ public class LevelExitSystemTest extends SystemTestBase {
     public void finalGateSavePersistsCompletedWorldIds() {
         when(levelManager.getCurrentLevelPath()).thenReturn("maps/world1/level_10.tmx");
 
-        system = new LevelExitSystem(levelManager, 0, () -> {});
+        system = new com.axehigh.platformer.ecs.systems.LevelExitSystem(levelManager, 0, () -> {});
         engine = newEngine();
         engine.addSystem(system);
 
@@ -290,7 +290,7 @@ public class LevelExitSystemTest extends SystemTestBase {
         verify(preferences).putString(eq("progress"), progressCaptor.capture());
         ProgressData progress = new Json().fromJson(ProgressData.class, progressCaptor.getValue());
         assertTrue("Progress should contain the just-completed world key",
-            progress.completedWorldIds.contains("world1", false));
+            progress.completedWorldIds.contains("dungeon1", false));
 
         // The run save is a separate blob and must NOT contain star data anymore.
         ArgumentCaptor<String> saveCaptor = ArgumentCaptor.forClass(String.class);

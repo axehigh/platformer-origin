@@ -1,6 +1,7 @@
 package com.axehigh.platformer.ecs.components;
 
 import com.axehigh.platformer.GameConstants;
+import com.axehigh.platformer.util.FeatureFlags;
 import com.axehigh.platformer.util.Timer;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
@@ -109,6 +110,8 @@ public class PlayerComponent implements Component {
      * started and cleared when the player moves again. Guards against re-arming the hold the frame
      * the grace expires (that frame is indistinguishable from a fresh stop by timer state alone). */
     public boolean idleHoldArmed = false;
+    /** True while the player was moving in the previous frame; reset when stationary to trigger move smoke on start. */
+    public boolean wasMoving = false;
 
     /** True from the frame the player leaves the ground until the next grounded frame. */
     public boolean inAir = false;
@@ -144,18 +147,26 @@ public class PlayerComponent implements Component {
      * {@code false} without consuming when the player holds none of that type.
      */
     public boolean consumePotion(PotionType type) {
-        if (countPotion(type) <= 0) {
+        int count = countPotion(type);
+        if (count <= 0) {
             return false;
         }
         if (type == PotionType.HEALING && health >= maxHealth) {
             return false;
         }
-        setPotionCount(type, countPotion(type) - 1);
+        if (!FeatureFlags.isGodModeEnabled()) {
+            setPotionCount(type, countPotionRaw(type) - 1);
+        }
         return true;
     }
 
     /** Returns how many potions of the given type the player holds. */
     public int countPotion(PotionType type) {
+        int raw = countPotionRaw(type);
+        return FeatureFlags.isGodModeEnabled() ? Math.max(1, raw) : raw;
+    }
+
+    int countPotionRaw(PotionType type) {
         switch (type) {
             case HEALING:
                 return healingPotions;

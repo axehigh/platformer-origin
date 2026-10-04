@@ -32,6 +32,18 @@ public enum LayoutMode {
         return values[(ordinal() + 1) % values.length];
     }
 
+    /** True if we are running on a desktop environment (Desktop app, Headless, or web browser). */
+    public static boolean isDesktop() {
+        DeviceClass simulated = DeviceClass.simulated();
+        if (simulated != null) {
+            return simulated == DeviceClass.DESKTOP;
+        }
+        Application.ApplicationType type = Gdx.app.getType();
+        return type == Application.ApplicationType.Desktop
+            || type == Application.ApplicationType.HeadlessDesktop
+            || type == Application.ApplicationType.WebGL;
+    }
+
     /** True on touch-only platforms (Android/iOS), or any faked non-desktop {@link DeviceClass}. */
     public static boolean isTouchDevice() {
         DeviceClass simulated = DeviceClass.simulated();

@@ -4,6 +4,7 @@ import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.audio.AudioManager;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.PotionType;
+import com.axehigh.platformer.util.NumFormat;
 import com.axehigh.platformer.util.PotionEffects;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.assets.AssetManager;
@@ -206,7 +207,7 @@ public class InventoryBarStage extends Stage {
             PotionType type = entry.key;
             Slot slot = entry.value;
             int count = playerComponent.countPotion(type);
-            slot.countLabel.setText(String.format("x %02d", count));
+            slot.countLabel.setText("x " + NumFormat.pad(count, 2));
             slot.countLabel.pack();
             slot.countLabel.setPosition(SLOT_SIZE - slot.countLabel.getWidth() - COUNT_PAD, COUNT_PAD);
 
@@ -225,7 +226,7 @@ public class InventoryBarStage extends Stage {
 
         // Refresh equipment slots if enabled
         if (GameConstants.ENABLE_INVENTORY_EQUIPMENT && bulletSlot != null) {
-            bulletSlot.countLabel.setText(String.format("x %02d", playerComponent.ammo));
+            bulletSlot.countLabel.setText("x " + NumFormat.pad(playerComponent.ammo, 2));
             bulletSlot.button.getColor().a = playerComponent.ammo > 0 ? 1f : 0.35f;
         }
     }

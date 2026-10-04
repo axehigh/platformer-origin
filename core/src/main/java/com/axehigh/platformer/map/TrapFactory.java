@@ -68,8 +68,8 @@ class TrapFactory {
         } else if ("y".equalsIgnoreCase(axis)) {
             platform.amplitudeX = 0f;
         }
-        platform.amplitudeX = TileProps.getTileXProperty(object, tile, "amplitudeX", platform.amplitudeX, context.tileWidth) * context.unitScale;
-        platform.amplitudeY = TileProps.getTileYProperty(object, tile, "amplitudeY", platform.amplitudeY, context.tileHeight) * context.unitScale;
+        platform.amplitudeX = TileProps.getTileXProperty(object, tile, "amplitudeX", platform.amplitudeX, context.tileWidth);
+        platform.amplitudeY = TileProps.getTileYProperty(object, tile, "amplitudeY", platform.amplitudeY, context.tileHeight);
         platform.speed = TileProps.getFloatProperty(object, tile, "speed", DEFAULT_PLATFORM_SPEED);
         platform.phase = TileProps.getFloatProperty(object, tile, "phase", 0f);
         platform.roomIndex = roomIndex;
@@ -198,6 +198,65 @@ class TrapFactory {
 
         AnimationComponent animComp = new AnimationComponent();
         animComp.animations.put(IDLE, context.buildAnimation(0.1f, "fire", LOOP));
+        animComp.currentState = IDLE;
+        entity.add(animComp);
+
+        return entity;
+    }
+
+    /**
+     * Builds a spinning blade trap entity. The blade oscillates around its spawn position (up/down or
+     * sideways) like a moving platform, spins through an animated sequence (blade1..3), and damages
+     * the player on contact (1 damage). Custom properties: {@code amplitudeX}/{@code amplitudeY},
+     * {@code speed} (rad/s, default 1), {@code phase} (radians, default 0), {@code axis} ("x"/"y"/"both"),
+     * {@code damage} (default 1).
+     */
+    public Entity createSpinningBladeTrap(float x, float y, float width, float height, MapObject object, TiledMapTile tile, int roomIndex) {
+        TextureRegion region = tile != null ? tile.getTextureRegion()
+                : context.originAtlas.findRegion(SpriteConstants.BLADE_REGION + "1");
+        if (region == null) {
+            region = context.originAtlas.findRegion("blade1");
+        }
+        if (region == null) {
+            region = context.originAtlas.findRegion("goblin_idle1");
+        }
+
+        Entity entity = new Entity();
+
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(x, y);
+        transform.scale.set(width / region.getRegionWidth(), height / region.getRegionHeight());
+        transform.z = FactoryContext.DECOR_Z;
+        entity.add(transform);
+
+        TextureComponent textureComponent = new TextureComponent();
+        textureComponent.region = region;
+        entity.add(textureComponent);
+
+        CollisionComponent collisionComponent = new CollisionComponent();
+        collisionComponent.bounds.setSize(width, height);
+        entity.add(collisionComponent);
+
+        TrapComponent trap = new TrapComponent();
+        trap.type = TrapComponent.TrapType.BLADE;
+        trap.roomIndex = roomIndex;
+        trap.damage = TileProps.getFloatProperty(object, tile, "damage", 1f);
+        trap.baseX = x;
+        trap.baseY = y;
+        String axis = TileProps.getProperty(object, tile, "axis", null);
+        if ("x".equalsIgnoreCase(axis)) {
+            trap.amplitudeY = 0f;
+        } else if ("y".equalsIgnoreCase(axis)) {
+            trap.amplitudeX = 0f;
+        }
+        trap.amplitudeX = TileProps.getTileXProperty(object, tile, "amplitudeX", trap.amplitudeX, context.tileWidth);
+        trap.amplitudeY = TileProps.getTileYProperty(object, tile, "amplitudeY", trap.amplitudeY, context.tileHeight);
+        trap.speed = TileProps.getFloatProperty(object, tile, "speed", 1f);
+        trap.phase = TileProps.getFloatProperty(object, tile, "phase", 0f);
+        entity.add(trap);
+
+        AnimationComponent animComp = new AnimationComponent();
+        animComp.animations.put(IDLE, context.buildAnimation(0.1f, SpriteConstants.BLADE_REGION, LOOP));
         animComp.currentState = IDLE;
         entity.add(animComp);
 

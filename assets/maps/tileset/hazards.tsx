@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.2" name="hazards" tilewidth="129" tileheight="128" tilecount="6" columns="2">
+<tileset version="1.10" tiledversion="1.11.2" name="hazards" tilewidth="256" tileheight="256" tilecount="8" columns="2">
  <grid orientation="orthogonal" width="128" height="128"/>
  <tile id="2" type="Floating">
   <properties>
@@ -45,5 +45,17 @@
    <property name="hazard" type="bool" value="true"/>
   </properties>
   <image source="../gfx/tiles/bg/Plague_Town_2D_Platformer_Tileset_Environment - Acid.png" width="128" height="128"/>
+ </tile>
+ <tile id="9">
+  <image source="../gfx/hazards/axe1.png" width="256" height="256"/>
+ </tile>
+ <tile id="10" type="trap">
+  <properties>
+   <property name="amplitudeX" type="float" value="0"/>
+   <property name="amplitudeY" type="float" value="2"/>
+   <property name="speed" type="float" value="1"/>
+   <property name="trapType" value="blade"/>
+  </properties>
+  <image source="../gfx/hazards/blade1.png" width="128" height="128"/>
  </tile>
 </tileset>

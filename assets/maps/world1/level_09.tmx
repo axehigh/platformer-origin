@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="32" height="17" tilewidth="128" tileheight="128" infinite="0" nextlayerid="8" nextobjectid="38">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="32" height="17" tilewidth="128" tileheight="128" infinite="0" nextlayerid="8" nextobjectid="50">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
  <tileset firstgid="70" source="../tileset/enemy.tsx"/>
- <tileset firstgid="77" source="../tileset/secret_wall.tsx"/>
- <tileset firstgid="78" name="secret_room_wall" tilewidth="128" tileheight="128" tilecount="1" columns="1">
+ <tileset firstgid="79" source="../tileset/secret_wall.tsx"/>
+ <tileset firstgid="80" name="secret_room_wall" tilewidth="128" tileheight="128" tilecount="1" columns="1">
   <tile id="0">
    <properties>
     <property name="secret" type="bool" value="true"/>
@@ -12,9 +12,9 @@
    <image source="../gfx/tiles/secret_wall.png" width="128" height="128"/>
   </tile>
  </tileset>
- <tileset firstgid="79" source="../tileset/bg.tsx"/>
- <tileset firstgid="126" source="../tileset/items.tsx"/>
- <tileset firstgid="157" source="../tileset/hazards.tsx"/>
+ <tileset firstgid="81" source="../tileset/bg.tsx"/>
+ <tileset firstgid="128" source="../tileset/items.tsx"/>
+ <tileset firstgid="159" source="../tileset/hazards.tsx"/>
  <layer id="1" name="background" width="32" height="17">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -22,24 +22,24 @@
 0,0,0,0,47,45,49,0,0,0,0,0,0,0,0,0,0,0,0,0,47,45,45,45,45,48,0,0,0,0,0,0,
 0,0,0,0,0,47,45,49,0,0,0,0,0,0,0,0,0,0,0,0,0,47,45,45,48,0,0,0,0,0,0,0,
 0,0,0,0,0,0,47,45,49,0,0,0,0,0,0,0,0,0,0,0,0,0,45,45,0,0,0,0,0,0,0,0,
-0,0,0,18,101,0,0,47,45,49,0,0,0,0,0,0,0,0,0,0,0,0,45,45,0,0,0,0,0,0,0,0,
+0,0,0,18,103,0,0,47,45,49,0,0,0,0,0,0,0,0,0,0,0,0,45,45,0,0,0,0,0,0,0,0,
 0,11,10,18,0,0,0,0,47,45,49,0,0,0,0,0,0,0,0,0,0,0,45,45,0,0,0,0,0,0,0,0,
 0,6,6,18,0,0,0,0,0,47,45,49,0,0,50,0,0,0,0,0,0,0,45,45,0,0,0,0,0,0,50,0,
 0,6,6,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,45,45,0,0,0,0,0,0,0,0,
-0,6,6,18,0,0,0,0,0,47,45,45,45,45,45,45,48,0,0,47,45,101,45,45,0,0,0,0,50,48,0,0,
+0,6,6,18,0,0,0,0,0,47,45,45,45,45,45,45,48,0,0,47,45,103,45,45,0,0,0,0,50,48,0,0,
 0,0,0,0,0,0,0,0,0,0,45,45,45,45,45,45,0,0,0,0,0,0,45,45,0,0,0,50,48,0,50,0,
 0,48,0,0,18,0,0,0,0,0,45,45,45,45,45,0,0,0,0,0,0,0,0,45,45,0,0,0,0,0,0,0,
-0,0,0,0,18,0,0,0,0,0,45,45,45,45,45,0,0,45,45,45,45,45,0,45,48,0,0,0,0,101,47,0,
+0,0,0,0,18,0,0,0,0,0,45,45,45,45,45,0,0,45,45,45,45,45,0,45,48,0,0,0,0,103,47,0,
 0,0,0,0,18,0,0,47,45,48,45,45,45,45,45,0,0,45,45,45,45,45,0,45,0,0,0,0,0,0,0,0,
 0,0,0,0,18,0,0,0,0,0,45,45,45,45,45,0,0,45,45,45,45,45,45,45,0,0,0,0,0,0,0,0,
-0,0,32,0,18,0,0,0,0,0,45,45,0,0,0,0,0,45,45,45,45,45,45,45,0,0,0,0,0,104,29,0,
+0,0,32,0,18,0,0,0,0,0,45,45,0,0,0,0,0,45,45,45,45,45,45,45,0,0,0,0,0,106,29,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
  <layer id="2" name="collision" width="32" height="17">
   <data encoding="csv">
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,78,78,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,80,80,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,3,3,3,3,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
@@ -66,9 +66,9 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,146,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,146,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,104,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,148,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,148,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,106,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -85,11 +85,6 @@
     <property name="nextLevel" value="maps/world1/level_10.tmx"/>
    </properties>
   </object>
-  <object id="16" name="torchLeft" type="torch" x="3968" y="640" width="128" height="128"/>
-  <object id="17" gid="72" x="2464" y="1408" width="128" height="128"/>
-  <object id="18" gid="72" x="1536" y="640" width="128" height="128"/>
-  <object id="19" gid="72" x="3744" y="1024" width="128" height="128"/>
-  <object id="20" gid="72" x="1280" y="2048" width="128" height="128"/>
   <object id="27" name="chest_secret_room" type="chest" x="2176" y="1920" width="128" height="128">
    <properties>
     <property name="secretRoom" value="secret_room"/>
@@ -105,35 +100,47 @@
     <property name="secretRoom" value="secret_room"/>
    </properties>
   </object>
-  <object id="32" gid="139" x="128" y="512" width="128" height="128"/>
-  <object id="33" gid="159" x="896" y="640" width="128" height="128">
+  <object id="32" gid="141" x="128" y="512" width="128" height="128"/>
+  <object id="33" gid="161" x="896" y="640" width="128" height="128">
    <properties>
     <property name="amplitudeY" type="float" value="1"/>
    </properties>
   </object>
-  <object id="34" gid="129" x="2176" y="2048" width="128" height="128">
+  <object id="34" gid="131" x="2176" y="2048" width="128" height="128">
    <properties>
     <property name="secretRoom" value="secret_room"/>
    </properties>
   </object>
-  <object id="35" gid="129" x="2304" y="2048" width="128" height="128">
+  <object id="35" gid="131" x="2304" y="2048" width="128" height="128">
    <properties>
     <property name="secretRoom" value="secret_room"/>
    </properties>
   </object>
-  <object id="36" gid="129" x="2432" y="2048" width="128" height="128">
+  <object id="36" gid="131" x="2432" y="2048" width="128" height="128">
    <properties>
     <property name="secretRoom" value="secret_room"/>
    </properties>
   </object>
-  <object id="37" gid="138" x="2560" y="2048" width="128" height="128">
+  <object id="37" gid="140" x="2560" y="2048" width="128" height="128">
    <properties>
     <property name="secretRoom" value="secret_room"/>
    </properties>
   </object>
+  <object id="38" gid="77" x="2304" y="1024" width="128" height="104"/>
+  <object id="39" gid="77" x="1408" y="640" width="128" height="104"/>
+  <object id="40" gid="78" x="256" y="512" width="198" height="161"/>
+  <object id="41" gid="77" x="384" y="2048" width="128" height="104"/>
+  <object id="42" gid="77" x="1280" y="2048" width="128" height="104"/>
+  <object id="43" gid="77" x="3584" y="1408" width="128" height="104"/>
+  <object id="44" gid="77" x="2304" y="1408" width="128" height="104"/>
+  <object id="45" gid="148" x="3968" y="1792" width="128" height="156"/>
+  <object id="46" gid="148" x="3968" y="768" width="128" height="156"/>
+  <object id="47" gid="148" x="1920" y="768" width="128" height="156"/>
+  <object id="48" gid="148" x="1920" y="1664" width="128" height="156"/>
+  <object id="49" gid="148" x="0" y="1024" width="128" height="156"/>
  </objectgroup>
  <objectgroup id="7" name="enemies"/>
- <objectgroup id="4" name="Rooms">
+ <objectgroup id="4" name="Rooms" locked="1">
   <object id="2" x="0" y="0" width="2048" height="2176"/>
   <object id="5" x="2048" y="0" width="2048" height="2176"/>
   <object id="22" name="secret_room" x="2048" y="1408" width="896" height="768"/>

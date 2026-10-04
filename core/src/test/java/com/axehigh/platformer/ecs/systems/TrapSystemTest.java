@@ -1,11 +1,9 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.AnimationComponent;
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.TransformComponent;
-import com.axehigh.platformer.ecs.components.TrapComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.ecs.components.TrapComponent.TrapType;
 import com.axehigh.platformer.map.RoomState;
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
@@ -22,8 +20,7 @@ import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
 import static com.axehigh.platformer.assets.SpriteConstants.AcidDropCollisionHeight;
 import static com.axehigh.platformer.assets.SpriteConstants.AcidDropCollisionWidth;
 import static com.axehigh.platformer.ecs.components.Mappers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -276,5 +273,57 @@ public class TrapSystemTest extends SystemTestBase {
         AnimationComponent anim2 = ANIMATION.get(pool2);
         assertNotNull("pool 2 should carry animation", anim2);
         assertEquals("pool 2 animation should start at stateTime = 0", 0f, anim2.stateTime, 0.1f);
+    }
+
+    @Test
+    public void spinningBladeOscillatesInTrapSystem() {
+        Entity blade = new Entity();
+        TransformComponent transform = new TransformComponent();
+        transform.position.set(100f, 100f);
+        blade.add(transform);
+        CollisionComponent collision = new CollisionComponent();
+        collision.bounds.setSize(32f, 32f);
+        blade.add(collision);
+        TrapComponent trap = new TrapComponent();
+        trap.type = TrapType.BLADE;
+        trap.baseX = 100f;
+        trap.baseY = 100f;
+        trap.amplitudeX = 50f;
+        trap.amplitudeY = 0f;
+        trap.speed = 2f;
+        blade.add(trap);
+        engine.addEntity(blade);
+
+        engine.update(0.5f);
+
+        org.junit.Assert.assertNotEquals(100f, transform.position.x, 0.001f);
+    }
+
+    @Test
+    public void spinningBladeAppliesKnockbackOnContact() {
+        Engine testEngine = newEngine();
+        testEngine.addSystem(new com.axehigh.platformer.ecs.systems.TrapContactSystem(roomState, 0));
+
+        TransformComponent playerTransform = transform(100f, 100f);
+        CollisionComponent playerCollision = collision(0f, 0f, 32f, 32f);
+        place(playerTransform, playerCollision, 100f, 100f);
+        PlayerComponent playerComponent = new PlayerComponent();
+        MovementComponent movement = movement();
+        Entity player = entity(playerTransform, playerCollision, playerComponent, movement);
+        testEngine.addEntity(player);
+
+        TransformComponent bladeTransform = transform(100f, 100f);
+        CollisionComponent bladeCollision = collision(0f, 0f, 32f, 32f);
+        place(bladeTransform, bladeCollision, 100f, 100f);
+        TrapComponent trap = new TrapComponent();
+        trap.type = TrapType.BLADE;
+        trap.roomIndex = -1;
+        Entity blade = entity(bladeTransform, bladeCollision, trap);
+        testEngine.addEntity(blade);
+
+        testEngine.update(DT);
+
+        assertEquals(2, playerComponent.health);
+        assertTrue(Math.abs(movement.velocity.x) > EPSILON);
     }
 }

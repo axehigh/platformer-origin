@@ -34,6 +34,7 @@ public final class Mappers {
     public static final ComponentMapper<TrailComponent> TRAIL = ComponentMapper.getFor(TrailComponent.class);
     public static final ComponentMapper<LootComponent> LOOT = ComponentMapper.getFor(LootComponent.class);
     public static final ComponentMapper<TutorialComponent> TUTORIAL = ComponentMapper.getFor(TutorialComponent.class);
+    public static final ComponentMapper<UndeadComponent> UNDEAD = ComponentMapper.getFor(UndeadComponent.class);
 
     private Mappers() {
     }

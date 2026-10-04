@@ -10,7 +10,7 @@ import com.badlogic.gdx.utils.Pool.Poolable;
  */
 public class TrapComponent implements Component, Poolable {
 
-    public enum TrapType { ACID_DROP_SPAWNER, ACID_DROP, ACID_POOL, FLAME }
+    public enum TrapType { ACID_DROP_SPAWNER, ACID_DROP, ACID_POOL, FLAME, BLADE }
 
     public enum TrapDirection { UP, DOWN, LEFT, RIGHT }
 
@@ -69,6 +69,15 @@ public class TrapComponent implements Component, Poolable {
     public float flameDuration = 2.0f;
     public float cooldownDuration = 1.5f;
 
+    // === Spinning blade oscillation fields ===
+    public float baseX;
+    public float baseY;
+    public float amplitudeX;
+    public float amplitudeY;
+    public float speed = 1f;
+    public float phase;
+    public float angle;
+
     @Override
     public void reset() {
         type = null;
@@ -104,5 +113,12 @@ public class TrapComponent implements Component, Poolable {
         cooldownTimer.reset();
         flameDuration = 2.0f;
         cooldownDuration = 1.5f;
+        baseX = 0f;
+        baseY = 0f;
+        amplitudeX = 0f;
+        amplitudeY = 0f;
+        speed = 1f;
+        phase = 0f;
+        angle = 0f;
     }
 }

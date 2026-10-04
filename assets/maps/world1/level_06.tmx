@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="17" tilewidth="128" tileheight="128" infinite="0" nextlayerid="8" nextobjectid="538">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="17" tilewidth="128" tileheight="128" infinite="0" nextlayerid="8" nextobjectid="548">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
  <tileset firstgid="70" source="../tileset/items.tsx"/>
  <tileset firstgid="101" source="../tileset/enemy.tsx"/>
- <tileset firstgid="108" source="../tileset/bg.tsx"/>
- <tileset firstgid="155" source="../tileset/hazards.tsx"/>
+ <tileset firstgid="110" source="../tileset/bg.tsx"/>
+ <tileset firstgid="157" source="../tileset/hazards.tsx"/>
  <layer id="1" name="background" width="30" height="17">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -22,7 +22,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,18,0,0,6,6,6,0,
 0,0,0,0,0,0,0,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,18,0,0,0,0,0,0,
 0,0,0,0,0,0,0,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,18,6,6,6,6,6,0,
-0,0,0,0,0,0,0,18,138,0,0,0,0,0,0,0,0,0,0,0,0,0,0,18,6,6,6,6,6,0,
+0,0,0,0,0,0,0,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,18,6,6,6,6,6,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
@@ -50,14 +50,14 @@
  <layer id="5" name="decoration" width="30" height="17">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,125,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,127,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,90,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,117,0,0,0,125,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,119,0,0,0,127,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,133,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,133,0,0,
+0,135,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,135,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,90,0,0,
@@ -79,7 +79,7 @@
   </object>
   <object id="517" name="chest1" type="chest" x="1408" y="1920" width="128" height="128"/>
   <object id="521" name="torch2" type="torch" x="3712" y="1536" width="128" height="128"/>
-  <object id="523" gid="157" x="3200" y="1664" width="128" height="128">
+  <object id="523" gid="159" x="3200" y="1664" width="128" height="128">
    <properties>
     <property name="amplitudeY" type="int" value="1"/>
    </properties>
@@ -98,16 +98,15 @@
   <object id="537" gid="82" x="2432" y="512" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="7" name="enemies">
-  <object id="2" name="enemy_r0_walker" gid="103" x="2816" y="2048" width="128" height="128"/>
-  <object id="513" name="enemy_r0_walker" gid="103" x="2688" y="1152" width="128" height="128"/>
-  <object id="514" name="enemy_r0_walker" gid="103" x="1408" y="1536" width="128" height="128"/>
-  <object id="515" name="enemy_r0_walker" gid="103" x="1280" y="2048" width="128" height="128"/>
-  <object id="516" name="enemy_r0_walker" gid="103" x="2048" y="1152" width="128" height="128"/>
-  <object id="522" name="enemy6" type="enemy" x="2560" y="1536" width="128" height="128">
-   <properties>
-    <property name="enemyType" value="flyer"/>
-   </properties>
-  </object>
+  <object id="538" gid="108" x="1408" y="1152" width="128" height="104"/>
+  <object id="540" gid="108" x="1408" y="2048" width="128" height="104"/>
+  <object id="541" gid="108" x="2048" y="1152" width="128" height="104"/>
+  <object id="542" gid="108" x="2816" y="1152" width="128" height="104"/>
+  <object id="543" gid="108" x="1408" y="384" width="128" height="104"/>
+  <object id="544" gid="108" x="1536" y="1536" width="128" height="104"/>
+  <object id="545" gid="108" x="3072" y="2048" width="128" height="104"/>
+  <object id="546" gid="107" x="2688" y="1792" width="128" height="128"/>
+  <object id="547" gid="107" x="3072" y="1024" width="128" height="128"/>
  </objectgroup>
  <objectgroup id="6" name="Rooms" locked="1">
   <object id="511" name="room0" x="0" y="0" width="3840" height="2176"/>

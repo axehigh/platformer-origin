@@ -105,6 +105,7 @@ class EnemyFactory {
 
         switch (type) {
             case FLYER:
+            case GHOST:
                 FlyingEnemyComponent flying = new FlyingEnemyComponent();
                 flying.bobAmplitude *= context.unitScale;
                 // Random bob phase so flyers don't flap in unison (they all start at bobTime = 0).
@@ -138,6 +139,9 @@ class EnemyFactory {
                 break;
             default:
                 break;
+        }
+        if (type == EnemyType.SKELETON || type == EnemyType.GHOST) {
+            entity.add(new UndeadComponent());
         }
         entity.add(enemyComponent);
         entity.add(new HitFlashComponent());

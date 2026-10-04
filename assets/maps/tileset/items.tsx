@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.2" name="items" tilewidth="128" tileheight="156" tilecount="25" columns="0">
+<tileset version="1.10" tiledversion="1.11.2" name="items" tilewidth="128" tileheight="156" tilecount="25" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="3" type="chest">
   <image source="../gfx/items/Chest_01_Locked.png" width="128" height="128"/>
@@ -15,7 +15,7 @@
  </tile>
  <tile id="5" type="chest_elite">
   <properties>
-   <property name="potionType" value="speed"/>
+   <property name="potionType" propertytype="Potion" value="healing"/>
   </properties>
   <image source="../gfx/items/Chest_02_Locked.png" width="128" height="128"/>
   <objectgroup draworder="index" id="2">

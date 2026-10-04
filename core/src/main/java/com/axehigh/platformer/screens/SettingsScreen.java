@@ -149,6 +149,18 @@ public class SettingsScreen extends MenuScreen {
                     });
                     tabContent.add(wallClimbCheckBox).colspan(2).left().padBottom(ELEMENT_PAD).row();
 
+                    LabelFirstCheckBox godModeCheckBox = new LabelFirstCheckBox(" God Mode", skin);
+                    godModeCheckBox.getLabel().setFontScale(BodyFontScale);
+                    godModeCheckBox.setChecked(FeatureFlags.isGodModeEnabled());
+                    godModeCheckBox.addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            AudioManager.get().playClick();
+                            FeatureFlags.setGodModeEnabled(godModeCheckBox.isChecked());
+                        }
+                    });
+                    tabContent.add(godModeCheckBox).colspan(2).left().padBottom(ELEMENT_PAD).row();
+
                     Label transitionLabel = new Label("Transition Style:", skin);
                     transitionLabel.setFontScale(BodyFontScale);
                     final TextButton[] transitionStyleButtonHolder = new TextButton[1];

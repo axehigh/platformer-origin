@@ -41,11 +41,23 @@ public class SpriteConstants {
     public static float EnemyShooterCollisionHeight = 166f * EnemyShooterScale;
     public static float EnemyShooterOffsetY = 4f;
 
-    public static String EnemyKnightSprite = "goblin";
-    public static float EnemyKnightScale = 0.40f;
-    public static float EnemyKnightCollisionWidth = 80f * EnemyKnightScale;
-    public static float EnemyKnightCollisionHeight = 140 * EnemyKnightScale;
-    public static float EnemyKnightOffsetY = 10f * EnemyKnightScale;
+    public static String EnemyGoblinBruteSprite = "goblin";
+    public static float EnemyGoblinBruteScale = 0.40f;
+    public static float EnemyGoblinBruteCollisionWidth = 80f * EnemyGoblinBruteScale;
+    public static float EnemyGoblinBruteCollisionHeight = 140 * EnemyGoblinBruteScale;
+    public static float EnemyGoblinBruteOffsetY = 10f * EnemyGoblinBruteScale;
+
+    public static String EnemySkeletonSprite = "skeleton";
+    public static float EnemySkeletonScale = 0.3f;
+    public static float EnemySkeletonCollisionWidth = 80f * EnemySkeletonScale;
+    public static float EnemySkeletonCollisionHeight = 140f * EnemySkeletonScale;
+    public static float EnemySkeletonOffsetY = -10f;
+
+    public static String EnemyGhostSprite = "ghost";
+    public static float EnemyGhostScale = 0.25f;
+    public static float EnemyGhostCollisionWidth = 100f * EnemyGhostScale;
+    public static float EnemyGhostCollisionHeight = 100f * EnemyGhostScale;
+    public static float EnemyGhostOffsetY = 0f;
 
     //Acid atlas region prefixes (gfx/origin-game.atlas)
     /** Dispatcher tube animation — 64px sprites, scaled to fill a full 128px tile. */
@@ -65,4 +77,6 @@ public class SpriteConstants {
     public static float FlameTrapScale = 0.15f;
     public static float FlameTrapCollisionWidth = 24f;
     public static float FlameTrapCollisionHeight = 48f;
+
+    public static final String BLADE_REGION = "blade";
 }

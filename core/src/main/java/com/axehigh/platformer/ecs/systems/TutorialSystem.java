@@ -4,7 +4,9 @@ import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
 import com.axehigh.platformer.ecs.components.TutorialComponent;
+import com.axehigh.platformer.ui.LayoutMode;
 import com.axehigh.platformer.ui.TouchControlsStage;
+import com.axehigh.platformer.ui.TutorialHighlight;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -136,23 +138,35 @@ public class TutorialSystem extends IteratingSystem {
                         float padX = 64f;
                         float padY = 36f;
 
-                        // Resolve inline icon from the highlight keyword: the same skin drawable the
-                        // touch controller uses, so the tooltip text maps 1:1 to the button to press.
+                        // Resolve inline icon or desktop key from the highlight keyword.
                         TextureRegionDrawable iconDrawable = null;
                         float iconSize = 0f;
+                        String desktopKeyText = null;
+                        float desktopKeyWidth = 0f;
                         if (!tutorial.highlight.isEmpty()) {
-                            String iconName = TouchControlsStage.iconNameFor(tutorial.highlight);
-                            if (iconName != null) {
-                                Drawable d = skin.getDrawable(iconName);
-                                if (d instanceof TextureRegionDrawable) {
-                                    iconDrawable = (TextureRegionDrawable) d;
-                                    iconSize = layout.height;
+                            TutorialHighlight th = TutorialHighlight.fromKeyword(tutorial.highlight);
+                            if (th != null) {
+                                if (!LayoutMode.isTouchDevice()) {
+                                    desktopKeyText = "[" + th.desktopKey() + "]";
+                                    layout.setText(font, desktopKeyText);
+                                    desktopKeyWidth = layout.width;
+                                    layout.setText(font, tutorial.text);
+                                } else {
+                                    String iconName = th.icon();
+                                    if (iconName != null) {
+                                        Drawable d = skin.getDrawable(iconName);
+                                        if (d instanceof TextureRegionDrawable) {
+                                            iconDrawable = (TextureRegionDrawable) d;
+                                            iconSize = layout.height;
+                                        }
+                                    }
                                 }
                             }
                         }
 
-                        float gap = iconDrawable != null ? 8f : 0f;
-                        float boxWidth = (iconDrawable != null ? iconSize + gap : 0f) + layout.width + padX * 2f;
+                        float extraWidth = iconDrawable != null ? iconSize : (desktopKeyText != null ? desktopKeyWidth : 0f);
+                        float gap = extraWidth > 0f ? 8f : 0f;
+                        float boxWidth = (extraWidth > 0f ? extraWidth + gap : 0f) + layout.width + padX * 2f;
                         float boxHeight = layout.height + padY * 2f;
 
                         float drawX = collision.worldBounds.x + collision.worldBounds.width / 2f;
@@ -178,6 +192,12 @@ public class TutorialSystem extends IteratingSystem {
                             float iconY = panelY + padY + (layout.height - iconSize) / 2f;
                             iconDrawable.draw(batch, textX, iconY, iconSize, iconSize);
                             textX += iconSize + gap;
+                        } else if (desktopKeyText != null) {
+                            font.setColor(Color.YELLOW);
+                            font.draw(batch, desktopKeyText, textX, panelY + padY + layout.height);
+                            layout.setText(font, desktopKeyText);
+                            textX += layout.width + gap;
+                            layout.setText(font, tutorial.text);
                         }
 
                         font.setColor(Color.WHITE);

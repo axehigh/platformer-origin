@@ -34,7 +34,6 @@ public final class LevelCatalog {
 
         //world 2
         LEVELS.add(new LevelDefinition(WORLD_2, "world2_level01", "Level 1", "maps/world2/level_01.tmx"));
-        LEVELS.add(new LevelDefinition(WORLD_2, "world2_level01b", "Level 1b", "maps/world2/level_01b.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_2, "world2_level02", "Level 2", "maps/world2/level_02.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_2, "world2_level03", "Level 3", "maps/world2/level_03.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_2, "world2_level04", "Level 4", "maps/world2/level_04.tmx"));
@@ -49,6 +48,9 @@ public final class LevelCatalog {
         LEVELS.add(new LevelDefinition(WORLD_3, "world3_level01", "Level 1", "maps/world3/level3_01.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_3, "world3_level02", "Level 2", "maps/world3/level3_02.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_3, "world3_level03", "Level 3", "maps/world3/level3_03.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_3, "world3_level04", "Level 4", "maps/world3/level3_04.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_3, "world3_level05", "Level 5", "maps/world3/level3_05.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_3, "world3_level06", "Level 6", "maps/world3/level3_06.tmx"));
 
         //demo
         LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_platforming_24x10", "24x10", "maps/world_demo/platforming_24x10.tmx"));
@@ -59,6 +61,8 @@ public final class LevelCatalog {
         LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_my_map", "Potion", "maps/world_demo/map_potion.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_proto_30x9", "30x9", "maps/world_demo/proto_30x9.tmx"));
         LEVELS.add(new LevelDefinition(WORLD_DEMO, "demo_proto_60x9", "60x9", "maps/world_demo/proto_60x9.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_DEMO, "undead_proto", "Undeads", "maps/world_demo/undead_proto.tmx"));
+        LEVELS.add(new LevelDefinition(WORLD_DEMO, "traps_proto", "Traps", "maps/world_demo/traps_proto.tmx"));
 
     }
 

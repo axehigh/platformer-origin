@@ -4,6 +4,10 @@
   <!-- Paths to source are relative to this file and separated by slashes ('/'). -->
   <source path="" />
 
+  <!-- GWT-only replacements for core classes the browser JRE cannot compile (e.g. NativeScreenshotWriter,
+       which needs PixmapIO -> DeflaterOutputStream). Lives in html/src/emu, never in plain javac's source set. -->
+  <super-source path="emu" />
+
   <!-- Any resources placed under package public_html, relative to this file, will be copied verbatim into the final webapp folder. -->
   <!-- This is where you can place your JavaScript, CSS and other resources for advanced JS integration. -->
   <public path="public_html" />
@@ -21,6 +25,19 @@
   <!-- You can include a full package by not including the name of a type at the end. -->
   <!-- This is a feature of libGDX, so these lines go after the above "inherits" that brings in libGDX. -->
   <!-- <extend-configuration-property name="gdx.reflect.include" value="fully.qualified.TypeName" /> -->
+  <extend-configuration-property name="gdx.reflect.include" value="com.axehigh.platformer.ecs.components" />
+
+  <!-- MANDATORY for every class handed to libGDX Json (toJson/fromJson). GWT has no reflection at
+       runtime: libGDX's gwtref ReflectionCacheGenerator only emits field metadata for types whose
+       fully-qualified name CONTAINS one of these values, and Json looks that metadata up by name.
+       A missing entry compiles cleanly and then throws at runtime, on the save/load call site only:
+       "Couldn't find Type for class 'com.axehigh.platformer.map.ProgressData'" (surfaced as
+       "GwtApplication: exception:"). SaveManager's two persisted blobs live in ...platformer.map, so
+       both are listed by class (not the whole map package, which would drag every factory/type in it
+       into the reflection cache and bloat the compiled JS). Add a line here whenever a new
+       Json-serialized class is introduced - see resources/docs-ai/ashley-ecs-utilities.md. -->
+  <extend-configuration-property name="gdx.reflect.include" value="com.axehigh.platformer.map.SaveData" />
+  <extend-configuration-property name="gdx.reflect.include" value="com.axehigh.platformer.map.ProgressData" />
 
   <!-- Rarely, projects may need to include files but do not have access to the complete assets. -->
   <!-- This happens for libraries and shared projects, typically, and the configuration goes in that project. -->

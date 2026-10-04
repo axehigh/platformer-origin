@@ -102,6 +102,11 @@ public class TrapSystem extends IteratingSystem {
                     updateFlame(entity, trap, deltaTime);
                 }
                 break;
+            case BLADE:
+                if (roomActive) {
+                    updateBlade(entity, trap, transform, deltaTime);
+                }
+                break;
         }
     }
 
@@ -330,6 +335,18 @@ public class TrapSystem extends IteratingSystem {
             }
         }
         return false;
+    }
+
+    private void updateBlade(Entity entity, TrapComponent trap, TransformComponent transform, float deltaTime) {
+        CollisionComponent collision = COLLISION.get(entity);
+        trap.angle += trap.speed * deltaTime;
+        float offset = trap.angle + trap.phase;
+        transform.position.set(
+            trap.baseX + trap.amplitudeX * MathUtils.sin(offset),
+            trap.baseY + trap.amplitudeY * MathUtils.sin(offset));
+        if (collision != null) {
+            collision.updateWorldBounds(transform.position);
+        }
     }
 
     private void updateFlame(Entity entity, TrapComponent trap, float deltaTime) {

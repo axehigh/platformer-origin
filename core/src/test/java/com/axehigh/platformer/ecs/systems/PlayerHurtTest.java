@@ -4,6 +4,7 @@ import com.axehigh.platformer.ecs.components.CollisionComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.util.FeatureFlags;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
@@ -24,14 +25,15 @@ import static org.mockito.Mockito.when;
  */
 public class PlayerHurtTest extends SystemTestBase {
     private PooledEngine engine;
-    private PlayerInputSystem system;
+    private com.axehigh.platformer.ecs.systems.PlayerInputSystem system;
     private MovementComponent movement;
     private PlayerComponent player;
 
     @Before
     public void setUp() {
         Gdx.input = mock(Input.class);
-        system = new PlayerInputSystem(new AssetManager());
+        FeatureFlags.setSoftStopEnabled(false);
+        system = new com.axehigh.platformer.ecs.systems.PlayerInputSystem(new AssetManager());
         engine = new PooledEngine();
         engine.addSystem(system);
 
@@ -52,6 +54,7 @@ public class PlayerHurtTest extends SystemTestBase {
     @After
     public void tearDown() {
         Gdx.input = null;
+        FeatureFlags.setSoftStopEnabled(true);
     }
 
     @Test

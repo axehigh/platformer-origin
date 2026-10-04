@@ -15,16 +15,15 @@ import static com.axehigh.platformer.ecs.components.Mappers.TRANSFORM;
  * then the deviation exponentially decays back to the resting scale. (Jump stretch was removed for
  * feel; the stretch path remains for future use.) The trigger point lives in {@code
  * MovementSystem.onLanding(...)}, shared with {@code MovingPlatformSystem} so every landing surface
- * squashes identically. **Disabled by default** — the trigger is gated on {@code
- * FeatureFlags.isSquashEnabled()} (default {@code false}) until the look is finalized; flip the
- * persisted pref or call {@code FeatureFlags.setSquashEnabled(true)} to re-enable. Runs just before
- * rendering (after {@code AnimationSystem}) so the pulse scales the current animation frame.
+ * squashes identically. Enabled by default (gated on {@code FeatureFlags.isSquashEnabled()}, default
+ * {@code true}). Runs just before rendering (after {@code AnimationSystem}) so the pulse scales the
+ * current animation frame.
  */
 public class SquashSystem extends IteratingSystem {
-    /** Peak deviation (0..1) at the moment a pulse starts: e.g. 0.25 = 25% taller/flatter. */
-    private static final float SQUASH_AMOUNT = 0.25f;
-    /** Exponential decay rate (1/s): higher = quicker snap back to resting scale. */
-    private static final float SQUASH_DECAY = 10f;
+    /** Peak deviation (0..1) at the moment a pulse starts: e.g. 0.15 = 15% subtle squash. */
+    private static final float SQUASH_AMOUNT = 0.15f;
+    /** Exponential decay rate (1/s): higher = quicker snap back to resting scale (~0.1s duration). */
+    private static final float SQUASH_DECAY = 27f;
     /** Below this deviation the pulse is visually over; snap exactly to the resting scale. */
     private static final float SQUASH_EPSILON = 0.01f;
 

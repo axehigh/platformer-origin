@@ -51,7 +51,7 @@ KNOWN_TILESETS = {
     "../tileset/drop_platform.tsx",
 }
 
-VALID_ENEMY_TYPES  = {"walker", "flyer", "shooter", "knight"}
+VALID_ENEMY_TYPES  = {"walker", "flyer", "shooter", "goblin_brute"}
 VALID_TRAP_TYPES   = {"acidDrop", "flame"}
 VALID_POTION_TYPES = {"healing", "strength", "speed", "invulnerability"}
 

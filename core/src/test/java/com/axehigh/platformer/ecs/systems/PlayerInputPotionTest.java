@@ -1,11 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
-import com.axehigh.platformer.ecs.components.BuffComponent;
-import com.axehigh.platformer.ecs.components.CollisionComponent;
-import com.axehigh.platformer.ecs.components.MovementComponent;
-import com.axehigh.platformer.ecs.components.PlayerComponent;
-import com.axehigh.platformer.ecs.components.PotionType;
-import com.axehigh.platformer.ecs.components.TransformComponent;
+import com.axehigh.platformer.ecs.components.*;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
@@ -15,9 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -29,13 +22,13 @@ import static org.mockito.Mockito.when;
  */
 public class PlayerInputPotionTest extends SystemTestBase {
     private PooledEngine engine;
-    private PlayerInputSystem system;
+    private com.axehigh.platformer.ecs.systems.PlayerInputSystem system;
     private PlayerComponent player;
 
     @Before
     public void setUp() {
         Gdx.input = mock(Input.class);
-        system = new PlayerInputSystem(new AssetManager());
+        system = new com.axehigh.platformer.ecs.systems.PlayerInputSystem(new AssetManager());
         engine = new PooledEngine();
         engine.addSystem(system);
 
@@ -67,7 +60,7 @@ public class PlayerInputPotionTest extends SystemTestBase {
 
         engine.update(DT);
 
-        assertEquals(PotionType.STRENGTH, player.selectedPotion);
+        assertEquals(PotionType.INVISIBILITY, player.selectedPotion);
     }
 
     @Test

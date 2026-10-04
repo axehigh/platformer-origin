@@ -22,6 +22,7 @@ import com.badlogic.gdx.math.MathUtils;
 import static com.axehigh.platformer.PlayerConfig.*;
 import static com.axehigh.platformer.assets.GameAssetRegistry.*;
 import static com.axehigh.platformer.ecs.components.Mappers.*;
+import static com.axehigh.platformer.util.FeatureFlags.isGodModeEnabled;
 import static com.badlogic.gdx.Gdx.input;
 import static com.badlogic.gdx.Input.Keys.*;
 
@@ -52,6 +53,11 @@ public class PlayerInputSystem extends IteratingSystem {
     private boolean touchShootRequested = false;
     private boolean touchInteractRequested = false;
     private boolean touchDropRequested = false;
+    private boolean clickOnUi = false;
+
+    public void setClickOnUi(boolean clickOnUi) {
+        this.clickOnUi = clickOnUi;
+    }
 
     public PlayerInputSystem(AssetManager assetManager) {
         this(assetManager, null, 0);
@@ -152,12 +158,23 @@ public class PlayerInputSystem extends IteratingSystem {
         boolean hurt = player.hurtTimer.isActive();
         boolean locked = hurt || player.isDead;
 
-        if (!locked && left && !right) {
-            movement.velocity.x = -MOVE_SPEED * unitScale;
-            player.facingDirection = -1;
-        } else if (!locked && right && !left) {
-            movement.velocity.x = MOVE_SPEED * unitScale;
-            player.facingDirection = 1;
+        float targetVx = 0f;
+        if (!locked) {
+            if (left && !right) {
+                targetVx = -MOVE_SPEED * unitScale;
+                player.facingDirection = -1;
+            } else if (right && !left) {
+                targetVx = MOVE_SPEED * unitScale;
+                player.facingDirection = 1;
+            }
+        }
+
+        if (targetVx != 0f) {
+            if (FeatureFlags.isSoftStopEnabled()) {
+                movement.velocity.x = MathUtils.lerp(movement.velocity.x, targetVx, 1f - (float) Math.exp(-PLAYER_ACCEL * deltaTime));
+            } else {
+                movement.velocity.x = targetVx;
+            }
         } else if (!locked) {
             // Ground friction (FeatureFlags.isSoftStopEnabled(), default ON): don't snap velocity to
             // 0 (that made the sprite jump straight from RUNNING to IDLE in one frame). Decelerate
@@ -173,6 +190,16 @@ public class PlayerInputSystem extends IteratingSystem {
             } else {
                 movement.velocity.x = 0f;
             }
+        }
+
+        boolean movingInput = (targetVx != 0f);
+        if (movingInput && movement.grounded && !player.wasMoving) {
+            if (FeatureFlags.isVisualEffectsEnabled()) {
+                spawnJumpSmoke(transform, collision);
+            }
+            player.wasMoving = true;
+        } else if (!movingInput) {
+            player.wasMoving = false;
         }
 
         boolean jumpPressed = input.isKeyJustPressed(W) || input.isKeyJustPressed(UP) || touchJumpRequested;
@@ -212,7 +239,8 @@ public class PlayerInputSystem extends IteratingSystem {
             }
         }
 
-        boolean meleePressed = input.isKeyJustPressed(Input.Keys.J) || input.isKeyJustPressed(Input.Keys.SPACE) || touchMeleeRequested;
+        boolean mouseAttack = !clickOnUi && input.isButtonJustPressed(Input.Buttons.LEFT);
+        boolean meleePressed = input.isKeyJustPressed(Input.Keys.J) || input.isKeyJustPressed(Input.Keys.SPACE) || mouseAttack || touchMeleeRequested;
         if (!locked && meleePressed && player.meleeCooldown.isDone()) {
             float attackDuration = findAttackDuration(entity);
             player.meleeAttack.start(attackDuration);
@@ -226,17 +254,23 @@ public class PlayerInputSystem extends IteratingSystem {
             }
         }
 
-        boolean shootPressed = input.isKeyJustPressed(Input.Keys.K) || input.isKeyJustPressed(Input.Keys.Y) || touchShootRequested;
-        if (!locked && shootPressed && player.shootCooldown.isDone() && player.ammo > 0) {
+        boolean shootPressed = input.isKeyJustPressed(Input.Keys.K) || input.isKeyJustPressed(Input.Keys.Y)
+            || input.isKeyJustPressed(Input.Keys.SHIFT_LEFT) || input.isKeyJustPressed(Input.Keys.SHIFT_RIGHT)
+            || touchShootRequested;
+
+        boolean hasAmmo = isGodModeEnabled() || player.ammo > 0;
+        if (!locked && shootPressed && player.shootCooldown.isDone() && hasAmmo) {
             spawnBullet(entity, transform, collision, player);
-            player.ammo--;
+            if (!isGodModeEnabled()) {
+                player.ammo--;
+            }
             player.shootCooldown.start(SHOOT_COOLDOWN);
             if (sfxSystem != null) {
                 sfxSystem.playShoot();
             }
         }
 
-        player.interactPressed = input.isKeyJustPressed(Input.Keys.E) || touchInteractRequested;
+        player.interactPressed = input.isKeyJustPressed(Input.Keys.E) || input.isKeyJustPressed(Input.Keys.ENTER) || touchInteractRequested;
 
         boolean dropPressed = input.isKeyJustPressed(Input.Keys.S)
             || input.isKeyJustPressed(Input.Keys.DOWN)

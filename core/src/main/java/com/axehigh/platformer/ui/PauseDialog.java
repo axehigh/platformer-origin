@@ -42,6 +42,12 @@ public class PauseDialog extends Dialog {
         /** Called when the dialog closes by any path (Resume button, Exit button, ESC/Enter). */
         void onResume();
 
+        /**
+         * Arms a screenshot of the next fully composited frame. The dialog hides itself before
+         * calling this, so the capture never contains the pause menu.
+         */
+        void onScreenshot();
+
         boolean isTouchDebugOn();
 
         void setTouchDebugOn(boolean on);
@@ -137,9 +143,21 @@ public class PauseDialog extends Dialog {
             FeatureFlags::isWallClimbingEnabled,
             FeatureFlags::setWallClimbingEnabled)).row();
 
+        gameplayContent.add(toggleCheckBox("God Mode",
+            FeatureFlags::isGodModeEnabled,
+            FeatureFlags::setGodModeEnabled)).row();
+
         gameplayContent.add(toggleCheckBox("Soft Stop",
             FeatureFlags::isSoftStopEnabled,
             FeatureFlags::setSoftStopEnabled)).row();
+
+        // Closing first matters: the capture is flushed at the end of this same frame, and a dialog
+        // still on stage would be drawn into the shot. hideAndResume() also drops the pause flag,
+        // so the shot catches the game running again rather than frozen.
+        gameplayContent.add(actionButton("Take Screenshot", () -> {
+            hideAndResume();
+            listener.onScreenshot();
+        })).left().row();
     }
 
     private void buildDebugTab() {
@@ -160,12 +178,15 @@ public class PauseDialog extends Dialog {
         CheckBox slashDebugBox = toggleCheckBox("Combat FX",
             FeatureFlags::isSlashArcEnabled,
             FeatureFlags::setSlashArcEnabled);
+        CheckBox visualEffectsBox = toggleCheckBox("Visual FX",
+            FeatureFlags::isVisualEffectsEnabled,
+            FeatureFlags::setVisualEffectsEnabled);
 
-        // Three toggles per row: 5 flags don't fit in a single row inside the dialog content width.
+        // Three toggles per row: 6 flags fit in 2 rows of 3.
         debugContent.add(toggleRow(
             collisionDebugBox, touchDebugBox, embersDebugBox)).left().row();
         debugContent.add(toggleRow(
-            vignetteDebugBox, slashDebugBox)).left().row();
+            vignetteDebugBox, slashDebugBox, visualEffectsBox)).left().row();
 
         deviceButton = new TextButton("Device: " + listener.deviceLabel(), getSkin());
         deviceButton.getLabel().setFontScale(SmallFontScale);

@@ -60,7 +60,7 @@ public final class PlayerDamageResolver {
      * period. Returns {@code true} if the hit applied.
      */
     static boolean applyHit(Entity playerEntity, PlayerComponent player, MovementComponent movement, int knockbackDirection, float unitScale) {
-        if (player.isDead || player.hitInvulnerability.isActive() || isBuffInvulnerable(playerEntity) || isBuffInvisible(playerEntity)) {
+        if (FeatureFlags.isGodModeEnabled() || player.isDead || player.hitInvulnerability.isActive() || isBuffInvulnerable(playerEntity) || isBuffInvisible(playerEntity)) {
             return false;
         }
 
@@ -89,7 +89,7 @@ public final class PlayerDamageResolver {
      * Invulnerability potion buff still apply.
      */
     static boolean applyHitWithoutKnockback(Entity playerEntity, PlayerComponent player) {
-        if (player.isDead || player.hitInvulnerability.isActive() || isBuffInvulnerable(playerEntity)) {
+        if (FeatureFlags.isGodModeEnabled() || player.isDead || player.hitInvulnerability.isActive() || isBuffInvulnerable(playerEntity)) {
             return false;
         }
 

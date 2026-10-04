@@ -4,6 +4,7 @@ import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.components.BuffComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.axehigh.platformer.ecs.components.PotionType;
+import com.axehigh.platformer.util.NumFormat;
 import com.axehigh.platformer.util.Timer;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
@@ -151,14 +152,14 @@ public class HudStage extends Stage {
         for (int i = 0; i < heartImages.length; i++) {
             heartImages[i].setColor(i < playerComponent.health ? Color.RED : Color.DARK_GRAY);
         }
-        coinLabel.setText(String.format("x %04d", playerComponent.coins));
+        coinLabel.setText("x " + NumFormat.pad(playerComponent.coins, 4));
         if (GameConstants.USE_BULLET && bulletLabel != null) {
-            bulletLabel.setText(String.format("x %02d", playerComponent.ammo));
+            bulletLabel.setText("x " + NumFormat.pad(playerComponent.ammo, 2));
         }
         boolean hasCrystalObjective = playerComponent.crystalTarget > 0;
         crystalIcon.setVisible(hasCrystalObjective);
         crystalLabel.setVisible(hasCrystalObjective);
-        crystalLabel.setText(String.format("%d/%d", playerComponent.crystalsCollected, playerComponent.crystalTarget));
+        crystalLabel.setText(NumFormat.format("%d/%d", playerComponent.crystalsCollected, playerComponent.crystalTarget));
         refreshBuffRow();
     }
 
@@ -179,7 +180,7 @@ public class HudStage extends Stage {
             buffImages[i].setVisible(active && !blinkHidden);
             buffLabels[i].setVisible(active);
             if (active) {
-                buffLabels[i].setText(String.format("%d", (int) Math.ceil(remaining)));
+                buffLabels[i].setText(Integer.toString((int) Math.ceil(remaining)));
             }
         }
     }

@@ -45,6 +45,9 @@ gwt {
 
 gwt.extraSourceDirs.from(
   file('src/main/java'),
+  // GWT-only super-source overrides (see GdxDefinition.gwt.xml). Deliberately NOT part of
+  // sourceSets.main.java.srcDirs, so these duplicate core classes are never compiled by javac.
+  file('src/emu'),
   files(project(":core").file('src/main/java')),
   files(project(':core').sourceSets.main.allJava.srcDirs),
   files("../core/build/generated/sources/annotationProcessor/java/main"),
@@ -74,6 +77,13 @@ clean.delete += [file("war")]
 //// The compileJava task is run at the start of any GWT build; we need to clean the output directory BEFORE
 //// anything can be built into that output directory, so the rest of the build can use it.
 tasks.named("compileJava").get().dependsOn("clean")
+
+//// The gwt plugin feeds gwt.extraSourceDirs to compileJava too, so src/emu (GWT super-sources that
+//// deliberately reuse a core class name) reaches javac and collides with the core file. Drop it here:
+//// those classes must only ever be compiled by the GWT compiler.
+tasks.named("compileJava").configure {
+  exclude { details -> details.file.path.replace('\\', '/').contains('/src/emu/') }
+}
 
 
 //// You should always use the dist task (which could be folded into the "other" group), not the build task.
@@ -138,6 +148,26 @@ tasks.register("distZip", Zip) {
 tasks.register('superDev') {
   dependsOn("dist", "gwtDevMode")
   group("gwt")
+}
+
+//// Publishes the browser build into the marketing site so "Play in browser"
+//// (web/play/index.html) always ships the same GWT build as the other platforms.
+//// The dist output is generated, so it is not committed — run this before deploying.
+tasks.register('distToWeb') {
+  group("gwt")
+  description = "Copies the GWT dist build into ../web/play for the marketing site."
+  dependsOn("dist")
+  doLast {
+    def target = file("../web/play")
+    delete target
+    copy {
+      from(outputPath)
+      into target
+    }
+    // Everything under play/ is generated; GitHub Pages must not try to run Jekyll on it.
+    new File(target, ".nojekyll").text = ""
+    println "Published the browser build to ${target}"
+  }
 }
 
 tasks.compileJava.dependsOn("processResources")

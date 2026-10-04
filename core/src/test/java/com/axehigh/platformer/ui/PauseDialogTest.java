@@ -23,9 +23,10 @@ public class PauseDialogTest {
     private TestListener listener;
     private Preferences preferences;
 
-    private static class TestListener implements PauseDialog.Listener {
+    private static class TestListener implements com.axehigh.platformer.ui.PauseDialog.Listener {
         boolean resumed = false;
         boolean exited = false;
+        boolean screenshot = false;
         boolean touchDebug = false;
         String device = "Auto";
         String layout = "Band";
@@ -33,6 +34,11 @@ public class PauseDialogTest {
         @Override
         public void onResume() {
             resumed = true;
+        }
+
+        @Override
+        public void onScreenshot() {
+            screenshot = true;
         }
 
         @Override
@@ -132,7 +138,7 @@ public class PauseDialogTest {
 
     @Test
     public void pauseDialogInitializesWithGameplayTabAndToggles() {
-        PauseDialog dialog = new PauseDialog(skin, listener);
+        com.axehigh.platformer.ui.PauseDialog dialog = new com.axehigh.platformer.ui.PauseDialog(skin, listener);
         assertNotNull(dialog);
         assertEquals("Paused", dialog.getTitleLabel().getText().toString());
 
@@ -145,7 +151,7 @@ public class PauseDialogTest {
 
     @Test
     public void resumeAndExitButtonsTriggerCallbacks() {
-        PauseDialog dialog = new PauseDialog(skin, listener);
+        com.axehigh.platformer.ui.PauseDialog dialog = new com.axehigh.platformer.ui.PauseDialog(skin, listener);
         Array<TextButton> textButtons = new Array<>();
         findTextButtons(dialog.getButtonTable(), textButtons);
 
@@ -171,15 +177,27 @@ public class PauseDialogTest {
 
     @Test
     public void debugTabShowsAllFeatureFlagTogglesAcrossRows() {
-        PauseDialog dialog = new PauseDialog(skin, listener);
+        com.axehigh.platformer.ui.PauseDialog dialog = new com.axehigh.platformer.ui.PauseDialog(skin, listener);
         TextButton debugTab = findTextButton(dialog, "Debug");
         assertNotNull("Debug tab button should exist", debugTab);
         debugTab.toggle();
 
         Array<CheckBox> checkBoxes = new Array<>();
         findCheckBoxes(dialog, checkBoxes);
-        assertEquals("Debug tab should show all 5 feature-flag toggles",
-            5, checkBoxes.size);
+        assertEquals("Debug tab should show all 6 feature-flag toggles",
+            6, checkBoxes.size);
+    }
+
+    @Test
+    public void screenshotButtonHidesDialogAndArmsCapture() {
+        com.axehigh.platformer.ui.PauseDialog dialog = new com.axehigh.platformer.ui.PauseDialog(skin, listener);
+        TextButton screenshotButton = findTextButton(dialog, "Take Screenshot");
+        assertNotNull("Screenshot button should exist in the Gameplay tab", screenshotButton);
+
+        screenshotButton.toggle();
+
+        assertTrue("Screenshot callback should be fired", listener.screenshot);
+        assertTrue("Screenshot capture should also close the dialog", listener.resumed);
     }
 
     private TextButton findTextButton(com.badlogic.gdx.scenes.scene2d.Group group, String text) {

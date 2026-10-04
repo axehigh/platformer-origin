@@ -266,7 +266,8 @@ Two ways to place a marker:
 | `dagger` | Dagger pickup | — | Collectible item. |
 | `exitGate` | Exit gate / level transition | `nextLevel` (string, optional), `isFinal` (string, default `"false"`) | Spawns a **logic-only** entity: a collision box (sized from the object rectangle) + optional level transition. **No gate art is drawn** — paint the door's decoration yourself. The gate is interactive only when it has `nextLevel` **or** `isFinal="true"`; with neither it's purely decorative. `isFinal="true"` triggers the Victory Screen instead of loading the next level. |
 | `enemy` | Enemy | `enemyType` (string, default `"walker"`), `aiMode` (string), `speed` (float), `patrolRange` (float), `loot` (string) | Put these on the `enemies` layer (or `objects`). Catalog: `walker` (goblin), `flyer` (mosquito), `shooter` (spider), `knight` (15 HP). `loot` defines drop behavior (e.g., `"coin:3, ammo:1"`). See `resources/docs-ai/enemies.md`. |
-| `trap` | Trap | `trapType` (string, default `"acidDrop"`), `direction` (string), `interval` (float), `speed` (float), `damage` (int), `duration` (float), `cooldown` (float), `pulseSpeed` (float) | Place on `objects`/`enemies`. See §5.6. |
+| `trap` | Trap | `trapType` (string, default `"acidDrop"`), `direction` (string), `interval` (float), `speed` (float), `damage` (int), `duration` (float), `cooldown` (float), `pulseSpeed` (float), `amplitudeX`, `amplitudeY`, `phase`, `axis` | Place on `objects`/`enemies`. See §5.6. |
+| `blade` or `spinningBlade` | Spinning blade trap | `amplitudeX`, `amplitudeY`, `speed`, `phase`, `axis`, `damage` | Oscillates around its spawn position with a sine wave, frame animation (`blade1..3`), 1 damage on touch. Can also be placed via `type="trap"` with `trapType="blade"`. See §5.6. |
 | `platform` | Moving platform | `amplitudeX`, `amplitudeY`, `speed`, `phase`, `axis` (see §5.7) | The object **rectangle size defines both the sprite and collision box**. |
 | `text` or `sign` | Tutorial sign (proximity tooltip + optional button highlight) | `text` (string), `message` (string, alias of `text`), `highlight` (string, optional) | See §5.8 for the full keyword table and a copy-paste example. |
 | (any other) | — | — | Ignored. |
@@ -368,7 +369,24 @@ An animated flame that pulses between small and large on a timed cycle. The coll
 
 Visual: `fire1..10` atlas sprites (256×256), animated across the ON phase. Initial cooldown is randomised (`0` to `cooldown`) so multiple flames in a room don't pulse in sync.
 
-**Planned but not yet coded:** The atlas contains `blade1..7` and `lightning1..9` sprite regions reserved for future blade-trap and lightning-trap types. No `TrapType` enum, no `EntityFactory` code, and no system logic exist for them yet.
+D**Spinning Blade Trap (`trapType = "blade"` or `type = "blade"` / `type = "spinningBlade"`):**
+
+A spinning blade hazard that oscillates around its spawn position (up/down or sideways) like a moving platform, while continuously cycling through an animated frame sequence (`blade1..3` from `origin-game.atlas`).
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `amplitudeX` | float | `0` | Horizontal oscillation amplitude in tile units (scaled by `unitScale`). |
+| `amplitudeY` | float | `0` | Vertical oscillation amplitude in tile units (scaled by `unitScale`). |
+| `speed` | float | `1.0` | Oscillation speed in radians per second. |
+| `phase` | float | `0.0` | Starting angle offset in radians. |
+| `axis` | string | — | Convenience shortcut: `"x"` zeroes vertical amplitude, `"y"` zeroes horizontal amplitude. |
+| `damage` | int/float | `1` | HP dealt on contact with the player. |
+
+- **Motion:** Oscillates via sine wave around its base spawn position, identical to moving platforms (§5.7).
+- **Animation:** Plays a looping animation across `blade1`, `blade2`, and `blade3` at 0.1s per frame.
+- **Collision & Damage:** Inflicts 1 damage on contact with the player (respecting invulnerability grace period, no knockback). Debug AABBs appear in lime via SHIFT+D.
+
+**Planned but not yet coded:** The atlas contains `lightning1..9` sprite regions reserved for future lightning-trap types. No `TrapType` enum, no `EntityFactory` code, and no system logic exist for them yet.
 
 **Trap room awareness:** Both spawners and flames check `roomIndex` against `RoomState.activeRoomIndex` each frame. In inactive rooms: spawners pause their timers, drops continue moving (they're transient), flames freeze their pulse cycle. Matches enemy freeze behaviour.
 
@@ -554,7 +572,12 @@ All properties are read as `float`/`string`/`boolean` and tolerate being set as 
 | `patrolRange` | float | per-type default (`64`) | (enemy only) Patrol-range override in **tile units** — effective patrol = `value × unitScale` map tiles to each side of spawn (128px maps: `1` ≈ 8 tiles, `0.5` ≈ 4 tiles). Only used in `PATROL` mode (`SIDE_TO_SIDE` ignores it). |
 | `nextLevel` | string | — | (exitGate only) The next `.tmx` path **relative to the `assets/` folder**, e.g. `maps/world1/level_03.tmx`. Cycles to that map on interaction. |
 | `isFinal` | string | `"false"` | (exitGate only) `"true"` triggers the Victory Screen instead of loading the next level. |
-| `trapType` | string | `"acidDrop"` | (trap only) Trap variant: `"acidDrop"` (spawner + projectiles) or `"flame"` (pulsing fire). |
+| `trapType` | string | `"acidDrop"` | (trap only) Trap variant: `"acidDrop"` (spawner + projectiles), `"flame"` (pulsing fire), or `"blade"` / `"spinningBlade"` (oscillating spinning blade). |
+| `amplitudeX` / `amplitudeY` | float | `0` | (blade trap / platform only) Oscillation amplitude in tile units. |
+| `speed` | float | `200` (acid) / `1` (blade/platform) | (trap / platform) Projectile velocity for acid drop, or oscillation speed (rad/s) for blade/platform. |
+| `phase` | float | `0` | (blade trap / platform only) Starting angle offset in radians. |
+| `axis` | string | — | (blade trap / platform only) Convenience shortcut: `"x"` zeroes vertical axis, `"y"` zeroes horizontal. |
+| `damage` | int | `1` | (trap only) HP dealt on contact. |
 | `direction` | string | `"down"` | (trap only) Direction the trap fires/extends: `"up"`, `"down"`, `"left"`, `"right"`. |
 | `interval` | float | `2.0` | (acid drop spawner only) Seconds between projectile spawns. |
 | `speed` | float | `200` | (acid drop only) Projectile velocity in world-units/s (before unitScale). |

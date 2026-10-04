@@ -190,11 +190,16 @@ public class EntityFactory {
 
             String type = TileProps.getProperty(object, tile, "type", null);
             if (type == null) {
-                String textProp = TileProps.getProperty(object, tile, "text", null);
-                if (textProp != null) {
-                    type = "text";
+                String trapTypeProp = TileProps.getProperty(object, tile, "trapType", null);
+                if (trapTypeProp != null) {
+                    type = "trap";
                 } else {
-                    continue;
+                    String textProp = TileProps.getProperty(object, tile, "text", null);
+                    if (textProp != null) {
+                        type = "text";
+                    } else {
+                        continue;
+                    }
                 }
             }
 
@@ -252,11 +257,19 @@ public class EntityFactory {
                     engine.addEntity(trapFactory.createPlatform(spawnX, spawnY, objectWidth, objectHeight, tile, object, platformRoomIndex));
                     spawned = true;
                     break;
+                case "blade":
+                case "spinningBlade":
+                    int bladeRoomIndex = roomState.findRoomIndexContaining(centerX, centerY);
+                    engine.addEntity(trapFactory.createSpinningBladeTrap(spawnX, spawnY, objectWidth, objectHeight, object, tile, bladeRoomIndex));
+                    spawned = true;
+                    break;
                 case "trap":
                     String trapType = TileProps.getProperty(object, tile, "trapType", "acidDrop");
                     int trapRoomIndex = roomState.findRoomIndexContaining(centerX, centerY);
                     if ("flame".equalsIgnoreCase(trapType)) {
                         engine.addEntity(trapFactory.createFlameTrap(spawnX, spawnY, object, tile, trapRoomIndex));
+                    } else if ("blade".equalsIgnoreCase(trapType) || "spinningBlade".equalsIgnoreCase(trapType)) {
+                        engine.addEntity(trapFactory.createSpinningBladeTrap(spawnX, spawnY, objectWidth, objectHeight, object, tile, trapRoomIndex));
                     } else {
                         engine.addEntity(trapFactory.createAcidDropSpawner(spawnX, spawnY, object, tile, trapRoomIndex));
                     }

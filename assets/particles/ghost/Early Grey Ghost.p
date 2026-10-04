@@ -31,8 +31,10 @@ timelineCount: 3
 timeline0: 0.0
 timeline1: 0.66
 timeline2: 1.0
+independent: false
 - Life Offset -
 active: false
+independent: false
 - X Offset -
 active: false
 - Y Offset -
@@ -173,8 +175,10 @@ scalingCount: 1
 scaling0: 1.0
 timelineCount: 1
 timeline0: 0.0
+independent: false
 - Life Offset -
 active: false
+independent: false
 - X Offset -
 active: false
 - Y Offset -
@@ -321,8 +325,10 @@ timelineCount: 3
 timeline0: 0.0
 timeline1: 0.66
 timeline2: 1.0
+independent: false
 - Life Offset -
 active: false
+independent: false
 - X Offset -
 active: false
 - Y Offset -
@@ -431,7 +437,7 @@ behind: false
 premultipliedAlpha: false
 spriteMode: single
 - Image Paths -
-/C:/Programming/graphgameworking/assets/pack/hard_edges/Early Grey Ghost.png
+Early Grey Ghost.png
 
 
 inner_glow
@@ -467,8 +473,10 @@ timelineCount: 3
 timeline0: 0.0
 timeline1: 0.66
 timeline2: 1.0
+independent: false
 - Life Offset -
 active: false
+independent: false
 - X Offset -
 active: false
 - Y Offset -
