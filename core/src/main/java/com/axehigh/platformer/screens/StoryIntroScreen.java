@@ -29,7 +29,7 @@ public class StoryIntroScreen extends MenuScreen {
 
     public StoryIntroScreen(Game game) {
         super(game);
-        this.introBackgroundTexture = new Texture(Gdx.files.internal("splash/intro-screen.jpeg"));
+        this.introBackgroundTexture = new Texture(Gdx.files.internal("splash/intro_01_night.jpeg"));
     }
 
     @Override
