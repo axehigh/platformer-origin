@@ -410,6 +410,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
         }
         touchControlsStage.setInventoryAlpha(totalPotions > 0 ? 1f : 0.4f);
         touchControlsStage.setShootAlpha(playerComponent.ammo > 0 ? 1f : 0.4f);
+        touchControlsStage.setShootFireBreathActive(BUFF.has(playerEntity) && BUFF.get(playerEntity).isFireBreathActive());
 
         hudStage.getViewport().apply();
         boolean debugEnabled = com.axehigh.platformer.ecs.systems.DebugRenderSystem.isDebugEnabled();

@@ -47,6 +47,15 @@ public class BuffSystem extends IteratingSystem {
                 light.baseAlpha = 0.6f;
                 light.flickerSpeed = 6f;
                 light.flickerAmplitude = 0.2f;
+                com.axehigh.platformer.ecs.components.CollisionComponent collision = COLLISION.get(entity);
+                if (collision != null) {
+                    light.offset.set(
+                        collision.bounds.x + collision.bounds.width / 2f,
+                        collision.bounds.y + collision.bounds.height / 2f
+                    );
+                } else {
+                    light.offset.set(16f, 16f);
+                }
                 entity.add(light);
             }
         } else {

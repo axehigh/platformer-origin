@@ -84,6 +84,18 @@ public final class PlayerConfig {
     public static final float BULLET_COLLISION_HEIGHT = 16f;
     public static final float BULLET_OFFSET_X = 0f;
     public static final float BULLET_OFFSET_Y = 0f;
+
+    //------ Fire-breath potion dagger shot (temporary gfx/fire1.png placeholder) ------
+    /** Scale applied to the 64x64 {@code fire1.png} frame. Deliberately much smaller than
+     *  {@code unitScale} (unlike the regular dagger's {@link #PLAYER_BULLET_SCALE}, {@code unitScale}
+     *  here is the map's tile-to-16px factor, so a scale of {@code 1f} would blow the frame up to
+     *  several tiles wide) — that previously produced a hitbox so large it overlapped the floor/wall
+     *  the instant it spawned and got removed by {@code PlayerBulletSystem} before ever rendering. */
+    public static final float FIRE_BREATH_BULLET_SCALE = .1f;
+    /** Fire-breath bullet collision box (base units, scaled by {@link #FIRE_BREATH_BULLET_SCALE}),
+     *  kept well inside the 64x64 frame like the regular dagger's hitbox convention. */
+    public static final float FIRE_BREATH_COLLISION_WIDTH = 40f;
+    public static final float FIRE_BREATH_COLLISION_HEIGHT = 24f;
     /** Minimum delay between two shots (seconds). */
     public static final float SHOOT_COOLDOWN = 0.35f;
     /** Bullet horizontal speed (world units/second, before {@code unitScale}). */

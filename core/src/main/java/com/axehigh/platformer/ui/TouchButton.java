@@ -77,6 +77,15 @@ public class TouchButton extends ImageButton {
     }
 
     /**
+     * Tints the visible icon (preserving its current alpha), e.g. to flag an active buff/state.
+     * Like {@link #setHighlightColor}, this must tint the child {@link Image} directly since a
+     * {@code Group}'s own color only propagates alpha (not RGB) to its children.
+     */
+    public void setIconTint(float r, float g, float b) {
+        getImage().setColor(r, g, b, getImage().getColor().a);
+    }
+
+    /**
      * Treats the whole button (plus {@code UI_TOUCH_HIT_PAD} on each side) as a hit target, so
      * taps just outside the drawn button still register.
      */

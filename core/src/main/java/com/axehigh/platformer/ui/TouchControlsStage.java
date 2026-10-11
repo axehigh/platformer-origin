@@ -1,6 +1,8 @@
 package com.axehigh.platformer.ui;
 
+import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.systems.PlayerInputSystem;
+import com.axehigh.platformer.ecs.systems.TutorialSystem;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -121,12 +123,12 @@ public class TouchControlsStage extends Stage {
         actions.add(dropButton).size(UI_Button_Contextual_Size, UI_Button_Contextual_Size).padLeft(UI_PADDING_TOUCH * 2f).padRight(UI_PADDING_TOUCH * 2f);
         actions.add(yButton).size(UI_Button_Action_Size, UI_Button_Action_Size).padLeft(UI_PADDING_TOUCH * 2f).padRight(UI_PADDING_TOUCH * 2f);
         actions.add(bButton).size(UI_Button_Action_Size, UI_Button_Action_Size).padLeft(UI_PADDING_TOUCH * 2f).padRight(UI_PADDING_TOUCH * 2f);
-        
+
         Table jumpCol = new Table();
         jumpCol.defaults().spaceBottom(UI_PADDING_TOUCH);
         jumpCol.add(interactButton).size(UI_Button_Contextual_Size, UI_Button_Contextual_Size).row();
         jumpCol.add(aButton).size(UI_Button_Jump_Size, UI_Button_Jump_Size);
-        
+
         actions.add(jumpCol).padLeft(UI_PADDING_TOUCH * 2f).padRight(UI_PADDING_TOUCH * 2f);
 
         root.add(dpad).expandX().left().bottom().padLeft(UI_BOTTOM_PAD * 4f).pad(UI_BOTTOM_PAD);
@@ -195,6 +197,15 @@ public class TouchControlsStage extends Stage {
     /** Fades the shoot (daggers/Y) button when the player has no ammo. */
     public void setShootAlpha(float alpha) {
         shootButton.getColor().a = alpha;
+    }
+
+    /** Tints the shoot (daggers/Y) button red while the fire-breath potion buff is active. */
+    public void setShootFireBreathActive(boolean active) {
+        if (active) {
+            shootButton.setIconTint(1f, 0.3f, 0.3f);
+        } else {
+            shootButton.setIconTint(1f, 1f, 1f);
+        }
     }
 
     /**

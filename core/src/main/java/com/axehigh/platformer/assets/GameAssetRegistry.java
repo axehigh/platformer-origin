@@ -20,6 +20,8 @@ public final class GameAssetRegistry {
     public static final String TUTORIAL_PLAQUE = "gfx/tutorial_plaque.png";
     /** Down-pointing tail/pointer under the tutorial plaque (24x16). */
     public static final String TUTORIAL_TAIL = "gfx/tutorial_tail.png";
+    /** Temporary placeholder flame sprite for the fire-breath potion's dagger shot (64x64). */
+    public static final String FIRE1_TEXTURE = "gfx/fire1.png";
 
     private GameAssetRegistry() {
     }
@@ -43,6 +45,7 @@ public final class GameAssetRegistry {
         assetManager.load(SLASH_ARC_TEXTURE, Texture.class);
         assetManager.load(TUTORIAL_PLAQUE, Texture.class);
         assetManager.load(TUTORIAL_TAIL, Texture.class);
+        assetManager.load(FIRE1_TEXTURE, Texture.class);
         assetManager.load(BACKGROUND_FAR, Texture.class);
         assetManager.load(BACKGROUND_NEAR, Texture.class);
     }

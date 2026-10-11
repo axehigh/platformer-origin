@@ -44,6 +44,8 @@ public class PlayerInputSystem extends IteratingSystem {
 
     /** Lazily wrapped {@code gfx/slash_arc.png} texture region, or {@code null} until loaded. */
     private TextureRegion slashArcRegion;
+    /** Lazily wrapped {@code gfx/fire1.png} texture region, or {@code null} until loaded. */
+    private TextureRegion fire1Region;
 
     private PooledEngine engine;
     private float unitScale = 1f;
@@ -304,18 +306,17 @@ public class PlayerInputSystem extends IteratingSystem {
     private void spawnBullet(Entity playerEntity, TransformComponent playerTransform, CollisionComponent playerCollision, PlayerComponent player) {
         Entity bullet = engine.createEntity();
 
-        boolean fireBreath = BUFF.has(playerEntity) && BUFF.get(playerEntity).isFireBreathActive();
-        String regionName = fireBreath ? "fire1" : PLAYER_BULLET_REGION;
-        TextureRegion region = findRegion(assetManager, regionName);
-        float scaleMult = fireBreath ? 0.3f : PLAYER_BULLET_SCALE;
+        boolean isFireBreath = BUFF.has(playerEntity) && BUFF.get(playerEntity).isFireBreathActive();
+        TextureRegion region = isFireBreath ? getFire1Region() : findRegion(assetManager, PLAYER_BULLET_REGION);
+        float scaleMult = isFireBreath ? FIRE_BREATH_BULLET_SCALE : PLAYER_BULLET_SCALE;
         float bulletScale = unitScale * scaleMult;
         // The sprite's on-screen scale drives the render; the collision box is authored per-sprite
         // (BULLET_COLLISION_WIDTH/HEIGHT, scaled by PLAYER_BULLET_SCALE) since the visible blade can
         // be smaller than the full atlas frame. Offsets position the box within the frame.
-        float bulletWidth = fireBreath ? (64f * bulletScale) : (BULLET_COLLISION_WIDTH * bulletScale);
-        float bulletHeight = fireBreath ? (64f * bulletScale) : (BULLET_COLLISION_HEIGHT * bulletScale);
-        float bulletOffsetX = fireBreath ? (region.getRegionWidth() * bulletScale - bulletWidth) / 2f : (BULLET_OFFSET_X * bulletScale);
-        float bulletOffsetY = fireBreath ? (region.getRegionHeight() * bulletScale - bulletHeight) / 2f : (BULLET_OFFSET_Y * bulletScale);
+        float bulletWidth = isFireBreath ? (FIRE_BREATH_COLLISION_WIDTH * bulletScale) : (BULLET_COLLISION_WIDTH * bulletScale);
+        float bulletHeight = isFireBreath ? (FIRE_BREATH_COLLISION_HEIGHT * bulletScale) : (BULLET_COLLISION_HEIGHT * bulletScale);
+        float bulletOffsetX = isFireBreath ? (region.getRegionWidth() * bulletScale - bulletWidth) / 2f : (BULLET_OFFSET_X * bulletScale);
+        float bulletOffsetY = isFireBreath ? (region.getRegionHeight() * bulletScale - bulletHeight) / 2f : (BULLET_OFFSET_Y * bulletScale);
         float frameWidth = region.getRegionWidth() * bulletScale;
         // Center the sprite's vertical extent on the player's collision center. The blade sits at
         // a fixed offset within the (tall) atlas frame, so centering the frame keeps the visible
@@ -383,7 +384,7 @@ public class PlayerInputSystem extends IteratingSystem {
         bullet.add(collision);
 
         BulletComponent bulletComponent = engine.createComponent(BulletComponent.class);
-        bulletComponent.damage = fireBreath ? BULLET_DAMAGE * 2f : BULLET_DAMAGE;
+        bulletComponent.damage = isFireBreath ? BULLET_DAMAGE * 2f : BULLET_DAMAGE;
         bulletComponent.lifetime = BULLET_LIFETIME;
         bullet.add(bulletComponent);
         engine.addEntity(bullet);
@@ -442,6 +443,17 @@ public class PlayerInputSystem extends IteratingSystem {
         arc.add(arcComponent);
 
         engine.addEntity(arc);
+    }
+
+    /**
+     * Returns the cached {@code gfx/fire1.png} region for the fire-breath potion's dagger shot,
+     * loading/wrapping it on first use.
+     */
+    private TextureRegion getFire1Region() {
+        if (fire1Region == null) {
+            fire1Region = new TextureRegion(assetManager.get(FIRE1_TEXTURE, Texture.class));
+        }
+        return fire1Region;
     }
 
     private static TextureAtlas.AtlasRegion findRegion(AssetManager assetManager, String regionName) {
