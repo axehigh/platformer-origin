@@ -120,6 +120,7 @@ public class RenderSystem extends SortedIteratingSystem {
 
         BuffComponent buff = BUFF.get(entity);
         boolean isInvisible = buff != null && buff.isInvisibilityActive();
+        boolean isInvulnerable = buff != null && buff.isInvulnerabilityActive();
 
         if (isTrail) {
             TrailComponent trail = TRAIL.get(entity);
@@ -130,6 +131,9 @@ public class RenderSystem extends SortedIteratingSystem {
         } else if (isInvisible) {
             batch.flush();
             batch.setColor(0.6f, 0.6f, 0.6f, 0.3f * transform.alpha);
+        } else if (isInvulnerable) {
+            batch.flush();
+            batch.setColor(1.2f, 1.1f, 0.4f, oldColor.a * transform.alpha);
         } else {
             boolean hasAlpha = transform.alpha < 1f;
             if (hasAlpha) {

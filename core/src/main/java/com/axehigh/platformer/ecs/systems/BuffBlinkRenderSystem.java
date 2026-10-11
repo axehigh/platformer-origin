@@ -79,8 +79,8 @@ public class BuffBlinkRenderSystem extends IteratingSystem {
         if (expiring.size > 0) {
             boolean blinkPhase = (int) (blinkClock / GameConstants.BUFF_BLINK_INTERVAL) % 2 == 0;
             if (blinkPhase) {
-                float iconSize = 20f;
-                float spacing = 4f;
+                float iconSize = 36f;
+                float spacing = 6f;
                 float totalWidth = expiring.size * iconSize + (expiring.size - 1) * spacing;
                 float startX = centerX - totalWidth / 2f;
                 for (int i = 0; i < expiring.size; i++) {

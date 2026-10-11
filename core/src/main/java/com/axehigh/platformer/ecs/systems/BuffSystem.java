@@ -2,6 +2,7 @@ package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.GameConstants;
 import com.axehigh.platformer.ecs.components.BuffComponent;
+import com.axehigh.platformer.ecs.components.LightComponent;
 import com.axehigh.platformer.ecs.components.MovementComponent;
 import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.badlogic.ashley.core.Entity;
@@ -36,6 +37,24 @@ public class BuffSystem extends IteratingSystem {
         buff.invisibility.update(deltaTime);
         buff.jump.update(deltaTime);
         buff.fireBreath.update(deltaTime);
+
+        if (buff.invulnerability.isActive()) {
+            LightComponent light = LIGHT.get(entity);
+            if (light == null) {
+                light = new LightComponent();
+                light.color.set(1f, 0.85f, 0.2f, 1f);
+                light.radius = 80f;
+                light.baseAlpha = 0.6f;
+                light.flickerSpeed = 6f;
+                light.flickerAmplitude = 0.2f;
+                entity.add(light);
+            }
+        } else {
+            LightComponent light = LIGHT.get(entity);
+            if (light != null) {
+                entity.remove(LightComponent.class);
+            }
+        }
 
         if (buff.speed.isActive()) {
             if (!buff.speedApplied) {
