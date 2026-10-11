@@ -20,7 +20,7 @@ import com.badlogic.gdx.math.MathUtils;
  * room/map edge, so this reads as "the edges of the map get darker". Uses normal blending, runs
  * after {@code LightRenderSystem} (so torch glows near the frame also get dimmed) and before
  * {@code DebugRenderSystem}. Gated on {@code FeatureFlags.isVignetteEnabled()} (toggled from the
- * pause dialog's Debug tab and the Settings screen's Debug tab) — when OFF the batch is untouched.
+ * pause dialog's Visual tab and the Settings screen's Debug tab) — when OFF the batch is untouched.
  * Also draws a short-lived RED pulse overlay (same gradient) triggered by
  * {@link #triggerPulse()} whenever the player takes damage (see {@code PlayerDamageResolver});
  * the pulse decays over {@code GameConstants.VIGNETTE_PULSE_DURATION} and always draws exactly one

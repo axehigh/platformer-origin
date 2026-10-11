@@ -142,16 +142,17 @@ public class PauseDialogTest {
         assertNotNull(dialog);
         assertEquals("Paused", dialog.getTitleLabel().getText().toString());
 
-        // Find checkboxes in content
+        // Find checkboxes in gameplay content (Music, Sound Effects)
         Array<CheckBox> checkBoxes = new Array<>();
         findCheckBoxes(dialog, checkBoxes);
 
-        assertTrue("Should have initialized with checkboxes", checkBoxes.size >= 3);
+        assertEquals("Gameplay tab should have 2 audio checkboxes", 2, checkBoxes.size);
     }
 
     @Test
     public void resumeAndExitButtonsTriggerCallbacks() {
         com.axehigh.platformer.ui.PauseDialog dialog = new com.axehigh.platformer.ui.PauseDialog(skin, listener);
+        dialog.pack();
         Array<TextButton> textButtons = new Array<>();
         findTextButtons(dialog.getButtonTable(), textButtons);
 
@@ -160,13 +161,15 @@ public class PauseDialogTest {
         for (TextButton btn : textButtons) {
             if ("Resume".equals(btn.getText().toString())) {
                 resumeBtn = btn;
-            } else if ("Exit".equals(btn.getText().toString())) {
+            } else if ("Menu".equals(btn.getText().toString()) || "Exit".equals(btn.getText().toString())) {
                 exitBtn = btn;
             }
         }
 
         assertNotNull("Resume button should exist in footer", resumeBtn);
-        assertNotNull("Exit button should exist in footer", exitBtn);
+        assertNotNull("Menu/Exit button should exist in footer", exitBtn);
+        assertEquals("Footer button width should match configured size", 180f, resumeBtn.getWidth(), 0.01f);
+        assertEquals("Footer button height should match configured size", 60f, resumeBtn.getHeight(), 0.01f);
 
         resumeBtn.toggle();
         assertTrue("Resume callback should be fired", listener.resumed);
@@ -176,28 +179,119 @@ public class PauseDialogTest {
     }
 
     @Test
-    public void debugTabShowsAllFeatureFlagTogglesAcrossRows() {
+    public void visualTabShowsVisualToggles() {
         com.axehigh.platformer.ui.PauseDialog dialog = new com.axehigh.platformer.ui.PauseDialog(skin, listener);
-        TextButton debugTab = findTextButton(dialog, "Debug");
-        assertNotNull("Debug tab button should exist", debugTab);
-        debugTab.toggle();
+        TextButton visualTab = findTextButton(dialog, "Visual");
+        assertNotNull("Visual tab button should exist", visualTab);
+        visualTab.toggle();
 
         Array<CheckBox> checkBoxes = new Array<>();
         findCheckBoxes(dialog, checkBoxes);
-        assertEquals("Debug tab should show all 6 feature-flag toggles",
-            6, checkBoxes.size);
+        assertEquals("Visual tab should show 5 visual toggles", 5, checkBoxes.size);
+    }
+
+    @Test
+    public void betaTabShowsFeatureFlagAndDebugToggles() {
+        com.axehigh.platformer.ui.PauseDialog dialog = new com.axehigh.platformer.ui.PauseDialog(skin, listener);
+        TextButton betaTab = findTextButton(dialog, "Beta");
+        assertNotNull("Beta tab button should exist", betaTab);
+        betaTab.toggle();
+
+        Array<CheckBox> checkBoxes = new Array<>();
+        findCheckBoxes(dialog, checkBoxes);
+        assertEquals("Beta tab should show 5 feature-flag and debug toggles", 5, checkBoxes.size);
+    }
+
+    @Test
+    public void deviceTabShowsSimulationButtonsAndCycles() {
+        com.axehigh.platformer.ui.PauseDialog dialog = new com.axehigh.platformer.ui.PauseDialog(skin, listener);
+        TextButton deviceTab = findTextButton(dialog, "Device");
+        assertNotNull("Device tab button should exist", deviceTab);
+        deviceTab.toggle();
+
+        assertNotNull("Device title label should exist in Device tab", findLabel(dialog, "Device"));
+        assertNotNull("Mobile title label should exist in Device tab", findLabel(dialog, "Mobile"));
+
+        TextButton deviceBtn = findTextButton(dialog, "Auto");
+        assertNotNull("Device button should exist in Device tab", deviceBtn);
+        deviceBtn.toggle();
+        assertEquals("Phone", listener.device);
+        assertEquals("Phone", deviceBtn.getText().toString());
+
+        TextButton layoutBtn = findTextButton(dialog, "Band");
+        assertNotNull("Layout button should exist in Device tab", layoutBtn);
+        layoutBtn.toggle();
+        assertEquals("Standard", listener.layout);
+        assertEquals("Standard", layoutBtn.getText().toString());
     }
 
     @Test
     public void screenshotButtonHidesDialogAndArmsCapture() {
         com.axehigh.platformer.ui.PauseDialog dialog = new com.axehigh.platformer.ui.PauseDialog(skin, listener);
-        TextButton screenshotButton = findTextButton(dialog, "Take Screenshot");
+        TextButton screenshotButton = findTextButton(dialog, "Screenshot");
         assertNotNull("Screenshot button should exist in the Gameplay tab", screenshotButton);
 
         screenshotButton.toggle();
 
         assertTrue("Screenshot callback should be fired", listener.screenshot);
         assertTrue("Screenshot capture should also close the dialog", listener.resumed);
+    }
+
+    @Test
+    public void buttonsHavePaddingInsidePanel() {
+        com.axehigh.platformer.ui.PauseDialog dialog = new com.axehigh.platformer.ui.PauseDialog(skin, listener);
+        dialog.setSize(600f, 400f);
+        dialog.layout();
+
+        // Button table should have positive bottom padding to keep footer buttons inside panel
+        assertTrue("Footer button table should have bottom padding", dialog.getButtonTable().getPadBottom() > 0f);
+
+        // Header table cell in content table should have positive top padding
+        com.badlogic.gdx.scenes.scene2d.ui.Cell<?> headerCell = dialog.getContentTable().getCells().first();
+        assertNotNull(headerCell);
+        assertTrue("Tab header cell should have top padding", headerCell.getPadTop() > 0f);
+    }
+
+    @Test
+    public void tabHeaderRemainsFixedAtTopAcrossTabs() {
+        com.axehigh.platformer.ui.PauseDialog dialog = new com.axehigh.platformer.ui.PauseDialog(skin, listener);
+        dialog.setSize(600f, 400f);
+        dialog.layout();
+
+        TextButton gameplayTab = findTextButton(dialog, "Gameplay");
+        assertNotNull(gameplayTab);
+        float gameplayY = gameplayTab.getY();
+
+        TextButton visualTab = findTextButton(dialog, "Visual");
+        visualTab.toggle();
+        dialog.layout();
+        assertEquals("Visual tab button Y position should remain fixed", gameplayY, findTextButton(dialog, "Visual").getY(), 0.01f);
+
+        TextButton betaTab = findTextButton(dialog, "Beta");
+        betaTab.toggle();
+        dialog.layout();
+        assertEquals("Beta tab button Y position should remain fixed", gameplayY, findTextButton(dialog, "Beta").getY(), 0.01f);
+
+        TextButton deviceTab = findTextButton(dialog, "Device");
+        deviceTab.toggle();
+        dialog.layout();
+        assertEquals("Device tab button Y position should remain fixed", gameplayY, findTextButton(dialog, "Device").getY(), 0.01f);
+    }
+
+    private com.badlogic.gdx.scenes.scene2d.ui.Label findLabel(com.badlogic.gdx.scenes.scene2d.Group group, String text) {
+        for (com.badlogic.gdx.scenes.scene2d.Actor actor : group.getChildren()) {
+            if (actor instanceof com.badlogic.gdx.scenes.scene2d.ui.Label
+                && text.equals(((com.badlogic.gdx.scenes.scene2d.ui.Label) actor).getText().toString())) {
+                return (com.badlogic.gdx.scenes.scene2d.ui.Label) actor;
+            }
+            if (actor instanceof com.badlogic.gdx.scenes.scene2d.Group) {
+                com.badlogic.gdx.scenes.scene2d.ui.Label found = findLabel((com.badlogic.gdx.scenes.scene2d.Group) actor, text);
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
+        return null;
     }
 
     private TextButton findTextButton(com.badlogic.gdx.scenes.scene2d.Group group, String text) {

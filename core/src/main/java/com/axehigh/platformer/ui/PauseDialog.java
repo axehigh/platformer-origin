@@ -11,18 +11,19 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import static com.axehigh.platformer.GameConstants.SmallFontScale;
 
 /**
- * In-game pause menu, split into a Gameplay tab (audio toggles, wall-climb feature flag) and a
- * Debug tab (collision/touch debug toggles, device/layout simulation). Resume and Exit stay
- * outside the tabs side-by-side so they're reachable from either. Checkbox toggles flip settings
- * directly; state owned by the screen (pause flag, touch-debug logging, device/layout switching)
- * is reached through {@link Listener}.
+ * In-game pause menu, organized into four tabs: Gameplay (audio, screenshot, tries),
+ * Visual (rendering & visual toggles), Beta (feature flags, collision/touch debug),
+ * and Device (device & mobile layout simulation). Resume and Menu stay outside the tabs
+ * side-by-side in the footer.
  */
 public class PauseDialog extends Dialog {
 
     /** Which content page the tab header shows. */
     private enum Tab {
         GAMEPLAY,
-        DEBUG
+        VISUAL,
+        BETA,
+        DEVICE
     }
 
     /** RoboVM-safe functional interface: reads a boolean setting (no java.util.function on iOS). */
@@ -69,20 +70,28 @@ public class PauseDialog extends Dialog {
         int getTriesRemaining();
     }
 
-    private static final float TAB_BUTTON_MIN_WIDTH = 130f;
-    private static final float ACTION_BUTTON_MIN_WIDTH = 110f;
-    private static final float SIMULATION_BUTTON_MIN_WIDTH = 130f;
+    private static final float TAB_BUTTON_MIN_WIDTH = 90f;
+    private static final float FOOTER_BUTTON_WIDTH = 180f;
+    private static final float FOOTER_BUTTON_HEIGHT = 60f;
+    private static final float SIMULATION_BUTTON_MIN_WIDTH = 140f;
     private static final float CONTENT_PAD = 8f;
     private static final float ELEMENT_PAD = 5f;
+    private static final float TOP_HEADER_PAD = 16f;
+    private static final float FOOTER_BUTTON_PAD = 8f;
+    private static final float FOOTER_BOTTOM_PAD = 24f;
     private static final Color TAB_ACTIVE_COLOR = Color.GOLD;
     private static final Color TAB_INACTIVE_COLOR = Color.WHITE;
 
     private final Listener listener;
     private final Table gameplayContent = new Table();
-    private final Table debugContent = new Table();
+    private final Table visualContent = new Table();
+    private final Table betaContent = new Table();
+    private final Table deviceContent = new Table();
     private final Table tabContent = new Table();
     private final TextButton gameplayTabButton;
-    private final TextButton debugTabButton;
+    private final TextButton visualTabButton;
+    private final TextButton betaTabButton;
+    private final TextButton deviceTabButton;
     private TextButton deviceButton;
     private TextButton layoutButton;
 
@@ -91,26 +100,35 @@ public class PauseDialog extends Dialog {
         this.listener = listener;
 
         getTitleLabel().setFontScale(SmallFontScale);
-        getContentTable().defaults().pad(CONTENT_PAD);
-        getButtonTable().defaults().pad(CONTENT_PAD);
+        getContentTable().top().defaults().pad(CONTENT_PAD);
 
         buildGameplayTab();
-        buildDebugTab();
+        buildVisualTab();
+        buildBetaTab();
+        buildDeviceTab();
 
         gameplayTabButton = tabButton("Gameplay", Tab.GAMEPLAY);
-        debugTabButton = tabButton("Debug", Tab.DEBUG);
-        Table tabHeader = new Table();
-        tabHeader.add(gameplayTabButton).minWidth(TAB_BUTTON_MIN_WIDTH).padRight(ELEMENT_PAD);
-        tabHeader.add(debugTabButton).minWidth(TAB_BUTTON_MIN_WIDTH);
-        getContentTable().add(tabHeader).row();
+        visualTabButton = tabButton("Visual", Tab.VISUAL);
+        betaTabButton = tabButton("Beta", Tab.BETA);
+        deviceTabButton = tabButton("Device", Tab.DEVICE);
 
-        getContentTable().add(tabContent).row();
+        Table tabHeader = new Table();
+        tabHeader.defaults().pad(ELEMENT_PAD).minWidth(TAB_BUTTON_MIN_WIDTH);
+        tabHeader.add(gameplayTabButton);
+        tabHeader.add(visualTabButton);
+        tabHeader.add(betaTabButton);
+        tabHeader.add(deviceTabButton);
+        getContentTable().add(tabHeader).top().padTop(TOP_HEADER_PAD).padBottom(ELEMENT_PAD).row();
+
+        tabContent.top();
+        getContentTable().add(tabContent).top().expandX().fillX().row();
 
         selectTab(Tab.GAMEPLAY);
 
-        getButtonTable().defaults().pad(ELEMENT_PAD).minWidth(ACTION_BUTTON_MIN_WIDTH);
+        getButtonTable().padBottom(FOOTER_BOTTOM_PAD);
+        getButtonTable().defaults().pad(FOOTER_BUTTON_PAD).size(FOOTER_BUTTON_WIDTH, FOOTER_BUTTON_HEIGHT);
         button(actionButton("Resume", this::hideAndResume));
-        button(actionButton("Exit", listener::onExit));
+        button(actionButton("Menu", listener::onExit));
     }
 
     @Override
@@ -126,73 +144,92 @@ public class PauseDialog extends Dialog {
     }
 
     private void buildGameplayTab() {
-        gameplayContent.defaults().pad(ELEMENT_PAD).left();
+        gameplayContent.top().defaults().pad(ELEMENT_PAD).left();
         Label triesLabel = new Label("Tries remaining: " + listener.getTriesRemaining(), getSkin());
         triesLabel.setFontScale(SmallFontScale);
-        gameplayContent.add(triesLabel).row();
+        gameplayContent.add(triesLabel).colspan(2).left().row();
 
-        gameplayContent.add(toggleCheckBox("Music",
+        CheckBox musicBox = toggleCheckBox("Music",
             AudioManager.get()::isMusicEnabled,
-            AudioManager.get()::setMusicEnabled)).row();
-
-        gameplayContent.add(toggleCheckBox("Sound Effects",
+            AudioManager.get()::setMusicEnabled);
+        CheckBox sfxBox = toggleCheckBox("Sound Effects",
             AudioManager.get()::isSfxEnabled,
-            AudioManager.get()::setSfxEnabled)).row();
+            AudioManager.get()::setSfxEnabled);
 
-        gameplayContent.add(toggleCheckBox("Wall Climb",
-            FeatureFlags::isWallClimbingEnabled,
-            FeatureFlags::setWallClimbingEnabled)).row();
-
-        gameplayContent.add(toggleCheckBox("God Mode",
-            FeatureFlags::isGodModeEnabled,
-            FeatureFlags::setGodModeEnabled)).row();
-
-        gameplayContent.add(toggleCheckBox("Soft Stop",
-            FeatureFlags::isSoftStopEnabled,
-            FeatureFlags::setSoftStopEnabled)).row();
-
-        gameplayContent.add(toggleCheckBox("Potion Stacking",
-            FeatureFlags::isPotionStackingEnabled,
-            FeatureFlags::setPotionStackingEnabled)).row();
+        gameplayContent.add(musicBox).left();
+        gameplayContent.add(sfxBox).left().row();
 
         // Closing first matters: the capture is flushed at the end of this same frame, and a dialog
         // still on stage would be drawn into the shot. hideAndResume() also drops the pause flag,
         // so the shot catches the game running again rather than frozen.
-        gameplayContent.add(actionButton("Take Screenshot", () -> {
+        gameplayContent.add(actionButton("Screenshot", () -> {
             hideAndResume();
             listener.onScreenshot();
-        })).left().row();
+        })).colspan(2).left().row();
     }
 
-    private void buildDebugTab() {
-        debugContent.defaults().pad(ELEMENT_PAD);
+    private void buildVisualTab() {
+        visualContent.top().defaults().pad(ELEMENT_PAD).left();
 
+        CheckBox vignetteBox = toggleCheckBox("Vignette",
+            FeatureFlags::isVignetteEnabled,
+            FeatureFlags::setVignetteEnabled);
+        CheckBox combatFxBox = toggleCheckBox("Combat FX",
+            FeatureFlags::isSlashArcEnabled,
+            FeatureFlags::setSlashArcEnabled);
+        CheckBox visualFxBox = toggleCheckBox("Visual FX",
+            FeatureFlags::isVisualEffectsEnabled,
+            FeatureFlags::setVisualEffectsEnabled);
+        CheckBox embersBox = toggleCheckBox("Embers",
+            FeatureFlags::isEmbersEnabled,
+            FeatureFlags::setEmbersEnabled);
+        CheckBox softStopBox = toggleCheckBox("Soft Stop",
+            FeatureFlags::isSoftStopEnabled,
+            FeatureFlags::setSoftStopEnabled);
+
+        visualContent.add(vignetteBox).left();
+        visualContent.add(combatFxBox).left().row();
+        visualContent.add(visualFxBox).left();
+        visualContent.add(embersBox).left().row();
+        visualContent.add(softStopBox).left().row();
+    }
+
+    private void buildBetaTab() {
+        betaContent.top().defaults().pad(ELEMENT_PAD).left();
+
+        CheckBox godModeBox = toggleCheckBox("God Mode",
+            FeatureFlags::isGodModeEnabled,
+            FeatureFlags::setGodModeEnabled);
+        CheckBox wallClimbBox = toggleCheckBox("Wall Climb",
+            FeatureFlags::isWallClimbingEnabled,
+            FeatureFlags::setWallClimbingEnabled);
+        CheckBox potionStackBox = toggleCheckBox("Potion Stacking",
+            FeatureFlags::isPotionStackingEnabled,
+            FeatureFlags::setPotionStackingEnabled);
         CheckBox collisionDebugBox = toggleCheckBox("Collision Debug",
             DebugRenderSystem::isDebugEnabled,
             DebugRenderSystem::setDebugEnabled);
         CheckBox touchDebugBox = toggleCheckBox("Touch Debug",
             listener::isTouchDebugOn,
             listener::setTouchDebugOn);
-        CheckBox embersDebugBox = toggleCheckBox("Embers",
-            FeatureFlags::isEmbersEnabled,
-            FeatureFlags::setEmbersEnabled);
-        CheckBox vignetteDebugBox = toggleCheckBox("Vignette",
-            FeatureFlags::isVignetteEnabled,
-            FeatureFlags::setVignetteEnabled);
-        CheckBox slashDebugBox = toggleCheckBox("Combat FX",
-            FeatureFlags::isSlashArcEnabled,
-            FeatureFlags::setSlashArcEnabled);
-        CheckBox visualEffectsBox = toggleCheckBox("Visual FX",
-            FeatureFlags::isVisualEffectsEnabled,
-            FeatureFlags::setVisualEffectsEnabled);
 
-        // Three toggles per row: 6 flags fit in 2 rows of 3.
-        debugContent.add(toggleRow(
-            collisionDebugBox, touchDebugBox, embersDebugBox)).left().row();
-        debugContent.add(toggleRow(
-            vignetteDebugBox, slashDebugBox, visualEffectsBox)).left().row();
+        betaContent.add(godModeBox).left();
+        betaContent.add(wallClimbBox).left().row();
+        betaContent.add(potionStackBox).left();
+        betaContent.add(collisionDebugBox).left().row();
+        betaContent.add(touchDebugBox).left().row();
+    }
 
-        deviceButton = new TextButton("Device: " + listener.deviceLabel(), getSkin());
+    private void buildDeviceTab() {
+        deviceContent.top().defaults().pad(ELEMENT_PAD);
+
+        Label deviceTitle = new Label("Device", getSkin());
+        deviceTitle.setFontScale(SmallFontScale);
+
+        Label layoutTitle = new Label("Mobile", getSkin());
+        layoutTitle.setFontScale(SmallFontScale);
+
+        deviceButton = new TextButton(listener.deviceLabel(), getSkin());
         deviceButton.getLabel().setFontScale(SmallFontScale);
         deviceButton.addListener(new ChangeListener() {
             @Override
@@ -203,7 +240,7 @@ public class PauseDialog extends Dialog {
             }
         });
 
-        layoutButton = new TextButton("Mobile: " + listener.layoutLabel(), getSkin());
+        layoutButton = new TextButton(listener.layoutLabel(), getSkin());
         layoutButton.getLabel().setFontScale(SmallFontScale);
         layoutButton.addListener(new ChangeListener() {
             @Override
@@ -214,11 +251,10 @@ public class PauseDialog extends Dialog {
             }
         });
 
-        Table simulationRow = new Table();
-        simulationRow.defaults().pad(ELEMENT_PAD);
-        simulationRow.add(deviceButton).minWidth(SIMULATION_BUTTON_MIN_WIDTH);
-        simulationRow.add(layoutButton).minWidth(SIMULATION_BUTTON_MIN_WIDTH);
-        debugContent.add(simulationRow).row();
+        deviceContent.add(deviceTitle);
+        deviceContent.add(layoutTitle).row();
+        deviceContent.add(deviceButton).minWidth(SIMULATION_BUTTON_MIN_WIDTH);
+        deviceContent.add(layoutButton).minWidth(SIMULATION_BUTTON_MIN_WIDTH).row();
     }
 
     private TextButton tabButton(String label, Tab tab) {
@@ -227,23 +263,32 @@ public class PauseDialog extends Dialog {
 
     private void selectTab(Tab tab) {
         tabContent.clearChildren();
-        tabContent.add(tab == Tab.GAMEPLAY ? gameplayContent : debugContent);
+        Table selectedTable;
+        switch (tab) {
+            case VISUAL:
+                selectedTable = visualContent;
+                break;
+            case BETA:
+                selectedTable = betaContent;
+                break;
+            case DEVICE:
+                selectedTable = deviceContent;
+                break;
+            case GAMEPLAY:
+            default:
+                selectedTable = gameplayContent;
+                break;
+        }
+        tabContent.add(selectedTable).top();
         gameplayTabButton.getLabel().setColor(tab == Tab.GAMEPLAY ? TAB_ACTIVE_COLOR : TAB_INACTIVE_COLOR);
-        debugTabButton.getLabel().setColor(tab == Tab.DEBUG ? TAB_ACTIVE_COLOR : TAB_INACTIVE_COLOR);
+        visualTabButton.getLabel().setColor(tab == Tab.VISUAL ? TAB_ACTIVE_COLOR : TAB_INACTIVE_COLOR);
+        betaTabButton.getLabel().setColor(tab == Tab.BETA ? TAB_ACTIVE_COLOR : TAB_INACTIVE_COLOR);
+        deviceTabButton.getLabel().setColor(tab == Tab.DEVICE ? TAB_ACTIVE_COLOR : TAB_INACTIVE_COLOR);
     }
 
     private void refreshDeviceLayoutLabels() {
-        deviceButton.setText("Device: " + listener.deviceLabel());
-        layoutButton.setText("Mobile: " + listener.layoutLabel());
-    }
-
-    private Table toggleRow(CheckBox... boxes) {
-        Table row = new Table();
-        row.defaults().pad(ELEMENT_PAD);
-        for (CheckBox box : boxes) {
-            row.add(box).left();
-        }
-        return row;
+        deviceButton.setText(listener.deviceLabel());
+        layoutButton.setText(listener.layoutLabel());
     }
 
     private TextButton actionButton(String text, Runnable onClick) {

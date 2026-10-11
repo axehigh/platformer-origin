@@ -163,7 +163,7 @@ public final class FeatureFlags {
 
     /**
      * Whether the screen-framed vignette (darkened room/map edges) is enabled. Defaults to
-     * {@code true}; gates {@code VignetteRenderSystem}. Toggled from the pause dialog's Debug tab
+     * {@code true}; gates {@code VignetteRenderSystem}. Toggled from the pause dialog's Visual tab
      * and the Settings screen's Debug tab.
      */
     public static boolean isVignetteEnabled() {
