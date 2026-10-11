@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import static com.axehigh.platformer.ecs.components.Mappers.BUFF;
 import static com.axehigh.platformer.ecs.components.Mappers.MOVEMENT;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 /** Headless tests for the timed potion buffs managed by {@link BuffSystem}. */

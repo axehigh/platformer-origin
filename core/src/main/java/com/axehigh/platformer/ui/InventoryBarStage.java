@@ -169,6 +169,9 @@ public class InventoryBarStage extends Stage {
         if (!open || !playerComponent.potionCooldown.isDone()) {
             return;
         }
+        if (!PotionEffects.canApply(playerEntity, type)) {
+            return;
+        }
         if (!playerComponent.consumePotion(type)) {
             return;
         }

@@ -159,6 +159,7 @@ public class GameSystems {
         engine.addSystem(new CrumblingTileRenderSystem(batch, camera, mapLoader.getCrumblingTiles(), PRIORITY_CRUMBLE_RENDER));
         engine.addSystem(new RenderSystem(batch, camera, PRIORITY_ENTITY_RENDER));
         engine.addSystem(new FloatingMessageSystem(batch, camera, skin, PRIORITY_FLOATING_MESSAGE));
+        engine.addSystem(new BuffBlinkRenderSystem(assetManager, batch, camera, PRIORITY_FLOATING_MESSAGE + 3));
         engine.addSystem(new ParticleSystem(batch, camera, PRIORITY_PARTICLE_RENDER));
         lightRenderSystem = new LightRenderSystem(batch, camera, PRIORITY_LIGHT_RENDER);
         engine.addSystem(lightRenderSystem);

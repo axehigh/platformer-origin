@@ -33,7 +33,8 @@ public class HudStage extends Stage {
     private static final float HEART_PAD = 6f;
     /** Buff types with a timed effect, in HUD countdown-row order. */
     private static final PotionType[] BUFF_ORDER = {
-        PotionType.STRENGTH, PotionType.SPEED, PotionType.INVULNERABILITY
+        PotionType.STRENGTH, PotionType.SPEED, PotionType.INVULNERABILITY,
+        PotionType.INVISIBILITY, PotionType.JUMP, PotionType.FIRE_BREATH
     };
     private static final float BUFF_ICON_SIZE = 26f;
 
@@ -194,6 +195,12 @@ public class HudStage extends Stage {
                 return buffComponent.speed;
             case INVULNERABILITY:
                 return buffComponent.invulnerability;
+            case INVISIBILITY:
+                return buffComponent.invisibility;
+            case JUMP:
+                return buffComponent.jump;
+            case FIRE_BREATH:
+                return buffComponent.fireBreath;
             default:
                 return null;
         }

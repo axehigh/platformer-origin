@@ -23,6 +23,7 @@ public final class FeatureFlags {
     private static boolean slashArcEnabled = GamePreferences.DEFAULT_SLASH_ARC_ENABLED;
     private static boolean visualEffectsEnabled = GamePreferences.DEFAULT_VISUAL_EFFECTS_ENABLED;
     private static boolean godModeEnabled = GamePreferences.DEFAULT_GOD_MODE;
+    private static boolean potionStackingEnabled = GamePreferences.DEFAULT_POTION_STACKING_ENABLED;
     private static StylizedTransitionOverlay.TransitionType transitionStyle = GamePreferences.DEFAULT_TRANSITION_STYLE;
     private static boolean initialized = false;
 
@@ -46,6 +47,7 @@ public final class FeatureFlags {
         slashArcEnabled = preferences.isSlashArcEnabled();
         visualEffectsEnabled = preferences.isVisualEffectsEnabled();
         godModeEnabled = preferences.isGodModeEnabled();
+        potionStackingEnabled = preferences.isPotionStackingEnabled();
         transitionStyle = preferences.getTransitionStyle();
     }
 
@@ -230,6 +232,19 @@ public final class FeatureFlags {
             new GamePreferences().setGodModeEnabled(enabled);
         }
     }
+
+    public static boolean isPotionStackingEnabled() {
+        ensureInitialized();
+        return potionStackingEnabled;
+    }
+
+    public static void setPotionStackingEnabled(boolean enabled) {
+        potionStackingEnabled = enabled;
+        initialized = true;
+        if (Gdx.app != null) {
+            new GamePreferences().setPotionStackingEnabled(enabled);
+        }
+    }
     public static StylizedTransitionOverlay.TransitionType getTransitionStyle() {
         ensureInitialized();
         return transitionStyle;
@@ -256,6 +271,7 @@ public final class FeatureFlags {
         slashArcEnabled = GamePreferences.DEFAULT_SLASH_ARC_ENABLED;
         visualEffectsEnabled = GamePreferences.DEFAULT_VISUAL_EFFECTS_ENABLED;
         godModeEnabled = GamePreferences.DEFAULT_GOD_MODE;
+        potionStackingEnabled = GamePreferences.DEFAULT_POTION_STACKING_ENABLED;
         transitionStyle = GamePreferences.DEFAULT_TRANSITION_STYLE;
         initialized = false;
     }

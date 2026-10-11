@@ -232,7 +232,7 @@ public class PlayerInputSystem extends IteratingSystem {
         }
 
         boolean potionUsePressed = input.isKeyJustPressed(C);
-        if (!player.isDead && potionUsePressed && player.potionCooldown.isDone() && player.consumeSelectedPotion()) {
+        if (!player.isDead && potionUsePressed && player.potionCooldown.isDone() && PotionEffects.canApply(entity, player.selectedPotion) && player.consumeSelectedPotion()) {
             PotionEffects.apply(entity, player, player.selectedPotion);
             player.potionCooldown.start(GameConstants.POTION_USE_COOLDOWN);
             if (sfxSystem != null) {

@@ -27,6 +27,27 @@ public final class PotionEffects {
     }
 
     /**
+     * Returns whether the potion can be applied. If potion stacking is disallowed
+     * ({@link FeatureFlags#isPotionStackingEnabled()} is false), drinking a non-healing potion
+     * is disallowed if any other buff is currently active on the player.
+     */
+    public static boolean canApply(Entity playerEntity, PotionType type) {
+        if (type == PotionType.HEALING) {
+            return true;
+        }
+        if (!FeatureFlags.isPotionStackingEnabled()) {
+            BuffComponent buff = BUFF.get(playerEntity);
+            if (buff != null) {
+                if (buff.isStrengthActive() || buff.isSpeedActive() || buff.isInvulnerabilityActive()
+                        || buff.isInvisibilityActive() || buff.isJumpActive() || buff.isFireBreathActive()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
      * Applies the effect of a drunk potion: Healing restores hearts immediately (capped at
      * {@code maxHealth}); the buff potions start their timed buff on {@link BuffComponent} (ticked
      * and applied by {@code BuffSystem}). A player entity without a {@code BuffComponent} simply
@@ -35,6 +56,9 @@ public final class PotionEffects {
     public static void apply(Entity playerEntity, PlayerComponent player, PotionType type) {
         if (Gdx.app != null) {
             Gdx.app.log("PotionEffects", "apply " + type + ", listener=" + (potionListener != null));
+        }
+        if (!canApply(playerEntity, type)) {
+            return;
         }
         if (type == PotionType.HEALING) {
             player.health = Math.min(player.maxHealth, player.health + GameConstants.HEALING_POTION_HEAL);

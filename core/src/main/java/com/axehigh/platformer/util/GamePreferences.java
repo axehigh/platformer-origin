@@ -24,6 +24,7 @@ public class GamePreferences {
     private static final String KEY_SLASH_ARC_ENABLED = "slashArcEnabled";
     private static final String KEY_VISUAL_EFFECTS_ENABLED = "visualEffectsEnabled";
     private static final String KEY_GOD_MODE = "godMode";
+    private static final String KEY_POTION_STACKING = "potionStacking";
     private static final String KEY_DEVICE_CLASS = "deviceClass";
     private static final String KEY_LAYOUT_MODE = "layoutMode";
     private static final String KEY_UI_ICON_SCALE = "uiIconScale";
@@ -58,6 +59,8 @@ public class GamePreferences {
     static final boolean DEFAULT_VISUAL_EFFECTS_ENABLED = true;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
     static final boolean DEFAULT_GOD_MODE = false;
+    /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
+    static final boolean DEFAULT_POTION_STACKING_ENABLED = false;
     /** Shared with {@code FeatureFlags} so the runtime default and the persisted default never diverge. */
     static final StylizedTransitionOverlay.TransitionType DEFAULT_TRANSITION_STYLE = StylizedTransitionOverlay.TransitionType.PORTAL_IRIS;
 
@@ -238,6 +241,15 @@ public class GamePreferences {
 
     public void setGodModeEnabled(boolean godModeEnabled) {
         preferences.putBoolean(KEY_GOD_MODE, godModeEnabled);
+        preferences.flush();
+    }
+
+    public boolean isPotionStackingEnabled() {
+        return preferences.getBoolean(KEY_POTION_STACKING, DEFAULT_POTION_STACKING_ENABLED);
+    }
+
+    public void setPotionStackingEnabled(boolean potionStackingEnabled) {
+        preferences.putBoolean(KEY_POTION_STACKING, potionStackingEnabled);
         preferences.flush();
     }
 

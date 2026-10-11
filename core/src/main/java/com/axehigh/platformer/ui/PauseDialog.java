@@ -151,6 +151,10 @@ public class PauseDialog extends Dialog {
             FeatureFlags::isSoftStopEnabled,
             FeatureFlags::setSoftStopEnabled)).row();
 
+        gameplayContent.add(toggleCheckBox("Potion Stacking",
+            FeatureFlags::isPotionStackingEnabled,
+            FeatureFlags::setPotionStackingEnabled)).row();
+
         // Closing first matters: the capture is flushed at the end of this same frame, and a dialog
         // still on stage would be drawn into the shot. hideAndResume() also drops the pause flag,
         // so the shot catches the game running again rather than frozen.
