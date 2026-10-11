@@ -1,8 +1,9 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.GameConstants;
-import com.axehigh.platformer.ecs.components.*;
-import com.axehigh.platformer.util.Timer;
+import com.axehigh.platformer.ecs.components.BuffComponent;
+import com.axehigh.platformer.ecs.components.MovementComponent;
+import com.axehigh.platformer.ecs.components.PlayerComponent;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -16,27 +17,8 @@ import static com.axehigh.platformer.ecs.components.Mappers.*;
  * maxSpeedX doesn't clobber an active buff); when it expires the pre-buff max speed is restored.
  * The strength and invulnerability buffs have no side effects here — {@code MeleeAttackSystem} and
  * {@code PlayerDamageResolver} read them directly.
- *
- * Also owns the player's buff-feedback halo: while any buff is active the player carries one
- * {@link LightComponent} (rendered by the shared {@code LightRenderSystem} pass) tinted with the
- * component-wise average of the active {@link PotionType} colors; it is removed once no buff
- * remains. When the soonest-expiring timer drops under {@link GameConstants#BUFF_BLINK_THRESHOLD},
- * the halo's {@code baseAlpha} blinks between full and dim on a {@link GameConstants#BUFF_BLINK_INTERVAL}
- * toggle (driven by a {@link Timer}, matching the project timer convention).
  */
 public class BuffSystem extends IteratingSystem {
-
-    /** Radius of the blended buff halo on the player (world units). */
-    private static final float BUFF_LIGHT_RADIUS = 56f;
-    /** Halo alpha while a buff is steady (the {@code LightComponent} default). */
-    private static final float BUFF_LIGHT_ALPHA = 0.85f;
-    /** Halo alpha during the dim phase of the expiry blink. */
-    private static final float BUFF_LIGHT_BLINK_ALPHA = 0.15f;
-
-    /** Drives the bright/dim toggle of the halo while a buff is about to expire. */
-    private final Timer blinkTimer = new Timer();
-    /** Current phase of the expiry blink: {@code true} = bright, {@code false} = dim. */
-    private boolean blinkBright = false;
 
     public BuffSystem(int priority) {
         super(Family.all(PlayerComponent.class, MovementComponent.class, BuffComponent.class).get(), priority);
@@ -68,102 +50,24 @@ public class BuffSystem extends IteratingSystem {
 
         if (player != null) {
             player.maxJumps = buff.jump.isActive() ? 3 : 2;
-        }
 
-        updateHalo(entity, buff, deltaTime);
-    }
+            boolean speedBuffActive = buff.speed.isActive();
+            boolean jumpBuffActive = buff.jump.isActive();
 
-    /**
-     * Manages the buff feedback halo light:
-     * <ul>
-     *   <li>Adds/removes {@link LightComponent} based on active buff count.</li>
-     *   <li>Blends halo color from the active {@link PotionType} colors (RGB average).</li>
-     *   <li>Centers halo on the player's collision box (follows facing and sprite trimming).</li>
-     *   <li>Blinks alpha between {@value #BUFF_LIGHT_ALPHA} and {@value #BUFF_LIGHT_BLINK_ALPHA}
-     *       when the soonest-expiring buff drops below {@link GameConstants#BUFF_BLINK_THRESHOLD}.</li>
-     * </ul>
-     */
-    private void updateHalo(Entity entity, BuffComponent buff, float deltaTime) {
-        int activeCount = 0;
-        float minRemaining = Float.MAX_VALUE;
-        float red = 0f;
-        float green = 0f;
-        float blue = 0f;
-        PotionType[] contributing = {
-            PotionType.STRENGTH, PotionType.SPEED, PotionType.INVULNERABILITY,
-            PotionType.INVISIBILITY, PotionType.JUMP, PotionType.FIRE_BREATH
-        };
-        for (PotionType type : contributing) {
-            Timer timer = buffTimer(buff, type);
-            if (!timer.isActive()) {
-                continue;
+            boolean spawnSpeedTrail = speedBuffActive && (Math.abs(movement.velocity.x) > 5f || !movement.grounded);
+            boolean spawnJumpTrail = jumpBuffActive && !movement.grounded && player.jumpCount == 3;
+
+            if (spawnSpeedTrail || spawnJumpTrail) {
+                player.trailTimer -= deltaTime;
+                if (player.trailTimer <= 0f) {
+                    player.trailTimer = com.axehigh.platformer.PlayerConfig.PLAYER_TRAIL_INTERVAL;
+                    boolean speedActiveForTrail = speedBuffActive && spawnSpeedTrail;
+                    boolean jumpActiveForTrail = jumpBuffActive && spawnJumpTrail;
+                    TrailSystem.spawnPlayerTrail(getEngine(), TRANSFORM.get(entity), TEXTURE.get(entity), COLLISION.get(entity), speedActiveForTrail, jumpActiveForTrail);
+                }
+            } else {
+                player.trailTimer = 0f;
             }
-            activeCount++;
-            float[] color = type.messageColor();
-            red += color[0];
-            green += color[1];
-            blue += color[2];
-            minRemaining = Math.min(minRemaining, timer.getRemaining());
-        }
-
-        if (activeCount == 0) {
-            blinkTimer.reset();
-            blinkBright = false;
-            if (LIGHT.has(entity)) {
-                entity.remove(LightComponent.class);
-            }
-            return;
-        }
-
-        LightComponent light = LIGHT.get(entity);
-        if (light == null) {
-            light = new LightComponent();
-            entity.add(light);
-        }
-        light.radius = BUFF_LIGHT_RADIUS;
-        light.color.set(red / activeCount, green / activeCount, blue / activeCount, 1f);
-        // Center the halo on the player's body: middle of the live collision box relative to
-        // the transform (same convention RenderSystem uses for its debug box center), so the
-        // glow follows facing offsets and trimmed-atlas offsets instead of assuming a centered
-        // sprite.
-        if (COLLISION.has(entity)) {
-            CollisionComponent collision = COLLISION.get(entity);
-            light.offset.set(
-                collision.bounds.x + collision.bounds.width / 2f,
-                collision.bounds.y + collision.bounds.height / 2f);
-        }
-
-        if (minRemaining < GameConstants.BUFF_BLINK_THRESHOLD) {
-            blinkTimer.update(deltaTime);
-            if (blinkTimer.isDone()) {
-                blinkBright = !blinkBright;
-                blinkTimer.start(GameConstants.BUFF_BLINK_INTERVAL);
-            }
-            light.baseAlpha = blinkBright ? BUFF_LIGHT_ALPHA : BUFF_LIGHT_BLINK_ALPHA;
-        } else {
-            blinkTimer.reset();
-            blinkBright = false;
-            light.baseAlpha = BUFF_LIGHT_ALPHA;
-        }
-    }
-
-    /** The {@link BuffComponent} timer backing a buff-capable {@link PotionType}. */
-    private static Timer buffTimer(BuffComponent buff, PotionType type) {
-        switch (type) {
-            case STRENGTH:
-                return buff.strength;
-            case SPEED:
-                return buff.speed;
-            case INVULNERABILITY:
-                return buff.invulnerability;
-            case INVISIBILITY:
-                return buff.invisibility;
-            case JUMP:
-                return buff.jump;
-            case FIRE_BREATH:
-                return buff.fireBreath;
-            default:
-                throw new IllegalArgumentException("No buff timer for " + type);
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.axehigh.platformer.ecs.components;
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Pool.Poolable;
 
 /**
@@ -15,11 +16,14 @@ public class SlashArcComponent implements Component, Poolable {
     public float age = 0f;
     /** Fraction of {@link #lifeTime} spent fading in from alpha 0 → 1; the remainder fades 1 → 0. */
     public float fadeInRatio = 0.2f;
+    /** Optional color tint for the slash arc. */
+    public final Color tint = new Color(1f, 1f, 1f, 1f);
 
     @Override
     public void reset() {
         lifeTime = 0.2f;
         age = 0f;
         fadeInRatio = 0.2f;
+        tint.set(1f, 1f, 1f, 1f);
     }
 }

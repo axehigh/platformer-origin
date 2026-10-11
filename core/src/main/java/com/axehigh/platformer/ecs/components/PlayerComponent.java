@@ -61,6 +61,8 @@ public class PlayerComponent implements Component {
     public boolean isWallClimbing = false;
     /** Prevents bullet spamming. */
     public Timer shootCooldown = new Timer();
+    /** Countdown to the next trail afterimage spawn while speed or jump buffs are active. */
+    public float trailTimer = 0f;
 
     /** Prevents melee-strike spamming. */
     public Timer meleeCooldown = new Timer();

@@ -100,6 +100,10 @@ public final class PlayerConfig {
     public static final float BULLET_TRAIL_INTERVAL = 0.04f;
     /** How long each trail ghost lingers on screen before fading out entirely. */
     public static final float BULLET_TRAIL_LIFETIME = 0.12f;
+    /** Interval (seconds) between successive trail ghost spawns along the player's path during speed/jump buffs. */
+    public static final float PLAYER_TRAIL_INTERVAL = 0.05f;
+    /** How long each player trail ghost lingers on screen before fading out entirely. */
+    public static final float PLAYER_TRAIL_LIFETIME = 0.15f;
 
     //------ Slash-arc VFX (cosmetic melee swing feedback) ------
     /** How long the arc sprite lingers on screen (then it fades out entirely). */

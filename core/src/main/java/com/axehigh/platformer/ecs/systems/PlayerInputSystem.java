@@ -13,6 +13,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -434,6 +435,10 @@ public class PlayerInputSystem extends IteratingSystem {
 
         SlashArcComponent arcComponent = engine.createComponent(SlashArcComponent.class);
         arcComponent.lifeTime = SLASH_ARC_LIFETIME;
+        BuffComponent buff = BUFF.has(playerEntity) ? BUFF.get(playerEntity) : null;
+        if (buff != null && buff.isStrengthActive()) {
+            arcComponent.tint.set(Color.RED);
+        }
         arc.add(arcComponent);
 
         engine.addEntity(arc);

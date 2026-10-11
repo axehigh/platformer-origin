@@ -60,8 +60,10 @@ public class RenderSystem extends SortedIteratingSystem {
         float drawY = transform.position.y;
 
         CollisionComponent collision = COLLISION.get(entity);
+        boolean isTrail = TRAIL.get(entity) != null;
+        boolean isSlashArc = SLASH_ARC.get(entity) != null;
         boolean isCharacter = PLAYER.get(entity) != null || ENEMY.get(entity) != null;
-        if (BULLET.get(entity) == null && isCharacter && collision != null && region instanceof AtlasRegion) {
+        if (!isTrail && !isSlashArc && BULLET.get(entity) == null && isCharacter && collision != null && region instanceof AtlasRegion) {
             AtlasRegion atlasRegion = (AtlasRegion) region;
             float absScaleX = Math.abs(transform.scale.x);
             float absScaleY = Math.abs(transform.scale.y);
@@ -98,7 +100,7 @@ public class RenderSystem extends SortedIteratingSystem {
             } else {
                 drawY = frameAnchorY + (atlasRegion.originalHeight - atlasRegion.offsetY) * absScaleY;
             }
-        } else if (BULLET.get(entity) == null) {
+        } else if (!isTrail && BULLET.get(entity) == null) {
             // Fallback for non-atlas or non-collision entities
             drawX -= Math.min(0f, width);
             drawY -= Math.min(0f, height);
@@ -116,10 +118,24 @@ public class RenderSystem extends SortedIteratingSystem {
             }
         }
 
-        boolean hasAlpha = transform.alpha < 1f;
-        if (hasAlpha) {
+        BuffComponent buff = BUFF.get(entity);
+        boolean isInvisible = buff != null && buff.isInvisibilityActive();
+
+        if (isTrail) {
+            TrailComponent trail = TRAIL.get(entity);
+            batch.setColor(trail.tint.r, trail.tint.g, trail.tint.b, trail.tint.a * transform.alpha);
+        } else if (isSlashArc) {
+            SlashArcComponent arc = SLASH_ARC.get(entity);
+            batch.setColor(arc.tint.r, arc.tint.g, arc.tint.b, arc.tint.a * transform.alpha);
+        } else if (isInvisible) {
             batch.flush();
-            batch.setColor(oldColor.r, oldColor.g, oldColor.b, oldColor.a * transform.alpha);
+            batch.setColor(0.6f, 0.6f, 0.6f, 0.3f * transform.alpha);
+        } else {
+            boolean hasAlpha = transform.alpha < 1f;
+            if (hasAlpha) {
+                batch.flush();
+                batch.setColor(oldColor.r, oldColor.g, oldColor.b, oldColor.a * transform.alpha);
+            }
         }
 
         HitFlashComponent flash = HIT_FLASH.get(entity);

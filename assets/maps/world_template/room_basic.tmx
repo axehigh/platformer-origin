@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="24" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="489">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="24" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="489">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
- <tileset firstgid="60" source="../tileset/items.tsx"/>
- <tileset firstgid="79" source="../tileset/enemy.tsx"/>
- <tileset firstgid="86" source="../tileset/bg.tsx"/>
+ <tileset firstgid="70" source="../tileset/items.tsx"/>
+ <tileset firstgid="101" source="../tileset/enemy.tsx"/>
+ <tileset firstgid="110" source="../tileset/bg.tsx"/>
  <layer id="1" name="background" width="24" height="10">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

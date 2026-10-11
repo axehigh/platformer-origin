@@ -62,11 +62,11 @@ Marker component applied to potion pickup entities (spawned from `"potion"` obje
 
 ### D.2. BuffComponent (New)
 Holds the player's drink-buff timers (added to the player entity by `EntityFactory.createPlayer`):
-*   `Timer strength` (`20s` via `startStrength()`; while `isActive()`, melee strikes deal `swordDamage × STRENGTH_DAMAGE_MULTIPLIER` (doubles base damage)).
+*   `Timer strength` (`20s` via `startStrength()`; while `isActive()`, melee strikes deal `swordDamage × STRENGTH_DAMAGE_MULTIPLIER` (doubles base damage) and tint the melee strike slash-arc red).
 *   `Timer speed` (`15s` via `startSpeed()`; while `isActive()`, `BuffSystem` scales `maxSpeedX` by `SPEED_MULTIPLIER`).
 *   `Timer invulnerability` (`10s` via `startInvulnerability()`; while `isActive()`, `PlayerDamageResolver` ignores all damage).
-*   `Timer invisibility` (`10s` via `startInvisibility()`; while `isActive()`, monsters ignore the player and player phases through monster collision boxes).
-*   `Timer jump` (`15s` via `startJump()`; while `isActive()`, grants triple jump (`maxJumps = 3`)).
+*   `Timer invisibility` (`10s` via `startInvisibility()`; while `isActive()`, monsters ignore the player, player phases through monster collision boxes, and the character is rendered faded out and greyed out to appear invisible).
+*   `Timer jump` (`15s` via `startJump()`; while `isActive()`, grants triple jump (`maxJumps = 3`), and periodically spawns fading afterimage trail ghosts when jumping and specifically performing the third jump in mid-air (`player.jumpCount == 3`)).
 *   `Timer fireBreath` (`15s` via `startFireBreath()`; while `isActive()`, shooting ranged attacks fires fireballs instead of knives with doubled damage).
 
 See §2.E.1 for the full consumption flow.

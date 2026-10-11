@@ -243,11 +243,11 @@ class Layout:
         self.secret_wall = load(SECRET_WALL_TILESET)
 
         self.cave.firstgid = 1
-        self.items.firstgid = self.cave.firstgid + self.cave.tilecount
-        self.enemy.firstgid = self.items.firstgid + self.items.tilecount
-        self.bg.firstgid = self.enemy.firstgid + self.enemy.tilecount
-        self.hazards.firstgid = self.bg.firstgid + self.bg.tilecount
-        self.secret_wall.firstgid = self.hazards.firstgid + self.hazards.tilecount
+        self.items.firstgid = self.cave.firstgid + self.cave.local_id_range
+        self.enemy.firstgid = self.items.firstgid + self.items.local_id_range
+        self.bg.firstgid = self.enemy.firstgid + self.bg.local_id_range
+        self.hazards.firstgid = self.bg.firstgid + self.hazards.local_id_range
+        self.secret_wall.firstgid = self.hazards.firstgid + self.hazards.local_id_range
 
         self.solid_gids = []
         self.passage_gids = []
@@ -1019,9 +1019,9 @@ def _section_fits(layout, room, section, col_offset, extra_forbidden=None):
     end_col = start_col + section.width - 1
     if start_col < room.col_start + 1 or end_col > room.col_end - 1:
         return False
-    # floor_row - section.height + 1 is the section's top row; it must stay below the room ceiling
+    # floor_row - section.height is the section's top row; it must stay below the room ceiling
     # (room.row_start is the perimeter ceiling row, which a section must never touch).
-    if room.floor_row - section.height + 1 <= room.row_start:
+    if room.floor_row - section.height <= room.row_start:
         return False
     forbidden = _forbidden_interior_cols(layout, room, extra_forbidden)
     if any(col in forbidden for col in range(start_col, end_col + 1)):
@@ -1059,7 +1059,7 @@ def _plan_section_footprints(layout, placements, extra_forbidden=None):
                 f"cols {room.col_start + 1}..{room.col_end - 1}, height {room.height}) without "
                 f"blocking a doorway approach, entrance, or exit column")
         start_col = room.col_start + 1 + col_offset
-        start_row = room.floor_row - section.height + 1
+        start_row = room.floor_row - section.height
         footprints.append((section, room, start_col, start_row))
     return footprints
 
