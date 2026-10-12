@@ -37,6 +37,7 @@ public class BuffSystem extends IteratingSystem {
         buff.invisibility.update(deltaTime);
         buff.jump.update(deltaTime);
         buff.fireBreath.update(deltaTime);
+        buff.spider.update(deltaTime);
 
         if (buff.invulnerability.isActive()) {
             LightComponent light = LIGHT.get(entity);

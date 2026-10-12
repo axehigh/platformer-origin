@@ -93,6 +93,7 @@ public final class GameConstants {
     public static final float[] MESSAGE_COLOR_INVISIBILITY = {0.7f, 0.3f, 0.9f};
     public static final float[] MESSAGE_COLOR_JUMP = {0.2f, 0.8f, 1f};
     public static final float[] MESSAGE_COLOR_FIRE = {1f, 0.4f, 0.1f};
+    public static final float[] MESSAGE_COLOR_SPIDER = {1f, 0.4f, 0.1f};
     /**
      * Crystal objective counter / pickup text (cyan). Distinct from the gold coin counter.
      */

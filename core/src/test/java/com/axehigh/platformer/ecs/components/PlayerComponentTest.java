@@ -73,6 +73,15 @@ public class PlayerComponentTest {
     }
 
     @Test
+    public void spiderPotionTrackingAndConsumption() {
+        player.setPotionCount(com.axehigh.platformer.ecs.components.PotionType.SPIDER, 2);
+        assertEquals(2, player.countPotion(com.axehigh.platformer.ecs.components.PotionType.SPIDER));
+
+        assertTrue(player.consumePotion(com.axehigh.platformer.ecs.components.PotionType.SPIDER));
+        assertEquals(1, player.countPotion(com.axehigh.platformer.ecs.components.PotionType.SPIDER));
+    }
+
+    @Test
     public void consumePotionWhenGodModeEnabledDoesNotConsume() {
         FeatureFlags.setGodModeEnabled(true);
         player.setPotionCount(com.axehigh.platformer.ecs.components.PotionType.HEALING, 0);

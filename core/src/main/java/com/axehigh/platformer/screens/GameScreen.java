@@ -270,6 +270,7 @@ public class GameScreen extends BaseScreen implements PauseDialog.Listener, Game
             save.invisibilityPotions = playerComponent.countPotion(com.axehigh.platformer.ecs.components.PotionType.INVISIBILITY);
             save.jumpPotions = playerComponent.countPotion(com.axehigh.platformer.ecs.components.PotionType.JUMP);
             save.fireBreathPotions = playerComponent.countPotion(com.axehigh.platformer.ecs.components.PotionType.FIRE_BREATH);
+            save.spiderPotions = playerComponent.countPotion(com.axehigh.platformer.ecs.components.PotionType.SPIDER);
         }
         SaveManager.save(save);
 

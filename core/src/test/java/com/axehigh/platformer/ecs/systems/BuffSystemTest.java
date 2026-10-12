@@ -79,4 +79,21 @@ public class BuffSystemTest extends SystemTestBase {
         assertFalse(buff.isStrengthActive());
         assertFalse(buff.isInvulnerabilityActive());
     }
+
+    @Test
+    public void spiderBuffExpiresAfterDuration() {
+        Entity entity = buffedPlayer(100f);
+        com.axehigh.platformer.ecs.components.BuffComponent buff = BUFF.get(entity);
+        buff.startSpider();
+
+        engine.update(DT);
+        org.junit.Assert.assertTrue(buff.isSpiderActive());
+
+        int frames = (int) Math.ceil(com.axehigh.platformer.ecs.components.PotionType.SPIDER.duration() / DT) + 1;
+        for (int i = 0; i < frames; i++) {
+            engine.update(DT);
+        }
+
+        assertFalse(buff.isSpiderActive());
+    }
 }

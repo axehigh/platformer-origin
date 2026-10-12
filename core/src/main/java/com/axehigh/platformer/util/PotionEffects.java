@@ -39,7 +39,8 @@ public final class PotionEffects {
             BuffComponent buff = BUFF.get(playerEntity);
             if (buff != null) {
                 if (buff.isStrengthActive() || buff.isSpeedActive() || buff.isInvulnerabilityActive()
-                        || buff.isInvisibilityActive() || buff.isJumpActive() || buff.isFireBreathActive()) {
+                        || buff.isInvisibilityActive() || buff.isJumpActive() || buff.isFireBreathActive()
+                        || buff.isSpiderActive()) {
                     return false;
                 }
             }
@@ -89,6 +90,9 @@ public final class PotionEffects {
                 break;
             case FIRE_BREATH:
                 buff.startFireBreath();
+                break;
+            case SPIDER:
+                buff.startSpider();
                 break;
             default:
                 break;

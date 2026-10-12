@@ -87,8 +87,10 @@ public class MovementSystem extends IteratingSystem {
         MovementComponent movement = MOVEMENT.get(entity);
         CollisionComponent collision = COLLISION.get(entity);
         PlayerComponent player = PLAYER.get(entity);
+        BuffComponent buff = BUFF.get(entity);
 
-        boolean wallClimbing = player != null && player.isWallClimbing && FeatureFlags.isWallClimbingEnabled();
+        boolean canWallClimb = FeatureFlags.isWallClimbingEnabled() && ((buff != null && buff.isSpiderActive()) || FeatureFlags.isGodModeEnabled());
+        boolean wallClimbing = player != null && player.isWallClimbing && canWallClimb;
         boolean flying = FLYING.get(entity) != null;
 
         if (player != null) {
@@ -140,7 +142,7 @@ public class MovementSystem extends IteratingSystem {
                     // While hurt, a knockback push into a wall must not fake a wall-grab; a dead
                     // player must not latch onto walls either.
                     player.isWallClimbing = false;
-                } else if (FeatureFlags.isWallClimbingEnabled() && hitWallX && attemptedDeltaX != 0f) {
+                } else if (canWallClimb && hitWallX && attemptedDeltaX != 0f) {
                     player.isWallClimbing = true;
                     player.jumpCount = 1;
                 } else if (player.isWallClimbing) {

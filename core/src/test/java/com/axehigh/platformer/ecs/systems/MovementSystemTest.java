@@ -1,7 +1,6 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.GameConstants;
-import com.axehigh.platformer.ecs.components.*;
 import com.axehigh.platformer.util.FeatureFlags;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -27,23 +26,23 @@ public class MovementSystemTest extends SystemTestBase {
     private final Array<Rectangle> collisionRects = new Array<>();
     private final Array<Rectangle> oneWayRects = new Array<>();
     private Engine engine;
-    private MovementSystem system;
+    private com.axehigh.platformer.ecs.systems.MovementSystem system;
 
     @Before
     public void setUp() {
         FeatureFlags.setWallClimbingEnabled(true);
-        system = new MovementSystem(collisionRects, oneWayRects);
+        system = new com.axehigh.platformer.ecs.systems.MovementSystem(collisionRects, oneWayRects);
         system.setUnitScale(1f);
         engine = newEngine();
         engine.addSystem(system);
     }
 
     private Entity player(float x, float y) {
-        TransformComponent transform = transform(x, y);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = transform(x, y);
         transform.scale.x = 0f;
-        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
         place(transform, collision, x, y);
-        Entity entity = entity(transform, player(), movement(), collision);
+        Entity entity = entity(transform, player(), movement(), collision, new com.axehigh.platformer.ecs.components.BuffComponent());
         engine.addEntity(entity);
         return entity;
     }
@@ -51,8 +50,8 @@ public class MovementSystemTest extends SystemTestBase {
     @Test
     public void gravityPullsNonFlyingEntityDown() {
         Entity entity = player(0f, 130f);
-        MovementComponent movement = MOVEMENT.get(entity);
-        TransformComponent transform = TRANSFORM.get(entity);
+        com.axehigh.platformer.ecs.components.MovementComponent movement = MOVEMENT.get(entity);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = TRANSFORM.get(entity);
 
         engine.update(DT);
 
@@ -64,7 +63,7 @@ public class MovementSystemTest extends SystemTestBase {
     @Test
     public void horizontalVelocityIsClampedToMaxSpeed() {
         Entity entity = player(0f, 130f);
-        MovementComponent movement = MOVEMENT.get(entity);
+        com.axehigh.platformer.ecs.components.MovementComponent movement = MOVEMENT.get(entity);
         movement.velocity.x = 500f;
 
         engine.update(DT);
@@ -76,8 +75,8 @@ public class MovementSystemTest extends SystemTestBase {
     public void wallStopsHorizontalMovement() {
         collisionRects.add(new Rectangle(100f, 0f, 50f, 300f));
         Entity entity = player(85f, 130f);
-        MovementComponent movement = MOVEMENT.get(entity);
-        TransformComponent transform = TRANSFORM.get(entity);
+        com.axehigh.platformer.ecs.components.MovementComponent movement = MOVEMENT.get(entity);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = TRANSFORM.get(entity);
         movement.velocity.x = 100f;
 
         engine.update(DT);
@@ -90,9 +89,9 @@ public class MovementSystemTest extends SystemTestBase {
     public void floorStopsFallGroundsAndResetsJumpCount() {
         collisionRects.add(new Rectangle(0f, 0f, 300f, 100f));
         Entity entity = player(0f, 130f);
-        MovementComponent movement = MOVEMENT.get(entity);
-        TransformComponent transform = TRANSFORM.get(entity);
-        PlayerComponent player = PLAYER.get(entity);
+        com.axehigh.platformer.ecs.components.MovementComponent movement = MOVEMENT.get(entity);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = TRANSFORM.get(entity);
+        com.axehigh.platformer.ecs.components.PlayerComponent player = PLAYER.get(entity);
         player.jumpCount = 2;
 
         engine.update(DT);
@@ -104,11 +103,12 @@ public class MovementSystemTest extends SystemTestBase {
     }
 
     @Test
-    public void wallClimbLatchesWhileAirborne() {
+    public void wallClimbLatchesWhileAirborneWithSpiderBuff() {
         collisionRects.add(new Rectangle(100f, 0f, 50f, 300f));
         Entity entity = player(85f, 130f);
-        MovementComponent movement = MOVEMENT.get(entity);
-        PlayerComponent player = PLAYER.get(entity);
+        BUFF.get(entity).startSpider();
+        com.axehigh.platformer.ecs.components.MovementComponent movement = MOVEMENT.get(entity);
+        com.axehigh.platformer.ecs.components.PlayerComponent player = PLAYER.get(entity);
         movement.velocity.x = 100f;
 
         engine.update(DT);
@@ -119,12 +119,28 @@ public class MovementSystemTest extends SystemTestBase {
     }
 
     @Test
+    public void wallClimbWithoutSpiderBuffDoesNotLatch() {
+        collisionRects.add(new Rectangle(100f, 0f, 50f, 300f));
+        Entity entity = player(85f, 130f);
+        com.axehigh.platformer.ecs.components.MovementComponent movement = MOVEMENT.get(entity);
+        com.axehigh.platformer.ecs.components.PlayerComponent player = PLAYER.get(entity);
+        movement.velocity.x = 100f;
+
+        engine.update(DT);
+
+        assertFalse(movement.grounded);
+        assertFalse(player.isWallClimbing);
+        assertEquals(0, player.jumpCount);
+    }
+
+    @Test
     public void wallClimbDisabledDoesNotLatch() {
         FeatureFlags.setWallClimbingEnabled(false);
         collisionRects.add(new Rectangle(100f, 0f, 50f, 300f));
         Entity entity = player(85f, 130f);
-        MovementComponent movement = MOVEMENT.get(entity);
-        PlayerComponent player = PLAYER.get(entity);
+        BUFF.get(entity).startSpider();
+        com.axehigh.platformer.ecs.components.MovementComponent movement = MOVEMENT.get(entity);
+        com.axehigh.platformer.ecs.components.PlayerComponent player = PLAYER.get(entity);
         movement.velocity.x = 100f;
 
         engine.update(DT);
@@ -138,8 +154,9 @@ public class MovementSystemTest extends SystemTestBase {
     public void wallClimbDisabledAppliesFullGravity() {
         FeatureFlags.setWallClimbingEnabled(false);
         Entity entity = player(85f, 130f);
-        MovementComponent movement = MOVEMENT.get(entity);
-        PlayerComponent player = PLAYER.get(entity);
+        BUFF.get(entity).startSpider();
+        com.axehigh.platformer.ecs.components.MovementComponent movement = MOVEMENT.get(entity);
+        com.axehigh.platformer.ecs.components.PlayerComponent player = PLAYER.get(entity);
         player.isWallClimbing = true;
 
         engine.update(DT);
@@ -153,9 +170,9 @@ public class MovementSystemTest extends SystemTestBase {
     public void landsOnOneWayPlatformFromAbove() {
         oneWayRects.add(new Rectangle(0f, 0f, 100f, 20f));
         Entity entity = player(0f, 50.1f);
-        MovementComponent movement = MOVEMENT.get(entity);
-        TransformComponent transform = TRANSFORM.get(entity);
-        PlayerComponent player = PLAYER.get(entity);
+        com.axehigh.platformer.ecs.components.MovementComponent movement = MOVEMENT.get(entity);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = TRANSFORM.get(entity);
+        com.axehigh.platformer.ecs.components.PlayerComponent player = PLAYER.get(entity);
         player.jumpCount = 2;
         movement.velocity.y = -400f;
 
@@ -177,8 +194,8 @@ public class MovementSystemTest extends SystemTestBase {
     public void risesUpThroughOneWayPlatform() {
         oneWayRects.add(new Rectangle(0f, 100f, 100f, 20f));
         Entity entity = player(0f, 129f);
-        MovementComponent movement = MOVEMENT.get(entity);
-        TransformComponent transform = TRANSFORM.get(entity);
+        com.axehigh.platformer.ecs.components.MovementComponent movement = MOVEMENT.get(entity);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = TRANSFORM.get(entity);
         movement.velocity.y = 200f;
 
         engine.update(DT);
@@ -192,9 +209,9 @@ public class MovementSystemTest extends SystemTestBase {
     public void dropWindowFallsThroughOneWayPlatform() {
         oneWayRects.add(new Rectangle(0f, 0f, 100f, 20f));
         Entity entity = player(0f, 50f);
-        MovementComponent movement = MOVEMENT.get(entity);
-        TransformComponent transform = TRANSFORM.get(entity);
-        PlayerComponent player = PLAYER.get(entity);
+        com.axehigh.platformer.ecs.components.MovementComponent movement = MOVEMENT.get(entity);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = TRANSFORM.get(entity);
+        com.axehigh.platformer.ecs.components.PlayerComponent player = PLAYER.get(entity);
         player.dropWindow.start(0.25f);
 
         engine.update(DT);
@@ -209,9 +226,9 @@ public class MovementSystemTest extends SystemTestBase {
         collisionRects.add(new Rectangle(-200f, -400f, 800f, 200f));
         oneWayRects.add(new Rectangle(0f, 0f, 100f, 20f));
         Entity entity = player(0f, 50f);
-        MovementComponent movement = MOVEMENT.get(entity);
-        TransformComponent transform = TRANSFORM.get(entity);
-        PlayerComponent player = PLAYER.get(entity);
+        com.axehigh.platformer.ecs.components.MovementComponent movement = MOVEMENT.get(entity);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = TRANSFORM.get(entity);
+        com.axehigh.platformer.ecs.components.PlayerComponent player = PLAYER.get(entity);
         player.dropWindow.start(0.25f);
 
         for (int i = 0; i < 240; i++) {
@@ -226,12 +243,12 @@ public class MovementSystemTest extends SystemTestBase {
     @Test
     public void enemyLandsOnOneWayPlatformFromAbove() {
         oneWayRects.add(new Rectangle(0f, 0f, 100f, 20f));
-        TransformComponent transform = transform(0f, 50.1f);
-        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = transform(0f, 50.1f);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
         place(transform, collision, 0f, 50.1f);
-        MovementComponent movement = movement();
+        com.axehigh.platformer.ecs.components.MovementComponent movement = movement();
         movement.velocity.y = -400f;
-        Entity entity = entity(transform, movement, collision, new EnemyComponent());
+        Entity entity = entity(transform, movement, collision, new com.axehigh.platformer.ecs.components.EnemyComponent());
         engine.addEntity(entity);
 
         engine.update(DT);
@@ -245,13 +262,13 @@ public class MovementSystemTest extends SystemTestBase {
     public void enemyBlockedByOneWayTileSide() {
         collisionRects.add(new Rectangle(0f, 0f, 400f, 20f));
         oneWayRects.add(new Rectangle(200f, 0f, 20f, 100f));
-        TransformComponent transform = transform(150f, 80f);
-        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = transform(150f, 80f);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
         place(transform, collision, 150f, 80f);
-        MovementComponent movement = movement();
+        com.axehigh.platformer.ecs.components.MovementComponent movement = movement();
         movement.velocity.y = -400f;
         movement.velocity.x = 200f;
-        Entity entity = entity(transform, movement, collision, new EnemyComponent());
+        Entity entity = entity(transform, movement, collision, new com.axehigh.platformer.ecs.components.EnemyComponent());
         engine.addEntity(entity);
 
         for (int i = 0; i < 60; i++) {
@@ -266,12 +283,12 @@ public class MovementSystemTest extends SystemTestBase {
     @Test
     public void poppedItemLandsOnOneWayPlatformFromAbove() {
         oneWayRects.add(new Rectangle(0f, 0f, 100f, 20f));
-        TransformComponent transform = transform(0f, 50.1f);
-        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = transform(0f, 50.1f);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
         place(transform, collision, 0f, 50.1f);
-        MovementComponent movement = movement();
+        com.axehigh.platformer.ecs.components.MovementComponent movement = movement();
         movement.velocity.y = -400f;
-        Entity entity = entity(transform, movement, collision, new PoppedItemComponent());
+        Entity entity = entity(transform, movement, collision, new com.axehigh.platformer.ecs.components.PoppedItemComponent());
         engine.addEntity(entity);
 
         engine.update(DT);
@@ -284,12 +301,12 @@ public class MovementSystemTest extends SystemTestBase {
     @Test
     public void flyingEnemyFallsThroughOneWayPlatform() {
         oneWayRects.add(new Rectangle(0f, 0f, 100f, 20f));
-        TransformComponent transform = transform(0f, 55f);
-        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = transform(0f, 55f);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
         place(transform, collision, 0f, 55f);
-        MovementComponent movement = movement();
+        com.axehigh.platformer.ecs.components.MovementComponent movement = movement();
         movement.velocity.y = -400f;
-        Entity entity = entity(transform, movement, collision, new FlyingEnemyComponent());
+        Entity entity = entity(transform, movement, collision, new com.axehigh.platformer.ecs.components.FlyingEnemyComponent());
         engine.addEntity(entity);
 
         engine.update(DT);
@@ -301,12 +318,12 @@ public class MovementSystemTest extends SystemTestBase {
     @Test
     public void poppedItemFreezesOnLanding() {
         collisionRects.add(new Rectangle(0f, 0f, 300f, 100f));
-        TransformComponent transform = transform(0f, 130f);
-        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = transform(0f, 130f);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
         place(transform, collision, 0f, 130f);
-        MovementComponent movement = movement();
+        com.axehigh.platformer.ecs.components.MovementComponent movement = movement();
         movement.velocity.x = 50f;
-        Entity entity = entity(transform, movement, collision, new PoppedItemComponent());
+        Entity entity = entity(transform, movement, collision, new com.axehigh.platformer.ecs.components.PoppedItemComponent());
         engine.addEntity(entity);
 
         engine.update(DT);
@@ -317,12 +334,12 @@ public class MovementSystemTest extends SystemTestBase {
 
     @Test
     public void flyingEnemySkipsGravity() {
-        TransformComponent transform = transform(0f, 130f);
-        CollisionComponent collision = collision(-10f, -20f, 20f, 40f);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = transform(0f, 130f);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = collision(-10f, -20f, 20f, 40f);
         place(transform, collision, 0f, 130f);
-        MovementComponent movement = movement();
+        com.axehigh.platformer.ecs.components.MovementComponent movement = movement();
         movement.velocity.y = 5f;
-        Entity entity = entity(transform, movement, collision, new FlyingEnemyComponent());
+        Entity entity = entity(transform, movement, collision, new com.axehigh.platformer.ecs.components.FlyingEnemyComponent());
         engine.addEntity(entity);
 
         engine.update(DT);
@@ -333,17 +350,17 @@ public class MovementSystemTest extends SystemTestBase {
     @Test
     public void landingAfterJumpSpawnsSmokePuff() {
         PooledEngine pooled = new PooledEngine();
-        MovementSystem pooledSystem = new MovementSystem(collisionRects);
+        com.axehigh.platformer.ecs.systems.MovementSystem pooledSystem = new com.axehigh.platformer.ecs.systems.MovementSystem(collisionRects);
         pooledSystem.setUnitScale(1f);
         pooled.addSystem(pooledSystem);
 
         collisionRects.add(new Rectangle(0f, 0f, 300f, 100f));
-        TransformComponent transform = transform(0f, 130.1f);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = transform(0f, 130.1f);
         transform.scale.x = 0f;
-        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
         place(transform, collision, 0f, 130.1f);
-        MovementComponent movement = movement();
-        PlayerComponent player = player();
+        com.axehigh.platformer.ecs.components.MovementComponent movement = movement();
+        com.axehigh.platformer.ecs.components.PlayerComponent player = player();
         player.jumpCount = 2;
         player.inAir = true;
         player.maxAirHeight = 100.1f + 20f;
@@ -357,17 +374,17 @@ public class MovementSystemTest extends SystemTestBase {
     @Test
     public void shortFallSpawnsNoSmoke() {
         PooledEngine pooled = new PooledEngine();
-        MovementSystem pooledSystem = new MovementSystem(collisionRects);
+        com.axehigh.platformer.ecs.systems.MovementSystem pooledSystem = new com.axehigh.platformer.ecs.systems.MovementSystem(collisionRects);
         pooledSystem.setUnitScale(1f);
         pooled.addSystem(pooledSystem);
 
         collisionRects.add(new Rectangle(0f, 0f, 300f, 100f));
-        TransformComponent transform = transform(0f, 130.1f);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = transform(0f, 130.1f);
         transform.scale.x = 0f;
-        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
         place(transform, collision, 0f, 130.1f);
-        MovementComponent movement = movement();
-        PlayerComponent player = player();
+        com.axehigh.platformer.ecs.components.MovementComponent movement = movement();
+        com.axehigh.platformer.ecs.components.PlayerComponent player = player();
         player.jumpCount = 0;
         player.inAir = true;
         player.maxAirHeight = 100.1f + 10f;
@@ -381,18 +398,18 @@ public class MovementSystemTest extends SystemTestBase {
     @Test
     public void landingPuffScalesWithFallSpeed() {
         PooledEngine pooled = new PooledEngine();
-        MovementSystem pooledSystem = new MovementSystem(collisionRects);
+        com.axehigh.platformer.ecs.systems.MovementSystem pooledSystem = new com.axehigh.platformer.ecs.systems.MovementSystem(collisionRects);
         pooledSystem.setUnitScale(1f);
         pooled.addSystem(pooledSystem);
 
         collisionRects.add(new Rectangle(0f, 0f, 300f, 100f));
-        TransformComponent transform = transform(0f, 130.1f);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = transform(0f, 130.1f);
         transform.scale.x = 0f;
-        CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = collision(-15f, -30f, 30f, 60f);
         place(transform, collision, 0f, 130.1f);
-        MovementComponent movement = movement();
+        com.axehigh.platformer.ecs.components.MovementComponent movement = movement();
         movement.velocity.y = -GameConstants.MaxSpeedY;
-        PlayerComponent player = player();
+        com.axehigh.platformer.ecs.components.PlayerComponent player = player();
         player.jumpCount = 2;
         player.inAir = true;
         player.maxAirHeight = 100.1f + 20f;
@@ -400,7 +417,7 @@ public class MovementSystemTest extends SystemTestBase {
 
         pooled.update(DT);
 
-        ParticleComponent pc = firstParticle(pooled);
+        com.axehigh.platformer.ecs.components.ParticleComponent pc = firstParticle(pooled);
         assertNotNull(pc);
         assertEquals(10f, pc.scale, EPSILON);
     }
@@ -409,8 +426,8 @@ public class MovementSystemTest extends SystemTestBase {
     public void hugeTimeStepDoesNotTunnelThroughFloor() {
         collisionRects.add(new Rectangle(-100f, 0f, 200f, 20f));
         Entity entity = player(0f, 100f);
-        MovementComponent movement = MOVEMENT.get(entity);
-        TransformComponent transform = TRANSFORM.get(entity);
+        com.axehigh.platformer.ecs.components.MovementComponent movement = MOVEMENT.get(entity);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = TRANSFORM.get(entity);
         movement.velocity.y = -10000f;
 
         engine.update(0.5f);
@@ -420,9 +437,9 @@ public class MovementSystemTest extends SystemTestBase {
         assertEquals(50f, transform.position.y, EPSILON);
     }
 
-    private static ParticleComponent firstParticle(Engine engine) {
+    private static com.axehigh.platformer.ecs.components.ParticleComponent firstParticle(Engine engine) {
         for (Entity entity : engine.getEntities()) {
-            ParticleComponent pc = entity.getComponent(ParticleComponent.class);
+            com.axehigh.platformer.ecs.components.ParticleComponent pc = entity.getComponent(com.axehigh.platformer.ecs.components.ParticleComponent.class);
             if (pc != null) {
                 return pc;
             }
@@ -433,7 +450,7 @@ public class MovementSystemTest extends SystemTestBase {
     private static int particleEntityCount(Engine engine) {
         int count = 0;
         for (Entity entity : engine.getEntities()) {
-            if (entity.getComponent(ParticleComponent.class) != null) {
+            if (entity.getComponent(com.axehigh.platformer.ecs.components.ParticleComponent.class) != null) {
                 count++;
             }
         }

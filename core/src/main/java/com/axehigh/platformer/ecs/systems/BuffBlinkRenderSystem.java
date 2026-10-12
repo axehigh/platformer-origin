@@ -65,7 +65,8 @@ public class BuffBlinkRenderSystem extends IteratingSystem {
 
         PotionType[] timedPotions = {
             PotionType.STRENGTH, PotionType.SPEED, PotionType.INVULNERABILITY,
-            PotionType.INVISIBILITY, PotionType.JUMP, PotionType.FIRE_BREATH
+            PotionType.INVISIBILITY, PotionType.JUMP, PotionType.FIRE_BREATH,
+            PotionType.SPIDER
         };
 
         Array<PotionType> expiring = new Array<>();
@@ -108,6 +109,8 @@ public class BuffBlinkRenderSystem extends IteratingSystem {
                 return buff.jump;
             case FIRE_BREATH:
                 return buff.fireBreath;
+            case SPIDER:
+                return buff.spider;
             default:
                 return null;
         }

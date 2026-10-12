@@ -34,6 +34,8 @@ public class PlayerComponent implements Component {
     public int jumpPotions = 0;
     /** Held Fire Breath potions, capped at {@link GameConstants#POTION_CAP}. */
     public int fireBreathPotions = 0;
+    /** Held Spider potions, capped at {@link GameConstants#POTION_CAP}. */
+    public int spiderPotions = 0;
     /** The potion type the "use potion" action currently targets; cycled by the potion input. */
     public PotionType selectedPotion = PotionType.HEALING;
     /** Short window after drinking a potion during which another drink is ignored. */
@@ -184,6 +186,8 @@ public class PlayerComponent implements Component {
                 return jumpPotions;
             case FIRE_BREATH:
                 return fireBreathPotions;
+            case SPIDER:
+                return spiderPotions;
         }
         return 0;
     }
@@ -212,6 +216,9 @@ public class PlayerComponent implements Component {
                 break;
             case FIRE_BREATH:
                 fireBreathPotions = clamped;
+                break;
+            case SPIDER:
+                spiderPotions = clamped;
                 break;
         }
     }

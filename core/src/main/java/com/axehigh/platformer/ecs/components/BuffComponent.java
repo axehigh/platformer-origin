@@ -24,6 +24,8 @@ public class BuffComponent implements Component {
     public final Timer jump = new Timer();
     /** Fire Breath buff: shoots fireballs instead of knives while active. */
     public final Timer fireBreath = new Timer();
+    /** Spider buff: grants wall climbing while active. */
+    public final Timer spider = new Timer();
 
     /** True while the speed multiplier is applied to {@code MovementComponent.maxSpeedX}. */
     public boolean speedApplied = false;
@@ -54,6 +56,10 @@ public class BuffComponent implements Component {
         return fireBreath.isActive();
     }
 
+    public boolean isSpiderActive() {
+        return spider.isActive();
+    }
+
     /** Refreshes the strength buff to its full duration. */
     public void startStrength() {
         strength.start(GameConstants.STRENGTH_BUFF_DURATION);
@@ -82,5 +88,10 @@ public class BuffComponent implements Component {
     /** Refreshes the fire breath buff to its full duration. */
     public void startFireBreath() {
         fireBreath.start(GameConstants.FIRE_BREATH_DURATION);
+    }
+
+    /** Refreshes the spider buff to its full duration. */
+    public void startSpider() {
+        spider.start(PotionType.SPIDER.duration());
     }
 }

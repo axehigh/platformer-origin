@@ -25,6 +25,7 @@ public class SaveData {
     public int invisibilityPotions;
     public int jumpPotions;
     public int fireBreathPotions;
+    public int spiderPotions;
     public int triesRemaining = 3;
     public int enemiesKilled = 0;
 
@@ -53,6 +54,7 @@ public class SaveData {
         saveData.invisibilityPotions = player.countPotion(PotionType.INVISIBILITY);
         saveData.jumpPotions = player.countPotion(PotionType.JUMP);
         saveData.fireBreathPotions = player.countPotion(PotionType.FIRE_BREATH);
+        saveData.spiderPotions = player.countPotion(PotionType.SPIDER);
         if (SaveManager.hasSave()) {
             SaveData prev = SaveManager.load();
             saveData.enemiesKilled = prev.enemiesKilled;
@@ -77,5 +79,6 @@ public class SaveData {
         player.setPotionCount(PotionType.INVISIBILITY, invisibilityPotions);
         player.setPotionCount(PotionType.JUMP, jumpPotions);
         player.setPotionCount(PotionType.FIRE_BREATH, fireBreathPotions);
+        player.setPotionCount(PotionType.SPIDER, spiderPotions);
     }
 }
