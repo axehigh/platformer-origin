@@ -82,12 +82,32 @@ public class PlayerTrailSpawnTest extends SystemTestBase {
     }
 
     @Test
-    public void speedBuffMoving_SpawnsPlayerTrails() {
+    public void speedBuffMoving_SpawnsPlayerTrailsWithConfiguredLifetime() {
         playerWithBuffs(true, false, 100f, true);
 
         assertEquals(0, countTrails());
         engine.update(PlayerConfig.PLAYER_TRAIL_INTERVAL + 0.01f);
         assertTrue("should spawn player trail ghost when speed buff active and moving", countTrails() > 0);
+
+        for (Entity e : engine.getEntities()) {
+            if (TRAIL.get(e) != null) {
+                assertEquals(PlayerConfig.PLAYER_TRAIL_LIFETIME, TRAIL.get(e).lifeTime, EPSILON);
+            }
+        }
+    }
+
+    @Test
+    public void playerTrailGhost_LingersLongerThanOldLifetime() {
+        playerWithBuffs(true, false, 100f, true);
+
+        // Spawn first trail ghost
+        engine.update(PlayerConfig.PLAYER_TRAIL_INTERVAL + 0.001f);
+        int initialTrails = countTrails();
+        assertTrue(initialTrails > 0);
+
+        // Advance 0.20s (which is longer than the old 0.15s lifetime, but less than 0.30s)
+        engine.update(0.20f);
+        assertTrue("trail ghosts should still linger after 0.20s", countTrails() > 0);
     }
 
     @Test

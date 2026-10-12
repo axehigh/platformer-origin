@@ -115,7 +115,7 @@ public final class PlayerConfig {
     /** Interval (seconds) between successive trail ghost spawns along the player's path during speed/jump buffs. */
     public static final float PLAYER_TRAIL_INTERVAL = 0.05f;
     /** How long each player trail ghost lingers on screen before fading out entirely. */
-    public static final float PLAYER_TRAIL_LIFETIME = 0.15f;
+    public static final float PLAYER_TRAIL_LIFETIME = 0.50f;
 
     //------ Slash-arc VFX (cosmetic melee swing feedback) ------
     /** How long the arc sprite lingers on screen (then it fades out entirely). */
