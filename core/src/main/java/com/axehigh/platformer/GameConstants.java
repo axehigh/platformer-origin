@@ -209,6 +209,10 @@ public final class GameConstants {
      */
     public static float FIRE_BREATH_DURATION = 15f;
     /**
+     * Spider buff duration (seconds).
+     */
+    public static float SPIDER_BUFF_DURATION = 15f;
+    /**
      * Remaining-buff duration under which the buff halo and HUD icon start blinking (seconds).
      */
     public static final float BUFF_BLINK_THRESHOLD = 3f;

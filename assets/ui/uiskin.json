@@ -104,7 +104,7 @@ com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 }
 com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
 	default: {
-		corner: potion_strength
+		corner: star
 		hScroll: rope_big_horisontal
 		hScrollKnob: star
 		vScroll: rope_big

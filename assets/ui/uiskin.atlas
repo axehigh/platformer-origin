@@ -109,13 +109,6 @@ pause
   orig: 80, 80
   offset: 0, 0
   index: -1
-potion
-  rotate: false
-  xy: 940, 1041
-  size: 80, 80
-  orig: 80, 80
-  offset: 0, 0
-  index: -1
 right
   rotate: false
   xy: 940, 959
@@ -135,34 +128,6 @@ sword-power
   xy: 940, 795
   size: 80, 80
   orig: 80, 80
-  offset: 0, 0
-  index: -1
-potion_healing
-  rotate: false
-  xy: 83, 169
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: -1
-potion_invulnerability
-  rotate: false
-  xy: 1022, 1171
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: -1
-potion_speed
-  rotate: false
-  xy: 1, 5
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: -1
-potion_strength
-  rotate: false
-  xy: 1579, 1479
-  size: 32, 32
-  orig: 32, 32
   offset: 0, 0
   index: -1
 rope_big

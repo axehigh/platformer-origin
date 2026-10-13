@@ -9,14 +9,14 @@ import static com.axehigh.platformer.GameConstants.*;
  * is drunk; the per-type effects are defined in {@code BuffComponent} / {@code BuffSystem}.
  */
 public enum PotionType {
-    FIRE_BREATH("Fire Breath", 15f, "Shoot fireballs for %ds", "Fire Breath", MESSAGE_COLOR_FIRE),
+    FIRE_BREATH("Fire Breath", FIRE_BREATH_DURATION, "Shoot fireballs for %ds", "Fire Breath", MESSAGE_COLOR_FIRE),
     HEALING("Healing", 0f, "Restores 1 heart", "Healing", MESSAGE_COLOR_HEAL),
-    INVISIBILITY("Invisibility", 10f, "Walk through monsters for %ds", "Invisibility", MESSAGE_COLOR_INVISIBILITY),
-    INVULNERABILITY("Invulnerability", 10f, "Take no damage for %ds", "Invulnerability", MESSAGE_COLOR_INVULN),
-    JUMP("Jump", 15f, "Grants triple jump for %ds", "Jump", MESSAGE_COLOR_JUMP),
-    STRENGTH("Strength", 20f, "Extra melee damage for %ds", "Strength", MESSAGE_COLOR_STRENGTH),
-    SPEED("Speed", 15f, "Move faster for %ds", "Speed potion", MESSAGE_COLOR_SPEED),
-    SPIDER("Spider", 15f, "Climb walls for %ds", "Spider climb", MESSAGE_COLOR_SPIDER)
+    INVISIBILITY("Invisibility", INVISIBILITY_DURATION, "Walk through monsters for %ds", "Invisibility", MESSAGE_COLOR_INVISIBILITY),
+    INVULNERABILITY("Invulnerability", INVULNERABILITY_DURATION, "Take no damage for %ds", "Invulnerability", MESSAGE_COLOR_INVULN),
+    JUMP("Jump", JUMP_BUFF_DURATION, "Grants triple jump for %ds", "Jump", MESSAGE_COLOR_JUMP),
+    STRENGTH("Strength", STRENGTH_BUFF_DURATION, "Extra melee damage for %ds", "Strength", MESSAGE_COLOR_STRENGTH),
+    SPEED("Speed", SPEED_BUFF_DURATION, "Move faster for %ds", "Speed potion", MESSAGE_COLOR_SPEED),
+    SPIDER("Spider", SPIDER_BUFF_DURATION, "Climb walls for %ds", "Spider climb", MESSAGE_COLOR_SPIDER)
     ;
 
     private final String displayName;
@@ -63,7 +63,7 @@ public enum PotionType {
         return messageColor;
     }
 
-    /** Region key shared by {@code origin-game.atlas} (in-game) and {@code uiskin.atlas} (UI). */
+    /** Region key in {@code origin-game.atlas}. */
     public String regionName() {
         return "potion_" + name().toLowerCase();
     }

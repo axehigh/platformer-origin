@@ -441,7 +441,7 @@ A tutorial sign is a **proximity trigger** that shows a floating tooltip above i
 | `jump`, `a`, `j` | A (jump) | `jump` |
 | `attack`, `sword`, `b`, `melee` | B (attack) | `sword` |
 | `special`, `ranged`, `y`, `dagger`, `throw` | Y (daggers/special) | `daggers` |
-| `inventory`, `bag`, `potion` | inventory (bag) | `potion` |
+| `inventory`, `bag`, `potion` | inventory (bag) | `bag` |
 | `left` | D-pad left | `left` |
 | `right` | D-pad right | `right` |
 | `enter`, `exit`, `up`, `door`, `interact` | interact (door) | `door` |

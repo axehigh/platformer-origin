@@ -14,7 +14,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
-import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_UI_GFX;
 import static com.axehigh.platformer.ecs.components.Mappers.*;
 
 /**
@@ -120,16 +119,13 @@ public class BuffBlinkRenderSystem extends IteratingSystem {
         if (assetManager == null) {
             return null;
         }
-        TextureAtlas atlas = assetManager.isLoaded(ORIGIN_UI_GFX) ? assetManager.get(ORIGIN_UI_GFX, TextureAtlas.class) : null;
-        if (atlas != null) {
-            TextureAtlas.AtlasRegion region = atlas.findRegion(type.regionName());
-            if (region != null) {
-                return region;
-            }
-        }
         TextureAtlas gameAtlas = assetManager.isLoaded(ORIGIN_GAME_GFX) ? assetManager.get(ORIGIN_GAME_GFX, TextureAtlas.class) : null;
         if (gameAtlas != null) {
             TextureAtlas.AtlasRegion region = gameAtlas.findRegion(type.regionName());
+            if (region != null) {
+                return region;
+            }
+            region = gameAtlas.findRegion("potion_healing");
             if (region != null) {
                 return region;
             }

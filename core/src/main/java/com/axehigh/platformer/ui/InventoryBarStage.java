@@ -23,6 +23,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import static com.axehigh.platformer.GameConstants.*;
+import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
 import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_UI_GFX;
 import static com.badlogic.gdx.utils.Scaling.fit;
 
@@ -71,10 +72,10 @@ public class InventoryBarStage extends Stage {
         // --- Equipment Row (Armor, Weapon, Bullet/Dagger, Key) ---
         if (GameConstants.ENABLE_INVENTORY_EQUIPMENT) {
             Table eqRow = new Table();
-            armorSlot = createEquipmentSlot(skin, uiAtlas, "Armor", "dagger");
-            weaponSlot = createEquipmentSlot(skin, uiAtlas, "Weapon", "potion_strength");
-            bulletSlot = createEquipmentSlot(skin, uiAtlas, "Ammo", "potion_speed");
-            keySlot = createEquipmentSlot(skin, uiAtlas, "Key", "potion_healing");
+            armorSlot = createEquipmentSlot(skin, uiAtlas, "Armor", "table");
+            weaponSlot = createEquipmentSlot(skin, uiAtlas, "Weapon", "sword");
+            bulletSlot = createEquipmentSlot(skin, uiAtlas, "Ammo", "daggers");
+            keySlot = createEquipmentSlot(skin, uiAtlas, "Key", "star");
 
             eqRow.add(armorSlot.container).size(SLOT_SIZE, SLOT_SIZE).pad(SLOT_PAD);
             eqRow.add(weaponSlot.container).size(SLOT_SIZE, SLOT_SIZE).pad(SLOT_PAD);
@@ -87,22 +88,19 @@ public class InventoryBarStage extends Stage {
 
         // --- Potion Row ---
         Table potionRow = new Table();
+        TextureAtlas gameAtlas = assetManager.get(ORIGIN_GAME_GFX, TextureAtlas.class);
         for (PotionType type : PotionType.values()) {
-            TouchButton drinkButton = new TouchButton(skin, "potion", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
-                    () -> drink(type));
-            TextureAtlas.AtlasRegion region = uiAtlas.findRegion(type.regionName());
-            if (region == null) {
-                region = uiAtlas.findRegion("potion_healing");
-            }
-            if (region == null) {
-                region = uiAtlas.findRegion("potion");
+            TextureAtlas.AtlasRegion region = gameAtlas != null ? gameAtlas.findRegion(type.regionName()) : null;
+            if (region == null && gameAtlas != null) {
+                region = gameAtlas.findRegion("potion_healing");
             }
             TextureRegionDrawable icon = region != null ? new TextureRegionDrawable(region) : null;
             if (icon != null) {
                 icon.setMinWidth(ICON_SIZE);
                 icon.setMinHeight(ICON_SIZE);
             }
-            drinkButton.setDrawable(icon);
+            TouchButton drinkButton = new TouchButton(skin, icon, UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+                    () -> drink(type));
             drinkButton.getImage().setScaling(fit);
             drinkButton.getImage().setScale(1.40f); // Reset internal scale
             drinkButton.getImageCell().center();
@@ -135,13 +133,14 @@ public class InventoryBarStage extends Stage {
 
     private Slot createEquipmentSlot(Skin skin, TextureAtlas uiAtlas, String title, String defaultIconRegion) {
         LabelStyle counterStyle = skin.get(LabelStyle.class);
-        TouchButton btn = new TouchButton(skin, "potion", 1f, 0f, () -> {});
-        TextureRegion region = uiAtlas.findRegion(defaultIconRegion);
-        if (region != null) {
-            TextureRegionDrawable icon = new TextureRegionDrawable(region);
+        TextureRegion region = uiAtlas != null ? uiAtlas.findRegion(defaultIconRegion) : null;
+        TextureRegionDrawable icon = region != null ? new TextureRegionDrawable(region) : null;
+        if (icon != null) {
             icon.setMinWidth(ICON_SIZE);
             icon.setMinHeight(ICON_SIZE);
-            btn.setDrawable(icon);
+        }
+        TouchButton btn = new TouchButton(skin, icon, 1f, 0f, () -> {});
+        if (icon != null) {
             btn.getImage().setScaling(fit);
             btn.getImage().setScale(1.0f);
             btn.getImageCell().center();

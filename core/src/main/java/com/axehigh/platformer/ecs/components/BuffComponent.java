@@ -92,6 +92,6 @@ public class BuffComponent implements Component {
 
     /** Refreshes the spider buff to its full duration. */
     public void startSpider() {
-        spider.start(PotionType.SPIDER.duration());
+        spider.start(GameConstants.SPIDER_BUFF_DURATION);
     }
 }

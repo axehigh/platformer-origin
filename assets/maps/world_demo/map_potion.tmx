@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="96" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="976">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="96" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="978">
  <tileset firstgid="1" source="../tileset/dungeon_tiles.tsx"/>
- <tileset firstgid="67" source="../tileset/items.tsx"/>
- <tileset firstgid="97" source="../tileset/enemy.tsx"/>
- <tileset firstgid="104" name="secret_room_wall" tilewidth="128" tileheight="128" tilecount="1" columns="1">
+ <tileset firstgid="70" source="../tileset/items.tsx"/>
+ <tileset firstgid="102" source="../tileset/enemy.tsx"/>
+ <tileset firstgid="111" name="secret_room_wall" tilewidth="128" tileheight="128" tilecount="1" columns="1">
   <tile id="0">
    <properties>
     <property name="secret" type="bool" value="true"/>
@@ -12,7 +12,7 @@
    <image source="../gfx/tiles/secret_wall.png" width="128" height="128"/>
   </tile>
  </tileset>
- <tileset firstgid="105" source="../tileset/bg.tsx"/>
+ <tileset firstgid="112" source="../tileset/bg.tsx"/>
  <layer id="1" name="background" width="96" height="10">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -23,7 +23,7 @@
 0,0,0,0,0,0,13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,130,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,137,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
@@ -36,8 +36,8 @@
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,33,33,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,2,2,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
-2,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,104,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
-2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,104,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+2,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,111,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
+2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,111,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
 </data>
  </layer>
@@ -57,37 +57,38 @@
  </layer>
  <objectgroup id="3" name="objects">
   <object id="1" name="playerStart" type="playerStart" x="2816" y="1024" width="128" height="128"/>
-  <object id="3" name="chest_r0" gid="70" x="896" y="1152" width="128" height="128"/>
-  <object id="5" name="chest_r1" gid="70" x="4992" y="1152" width="128" height="128"/>
-  <object id="6" name="coin_r1" gid="79" x="5376" y="1152" width="128" height="128"/>
-  <object id="7" name="chest_r1" gid="70" x="3584" y="1152" width="128" height="128"/>
-  <object id="8" name="coin_r2" gid="79" x="7680" y="1152" width="128" height="128"/>
-  <object id="9" name="chest_r2" gid="70" x="7040" y="1152" width="128" height="128"/>
-  <object id="10" name="chest_secret_room" gid="70" x="10880" y="1152" width="128" height="128">
+  <object id="3" name="chest_r0" gid="73" x="896" y="1152" width="128" height="128"/>
+  <object id="5" name="chest_r1" gid="73" x="4992" y="1152" width="128" height="128"/>
+  <object id="6" name="coin_r1" gid="82" x="5376" y="1152" width="128" height="128"/>
+  <object id="7" name="chest_r1" gid="73" x="3584" y="1152" width="128" height="128"/>
+  <object id="8" name="coin_r2" gid="82" x="7680" y="1152" width="128" height="128"/>
+  <object id="9" name="chest_r2" gid="73" x="7040" y="1152" width="128" height="128"/>
+  <object id="10" name="chest_secret_room" gid="73" x="10880" y="1152" width="128" height="128">
    <properties>
     <property name="secretRoom" value="secret_room"/>
    </properties>
   </object>
-  <object id="11" name="coin_secret_room" gid="79" x="11904" y="1152" width="128" height="128">
+  <object id="11" name="coin_secret_room" gid="82" x="11904" y="1152" width="128" height="128">
    <properties>
     <property name="secretRoom" value="secret_room"/>
    </properties>
   </object>
-  <object id="12" name="coin_secret_room" gid="79" x="11136" y="1152" width="128" height="128">
+  <object id="12" name="coin_secret_room" gid="82" x="11136" y="1152" width="128" height="128">
    <properties>
     <property name="secretRoom" value="secret_room"/>
    </properties>
   </object>
-  <object id="13" name="coin_platform_r0" gid="79" x="1024" y="384" width="128" height="128"/>
-  <object id="14" name="coin_platform_r1" gid="79" x="4096" y="384" width="128" height="128"/>
-  <object id="15" name="coin_platform_r2" gid="79" x="7168" y="384" width="128" height="128"/>
-  <object id="965" gid="69" x="2304" y="1152" width="128" height="128"/>
-  <object id="966" gid="68" x="2432" y="1152" width="128" height="128"/>
-  <object id="967" gid="92" x="1792" y="1152" width="53" height="22"/>
-  <object id="968" gid="93" x="1920" y="1152" width="101" height="101"/>
-  <object id="969" gid="94" x="2048" y="1152" width="101" height="101"/>
-  <object id="970" gid="95" x="2176" y="1152" width="100" height="100"/>
-  <object id="971" gid="96" x="2560" y="1152" width="100" height="100"/>
+  <object id="13" name="coin_platform_r0" gid="82" x="1024" y="384" width="128" height="128"/>
+  <object id="14" name="coin_platform_r1" gid="82" x="4096" y="384" width="128" height="128"/>
+  <object id="15" name="coin_platform_r2" gid="82" x="7168" y="384" width="128" height="128"/>
+  <object id="965" gid="72" x="2304" y="1152" width="128" height="128"/>
+  <object id="966" gid="71" x="2432" y="1152" width="128" height="128"/>
+  <object id="967" gid="95" x="1792" y="1152" width="53" height="22"/>
+  <object id="968" gid="96" x="1920" y="1152" width="101" height="101"/>
+  <object id="969" gid="97" x="2048" y="1152" width="101" height="101"/>
+  <object id="970" gid="98" x="2176" y="1152" width="100" height="100"/>
+  <object id="971" gid="99" x="2560" y="1152" width="100" height="100"/>
+  <object id="977" gid="101" x="2560" y="896" width="96" height="96"/>
  </objectgroup>
  <objectgroup id="7" name="enemies">
   <object id="4" name="enemy_r1_flyer" type="enemy" x="3328" y="1024" width="128" height="128">
@@ -95,10 +96,10 @@
     <property name="enemyType" value="flyer"/>
    </properties>
   </object>
-  <object id="972" gid="99" x="1280" y="1152" width="128" height="128"/>
-  <object id="973" gid="99" x="640" y="1152" width="128" height="128"/>
-  <object id="974" gid="99" x="512" y="896" width="128" height="128"/>
-  <object id="975" gid="100" x="4736" y="1152" width="256" height="256"/>
+  <object id="972" gid="104" x="1280" y="1152" width="128" height="128"/>
+  <object id="973" gid="104" x="640" y="1152" width="128" height="128"/>
+  <object id="974" gid="104" x="512" y="896" width="128" height="128"/>
+  <object id="975" gid="105" x="4736" y="1152" width="256" height="256"/>
  </objectgroup>
  <objectgroup id="6" name="Rooms" locked="1">
   <object id="961" name="room0" x="0" y="0" width="3072" height="1280"/>

@@ -17,7 +17,7 @@ public enum TutorialHighlight {
     JUMP    ("jump",    "W", "jump", "a", "j"),
     ATTACK  ("sword",   "J / Click", "attack", "sword", "b", "melee"),
     SPECIAL ("daggers", "Shift", "special", "ranged", "y", "dagger", "throw"),
-    INVENTORY("potion", "C", "inventory", "bag", "potion"),
+    INVENTORY("bag",    "C", "inventory", "bag", "potion"),
     LEFT    ("left",    "A", "left"),
     RIGHT   ("right",   "D", "right"),
     INTERACT("door",    "Enter", "enter", "exit", "up", "door", "interact"),

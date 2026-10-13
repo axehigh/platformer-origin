@@ -68,14 +68,11 @@ public class HudStage extends Stage {
 
         Table leftGroup = new Table();
 
-        TextureAtlas uiAtlas = assetManager.get(ORIGIN_UI_GFX, TextureAtlas.class);
+        TextureAtlas gameAtlas = assetManager.get(ORIGIN_GAME_GFX, TextureAtlas.class);
         for (PotionType type : PotionType.values()) {
-            TextureAtlas.AtlasRegion region = uiAtlas.findRegion(type.regionName());
-            if (region == null) {
-                region = uiAtlas.findRegion("potion_healing");
-            }
-            if (region == null) {
-                region = uiAtlas.findRegion("potion");
+            TextureAtlas.AtlasRegion region = gameAtlas != null ? gameAtlas.findRegion(type.regionName()) : null;
+            if (region == null && gameAtlas != null) {
+                region = gameAtlas.findRegion("potion_healing");
             }
             potionDrawables.put(type, region != null ? new TextureRegionDrawable(region) : null);
         }
@@ -103,6 +100,7 @@ public class HudStage extends Stage {
         leftGroup.add(crystalLabel).padRight(24f);
 
         if (GameConstants.USE_BULLET) {
+            TextureAtlas uiAtlas = assetManager.get(ORIGIN_UI_GFX, TextureAtlas.class);
             Image bulletIcon = new Image(uiAtlas.findRegion("daggers"));
             leftGroup.add(bulletIcon).size(30f, 30f).padRight(8f);
             bulletLabel = new ShadowLabel("", counterStyle);

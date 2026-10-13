@@ -29,13 +29,13 @@ public class TouchButton extends ImageButton {
         }
     }
 
-    public TouchButton(Skin skin, String drawableName, float pressedScale, float scaleDuration, Handler handler) {
+    public TouchButton(Skin skin, Drawable drawable, float pressedScale, float scaleDuration, Handler handler) {
         super(new ImageButtonStyle(skin.get("gameplay", ImageButtonStyle.class)));
         getImage().setScaling(fit);
         getImage().setScale(UI_ICON_SCALE);
         ImageButtonStyle style = getStyle();
-        style.imageUp = skin.getDrawable(drawableName);
-        style.imageDown = skin.getDrawable(drawableName);
+        style.imageUp = drawable;
+        style.imageDown = drawable;
         addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -50,6 +50,10 @@ public class TouchButton extends ImageButton {
                 handler.onRelease();
             }
         });
+    }
+
+    public TouchButton(Skin skin, String drawableName, float pressedScale, float scaleDuration, Handler handler) {
+        this(skin, skin.getDrawable(drawableName), pressedScale, scaleDuration, handler);
     }
 
     /**

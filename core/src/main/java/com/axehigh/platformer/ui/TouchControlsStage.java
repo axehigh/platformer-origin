@@ -88,7 +88,7 @@ public class TouchControlsStage extends Stage {
                         inputSystem.setTouchRight(false);
                     }
                 });
-        inventoryButton = new TouchButton(skin, "potion", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
+        inventoryButton = new TouchButton(skin, "bag", UI_BUTTON_PRESS_SCALE, UI_BUTTON_SCALE_DURATION,
                 new TouchButton.Handler() {
                     @Override
                     public void onPress() {
@@ -220,15 +220,17 @@ public class TouchControlsStage extends Stage {
 
     private TouchButton buttonForIcon(String icon) {
         switch (icon) {
-            case "jump":    return aButton;
-            case "sword":   return bButton;
-            case "daggers": return yButton;
-            case "potion":  return inventoryButton;
-            case "door":    return interactButton;
-            case "down":    return dropButton;
-            case "left":    return leftButton;
-            case "right":   return rightButton;
-            default:        return null;
+            case "jump":      return aButton;
+            case "sword":     return bButton;
+            case "daggers":   return yButton;
+            case "bag":
+            case "inventory":
+            case "potion":    return inventoryButton;
+            case "door":      return interactButton;
+            case "down":      return dropButton;
+            case "left":      return leftButton;
+            case "right":     return rightButton;
+            default:          return null;
         }
     }
 

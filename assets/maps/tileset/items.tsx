@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.2" name="items" tilewidth="128" tileheight="156" tilecount="25" columns="0">
+<tileset version="1.10" tiledversion="1.11.2" name="items" tilewidth="128" tileheight="156" tilecount="26" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="3" type="chest">
   <image source="../gfx/items/Chest_01_Locked.png" width="128" height="128"/>
@@ -100,49 +100,49 @@
    <property name="potionType" value="Speed"/>
    <property name="type" value="potion"/>
   </properties>
-  <image source="../gfx/tiles/items/fish.png" width="53" height="22"/>
+  <image source="../gfx/tiles/items/potion_speed.png" width="96" height="96"/>
  </tile>
  <tile id="26">
   <properties>
    <property name="potionType" value="Healing"/>
    <property name="type" value="potion"/>
   </properties>
-  <image source="../gfx/tiles/items/heart.png" width="101" height="101"/>
+  <image source="../gfx/tiles/items/potion_healing.png" width="96" height="96"/>
  </tile>
  <tile id="27">
   <properties>
    <property name="potionType" value="Strength"/>
    <property name="type" value="potion"/>
   </properties>
-  <image source="../gfx/tiles/items/meat.png" width="101" height="101"/>
+  <image source="../gfx/tiles/items/potion_strength.png" width="96" height="96"/>
  </tile>
  <tile id="28">
   <properties>
    <property name="potionType" value="Invulnerability"/>
    <property name="type" value="potion"/>
   </properties>
-  <image source="../gfx/tiles/items/orange.png" width="100" height="100"/>
+  <image source="../gfx/tiles/items/potion_invulnerability.png" width="96" height="96"/>
  </tile>
  <tile id="2">
   <properties>
    <property name="potionType" value="Invisibility"/>
    <property name="type" value="potion"/>
   </properties>
-  <image source="../gfx/items/Bubble.png" width="128" height="128"/>
+  <image source="../gfx/tiles/items/potion_invisibility.png" width="96" height="96"/>
  </tile>
  <tile id="1">
   <properties>
    <property name="potionType" value="Jump"/>
    <property name="type" value="potion"/>
   </properties>
-  <image source="../gfx/items/Apple.png" width="128" height="128"/>
+  <image source="../gfx/tiles/items/potion_jump.png" width="96" height="96"/>
  </tile>
  <tile id="29">
   <properties>
    <property name="potionType" value="FireBreath"/>
    <property name="type" value="potion"/>
   </properties>
-  <image source="../gfx/tiles/items/banana.png" width="100" height="100"/>
+  <image source="../gfx/tiles/items/potion_fire_breath.png" width="96" height="96"/>
  </tile>
  <tile id="30">
   <properties>
@@ -155,5 +155,12 @@
     <point/>
    </object>
   </objectgroup>
+ </tile>
+ <tile id="31">
+  <properties>
+   <property name="potionType" value="Spider"/>
+   <property name="type" value="potion"/>
+  </properties>
+  <image source="../gfx/tiles/items/potion_spider.png" width="96" height="96"/>
  </tile>
 </tileset>
