@@ -14,8 +14,6 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -32,11 +30,11 @@ import static com.axehigh.platformer.ecs.components.Mappers.TUTORIAL;
  * Manages tutorial sign proximity and floating world tooltips. When the player walks into
  * the proximity sensor of a tutorial object, its text message is displayed as a floating world
  * tooltip above the object, on a 9-patch parchment plaque (with a down-pointing tail toward the
- * sign) when the dedicated plaque/tail textures are available — otherwise the skin's classic
+ * sign) when the dedicated plaque/tail atlas regions are available — otherwise the skin's classic
  * scroll/table panel drawable is used as the background.
  */
 public class TutorialSystem extends IteratingSystem {
-    /** Border thickness (px) of {@code gfx/tutorial_plaque.png} — the NinePatch split size. */
+    /** Border thickness (px) of the {@code tutorial_plaque} region — the NinePatch split size. */
     private static final int PLAQUE_BORDER = 16;
     private static final float SENSOR_PADDING = 12f;
     private final SpriteBatch batch;
@@ -56,7 +54,7 @@ public class TutorialSystem extends IteratingSystem {
     }
     private ImmutableArray<Entity> players;
 
-    public TutorialSystem(SpriteBatch batch, OrthographicCamera camera, Skin skin, Texture plaqueTexture, Texture tailTexture, int priority) {
+    public TutorialSystem(SpriteBatch batch, OrthographicCamera camera, Skin skin, TextureRegion plaqueRegion, TextureRegion tailPointerRegion, int priority) {
         super(Family.all(TutorialComponent.class, TransformComponent.class, CollisionComponent.class).get(), priority);
         this.batch = batch;
         this.camera = camera;
@@ -71,13 +69,11 @@ public class TutorialSystem extends IteratingSystem {
         this.font = f;
         Drawable drawable = null;
         TextureRegion tail = null;
-        if (plaqueTexture != null && tailTexture != null) {
+        if (plaqueRegion != null && tailPointerRegion != null) {
             // Purpose-built in-world plaque + pointer: 9-patch so it stretches to the text box
-            // without distortion; tail drawn centered under the panel. Nearest filtering (pixel art).
-            plaqueTexture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
-            tailTexture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
-            drawable = new NinePatchDrawable(new NinePatch(new TextureRegion(plaqueTexture), PLAQUE_BORDER, PLAQUE_BORDER, PLAQUE_BORDER, PLAQUE_BORDER));
-            tail = new TextureRegion(tailTexture);
+            // without distortion; tail drawn centered under the panel. The atlas is Nearest-filtered.
+            drawable = new NinePatchDrawable(new NinePatch(plaqueRegion, PLAQUE_BORDER, PLAQUE_BORDER, PLAQUE_BORDER, PLAQUE_BORDER));
+            tail = tailPointerRegion;
         }
         if (drawable == null) {
             try {

@@ -14,14 +14,6 @@ public final class GameAssetRegistry {
     public static final String ORIGIN_UI_GFX = "ui/uiskin.atlas";
     public static final String BACKGROUND_FAR = "maps/gfx/background/Background_01.png";
     public static final String BACKGROUND_NEAR = "maps/gfx/background/Background_02.png";
-    /** Standalone crescent sprite for the melee slash-arc VFX (128x128). */
-    public static final String SLASH_ARC_TEXTURE = "gfx/slash_arc.png";
-    /** Parchment plaque behind in-world tutorial tooltips (96x64, 16px border for NinePatch splits). */
-    public static final String TUTORIAL_PLAQUE = "gfx/tutorial_plaque.png";
-    /** Down-pointing tail/pointer under the tutorial plaque (24x16). */
-    public static final String TUTORIAL_TAIL = "gfx/tutorial_tail.png";
-    /** Temporary placeholder flame sprite for the fire-breath potion's dagger shot (64x64). */
-    public static final String FIRE1_TEXTURE = "gfx/fire1.png";
 
     private GameAssetRegistry() {
     }
@@ -41,11 +33,6 @@ public final class GameAssetRegistry {
         assetManager.load("gfx/old/heart.png", Texture.class);
         assetManager.load("gfx/old/bullet.png", Texture.class);
         assetManager.load("gfx/old/dagger.png", Texture.class);
-        assetManager.load("gfx/lava_drop.png", Texture.class);
-        assetManager.load(SLASH_ARC_TEXTURE, Texture.class);
-        assetManager.load(TUTORIAL_PLAQUE, Texture.class);
-        assetManager.load(TUTORIAL_TAIL, Texture.class);
-        assetManager.load(FIRE1_TEXTURE, Texture.class);
         assetManager.load(BACKGROUND_FAR, Texture.class);
         assetManager.load(BACKGROUND_NEAR, Texture.class);
     }

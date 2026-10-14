@@ -1,14 +1,14 @@
 package com.axehigh.platformer.ecs.systems;
 
 import com.axehigh.platformer.assets.GameAssetRegistry;
-import com.axehigh.platformer.ecs.components.*;
+import com.axehigh.platformer.assets.SpriteConstants;
 import com.axehigh.platformer.util.FeatureFlags;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,41 +23,42 @@ import static org.mockito.Mockito.when;
 /**
  * Headless tests for the melee slash-arc spawn in {@code PlayerInputSystem}: exactly one cosmetic
  * {@code SlashArcComponent} entity per swing, flipped horizontally for a left-facing swing, and
- * gated off entirely by {@code FeatureFlags.isSlashArcEnabled()}. The arc needs a loaded
- * {@code gfx/slash_arc.png} — stubbed via a mocked {@code AssetManager}/{@code Texture} (plain Java
- * objects, no GL) so the region-resolution path runs for real.
+ * gated off entirely by {@code FeatureFlags.isSlashArcEnabled()}. The arc needs the loaded
+ * {@code slash_arc} region — stubbed via a mocked {@code AssetManager}/{@code TextureAtlas}/
+ * {@code AtlasRegion} (plain Java objects, no GL) so the region-resolution path runs for real.
  */
 public class PlayerInputSlashArcTest extends SystemTestBase {
     private static final int REGION_SIZE = 128;
 
     private PooledEngine engine;
-    private PlayerInputSystem system;
-    private PlayerComponent player;
+    private com.axehigh.platformer.ecs.systems.PlayerInputSystem system;
+    private com.axehigh.platformer.ecs.components.PlayerComponent player;
     private AssetManager assetManager;
-    private Texture texture;
 
     @Before
     public void setUp() {
         Gdx.input = mock(Input.class);
         FeatureFlags.setSlashArcEnabled(true);
 
-        texture = mock(Texture.class);
-        when(texture.getWidth()).thenReturn(REGION_SIZE);
-        when(texture.getHeight()).thenReturn(REGION_SIZE);
+        TextureAtlas.AtlasRegion region = mock(TextureAtlas.AtlasRegion.class);
+        when(region.getRegionWidth()).thenReturn(REGION_SIZE);
+        when(region.getRegionHeight()).thenReturn(REGION_SIZE);
+        TextureAtlas atlas = mock(TextureAtlas.class);
+        when(atlas.findRegion(SpriteConstants.SLASH_ARC_REGION)).thenReturn(region);
         assetManager = mock(AssetManager.class);
-        when(assetManager.isLoaded(GameAssetRegistry.SLASH_ARC_TEXTURE)).thenReturn(true);
-        when(assetManager.get(GameAssetRegistry.SLASH_ARC_TEXTURE, Texture.class)).thenReturn(texture);
+        when(assetManager.isLoaded(GameAssetRegistry.ORIGIN_GAME_GFX)).thenReturn(true);
+        when(assetManager.get(GameAssetRegistry.ORIGIN_GAME_GFX, TextureAtlas.class)).thenReturn(atlas);
 
-        system = new PlayerInputSystem(assetManager);
+        system = new com.axehigh.platformer.ecs.systems.PlayerInputSystem(assetManager);
         engine = new PooledEngine();
         engine.addSystem(system);
 
-        TransformComponent transform = engine.createComponent(TransformComponent.class);
+        com.axehigh.platformer.ecs.components.TransformComponent transform = engine.createComponent(com.axehigh.platformer.ecs.components.TransformComponent.class);
         transform.position.set(0f, 0f);
-        MovementComponent movement = engine.createComponent(MovementComponent.class);
-        CollisionComponent collision = engine.createComponent(CollisionComponent.class);
+        com.axehigh.platformer.ecs.components.MovementComponent movement = engine.createComponent(com.axehigh.platformer.ecs.components.MovementComponent.class);
+        com.axehigh.platformer.ecs.components.CollisionComponent collision = engine.createComponent(com.axehigh.platformer.ecs.components.CollisionComponent.class);
         collision.bounds.set(-8f, -32f, 16f, 32f);
-        player = engine.createComponent(PlayerComponent.class);
+        player = engine.createComponent(com.axehigh.platformer.ecs.components.PlayerComponent.class);
         Entity entity = engine.createEntity();
         entity.add(transform);
         entity.add(movement);
@@ -76,7 +77,7 @@ public class PlayerInputSlashArcTest extends SystemTestBase {
     private int countSlashArcs() {
         int count = 0;
         for (Entity e : engine.getEntities()) {
-            if (e.getComponent(SlashArcComponent.class) != null) {
+            if (e.getComponent(com.axehigh.platformer.ecs.components.SlashArcComponent.class) != null) {
                 count++;
             }
         }
@@ -85,7 +86,7 @@ public class PlayerInputSlashArcTest extends SystemTestBase {
 
     private Entity singleArc() {
         for (Entity e : engine.getEntities()) {
-            if (e.getComponent(SlashArcComponent.class) != null) {
+            if (e.getComponent(com.axehigh.platformer.ecs.components.SlashArcComponent.class) != null) {
                 return e;
             }
         }
@@ -100,7 +101,7 @@ public class PlayerInputSlashArcTest extends SystemTestBase {
         Entity arc = singleArc();
         assertNotNull(arc);
         assertTrue("the arc must carry the resolved region", TEXTURE.get(arc).region != null);
-        assertEquals("region resolved through the stubbed texture", REGION_SIZE, TEXTURE.get(arc).region.getRegionWidth());
+        assertEquals("region resolved through the stubbed atlas", REGION_SIZE, TEXTURE.get(arc).region.getRegionWidth());
         assertEquals("one swing spawns one arc", 1, countSlashArcs());
 
         // The release frames add no arc: a single press must never double-spawn.

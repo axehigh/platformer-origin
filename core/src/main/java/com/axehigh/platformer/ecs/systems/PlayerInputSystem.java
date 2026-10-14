@@ -14,14 +14,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 
 import static com.axehigh.platformer.PlayerConfig.*;
-import static com.axehigh.platformer.assets.GameAssetRegistry.*;
+import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_GAME_GFX;
+import static com.axehigh.platformer.assets.GameAssetRegistry.ORIGIN_UI_GFX;
+import static com.axehigh.platformer.assets.SpriteConstants.FIRE1_REGION;
+import static com.axehigh.platformer.assets.SpriteConstants.SLASH_ARC_REGION;
 import static com.axehigh.platformer.ecs.components.Mappers.*;
 import static com.axehigh.platformer.util.FeatureFlags.isGodModeEnabled;
 import static com.badlogic.gdx.Gdx.input;
@@ -42,9 +44,9 @@ public class PlayerInputSystem extends IteratingSystem {
     private final AssetManager assetManager;
     private final SfxSystem sfxSystem;
 
-    /** Lazily wrapped {@code gfx/slash_arc.png} texture region, or {@code null} until loaded. */
+    /** Lazily resolved {@code slash_arc} atlas region, or {@code null} until loaded. */
     private TextureRegion slashArcRegion;
-    /** Lazily wrapped {@code gfx/fire1.png} texture region, or {@code null} until loaded. */
+    /** Lazily resolved {@code fire1} atlas region, or {@code null} until loaded. */
     private TextureRegion fire1Region;
 
     private PooledEngine engine;
@@ -400,13 +402,19 @@ public class PlayerInputSystem extends IteratingSystem {
             return;
         }
         if (slashArcRegion == null) {
-            if (!assetManager.isLoaded(SLASH_ARC_TEXTURE)) {
+            if (!assetManager.isLoaded(ORIGIN_GAME_GFX)) {
                 if (Gdx.app != null) {
-                    Gdx.app.log("SlashArc", "Texture not loaded; skipping arc spawn");
+                    Gdx.app.log("SlashArc", "Atlas not loaded; skipping arc spawn");
                 }
                 return;
             }
-            slashArcRegion = new TextureRegion(assetManager.get(SLASH_ARC_TEXTURE, Texture.class));
+            slashArcRegion = findRegion(assetManager, SLASH_ARC_REGION);
+            if (slashArcRegion == null) {
+                if (Gdx.app != null) {
+                    Gdx.app.log("SlashArc", SLASH_ARC_REGION + " region missing; skipping arc spawn");
+                }
+                return;
+            }
         }
 
         Entity arc = engine.createEntity();
@@ -446,12 +454,12 @@ public class PlayerInputSystem extends IteratingSystem {
     }
 
     /**
-     * Returns the cached {@code gfx/fire1.png} region for the fire-breath potion's dagger shot,
-     * loading/wrapping it on first use.
+     * Returns the cached {@code fire1} atlas region for the fire-breath potion's dagger shot,
+     * resolving it on first use.
      */
     private TextureRegion getFire1Region() {
         if (fire1Region == null) {
-            fire1Region = new TextureRegion(assetManager.get(FIRE1_TEXTURE, Texture.class));
+            fire1Region = findRegion(assetManager, FIRE1_REGION);
         }
         return fire1Region;
     }

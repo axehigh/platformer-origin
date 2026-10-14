@@ -79,4 +79,14 @@ public class SpriteConstants {
     public static float FlameTrapCollisionHeight = 48f;
 
     public static final String BLADE_REGION = "blade";
+
+    //Atlas regions (gfx/origin-game.atlas) for HUD/VFX/tutorial art moved out of standalone PNGs.
+    /** Melee slash-arc VFX (128x128). */
+    public static final String SLASH_ARC_REGION = "slash_arc";
+    /** Placeholder flame sprite for the fire-breath potion's dagger shot (64x64). */
+    public static final String FIRE1_REGION = "fire1";
+    /** Parchment plaque behind in-world tutorial tooltips (96x64, 16px border for NinePatch splits). */
+    public static final String TUTORIAL_PLAQUE_REGION = "tutorial_plaque";
+    /** Down-pointing tail/pointer under the tutorial plaque (24x16). */
+    public static final String TUTORIAL_TAIL_REGION = "tutorial_tail";
 }

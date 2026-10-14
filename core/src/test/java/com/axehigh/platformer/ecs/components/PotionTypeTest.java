@@ -3,8 +3,7 @@ package com.axehigh.platformer.ecs.components;
 import com.axehigh.platformer.GameConstants;
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link PotionType} durations, descriptions, region names, and parsing.
