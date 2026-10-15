@@ -65,8 +65,6 @@
   <object id="610" gid="82" x="2304" y="512" width="128" height="128"/>
   <object id="611" gid="82" x="2688" y="512" width="128" height="128"/>
   <object id="613" gid="83" x="384" y="384" width="128" height="128"/>
-  <object id="616" gid="110" x="3712" y="640" width="128" height="128"/>
-  <object id="617" gid="110" x="2560" y="512" width="128" height="128"/>
   <object id="618" gid="82" x="4992" y="768" width="128" height="128"/>
   <object id="619" gid="82" x="5248" y="768" width="128" height="128"/>
   <object id="620" gid="82" x="5504" y="768" width="128" height="128"/>

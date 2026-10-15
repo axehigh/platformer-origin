@@ -155,7 +155,6 @@ public class EntityFactory {
         for (MapObject object : objects) {
             float centerX, centerY;
             TiledMapTile tile = null;
-            boolean spawned = false;
 
             float spawnX, spawnY;
             float objectWidth = 0f;
@@ -203,96 +202,148 @@ public class EntityFactory {
                 }
             }
 
+            // A tile-object marker whose tile defines a collision shape in Tiled carries that shape
+            // into the spawned entity's CollisionComponent (see applyTileCollisionOverride).
+            Rectangle tileCollision = (object instanceof TiledMapTileMapObject) ? collisionBoundsFromTile(tile) : null;
+
+            Entity entity = null;
             switch (type) {
                 case "coin":
-                    Entity coinEntity = pickupFactory.createCoinPickup(spawnX, spawnY, objectWidth, objectHeight);
-                    attachPickupLight(coinEntity, object, tile, spawnX, spawnY, objectWidth, objectHeight);
-                    engine.addEntity(coinEntity);
-                    spawned = true;
+                    entity = pickupFactory.createCoinPickup(spawnX, spawnY, objectWidth, objectHeight);
+                    attachPickupLight(entity, object, tile, spawnX, spawnY, objectWidth, objectHeight);
                     break;
                 case "crystal":
-                    Entity crystalEntity = pickupFactory.createCrystalPickup(spawnX, spawnY, objectWidth, objectHeight);
-                    attachPickupLight(crystalEntity, object, tile, spawnX, spawnY, objectWidth, objectHeight);
-                    engine.addEntity(crystalEntity);
-                    spawned = true;
+                    entity = pickupFactory.createCrystalPickup(spawnX, spawnY, objectWidth, objectHeight);
+                    attachPickupLight(entity, object, tile, spawnX, spawnY, objectWidth, objectHeight);
                     break;
                 case "chest":
                 case "chest_elite":
                     String chestPotionType = TileProps.getProperty(object, tile, "potionType", null);
-                    engine.addEntity(createChest(spawnX, spawnY, chestPotionType,type));
-                    spawned = true;
+                    entity = createChest(spawnX, spawnY, chestPotionType, type);
                     break;
                 case "torch":
-                    engine.addEntity(createTorch(spawnX, spawnY, object, tile));
-                    spawned = true;
+                    entity = createTorch(spawnX, spawnY, object, tile);
                     break;
                 case "exitGate":
                     String nextLevelPath = TileProps.getProperty(object, tile, "nextLevel", null);
                     String isFinalStr = TileProps.getProperty(object, tile, "isFinal", "false");
                     boolean isFinal = "true".equalsIgnoreCase(isFinalStr);
-                    engine.addEntity(createExitGate(spawnX, spawnY, objectWidth, objectHeight, nextLevelPath, isFinal));
-                    spawned = true;
+                    entity = createExitGate(spawnX, spawnY, objectWidth, objectHeight, nextLevelPath, isFinal);
                     break;
                 case "dagger":
-                    Entity daggerEntity = pickupFactory.createDaggerPickup(spawnX, spawnY, object, tile);
-                    attachPickupLight(daggerEntity, object, tile, spawnX, spawnY, objectWidth, objectHeight);
-                    engine.addEntity(daggerEntity);
-                    spawned = true;
+                    entity = pickupFactory.createDaggerPickup(spawnX, spawnY, object, tile);
+                    attachPickupLight(entity, object, tile, spawnX, spawnY, objectWidth, objectHeight);
                     break;
                 case "potion":
                     String potionType = TileProps.getProperty(object, tile, "potionType", "healing");
-                    Entity potionEntity = pickupFactory.createPotionPickup(spawnX, spawnY, potionType);
-                    attachPickupLight(potionEntity, object, tile, spawnX, spawnY, objectWidth, objectHeight);
-                    engine.addEntity(potionEntity);
-                    spawned = true;
+                    entity = pickupFactory.createPotionPickup(spawnX, spawnY, potionType);
+                    attachPickupLight(entity, object, tile, spawnX, spawnY, objectWidth, objectHeight);
                     break;
                 case "enemy":
                     String enemyType = TileProps.getProperty(object, tile, "enemyType", "walker");
                     int roomIndex = roomState.findRoomIndexContaining(centerX, centerY);
-                    engine.addEntity(enemyFactory.createEnemy(spawnX, spawnY, enemyType, object, tile, roomIndex));
-                    spawned = true;
+                    entity = enemyFactory.createEnemy(spawnX, spawnY, enemyType, object, tile, roomIndex);
                     break;
                 case "platform":
                     int platformRoomIndex = roomState.findRoomIndexContaining(centerX, centerY);
-                    engine.addEntity(trapFactory.createPlatform(spawnX, spawnY, objectWidth, objectHeight, tile, object, platformRoomIndex));
-                    spawned = true;
+                    entity = trapFactory.createPlatform(spawnX, spawnY, objectWidth, objectHeight, tile, object, platformRoomIndex);
                     break;
                 case "blade":
                 case "spinningBlade":
                     int bladeRoomIndex = roomState.findRoomIndexContaining(centerX, centerY);
-                    engine.addEntity(trapFactory.createSpinningBladeTrap(spawnX, spawnY, objectWidth, objectHeight, object, tile, bladeRoomIndex));
-                    spawned = true;
+                    entity = trapFactory.createSpinningBladeTrap(spawnX, spawnY, objectWidth, objectHeight, object, tile, bladeRoomIndex);
                     break;
                 case "trap":
                     String trapType = TileProps.getProperty(object, tile, "trapType", "acidDrop");
                     int trapRoomIndex = roomState.findRoomIndexContaining(centerX, centerY);
                     if ("flame".equalsIgnoreCase(trapType)) {
-                        engine.addEntity(trapFactory.createFlameTrap(spawnX, spawnY, object, tile, trapRoomIndex));
+                        entity = trapFactory.createFlameTrap(spawnX, spawnY, object, tile, trapRoomIndex);
                     } else if ("blade".equalsIgnoreCase(trapType) || "spinningBlade".equalsIgnoreCase(trapType)) {
-                        engine.addEntity(trapFactory.createSpinningBladeTrap(spawnX, spawnY, objectWidth, objectHeight, object, tile, trapRoomIndex));
+                        entity = trapFactory.createSpinningBladeTrap(spawnX, spawnY, objectWidth, objectHeight, object, tile, trapRoomIndex);
                     } else {
-                        engine.addEntity(trapFactory.createAcidDropSpawner(spawnX, spawnY, object, tile, trapRoomIndex));
+                        entity = trapFactory.createAcidDropSpawner(spawnX, spawnY, object, tile, trapRoomIndex);
                     }
-                    spawned = true;
                     break;
                 case "text":
                 case "sign":
                     String message = TileProps.getProperty(object, tile, "text", TileProps.getProperty(object, tile, "message", ""));
                     String highlight = TileProps.getProperty(object, tile, "highlight", "");
-                    engine.addEntity(createTutorialSign(spawnX, spawnY, objectWidth, objectHeight, message, highlight, tile));
-                    spawned = true;
+                    entity = createTutorialSign(spawnX, spawnY, objectWidth, objectHeight, message, highlight, tile);
                     break;
                 default:
                     // "playerStart" and any unrecognized type: nothing to spawn here.
                     break;
             }
-            if (spawned) {
+            if (entity != null) {
+                applyTileCollisionOverride(entity, tileCollision);
+                engine.addEntity(entity);
                 toRemove.add(object);
             }
         }
         for (MapObject obj : toRemove) {
             objects.remove(obj);
         }
+    }
+
+    /**
+     * Tile-local union bounding box of a tile's Tiled collision-editor shapes, expressed with a
+     * bottom-left Y-up origin (matching this world's axes and the entity origin). Returns
+     * {@code null} when the tile has no usable collision shape. Reuses
+     * {@link MapLoader#shapeBounds(MapObject)} so an entity's box matches exactly how the same
+     * shape is interpreted on the static collision tile layer. Point/zero-size shapes (light &
+     * torch markers) are ignored.
+     */
+    static Rectangle collisionBoundsFromTile(TiledMapTile tile) {
+        if (tile == null) {
+            return null;
+        }
+        MapObjects shapes = tile.getObjects();
+        if (shapes == null || shapes.getCount() == 0) {
+            return null;
+        }
+        float minX = Float.MAX_VALUE;
+        float minY = Float.MAX_VALUE;
+        float maxX = -Float.MAX_VALUE;
+        float maxY = -Float.MAX_VALUE;
+        boolean found = false;
+        for (MapObject shape : shapes) {
+            Rectangle local = MapLoader.shapeBounds(shape);
+            if (local == null || local.width <= 0f || local.height <= 0f) {
+                continue;
+            }
+            minX = Math.min(minX, local.x);
+            minY = Math.min(minY, local.y);
+            maxX = Math.max(maxX, local.x + local.width);
+            maxY = Math.max(maxY, local.y + local.height);
+            found = true;
+        }
+        return found ? new Rectangle(minX, minY, maxX - minX, maxY - minY) : null;
+    }
+
+    /**
+     * Replaces a spawned entity's default CollisionComponent box with the collision shape the tile
+     * defines in Tiled, when there is one. The shape is tile-local (bottom-left origin), and the
+     * marker's bottom-left anchors the entity, so the shape maps 1:1 onto the entity's local space.
+     * The base/current offsets are set so {@code MovementSystem} (which drives {@code bounds.x/y}
+     * from them each frame) keeps the box at that local position. No-op for entities without a
+     * {@code CollisionComponent} (torches/lights) or markers with no tile shape (coins, potions,
+     * plain-rectangle chests, etc.), which keep their type's default sizing.
+     */
+    static void applyTileCollisionOverride(Entity entity, Rectangle tileCollision) {
+        if (tileCollision == null) {
+            return;
+        }
+        CollisionComponent collision = entity.getComponent(CollisionComponent.class);
+        if (collision == null) {
+            return;
+        }
+        collision.bounds.setSize(tileCollision.width, tileCollision.height);
+        collision.baseOffsetX = tileCollision.x;
+        collision.baseOffsetY = tileCollision.y;
+        collision.currentOffsetX = 0f;
+        collision.currentOffsetY = 0f;
+        collision.bounds.setX(tileCollision.x);
+        collision.bounds.setY(tileCollision.y);
     }
 
     /**

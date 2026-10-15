@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.2" name="dungeon_tiles" tilewidth="170" tileheight="299" tilecount="55" columns="0">
+<tileset version="1.10" tiledversion="1.11.2" name="dungeon_tiles" tilewidth="170" tileheight="299" tilecount="59" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0" type="Ground">
   <properties>
@@ -19,6 +19,18 @@
  <tile id="4" type="Ground">
   <image source="../gfx/tiles/dungeon/02c.png" width="128" height="128"/>
  </tile>
+ <tile id="59">
+  <image source="../gfx/tiles/new.png" width="128" height="128"/>
+ </tile>
+ <tile id="70">
+  <image source="../gfx/tiles/dungeon/02d.png" width="128" height="128"/>
+ </tile>
+ <tile id="71">
+  <image source="../gfx/tiles/dungeon/02e.png" width="128" height="128"/>
+ </tile>
+ <tile id="60">
+  <image source="../gfx/tiles/new2.png" width="128" height="128"/>
+ </tile>
  <tile id="5">
   <image source="../gfx/tiles/dungeon/03a.png" width="128" height="128"/>
  </tile>
@@ -36,6 +48,9 @@
  </tile>
  <tile id="10">
   <image source="../gfx/tiles/dungeon/04bc.png" width="128" height="128"/>
+ </tile>
+ <tile id="69">
+  <image source="../gfx/tiles/dungeon/03d.png" width="128" height="128"/>
  </tile>
  <tile id="13">
   <properties>
@@ -198,12 +213,6 @@
    <object id="1" x="0" y="0" width="113" height="256"/>
   </objectgroup>
  </tile>
- <tile id="59">
-  <image source="../gfx/tiles/new.png" width="128" height="128"/>
- </tile>
- <tile id="60">
-  <image source="../gfx/tiles/new2.png" width="128" height="128"/>
- </tile>
  <tile id="63">
   <image source="../gfx/tiles/bg/cart.png" width="128" height="96"/>
   <objectgroup draworder="index" id="2">
@@ -246,5 +255,8 @@
   <objectgroup draworder="index" id="2">
    <object id="1" x="9" y="9" width="110" height="117"/>
   </objectgroup>
+ </tile>
+ <tile id="72">
+  <image source="../gfx/tiles/dungeon/02f.png" width="128" height="128"/>
  </tile>
 </tileset>

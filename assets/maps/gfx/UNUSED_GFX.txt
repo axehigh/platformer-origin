@@ -1,0 +1,498 @@
+Unused gfx report
+============================================================
+Scanned gfx files : 284
+In use            : 119
+Weak (tileset unused by any map) : 1
+Not in use        : 164
+
+Notes: 'assets/assets.txt' (generated asset manifest) and Tiled
+       *.tiled-session editor state files are ignored.
+
+NOT IN USE
+------------------------------------------------------------
+[bg]
+  cave-bottom.png
+  cave-middle.png
+  cave-top.png
+
+[items]
+  Apple.png
+  Bubble.png
+
+[tiles]
+  spikes.png
+
+[tiles/bg]
+  banner.png
+  banner3.png
+  cage.png
+  candlestick.png
+  chains.png
+
+[tiles/caves]
+  breakable.png
+  bridge-2.png
+  bridge.png
+  crystal-bottom-1.png
+  crystal-bottom-2.png
+  platform-one-way.png
+  signboard-left.png
+  signboard-right.png
+  signboard.png
+  spikes.png
+  wall-special.png
+  water-middle.png
+  water-surface.png
+
+[tiles/dungeon]
+  03c.png
+
+[tiles/dwarf_mine]
+  Bonus.png
+  Brick_01.png
+  Brick_02.png
+  Bridge_01.png
+  Bridge_02.png
+  Decor_Brick.png
+  Ground-Additional_01.png
+  Ground-Additional_02.png
+  Ground-Additional_03.png
+  Ground-Additional_04.png
+  Ground-Additional_05.png
+  Ground-Additional_06.png
+  Ground-Additional_07.png
+  Ground_01.png
+  Ground_02.png
+  Ground_03.png
+  Ground_04.png
+  Ground_05.png
+  Ground_06.png
+  Ground_07.png
+  Ground_08.png
+  Ground_09.png
+  Ground_10.png
+  Ground_11.png
+  Ground_12.png
+  Ground_13.png
+  Ladder.png
+  Spikes.png
+  Wooden_Box.png
+
+[tiles/environment]
+  Cage.png
+  Chains.png
+  Column.png
+  Decor_Rock_01.png
+  Decor_Rock_02.png
+  Fence.png
+  Lantern.png
+  Rock_01.png
+  Rock_02.png
+  Rock_03.png
+  Rock_04.png
+  Rock_05.png
+  Rock_06.png
+  Rock_07.png
+  Rock_08.png
+  Sculls.png
+  Sign_01.png
+  Sign_02.png
+  Sign_03.png
+  Sign_04.png
+  Sign_05.png
+  Sign_06.png
+  Statue.png
+
+[tiles/environment_dwarf]
+  Bag.png
+  Decor_Mechanism.png
+  Decor_Rock_01.png
+  Decor_Rock_02.png
+  Fence.png
+  Lantern.png
+  Mine_Enter.png
+  Mushrooms.png
+  Rock_01.png
+  Rock_02.png
+  Rock_03.png
+  Rock_04.png
+  Rock_05.png
+  Rock_06.png
+  Rock_07.png
+  Rock_08.png
+  Sign_01.png
+  Sign_02.png
+  Sign_03.png
+  Sign_04.png
+  Sign_05.png
+  Sign_06.png
+  Statue.png
+
+[tiles/items]
+  apple.png
+  banana.png
+  barrel.png
+  Cartoon_Medieval_Armory_Level_Set_Building - Decor Weapon 02.png
+  Cartoon_Medieval_Armory_Level_Set_Building - Decor Weapon 04.png
+  chest-gold-close.png
+  chest-gold-open.png
+  chest-silver-close.png
+  chest-silver-open.png
+  coin-bronze.png
+  coin-gold.png
+  coin-silver.png
+  crate.png
+  fish.png
+  heart.png
+  key-gold.png
+  key-silver.png
+  Key_01.png
+  Key_02.png
+  meat.png
+  object_0004_ivy4.png
+  object_0005_ivy3.png
+  orange.png
+  Plague_Town_2D_Platformer_Tileset_Collectable Object - Bottle potion.png
+  Plague_Town_2D_Platformer_Tileset_Collectable Object - Crystal.png
+  star.png
+  vase-1-broken.png
+  vase-1.png
+  vase-2-broken.png
+  vase-2.png
+  zap.png
+
+[tiles/lava]
+  01-alt.png
+  01.png
+  02.png
+  02alt.png
+  02b-broken-alt.png
+  02b-broken.png
+  03a.png
+  03b-shift.png
+  03b.png
+  04a.png
+  04b.png
+  04bb.png
+  04bc.png
+  bg-stalactite.png
+  breakable.png
+  bridge-2.png
+  bridge-3.png
+  bridge-4.png
+  bridge.png
+  crystal-bottom-1.png
+  crystal-bottom-2.png
+  door.png
+  ladder-broken.png
+  ladder.png
+  pedestal.png
+  platform-float.png
+  signboard-left.png
+  signboard-right.png
+  signboard.png
+  spikes.png
+  wall-special.png
+  water-middle.png
+  water-surface.png
+
+WEAK - only referenced by a tileset no map loads
+------------------------------------------------------------
+[tiles]
+  drop_platform.png
+
+============================================================
+FULL PATHS NOT IN USE
+------------------------------------------------------------
+assets/maps/gfx/bg/cave-bottom.png
+assets/maps/gfx/bg/cave-middle.png
+assets/maps/gfx/bg/cave-top.png
+assets/maps/gfx/items/Apple.png
+assets/maps/gfx/items/Bubble.png
+assets/maps/gfx/tiles/bg/banner.png
+assets/maps/gfx/tiles/bg/banner3.png
+assets/maps/gfx/tiles/bg/cage.png
+assets/maps/gfx/tiles/bg/candlestick.png
+assets/maps/gfx/tiles/bg/chains.png
+assets/maps/gfx/tiles/caves/breakable.png
+assets/maps/gfx/tiles/caves/bridge-2.png
+assets/maps/gfx/tiles/caves/bridge.png
+assets/maps/gfx/tiles/caves/crystal-bottom-1.png
+assets/maps/gfx/tiles/caves/crystal-bottom-2.png
+assets/maps/gfx/tiles/caves/platform-one-way.png
+assets/maps/gfx/tiles/caves/signboard-left.png
+assets/maps/gfx/tiles/caves/signboard-right.png
+assets/maps/gfx/tiles/caves/signboard.png
+assets/maps/gfx/tiles/caves/spikes.png
+assets/maps/gfx/tiles/caves/wall-special.png
+assets/maps/gfx/tiles/caves/water-middle.png
+assets/maps/gfx/tiles/caves/water-surface.png
+assets/maps/gfx/tiles/dungeon/03c.png
+assets/maps/gfx/tiles/dwarf_mine/Bonus.png
+assets/maps/gfx/tiles/dwarf_mine/Brick_01.png
+assets/maps/gfx/tiles/dwarf_mine/Brick_02.png
+assets/maps/gfx/tiles/dwarf_mine/Bridge_01.png
+assets/maps/gfx/tiles/dwarf_mine/Bridge_02.png
+assets/maps/gfx/tiles/dwarf_mine/Decor_Brick.png
+assets/maps/gfx/tiles/dwarf_mine/Ground-Additional_01.png
+assets/maps/gfx/tiles/dwarf_mine/Ground-Additional_02.png
+assets/maps/gfx/tiles/dwarf_mine/Ground-Additional_03.png
+assets/maps/gfx/tiles/dwarf_mine/Ground-Additional_04.png
+assets/maps/gfx/tiles/dwarf_mine/Ground-Additional_05.png
+assets/maps/gfx/tiles/dwarf_mine/Ground-Additional_06.png
+assets/maps/gfx/tiles/dwarf_mine/Ground-Additional_07.png
+assets/maps/gfx/tiles/dwarf_mine/Ground_01.png
+assets/maps/gfx/tiles/dwarf_mine/Ground_02.png
+assets/maps/gfx/tiles/dwarf_mine/Ground_03.png
+assets/maps/gfx/tiles/dwarf_mine/Ground_04.png
+assets/maps/gfx/tiles/dwarf_mine/Ground_05.png
+assets/maps/gfx/tiles/dwarf_mine/Ground_06.png
+assets/maps/gfx/tiles/dwarf_mine/Ground_07.png
+assets/maps/gfx/tiles/dwarf_mine/Ground_08.png
+assets/maps/gfx/tiles/dwarf_mine/Ground_09.png
+assets/maps/gfx/tiles/dwarf_mine/Ground_10.png
+assets/maps/gfx/tiles/dwarf_mine/Ground_11.png
+assets/maps/gfx/tiles/dwarf_mine/Ground_12.png
+assets/maps/gfx/tiles/dwarf_mine/Ground_13.png
+assets/maps/gfx/tiles/dwarf_mine/Ladder.png
+assets/maps/gfx/tiles/dwarf_mine/Spikes.png
+assets/maps/gfx/tiles/dwarf_mine/Wooden_Box.png
+assets/maps/gfx/tiles/environment/Cage.png
+assets/maps/gfx/tiles/environment/Chains.png
+assets/maps/gfx/tiles/environment/Column.png
+assets/maps/gfx/tiles/environment/Decor_Rock_01.png
+assets/maps/gfx/tiles/environment/Decor_Rock_02.png
+assets/maps/gfx/tiles/environment/Fence.png
+assets/maps/gfx/tiles/environment/Lantern.png
+assets/maps/gfx/tiles/environment/Rock_01.png
+assets/maps/gfx/tiles/environment/Rock_02.png
+assets/maps/gfx/tiles/environment/Rock_03.png
+assets/maps/gfx/tiles/environment/Rock_04.png
+assets/maps/gfx/tiles/environment/Rock_05.png
+assets/maps/gfx/tiles/environment/Rock_06.png
+assets/maps/gfx/tiles/environment/Rock_07.png
+assets/maps/gfx/tiles/environment/Rock_08.png
+assets/maps/gfx/tiles/environment/Sculls.png
+assets/maps/gfx/tiles/environment/Sign_01.png
+assets/maps/gfx/tiles/environment/Sign_02.png
+assets/maps/gfx/tiles/environment/Sign_03.png
+assets/maps/gfx/tiles/environment/Sign_04.png
+assets/maps/gfx/tiles/environment/Sign_05.png
+assets/maps/gfx/tiles/environment/Sign_06.png
+assets/maps/gfx/tiles/environment/Statue.png
+assets/maps/gfx/tiles/environment_dwarf/Bag.png
+assets/maps/gfx/tiles/environment_dwarf/Decor_Mechanism.png
+assets/maps/gfx/tiles/environment_dwarf/Decor_Rock_01.png
+assets/maps/gfx/tiles/environment_dwarf/Decor_Rock_02.png
+assets/maps/gfx/tiles/environment_dwarf/Fence.png
+assets/maps/gfx/tiles/environment_dwarf/Lantern.png
+assets/maps/gfx/tiles/environment_dwarf/Mine_Enter.png
+assets/maps/gfx/tiles/environment_dwarf/Mushrooms.png
+assets/maps/gfx/tiles/environment_dwarf/Rock_01.png
+assets/maps/gfx/tiles/environment_dwarf/Rock_02.png
+assets/maps/gfx/tiles/environment_dwarf/Rock_03.png
+assets/maps/gfx/tiles/environment_dwarf/Rock_04.png
+assets/maps/gfx/tiles/environment_dwarf/Rock_05.png
+assets/maps/gfx/tiles/environment_dwarf/Rock_06.png
+assets/maps/gfx/tiles/environment_dwarf/Rock_07.png
+assets/maps/gfx/tiles/environment_dwarf/Rock_08.png
+assets/maps/gfx/tiles/environment_dwarf/Sign_01.png
+assets/maps/gfx/tiles/environment_dwarf/Sign_02.png
+assets/maps/gfx/tiles/environment_dwarf/Sign_03.png
+assets/maps/gfx/tiles/environment_dwarf/Sign_04.png
+assets/maps/gfx/tiles/environment_dwarf/Sign_05.png
+assets/maps/gfx/tiles/environment_dwarf/Sign_06.png
+assets/maps/gfx/tiles/environment_dwarf/Statue.png
+assets/maps/gfx/tiles/items/apple.png
+assets/maps/gfx/tiles/items/banana.png
+assets/maps/gfx/tiles/items/barrel.png
+assets/maps/gfx/tiles/items/Cartoon_Medieval_Armory_Level_Set_Building - Decor Weapon 02.png
+assets/maps/gfx/tiles/items/Cartoon_Medieval_Armory_Level_Set_Building - Decor Weapon 04.png
+assets/maps/gfx/tiles/items/chest-gold-close.png
+assets/maps/gfx/tiles/items/chest-gold-open.png
+assets/maps/gfx/tiles/items/chest-silver-close.png
+assets/maps/gfx/tiles/items/chest-silver-open.png
+assets/maps/gfx/tiles/items/coin-bronze.png
+assets/maps/gfx/tiles/items/coin-gold.png
+assets/maps/gfx/tiles/items/coin-silver.png
+assets/maps/gfx/tiles/items/crate.png
+assets/maps/gfx/tiles/items/fish.png
+assets/maps/gfx/tiles/items/heart.png
+assets/maps/gfx/tiles/items/key-gold.png
+assets/maps/gfx/tiles/items/key-silver.png
+assets/maps/gfx/tiles/items/Key_01.png
+assets/maps/gfx/tiles/items/Key_02.png
+assets/maps/gfx/tiles/items/meat.png
+assets/maps/gfx/tiles/items/object_0004_ivy4.png
+assets/maps/gfx/tiles/items/object_0005_ivy3.png
+assets/maps/gfx/tiles/items/orange.png
+assets/maps/gfx/tiles/items/Plague_Town_2D_Platformer_Tileset_Collectable Object - Bottle potion.png
+assets/maps/gfx/tiles/items/Plague_Town_2D_Platformer_Tileset_Collectable Object - Crystal.png
+assets/maps/gfx/tiles/items/star.png
+assets/maps/gfx/tiles/items/vase-1-broken.png
+assets/maps/gfx/tiles/items/vase-1.png
+assets/maps/gfx/tiles/items/vase-2-broken.png
+assets/maps/gfx/tiles/items/vase-2.png
+assets/maps/gfx/tiles/items/zap.png
+assets/maps/gfx/tiles/lava/01-alt.png
+assets/maps/gfx/tiles/lava/01.png
+assets/maps/gfx/tiles/lava/02.png
+assets/maps/gfx/tiles/lava/02alt.png
+assets/maps/gfx/tiles/lava/02b-broken-alt.png
+assets/maps/gfx/tiles/lava/02b-broken.png
+assets/maps/gfx/tiles/lava/03a.png
+assets/maps/gfx/tiles/lava/03b-shift.png
+assets/maps/gfx/tiles/lava/03b.png
+assets/maps/gfx/tiles/lava/04a.png
+assets/maps/gfx/tiles/lava/04b.png
+assets/maps/gfx/tiles/lava/04bb.png
+assets/maps/gfx/tiles/lava/04bc.png
+assets/maps/gfx/tiles/lava/bg-stalactite.png
+assets/maps/gfx/tiles/lava/breakable.png
+assets/maps/gfx/tiles/lava/bridge-2.png
+assets/maps/gfx/tiles/lava/bridge-3.png
+assets/maps/gfx/tiles/lava/bridge-4.png
+assets/maps/gfx/tiles/lava/bridge.png
+assets/maps/gfx/tiles/lava/crystal-bottom-1.png
+assets/maps/gfx/tiles/lava/crystal-bottom-2.png
+assets/maps/gfx/tiles/lava/door.png
+assets/maps/gfx/tiles/lava/ladder-broken.png
+assets/maps/gfx/tiles/lava/ladder.png
+assets/maps/gfx/tiles/lava/pedestal.png
+assets/maps/gfx/tiles/lava/platform-float.png
+assets/maps/gfx/tiles/lava/signboard-left.png
+assets/maps/gfx/tiles/lava/signboard-right.png
+assets/maps/gfx/tiles/lava/signboard.png
+assets/maps/gfx/tiles/lava/spikes.png
+assets/maps/gfx/tiles/lava/wall-special.png
+assets/maps/gfx/tiles/lava/water-middle.png
+assets/maps/gfx/tiles/lava/water-surface.png
+assets/maps/gfx/tiles/spikes.png
+
+============================================================
+FULL PATHS WEAK (unused tileset only)
+------------------------------------------------------------
+assets/maps/gfx/tiles/drop_platform.png  <-  assets/maps/tileset/drop_platform.tsx
+
+============================================================
+FULL PATHS IN USE
+------------------------------------------------------------
+assets/maps/gfx/background/Background_01.png  <-  core/src/main/java/com/axehigh/platformer/assets/GameAssetRegistry.java
+assets/maps/gfx/background/Background_02.png  <-  core/src/main/java/com/axehigh/platformer/assets/GameAssetRegistry.java
+assets/maps/gfx/enemies/big_knight01_idle1.png  <-  assets/maps/tileset/enemy.tsx
+assets/maps/gfx/enemies/ghost01_idle1.png  <-  assets/maps/tileset/enemy.tsx
+assets/maps/gfx/enemies/goblin_0goblin.png  <-  assets/maps/tileset/enemy.tsx
+assets/maps/gfx/enemies/goblin_large.png  <-  assets/maps/tileset/enemy.tsx
+assets/maps/gfx/enemies/mosquito_0mosquito.png  <-  assets/maps/tileset/enemy.tsx
+assets/maps/gfx/enemies/skeleton01_idle1.png  <-  assets/maps/tileset/enemy.tsx
+assets/maps/gfx/enemies/spider_0spider.png  <-  assets/maps/tileset/enemy.tsx
+assets/maps/gfx/hazards/acid_tube3.png  <-  assets/maps/tileset/hazards.tsx
+assets/maps/gfx/hazards/axe1.png  <-  assets/maps/tileset/hazards.tsx
+assets/maps/gfx/hazards/blade1.png  <-  assets/maps/tileset/hazards.tsx
+assets/maps/gfx/items/Chest_01_Locked.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/items/Chest_01_Unlocked.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/items/Chest_02_Locked.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/items/Chest_02_Unlocked.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/items/Coin_01.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/items/Coin_02.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/items/Coin_03.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/items/Coin_04.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/items/Coin_05.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/items/Coin_06.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/items/Diamond.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/items/Key_01.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/items/Key_02.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/items/Life.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/items/Light.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/items/Star.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/tiles/altar.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/Armor.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/banner2.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/banner4.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/banner5.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/banner6.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/Banner_01.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/Banner_02.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/Banner_03.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/cage2.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/cart.png  <-  assets/maps/tileset/bg.tsx, assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/bg/Cartoon_Medieval_Armory_Level_Set_Building - Wide Door 04.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/Cartoon_Medieval_Armory_Level_Set_Environment - Banner 01.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/Cartoon_Medieval_Armory_Level_Set_Environment - Banner 02.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/chains2.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/chains3.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/chains4.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/door.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/door2.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/door3.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/pillar01.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/bg/Plague_Town_2D_Platformer_Tileset_Environment - Acid.png  <-  assets/maps/tileset/hazards.tsx
+assets/maps/gfx/tiles/bg/pole_lamp.png  <-  assets/maps/tileset/bg.tsx, assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/bg/pole_skull.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/Portrait.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/skull.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/skulls.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/table.png  <-  assets/maps/tileset/bg.tsx
+assets/maps/gfx/tiles/bg/torch.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/tiles/caves/01.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/caves/01alt.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/caves/02.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/caves/02alt.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/caves/02b-broken.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/caves/03a.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/caves/03b.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/caves/04a.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/caves/04b.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/caves/04bb.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/caves/04bc.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/caves/bg-stalactite.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/caves/bridge-3.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/caves/bridge-4.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/caves/pedestal.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/caves/platform-float.png  <-  assets/maps/tileset/dungeon_tiles.tsx, assets/maps/tileset/hazards.tsx
+assets/maps/gfx/tiles/dungeon/01.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/02-broken.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/02.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/02b.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/02c.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/03a.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/03b.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/04a.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/04b.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/04bb.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/04bc.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/breakable.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/bridge-2.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/bridge-3.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/bridge-4.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/bridge.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/crystal-bottom-1.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/crystal-bottom-2.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/doorwall.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/pedestal.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/platform-float.png  <-  assets/maps/tileset/dungeon_tiles.tsx, assets/maps/tileset/hazards.tsx
+assets/maps/gfx/tiles/dungeon/platform-one-way.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/rock.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/signboard-left.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/signboard-right.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/signboard.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/spikes.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/water-middle.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dungeon/water-surface.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/dwarf_mine/Wooden_Barrel.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/environment/box.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/environment/Cartoon_Medieval_Carpenters_Workshop_Level_Set_Environment - Wooden Barrel.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/environment/Wooden_Barrel.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/items/potion_fire_breath.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/tiles/items/potion_healing.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/tiles/items/potion_invisibility.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/tiles/items/potion_invulnerability.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/tiles/items/potion_jump.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/tiles/items/potion_speed.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/tiles/items/potion_spider.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/tiles/items/potion_strength.png  <-  assets/maps/tileset/items.tsx
+assets/maps/gfx/tiles/lava/platform-one-way.png  <-  assets/maps/tileset/dungeon_tiles.tsx, assets/maps/tileset/hazards.tsx
+assets/maps/gfx/tiles/lava.png  <-  assets/maps/tileset/hazards.tsx
+assets/maps/gfx/tiles/new.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/new2.png  <-  assets/maps/tileset/dungeon_tiles.tsx
+assets/maps/gfx/tiles/secret_wall.png  <-  assets/maps/tileset/secret_wall.tsx, assets/maps/world1/level_05.tmx, assets/maps/world1/level_08.tmx, assets/maps/world1/level_09.tmx, assets/maps/world3/level3_01.tmx, assets/maps/world_demo/map_potion.tmx, assets/maps/world_demo/platforming_30x17.tmx, assets/maps/world_demo/platforming_clamp.tmx, assets/maps/world_demo/platforming_secret.tmx, assets/maps/world_demo/template_demo.tmx

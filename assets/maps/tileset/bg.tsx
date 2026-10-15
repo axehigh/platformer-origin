@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.2" name="bg" tilewidth="256" tileheight="386" tilecount="26" columns="0">
+<tileset version="1.10" tiledversion="1.11.2" name="bg" tilewidth="256" tileheight="386" tilecount="26" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="5">
   <image source="../gfx/tiles/bg/chains2.png" width="200" height="170"/>

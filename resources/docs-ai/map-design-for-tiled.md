@@ -255,13 +255,15 @@ Two ways to place a marker:
 - **Rectangle object** — draw a rectangle, then set its Type (e.g. `playerStart`) in the object properties. Size matters for `platform` (it defines the sprite + collision box); for everything else the rectangle is just a spawn point (position = its bottom-left in game coords).
 - **Tile object** — draw a tile from a tileset that already carries a `type` property. The `items.tsx` and `enemy.tsx` tilesets are pre-wired this way (e.g. the `coin` tiles, the `chest` tile, the animated `coin` tile, and the `enemy` tiles), so you can just paint the object with the stamp tool.
 
+**Collision shape from the tile (tile objects only).** If a **tile object**'s tile defines a collision-editor shape in its `.tsx` (`<tile><objectgroup>`), the spawned entity's `CollisionComponent` uses that shape — the tile-local **union bounding box** of every non-zero rectangle/polygon/circle/ellipse. Point-only shapes (the `Light`/`torch` tiles' markers) are ignored. This applies to every marker type; today only the `items.tsx` **chest** tiles define one (`(7, 40, 102, 81)`), so a stamped closed chest collides as the 102×81 chest art box rather than the full 128×128 tile — it **can be jumped over**. Rectangle markers (and tiles with no collision shape, e.g. coins) keep the type's default sizing.
+
 ### 5.1 Marker Type Reference
 
 | `type` | Spawns | Custom Properties | Notes |
 |---|---|---|---|
 | `playerStart` | The player | — | Exactly **one** per map, usually in the first room. Rectangle position = spawn point. |
 | `coin` | Coin pickup | — | Collectible objects are **never** drawn from the Tiled tile sprite — the spawned entity always renders its own `Coin_01..06` atlas spin animation, regardless of the marker source. Every coin renders at **half a map tile** (`DEFAULT_COIN_SIZE * unitScale`, i.e. 64px on a 128px-tile map) **centered on the marker rect — the marker's drawn size is ignored** (it's a pure placement guide). |
-| `chest` | Chest (opens on melee strike) | `potionType` (string, optional) | Built from the atlas `Chest_01_Locked`/`Chest_01_Unlocked` regions (128×128 — one map tile). Without `potionType`: drops 2–6 coins. With `potionType` set (e.g. `healing`, `strength`, `speed`, `invulnerability`): drops a single potion of that type instead. |
+| `chest` | Chest (opens on melee strike) | `potionType` (string, optional) | Sprite built from the atlas `Chest_01_Locked`/`Chest_01_Unlocked` regions (128×128 — one map tile); when stamped as a **tile object**, its closed-state collision box comes from the tile's Tiled collision shape (102×81), so the chest can be jumped over (see §5, "Collision shape from the tile"). Without `potionType`: drops 2–6 coins. With `potionType` set (e.g. `healing`, `strength`, `speed`, `invulnerability`): drops a single potion of that type instead. |
 | `torch` | Decorative torch | — | **Legacy** (still works). Prefer stamping the torch tile from `items.tsx` on a tile layer for new maps (see §7). Flickers visually. |
 | `dagger` | Dagger pickup | — | Collectible item. |
 | `exitGate` | Exit gate / level transition | `nextLevel` (string, optional), `isFinal` (string, default `"false"`) | Spawns a **logic-only** entity: a collision box (sized from the object rectangle) + optional level transition. **No gate art is drawn** — paint the door's decoration yourself. The gate is interactive only when it has `nextLevel` **or** `isFinal="true"`; with neither it's purely decorative. `isFinal="true"` triggers the Victory Screen instead of loading the next level. |
@@ -280,7 +282,7 @@ You can place coins as plain rectangles OR stamp any `items.tsx` coin tile (stat
 
 ### 5.3 Chests
 
-Chests open when the player melee-strikes them. Built from the atlas `Chest_01_Locked`/`Chest_01_Unlocked` regions (128×128 — one map tile), never from a Tiled tile sprite. Any `items.tsx` chest tile just marks the spot.
+Chests open when the player melee-strikes them. The sprite is built from the atlas `Chest_01_Locked`/`Chest_01_Unlocked` regions (128×128 — one map tile), never from a Tiled tile sprite; any `items.tsx` chest tile just marks the spot. When stamped as a **tile object**, the closed chest's collision box is the tile's Tiled collision shape (`(7, 40, 102, 81)`) rather than the full 128×128 tile, so it sits flush with the chest art and **can be jumped over**. A plain **rectangle** `chest` marker (no gid) has no tile shape and falls back to the full 128×128 box.
 
 - **Without `potionType`:** drops 2–6 coins.
 - **With `potionType`** (e.g. `healing`, `strength`, `speed`, `invulnerability`): drops a single potion of that type instead of coins.

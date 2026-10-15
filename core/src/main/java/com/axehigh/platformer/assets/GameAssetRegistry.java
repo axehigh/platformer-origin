@@ -12,8 +12,8 @@ public final class GameAssetRegistry {
     public static final String ORIGIN_GAME_GFX = "gfx/origin-game.atlas";
     public static final String ORIGIN_UI_JSON = "ui/uiskin.json";
     public static final String ORIGIN_UI_GFX = "ui/uiskin.atlas";
-    public static final String BACKGROUND_FAR = "maps/gfx/background/Background_01.png";
-    public static final String BACKGROUND_NEAR = "maps/gfx/background/Background_02.png";
+    public static final String BACKGROUND_FAR = "maps/gfx/background/Castle_Background_01.png";
+    public static final String BACKGROUND_NEAR = "maps/gfx/background/Castle_Background_02.png";
 
     private GameAssetRegistry() {
     }
